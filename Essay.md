@@ -1,0 +1,8 @@
+​    The use of translation applications is becoming increasingly popular.  As the saying goes, every coin has two sides. There is no doubt that technology has made our life and work more and more effective. However, when we enjoy the convenience of the translation applications, never should we make ourselves be ruined by technology.
+
+​    With the high development of the technology, the changes which are radical have taken place in our life. Our  ancestor who live hundreds even thousands years ago may never think about there would be one technology which could translate the language automatically. What's more, the birth of this kind of technology has made our daily life and work more effective than ever before. The time that we work on doing the repeated work has been exactly decreased. Besides, it also allows us to communicate with foreigners fluently. Of course, as for our student, we use the translation applications to help us study.
+
+​    However, some of the people who use the translation applications frequently have developed the increasing dependence on it, which will make our learning ability decrease , especially our student. What the society really need and eager is not a man who can use the applications smoothly, but the man who has strong learning ability. Not only that, maybe we can try to be the one who create the translate applications, instead of being one who can not left it. 
+
+​    To sum up, the use of translate applications do play a crucial role in our life, but is does not mean we can use it all the time without thinking. I always hold the opinion that what we want is that the technology assist our work and life instead of ruining us. 
+

@@ -17,3 +17,5 @@ scanf("Please input: %d", &a);
 
 [pass](https://blog.csdn.net/violet_echo_0908/article/details/52052054?ops_request_misc=%7B%22request%5Fid%22%3A%22166624905116782417016876%22%2C%22scm%22%3A%2220140713.130102334..%22%7D&request_id=166624905116782417016876&biz_id=0&utm_medium=distribute.pc_search_result.none-task-blog-2~all~top_positive~default-2-52052054-null-null.142^v59^control_1,201^v3^control_2&utm_term=python中的pass&spm=1018.2226.3001.4187)
 
+[各类参数](https://blog.csdn.net/Thewei666/article/details/125743991?ops_request_misc=&request_id=&biz_id=102&utm_term=python中的参数&utm_medium=distribute.pc_search_result.none-task-blog-2~all~sobaiduweb~default-0-125743991.142^v59^pc_search_tree,201^v3^control_1&spm=1018.2226.3001.4187)
+

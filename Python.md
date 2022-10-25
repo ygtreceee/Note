@@ -19,3 +19,4 @@ scanf("Please input: %d", &a);
 
 [各类参数](https://blog.csdn.net/Thewei666/article/details/125743991?ops_request_misc=&request_id=&biz_id=102&utm_term=python中的参数&utm_medium=distribute.pc_search_result.none-task-blog-2~all~sobaiduweb~default-0-125743991.142^v59^pc_search_tree,201^v3^control_1&spm=1018.2226.3001.4187)
 
+[迭代器](https://blog.csdn.net/qq_45807032/article/details/105219674?ops_request_misc=%7B%22request%5Fid%22%3A%22166667254316800182149542%22%2C%22scm%22%3A%2220140713.130102334..%22%7D&request_id=166667254316800182149542&biz_id=0&utm_medium=distribute.pc_search_result.none-task-blog-2~all~top_positive~default-3-105219674-null-null.142^v59^pc_search_tree,201^v3^control_1&utm_term=python迭代器&spm=1018.2226.3001.4187)

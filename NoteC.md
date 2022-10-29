@@ -214,6 +214,41 @@ int main()
 
 ***strlen***求字符串长度不计入'\0'
 
+易错
+
+```
+int main()
+{
+	char a[1000];
+	char b[3];
+	scanf("%s", b);//输入abc
+	scanf("%s", a);//输入def
+	printf("%p\n", a);//000000000061D710
+	printf("%p\n", b);//000000000061D70D
+	printf("%s\n", b);//abcdef
+	return 0;
+}
+
+
+//此处为什么打印b会输出abcdef?
+//因为栈区储存是由高地址到低地址, 所以b放在a的上端,输入abc,会自动添加'\0',但是b中已经没有空间放'\0',所以会放到a[0]中去,等到a再被赋值,会在a[4]才出现'\0',所以打印b会输出a和b的内容
+
+
+int main()
+{
+	char a[1000];
+	char b[3];
+	scanf("%s", a);//abc
+	scanf("%S", b);//def
+	printf("%c", a[0])//为'\0',无输出
+	return 0;
+}
+
+//此处a[0]不是a,却是'\0',再次印证'\0'会被放到b后面的内存空间
+```
+
+
+
 ###### 转义字符
 
 > 转义字符(Escape character), 所有的[ASCII码](https://baike.baidu.com/item/ASCII码?fromModule=lemma_inlink)都可以用"\\"加数字(一般是8进制数字)来表示. 而[C](https://baike.baidu.com/item/C/7252092?fromModule=lemma_inlink)中定义了一些字母前加"\\"来表示常见的那些不能显示的ASCII字符, 如\0,\t,\n等, 就称为转义字符, 因为后面的[字符](https://baike.baidu.com/item/字符/4768913?fromModule=lemma_inlink), 都不是它本来的ASCII字符意思了.

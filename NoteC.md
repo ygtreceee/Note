@@ -525,7 +525,7 @@ int main()
 
 移位规则: 左边抛弃, 右边补0
 
-<img src="C:\Users\hp\AppData\Roaming\Typora\typora-user-images\image-20221018141846977.png" alt="image-20221018141846977" style="zoom:67%;" />
+<img src="C:\Users\ygtrece\AppData\Roaming\Typora\typora-user-images\image-20221018141846977.png" alt="image-20221018141846977" style="zoom:67%;" />
 
 **右移操作符**
 
@@ -534,7 +534,7 @@ int main()
 1. 逻辑位移: 左边用0补充, 右边丢弃
 2. 算术位移: 左边用原该值的符号位填充, 右边丢弃
 
-<img src="C:\Users\hp\AppData\Roaming\Typora\typora-user-images\image-20221018142128327.png" alt="image-20221018142128327" style="zoom:67%;" />
+<img src="C:\Users\ygtrece\AppData\Roaming\Typora\typora-user-images\image-20221018142128327.png" alt="image-20221018142128327" style="zoom:67%;" />
 
 ###### 位操作符
 
@@ -851,8 +851,8 @@ int num = f;//隐式转换，会有精度丢失
 
 操作符==优先级==
 
-![image-20221018155824885](C:\Users\hp\AppData\Roaming\Typora\typora-user-images\image-20221018155824885.png)
-![image-20221018155549644](C:\Users\hp\AppData\Roaming\Typora\typora-user-images\image-20221018155549644.png)
+![image-20221018155824885](C:\Users\ygtrece\AppData\Roaming\Typora\typora-user-images\image-20221018155824885.png)
+![image-20221018155549644](C:\Users\ygtrece\AppData\Roaming\Typora\typora-user-images\image-20221018155549644.png)
 
 ```
 //表达式的求值部分由操作符的优先级决定。
@@ -1886,7 +1886,7 @@ int main()
 
 内存
 
-<img src="C:\Users\hp\AppData\Roaming\Typora\typora-user-images\image-20221018161649345.png" alt="image-20221018161649345" style="zoom:50%;" />
+<img src="C:\Users\ygtrece\AppData\Roaming\Typora\typora-user-images\image-20221018161649345.png" alt="image-20221018161649345" style="zoom:50%;" />
 
 指针变量
 
@@ -2117,7 +2117,7 @@ int main()
 
 指针变量也是变量, 是变量就有地址, 那指针变量的地址存放的地方就是 二级指针 
 
-<img src="C:\Users\hp\AppData\Roaming\Typora\typora-user-images\image-20221018164315412.png" alt="image-20221018164315412" style="zoom:67%;" />
+<img src="C:\Users\ygtrece\AppData\Roaming\Typora\typora-user-images\image-20221018164315412.png" alt="image-20221018164315412" style="zoom:67%;" />
 
 ```
 *ppa 通过对ppa中的地址进行解引用，这样找到的是 pa ， *ppa 其实访问的就是 pa .
@@ -4218,7 +4218,7 @@ int *f1(void)
 
 ###### C/C++程序的内存开辟
 
-<img src="C:\Users\hp\AppData\Roaming\Typora\typora-user-images\image-20221007185643969.png" alt="image-20221007185643969"  />
+<img src="C:\Users\ygtrece\AppData\Roaming\Typora\typora-user-images\image-20221007185643969.png" alt="image-20221007185643969"  />
 
 > 1. 栈区(stack): 在执行函数时, 函数内局部变量的存储单元都可以在栈上创建, 函数执行结束时这些存储单元自动被释放. 栈内存分配运算内置于处理器的指令集中, 效率很高, 但是分配的内存容量有限. 栈区主要存放运行函数而分配的局部变量, 函数参数, 返回数据, 返回地址等
 > 2. 堆区(heap): 一般由程序员分配释放, 若程序员不释放, 程序结束时可能由OS回收, 分配方式类似于链表
@@ -4884,7 +4884,7 @@ ANSIC 标准采用"缓冲文件系统"处理的数据文件的, 所谓缓冲文�
 
 据C编译系统决定的.
 
-<img src="C:\Users\hp\AppData\Roaming\Typora\typora-user-images\image-20221009163340899.png" alt="image-20221009163340899" style="zoom:67%;" />
+<img src="C:\Users\ygtrece\AppData\Roaming\Typora\typora-user-images\image-20221009163340899.png" alt="image-20221009163340899" style="zoom:67%;" />
 
 ```
 #include <stdio.h>
@@ -4923,7 +4923,7 @@ int main()
 
 程序编译过程如图
 
-<img src="C:\Users\hp\AppData\Roaming\Typora\typora-user-images\image-20221010232733697.png" alt="image-20221010232733697" style="zoom: 67%;" />
+<img src="C:\Users\ygtrece\AppData\Roaming\Typora\typora-user-images\image-20221010232733697.png" alt="image-20221010232733697" style="zoom: 67%;" />
 
 > - 组成一个程序的每个源文件通过编译过程分别转换成目标代码(object code).
 >
@@ -4935,7 +4935,7 @@ int main()
 
 **阶段分析**
 
-<img src="C:\Users\hp\AppData\Roaming\Typora\typora-user-images\image-20221010233328614.png" alt="image-20221010233328614" style="zoom: 67%;" />
+<img src="C:\Users\ygtrece\AppData\Roaming\Typora\typora-user-images\image-20221010233328614.png" alt="image-20221010233328614" style="zoom: 67%;" />
 
 1. **预处理(预编译)** 选项 gcc -E test.c -o test.i, 预处理完成之后就停下来, 预处理之后产生的结果都放在test.i文件中.
    > 完成了头文件的包含#include
@@ -5354,7 +5354,7 @@ int main()
 
 **嵌套文件包含**
 
-<img src="C:\Users\hp\AppData\Roaming\Typora\typora-user-images\image-20221013123825198.png" alt="image-20221013123825198" style="zoom:67%;" />
+<img src="C:\Users\ygtrece\AppData\Roaming\Typora\typora-user-images\image-20221013123825198.png" alt="image-20221013123825198" style="zoom:67%;" />
 
 comm.h和comm.c是公共模块, test1.h和test1.c使用了公共模块, test2.h和test2.c使用了公共模块, test.h和test.c使用了test1模块和test2模块, 这样最终程序中就会出现两份comm.h的内容, 这样就造成了文件内容的重复.
 

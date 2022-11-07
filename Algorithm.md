@@ -14,6 +14,8 @@
 
 ###### 贪心算法
 
+[Analysis](https://blog.csdn.net/weixin_46272350/article/details/120908253?ops_request_misc=%7B%22request%5Fid%22%3A%22166731629216782414915724%22%2C%22scm%22%3A%2220140713.130102334..%22%7D&request_id=166731629216782414915724&biz_id=0&utm_medium=distribute.pc_search_result.none-task-blog-2~all~top_click~default-4-120908253-null-null.142^v62^pc_search_tree,201^v3^control_1,213^v1^control&utm_term=贪心算法&spm=1018.2226.3001.4187)
+
 定义：
 贪心算法是指在对问题求解时，总是做出在当前看来是最好的选择。也就是说，不从整体最优上加以考虑，只做出在某种意义上的局部最优解。贪心算法不是对所有问题都能得到整体最优解，关键是贪心策略的选择，选择的贪心策略必须具备无后效性，即某个状态以前的过程不会影响以后的状态，只与当前状态有关。
 解题的一般步骤是：
@@ -22,10 +24,10 @@
 3.对每一子问题求解，得到子问题的局部最优解；
 4.把子问题的局部最优解合成原来问题的一个解。
 
-[Analysis](https://blog.csdn.net/weixin_46272350/article/details/120908253?ops_request_misc=%7B%22request%5Fid%22%3A%22166731629216782414915724%22%2C%22scm%22%3A%2220140713.130102334..%22%7D&request_id=166731629216782414915724&biz_id=0&utm_medium=distribute.pc_search_result.none-task-blog-2~all~top_click~default-4-120908253-null-null.142^v62^pc_search_tree,201^v3^control_1,213^v1^control&utm_term=贪心算法&spm=1018.2226.3001.4187)
+[校题](https://vjudge.csgrandeur.cn/contest/526923)
 
-```
-#if 0
+```c++
+
 //find amir
 int main()
 {
@@ -332,6 +334,58 @@ int main()
     }
     return 0;
 }
-#endif
+
+```
+
+[11. 盛最多水的容器 - 力扣（Leetcode）](https://leetcode.cn/problems/container-with-most-water/discussion/)
+
+```c++
+class Solution {
+public:
+    int maxArea(vector<int>& height) {
+        int i = 0, j = height.size() - 1, res = 0;
+        while(i < j) {
+            res = height[i] < height[j] ? 
+                max(res, (j - i) * height[i++]): 
+                max(res, (j - i) * height[j--]); 
+        }
+        return res;
+    }
+};
+```
+
+[122. 买卖股票的最佳时机 II - 力扣（Leetcode）](https://leetcode.cn/problems/best-time-to-buy-and-sell-stock-ii/discussion/)
+
+```c++
+class Solution {
+public:
+    int maxProfit(vector<int>& prices) 
+    {
+        int i = 0, sum = 0, min;
+        while(i < prices.size() - 1)
+        {
+            if(prices[i + 1] > prices[i])   sum += prices[i + 1] - prices[i];
+            i++;
+        }
+        return sum;
+    }
+};
+```
+
+[55. 跳跃游戏 - 力扣（Leetcode）](https://leetcode.cn/problems/jump-game/description/)
+
+```c++
+class Solution {
+public:
+    bool canJump(vector<int>& nums) {
+        int k = 0;
+        for(int i = 0; i < nums.size(); i++)
+        {
+            if(i > k)   return false;
+            k = max(k, i + nums[i]);
+        }
+        return true;
+    }
+};
 ```
 

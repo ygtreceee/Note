@@ -4,6 +4,40 @@
 
 [最长上升子序列(LIS)](https://vjudge.csgrandeur.cn/problem/OpenJ_Bailian-2757)	[Anlysis](https://blog.csdn.net/lxt_Lucia/article/details/81206439?ops_request_misc=%7B%22request%5Fid%22%3A%22166623480216800182771794%22%2C%22scm%22%3A%2220140713.130102334..%22%7D&request_id=166623480216800182771794&biz_id=0&utm_medium=distribute.pc_search_result.none-task-blog-2~all~top_positive~default-2-81206439-null-null.142^v59^control_1,201^v3^control_2&utm_term=最长上升子序列&spm=1018.2226.3001.4187)
 
+```c++
+#include <iostream>
+#include <cstdio>
+#include <vector>
+#include <iomanip>
+#include <cstring>
+#include <algorithm>
+#include <cmath>
+using namespace std;
+
+//The Triangle
+
+int main()
+{
+    int arr[105][105];
+    int lib[105][105];
+    memset(arr, 0, sizeof(arr));
+    memset(lib, 0, sizeof(lib));
+    int n, maxnum = 0;
+    cin >> n;
+    for(int i = 1; i <= n; i++)
+        for(int j = 1; j <= i; j++)
+        {
+            cin >> arr[i][j];
+            lib[i][j] = max(lib[i - 1][j], lib[i - 1][j - 1]) + arr[i][j];
+            if(lib[i][j] > maxnum)  maxnum = lib[i][j];
+        }
+    cout << maxnum << endl;
+    return 0;
+}
+```
+
+
+
 #### 中国剩余定理
 
 [Biorhythms](https://vjudge.csgrandeur.cn/problem/OpenJ_Bailian-1006)	[Analysis](https://www.cnblogs.com/MashiroSky/p/5918158.html)
@@ -394,4 +428,123 @@ public:
 [大整数乘法](https://blog.csdn.net/hgnuxc_1993/article/details/110297000?ops_request_misc=%7B%22request%5Fid%22%3A%22166791849016782395399619%22%2C%22scm%22%3A%2220140713.130102334..%22%7D&request_id=166791849016782395399619&biz_id=0&utm_medium=distribute.pc_search_result.none-task-blog-2~all~top_positive~default-1-110297000-null-null.142^v63^control,201^v3^control_1,213^v2^t3_esquery_v3&utm_term=大整数乘法&spm=1018.2226.3001.4187)
 
 #### 递归
+
+[校题](https://vjudge.csgrandeur.cn/contest/528411#overview)
+
+```c++
+#include <iostream>
+#include <cstdio>
+#include <vector>
+#include <iomanip>
+#include <cstring>
+#include <algorithm>
+#include <cmath>
+using namespace std;
+
+//斐波那契数列
+
+int Fib(int a)
+{
+    int arr[30] = {0, 1, 1, 2, 3, 5};
+    if(a == 1 || a == 2)    return arr[a];
+    else if(arr[a - 1] != 0 && arr[a - 2] != 0)  return arr[a - 2] + arr[a - 1];    
+    else   return Fib(a - 1) + Fib(a - 2);
+}
+
+int main()
+{
+    int n, a;
+    cin >> n;
+    while(n--)
+    {
+        cin >> a;
+        cout << Fib(a) << endl;
+    }
+    return 0;
+}
+
+//Pell数列
+ 
+int arr[1000001] = {0, 1, 2};
+
+int Pell(int k)
+{
+    if(arr[k] != 0) return arr[k];
+    return arr[k] = (2 * Pell(k - 1) + Pell(k - 2)) % 32767;   
+}
+
+int main()
+{
+    int n, k;
+    cin >> n;
+    for(int i = 1; i <= 1000000; i++)    Pell(i);
+    while(n--)
+    {
+        cin >> k;
+        cout << arr[k] << endl;
+    }
+    return 0;
+}
+
+//阶乘
+int Fact(int n)
+{
+    int sum = 1;
+    for(int i = 1; i <= n; i++) sum *= i;
+    return sum;
+}
+int main()
+{
+    int n;
+    cin >> n;
+    cout << Fact(n) << endl;
+    return 0;
+}
+
+//爬楼梯
+int lib[40] = {0, 1, 2};
+int Stairs(int i)
+{
+    if(lib[i] != 0) return lib[i];
+    else return lib[i] = lib[i - 1] + lib[i - 2];
+}
+int main()
+{
+    int n;
+    for(int i = 1; i <= 30; i++)    Stairs(i);
+    while(scanf("%d", &n) != EOF)
+        cout << lib[n] << endl;
+    return 0;
+}
+
+//Function Run Fun
+int lib[21][21][21];
+
+int w(int a, int b, int c)
+{
+    if (a <= 0 || b <= 0 || c <= 0)
+        return 1;
+    else if (a > 20 || b > 20 || c > 20)
+        return w(20, 20, 20);
+    else if(lib[a][b][c])  //记录数据，减少运行时间 
+        return lib[a][b][c];
+    else if (a < b && b < c)
+        return lib[a][b][c] = w(a, b, c - 1) + w(a, b - 1, c - 1) - w(a, b - 1, c);
+    else
+        return lib[a][b][c] = w(a - 1, b, c) + w(a - 1, b - 1, c) + w(a - 1, b, c - 1) - w(a - 1, b - 1, c - 1);
+}
+
+int main()
+{
+    int a, b, c;
+    while (1)
+    {
+        cin >> a >> b >> c;
+        if (a == b && b == c && a == -1)
+            break;
+        printf("w(%d, %d, %d) = %d\n", a, b, c, w(a, b, c));
+    }
+    return 0;
+}
+```
 

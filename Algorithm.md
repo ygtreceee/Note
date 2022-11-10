@@ -517,6 +517,7 @@ int main()
     return 0;
 }
 
+
 //Function Run Fun
 int lib[21][21][21];
 
@@ -546,5 +547,141 @@ int main()
     }
     return 0;
 }
+
+//The Triangle
+int main()
+{
+    int arr[105][105];
+    int lib[105][105];
+    memset(arr, 0, sizeof(arr));
+    memset(lib, 0, sizeof(lib));
+    int n, maxnum = 0;
+    cin >> n;
+    for(int i = 1; i <= n; i++)
+        for(int j = 1; j <= i; j++)
+        {
+            cin >> arr[i][j];
+            lib[i][j] = max(lib[i - 1][j], lib[i - 1][j - 1]) + arr[i][j];
+            if(lib[i][j] > maxnum)  maxnum = lib[i][j];
+        }
+    cout << maxnum << endl;
+    return 0;
+}
+
+//分解因数
+int Devide(int a, int k)
+{
+    int cnt = 1;
+    for(int i = k; i <= sqrt(a); i++)
+    {
+        if(a % i == 0)  
+        {
+            cnt += Devide(a / i, i);
+        }
+    }
+    return cnt;
+}
+
+int main()
+{
+    int n, a;
+    cin >> n;
+    while(n--)
+    {
+        cin >> a;
+        cout << Devide(a, 2) << endl;
+    }
+    return 0;
+}
+
+//算24
+#define EPS 1e-6;
+
+double a[5];
+bool Iszero(double x)
+{
+    //浮点数比较不能用==
+    return fabs(x) <= EPS;
+}
+bool count24(double a[], int n)
+{
+    if (n == 1)  
+    {
+        if (Iszero(a[0] - 24))   return true;
+        else return false;
+    }
+    double b[5];
+    for (int i = 0; i < n - 1; i++)
+        for (int j = i + 1; j < n; j++)
+        {
+            int m = 0;//计算剩余数个数
+            for (int k = 0; k < n; k++)
+            {
+                //储存剩余的数
+                if (k != j && k != i)   b[m++] = a[k];
+            }
+            //add
+            b[m] = a[i] + a[j];
+            if (count24(b, m + 1))  return true;
+            //sub
+            b[m] = a[i] - a[j];
+            if (count24(b, m + 1))  return true;
+            b[m] = a[j] - a[i];
+            if (count24(b, m + 1))  return true;
+            //mul
+            b[m] = a[i] * a[j];
+            if (count24(b, m + 1))  return true;
+            //div
+            if (!Iszero(a[i]))
+            {
+                b[m] = a[j] / a[i];
+                if (count24(b, m + 1))  return true;
+            }
+            if (!Iszero(a[j]))
+            {
+                b[m] = a[i] / a[j];
+                if (count24(b, m + 1))  return true;
+            }
+        }
+    return false;
+}
+int main()
+{
+    while(true)
+    {
+        for (int i = 0; i < 4; i++)  cin >> a[i];
+        if (Iszero(a[0]))    break;
+        if (count24(a, 4))   cout << "YES" << endl;
+        else cout << "NO" << endl;
+    }
+    return 0;
+}
+
+//Placing apple
+int lib[20][20];
+int Placing(int m, int n)
+{
+    if (lib[m][n])   return lib[m][n];
+    else
+    {
+        if (m == 0 || n == 1)   return lib[m][n] = 1;
+        else if (n > m)    return lib[m][n] = Placing(m, m);
+        else    return lib[m][n] = Placing(m - n, n) + Placing(m, n - 1);
+    }
+}
+int main()
+{
+    int t;
+    cin >> t;
+    while(t--)
+    {
+        int m, n;
+        cin >> m >> n;
+        cout << Placing(m, n) << endl;
+    }
+    return 0;
+}
+
+//
 ```
 

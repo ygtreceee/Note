@@ -682,6 +682,28 @@ int main()
     return 0;
 }
 
+//Tower of Hanoi
+int n;
+char a[2], b[2], c[2];
+void Move(int n, int a, int c){printf("%d:%c->%c\n", n, a, c);}
+void DFS(int n, int a, int b, int c)
+{
+    if(n == 1)
+    {
+        Move(n, a, c);
+        return;
+    }
+    DFS(n - 1, a, c, b);
+    Move(n, a, c);
+    DFS(n - 1, b, a, c);
+}
+int main()
+{
+    while(scanf("%d%s%s%s", &n, a, b, c) != EOF)
+        DFS(n, a[0], b[0], c[0]);
+    return 0;
+}
+
 //
 ```
 

@@ -704,6 +704,44 @@ int main()
     return 0;
 }
 
-//
+//The Sierpinski Fractal
+char base[2][5] = {
+    " /\\",
+    "/__\\"
+};
+char buf[1500][2500];
+void DFS(int sz, int y, int x)
+{
+    if (sz == 2)
+    {
+        for(int i = y, ii = 0; ii < 2; i++, ii++)
+            for(int j = x, jj = 0; jj < 4; j++, jj++)
+                buf[i][j] = base[ii][jj];
+        return;
+    }
+    DFS(sz >> 1, y, x + (sz >> 1));
+    DFS(sz >> 1, y + (sz >> 1), x);
+    DFS(sz >> 1, y + (sz >> 1), x + sz);
+}
+int main()
+{
+    int n;
+    while(cin >> n && n)
+    {
+        memset(buf, 0, sizeof(buf));
+        int sz = (int)(pow(2.0, n) + 1e-8);
+        DFS(sz, 0, 0);
+        for(int i = 0; i < sz; i++)
+        {
+            int j = sz << 1;
+            for(; !buf[i][j]; j--);
+            for(int k = 0; k <= j; k++)
+                printf("%c", buf[i][k] ? buf[i][k] : ' ');
+            printf("\n");
+        }
+        printf("\n");
+    }
+    return 0;
+}
 ```
 

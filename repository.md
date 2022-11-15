@@ -27,5 +27,30 @@ int main()
     }
     return 0;
 }
+
+//dan'ci'sh
+int main()
+{
+    string str;
+    while (getline(cin, str))
+    {
+        set<string> se;
+        if (str[0] == '#')  break;
+        string t = "";
+        for (int i = 0; i < str.size(); i++)
+        {
+            if (str[i] == ' ' || i == str.size() - 1)
+            {
+                if (t.size() == 0)  continue;
+                else se.insert(t);
+                t = "";
+            }
+            else
+                t += str[i];
+        }
+        printf("%d\n", se.size());
+    }
+    return 0;
+}
 ```
 

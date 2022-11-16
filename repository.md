@@ -1,3 +1,245 @@
+OJ
+
+```c
+#include <stdio.h>
+#include <math.h>
+#include <stdlib.h>
+#include <string.h>
+
+//字符金字塔
+void my_print(int n, char a)
+{
+    for(int i = n - 1; i >= 0; i--)
+    {
+        for(int j = 0; j < i; j++)  printf(" ");
+        for(int j = 0; j < (n - i); j++)    printf("%c ", a);
+        printf("\n");
+    }
+    return;
+}
+int main()
+{
+    int n;
+    char a;
+    scanf("%d %c", &n, &a);
+    my_print(n, a);
+    return 0;
+}
+
+//空心数字金字塔
+
+void my_print(int n)
+{
+    for (int i = 1; i <= n; i++)
+    {
+        for (int j = 0; j < n - i; j++)  printf(" ");
+        printf("%d", i);
+        if(i == 1)  printf("\n");
+        if (i > 1 && i < n)
+        {
+            for (int j = 0; j < 2 * (i - 1) - 1; j++)   printf(" ");
+        }
+        if(i > 1 && i < n)   printf("%d\n", i);
+        if(i == n)
+        {
+            for(int j = 1; j < 2 * n - 1; j++)  printf("%d", n);
+            printf("\n");
+        }
+    }
+}
+int main()
+{
+    int n;
+    scanf("%d", &n);
+    my_print(n);
+    return 0;
+}
+
+//使用函数求素数和
+int buf[1000];
+int cnt = 0, sum = 0;
+int Isprime(int a)
+{
+    if(a == 1)  return 0;
+    for(int i = 2; i < a; i++)
+        if(a % i == 0)  return 0;
+    return 1;
+}
+void my_print(int m, int n)
+{
+    for(int i = m; i <= n; i++)
+    {
+        if(Isprime(i))
+        {
+            buf[cnt++] = i;
+            sum += i;
+        }
+    }
+    for(int i = 0; i < cnt; i++)
+    {
+        if(i == 0)  printf("Sum of ( ");
+        printf(" %d" + !i, buf[i]);
+        if(i == cnt - 1)    printf(" ) = %d", sum);
+    }
+    return;
+}
+int main()
+{
+    int m, n;
+    scanf("%d %d", &m, &n);
+    my_print(m, n);
+    return 0;
+}
+
+//使用函数求数字个数
+int main()
+{
+    char buf[1000], num;
+    int cnt = 0;
+    scanf("%s %c", buf, &num);
+    int len = strlen(buf);
+    for (int i = 0; i < len; i++)    
+    {
+        if (buf[i] == num) cnt++;
+    }
+    printf("Number of digit %c in ", num);
+    for(int i = 0; i < len; i++)    printf("%c", buf[i]);
+    printf(": %d", cnt);
+    return 0;
+}
+
+//使用函数输出指定范围内完数
+int buf[20000];
+int cnt = 0, sum = 0, flag = 0;
+int Judge(int a)
+{
+    for(int i = 1; i < a; i++)
+    {
+        if(a % i == 0)  
+        {
+            buf[cnt++] = i;
+            sum += i;
+        }
+        if(i == a - 1 && sum == a)  return 1;
+    }
+    return 0;
+}
+void print(int m, int n)
+{
+    for(int i = m; i <= n; i++)
+    {
+        sum = 0;
+        cnt = 0;
+        memset(buf, 0, 20000);
+        if(Judge(i))
+        {
+            flag = 1;
+            printf("%d =", i);
+            for(int j = 0; j < cnt; j++)
+            {
+                if(j != cnt - 1)    printf(" %d +", buf[j]);
+                else printf(" %d\n", buf[j]);   
+            }
+        }
+    }
+    if(!flag)   printf("No perfect number");
+    return;
+}
+int main()
+{
+    int m, n;
+    scanf("%d %d", &m, &n);
+    print(m, n);
+    return 0;
+}
+
+//使用函数输出指定范围内的Fibonacci数
+void Fib(int lib[])
+{
+    int i = 2;
+    while(i < 10001)
+    {
+        lib[i] = lib[i - 1] + lib[i - 2];
+        i++;
+    }
+    return;
+}
+int Judge(int a, int lib[])
+{
+    for(int i = 0; i < 10001; i++)
+    {
+        if(lib[i] == a) return 1;
+    }
+    return 0;
+}
+int main()
+{
+    int m, n, cnt = 0;
+    int buf[8000];
+    int lib[10000] = {1, 1};
+    Fib(lib);
+    scanf("%d %d", &m, &n);
+    for(int i = m; i <= n; i++)
+    {
+        if(Judge(i, lib))    buf[cnt++] = i;
+    }
+    for(int i = 0; i < cnt; i++)
+    {
+        printf(" %d" + !i, buf[i]);
+    }
+    if(cnt == 0)    printf("No Fibonacci number");
+    return 0;
+}
+
+//勤奋的大佬
+int main()
+{
+    int t;
+    scanf("%d", &t);
+    while(t--)
+    {
+        int x, y, n, sum = 0;
+        scanf("%d %d %d", &x, &y, &n);
+        for(int i = 1; i <= n; i++)
+        {
+            if(!(i % (x + 1) || i % (y + 1)))  sum += 36;
+        }
+        printf("%d\n", sum);
+    }
+    return 0;
+}
+
+//字符合并
+char ch[1000000];
+int main()
+{
+    int n, cnt = 0, flag = 0;
+    scanf("%d", &n);
+    getchar();
+    gets(ch);
+    for(int i = 0; ch[i] != '#'; i++)
+    {
+        if(cnt >= n) break;
+        if(ch[i] >= 'A' && ch[i] <= 'Z')  
+        {
+            printf(" %c" + !flag, ch[i]);
+            cnt += 1 + flag;
+            flag = 1;
+        }
+        else if(ch[i] != ' ')    
+        {
+            printf("%c", ch[i]);
+            cnt++;
+        }
+    }
+    return 0;
+}
+```
+
+
+
+[百练题单][百练题单-热门题-从易到难 - Virtual Judge (csgrandeur.cn)](https://vjudge.csgrandeur.cn/article/3191)
+
 ```c++
 //大整数除法
 int main()
@@ -27,8 +269,18 @@ int main()
     }
     return 0;
 }
+```
 
-//dan'ci'sh
+
+
+[STL](https://vjudge.csgrandeur.cn/contest/529954#overview)
+
+```c++
+//单词数
+#include <iostream>
+#include <string>
+#include <set>
+using namespace std;
 int main()
 {
     string str;
@@ -52,5 +304,95 @@ int main()
     }
     return 0;
 }
+
+//操作栈
+#include <iostream>
+#include <stack>
+using namespace std;
+int main()
+{
+    stack<int> stk;
+    int n;
+    scanf("%d", &n);
+    for (int i = 0; i < n; i++)
+    {
+        int op;
+        scanf("%d", &op);
+        if (op == 1)
+        {
+            int x;
+            scanf("%d", &x);
+            stk.push(x);
+        }
+        else
+        {
+            if (stk.empty())    printf("empty\n");
+            else
+            {
+                printf("%d\n", stk.top());
+                stk.pop();
+            }
+        }
+    }
+    return 0;
+}
+
+//操作队列
+#include <iostream>
+#include <string>
+#include <queue>
+using namespace std;
+int main()
+{
+    queue<int> que;
+    int n;
+    scanf("%d", &n);
+    for (int i = 0; i < n; i++)
+    {
+        int op;
+        scanf("%d", &op);
+        if (op == 1)
+        {
+            int a;
+            scanf("%d", &a);
+            que.push(a);
+        }
+        else
+        {
+            if(que.empty()) printf("empty\n");
+            else
+            {
+                printf("%d\n", que.front());
+                que.pop();
+            }
+        }
+    }
+    return 0;
+}
+
+//愚人节的礼物
+#include <iostream>
+#include <string>
+#include <cstring>
+#include <stack>
+using namespace std;
+char s[1005];
+int main()
+{
+    stack<char> stk;
+    while (scanf("%s", s) != EOF)
+    {
+        int len = strlen(s);
+        for (int i = 0; i < len; i++)
+        {
+            if (s[i] == '(')    stk.push('(');
+            else if (s[i] == ')')    stk.pop();
+            else if (s[i] == 'B')   printf("%d\n", stk.size());
+        }
+    }
+    return 0;
+}
 ```
+
+
 

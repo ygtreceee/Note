@@ -392,6 +392,77 @@ int main()
     }
     return 0;
 }
+
+//Let the Balloon Rise
+#include <iostream>
+#include <string>
+#include <cstring>
+#include <stack>
+#include <map>
+using namespace std;
+int main()
+{
+    int n;
+    while(cin >> n)
+    {
+        if(!n)	break;
+        map<string, int> ma;
+        for(int i = 0; i < n; i++)
+        {
+            string s;
+            cin >> s;
+            ma[s]++;
+        }
+        string ret;
+        int cmp = 0;
+        for(auto it = ma.begin(); it != ma.end(); it++)
+        {
+            if(it -> second > cmp)
+            {
+                cmp = it -> second;
+                ret = it -> first;
+            }
+        }
+        cout << ret << endl;
+    }
+    return 0;
+}
+
+//水果
+#include <iostream>
+#include <string>
+#include <cstring>
+#include <stack>
+#include <map>
+using namespace std;
+int main()
+{
+    int t;
+    cin >> t;
+    while(t--)
+    {
+        int n;
+        cin >> n;
+        map<string, map<string, int>> ma;
+        for(int i = 0; i < n; i++)
+        {
+            string fruits, area;
+            int num;
+            cin >> fruits >> area >> num;
+            ma[area][fruits] += num;
+        }
+        for(auto it = ma.begin(); it != ma.end(); it++)
+        {
+            cout << it -> first << endl;
+            for(auto itt = it -> second.begin(); itt != it -> second.end(); itt++)
+            {
+                cout << "   |----" << itt -> first << "(" << itt -> second << ")" << endl;
+            }
+        }
+        if(t)   cout << endl;
+    }
+    return 0;
+}
 ```
 
 

@@ -463,6 +463,66 @@ int main()
     }
     return 0;
 }
+
+//stones
+#include <iostream>
+#include <string>
+#include <cstring>
+#include <queue>
+using namespace std;
+struct node
+{
+    int pos, dis;
+    bool operator<(const node &t) const
+    {
+        if (pos != t.pos)
+            return pos > t.pos;
+        return dis > t.dis;
+    }
+};
+int main()
+{
+    int t;
+    cin >> t;
+    while(t--)  
+    {
+        int n;
+        cin >> n;
+        priority_queue<node> que;
+        for (int i = 0; i < n; i++)
+        {
+            node b;
+            scanf("%d%d", &b.pos, &b.dis);
+            que.push(b);
+        }
+        int res = 0;
+        int flag = 0;
+        while (que.size())
+        {
+            if (!flag)
+            {
+                node b;
+                b.dis = que.top().dis;
+                b.pos = que.top().dis + que.top().pos;
+                que.pop();
+                que.push(b);
+                flag ^= 1;
+                if(que.size() == 1)
+                {
+                    res = que.top().pos;
+                    break;
+                }
+            }
+            else 
+            {
+                que.pop();
+                flag ^= 1;
+            }
+        }
+        printf("%d\n", res);
+    }
+    return 0;
+}
 ```
 
 

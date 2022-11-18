@@ -523,6 +523,55 @@ int main()
     }
     return 0;
 }
+
+//Windows Message Queue
+#include <iostream>
+#include <string>
+#include <cstring>
+#include <queue>
+using namespace std;
+struct node
+{
+    int num;
+    int val;
+    int val2;
+    string name;
+    bool operator<(const node &t) const
+    {
+        if (val != t.val)
+            return val > t.val;
+        else 
+            return val2 > t.val2;
+    }
+};
+int main()
+{
+    string s;
+    priority_queue<node> que;
+    int id = 1;
+    while (cin >> s)
+    {
+        if (s == "GET")
+        {
+            if (que.empty())
+                cout << "EMPTY QUEUE!\n";
+            else 
+            {
+                cout << que.top().name << " " << que.top().num << endl;
+                que.pop();
+            }
+        }
+        else 
+        {
+            string name;
+            int num, val;
+            cin >> name >> num >> val;
+            que.push({num, val, id, name});
+        }
+        id++;
+    }
+    return 0;
+}
 ```
 
 

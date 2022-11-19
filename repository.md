@@ -16,7 +16,7 @@ void my_print(int n, char a)
         printf("\n");
     }
     return;
-}
+}//
 int main()
 {
     int n;

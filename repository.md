@@ -16,7 +16,7 @@ void my_print(int n, char a)
         printf("\n");
     }
     return;
-}//
+}
 int main()
 {
     int n;
@@ -389,6 +389,52 @@ int main()
             else if (s[i] == ')')    stk.pop();
             else if (s[i] == 'B')   printf("%d\n", stk.size());
         }
+    }
+    return 0;
+}
+
+//Train Problem I
+#include <iostream>
+#include <string>
+#include <cstring>
+#include <queue>
+#include <stack>
+using namespace std;
+const int N = 15;
+char a[N], b[N];
+int main()
+{
+    int n;
+    while (scanf("%d%s%s", &n, a + 1, b + 1) != EOF)
+    {
+        vector<int> ve;
+        int j = 1;
+        stack<char> stk;
+        int fl = 1;
+        for (int i = 1; i <= n; i++)
+        {
+            stk.push(a[i]);
+            ve.push_back(1);
+            while (!stk.empty() && stk.top() == b[j])
+            {
+                stk.pop();
+                j++;
+                ve.push_back(0);
+            }
+        }
+        if (j <= n) fl = 0;
+        if (stk.empty() && fl)
+        {
+            printf("Yes.\n");
+            for (int i = 0; i < ve.size(); i++)
+            {
+                if (ve[i] == 0) printf("out\n");
+                else printf("in\n");
+            }
+        }
+        else 
+            printf("No.\n");
+        printf("FINISH\n");
     }
     return 0;
 }

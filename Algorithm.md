@@ -388,21 +388,50 @@ public:
 };
 ```
 
-[122. 买卖股票的最佳时机 II - 力扣（Leetcode）](https://leetcode.cn/problems/best-time-to-buy-and-sell-stock-ii/discussion/)
+
+[45. 跳跃游戏 II - 力扣（Leetcode）](https://leetcode.cn/problems/jump-game-ii/)
 
 ```c++
 class Solution {
 public:
-    int maxProfit(vector<int>& prices) 
+int jump(vector<int>& nums) 
+{
+    int cnt = 0, fin = nums.size() - 1; 
+    while (true)
     {
-        int i = 0, sum = 0, min;
-        while(i < prices.size() - 1)
+        if (fin == 0)   break;
+        for (int i = 0; i < fin; i++)
         {
-            if(prices[i + 1] > prices[i])   sum += prices[i + 1] - prices[i];
-            i++;
+            if (i + nums[i] >= fin)
+            {
+                fin = i;
+                cnt++;
+                break;
+            }
         }
-        return sum;
     }
+    return cnt;
+}
+};
+
+//
+
+class Solution {
+public:
+    int jump(vector<int>& nums) 
+{
+    int maxPos = 0, bar = 0, n = nums.size(), cnt = 0;
+    for (int i = 0; i < n - 1; i++)
+    {
+        maxPos = max(maxPos, i + nums[i]);
+        if (i == bar)    
+        {
+            bar = maxPos;
+            cnt++;
+        }
+    }
+    return cnt;
+}
 };
 ```
 
@@ -419,6 +448,24 @@ public:
             k = max(k, i + nums[i]);
         }
         return true;
+    }
+};
+```
+
+[122. 买卖股票的最佳时机 II - 力扣（Leetcode）](https://leetcode.cn/problems/best-time-to-buy-and-sell-stock-ii/discussion/)
+
+```c++
+class Solution {
+public:
+    int maxProfit(vector<int>& prices) 
+    {
+        int i = 0, sum = 0, min;
+        while(i < prices.size() - 1)
+        {
+            if(prices[i + 1] > prices[i])   sum += prices[i + 1] - prices[i];
+            i++;
+        }
+        return sum;
     }
 };
 ```

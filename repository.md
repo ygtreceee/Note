@@ -1,4 +1,4 @@
-OJ
+#### OJ
 
 ```c
 #include <stdio.h>
@@ -234,9 +234,69 @@ int main()
     }
     return 0;
 }
+
+//简化的插入排序
+int main()
+{
+    int n, num, flag = 0, ret;
+    scanf("%d", &n);
+    int arr[100];
+    for (int i = 0; i < n; i++) scanf("%d", &arr[i]);
+    scanf("%d", &num);
+    for (int i = 0; i < n; i++)
+    {
+        if (!flag && arr[i] > num)  printf("%d " + flag++, num);
+        printf("%d ", arr[i]);
+        if (i == n - 1 && !flag)    printf("%d ", num); 
+    }
+    return 0;
+}
+
+//交换最小值和最大值
+int main()
+{
+    int n, ret;
+    scanf("%d", &n);
+    int arr[100];
+    for (int i = 0; i < n; i++) scanf("%d", &arr[i]);
+    int min = 0, max = 0;
+    for (int i = 0; i < n; i++) min = arr[i]<arr[min]?i:min;
+    ret = arr[0];
+    arr[0] = arr[min];
+    arr[min] = ret;
+    for (int i = 0; i < n; i++) max = arr[i]>arr[max]?i:max;   
+    ret = arr[n - 1];
+    arr[n - 1] = arr[max];
+    arr[max] = ret;
+    for (int i = 0; i < n; i++) printf("%d ", arr[i]);
+    return 0;
+}
+
+//求一批整数中出现最多的各位数字
+int main()
+{
+    int n, ret, max = 0;
+    char num[10] = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9'};
+    int buf[10] = {0};
+    char ch[20];
+    scanf("%d", &n);
+    for (int i = 0; i < n; i++)
+    {   
+        scanf("%s", ch);
+        for (int k = 0; ch[k] != '\0'; k++)
+            for (int j = 0; j < 10; j++)
+                if (num[j] == ch[k])   buf[j]++;
+    }
+    for (int i = 0; i < 10; i++)    max = buf[i]>buf[max]?i:max;
+    printf("%d:", buf[max]);
+    for (int i = 0; i < 10; i++)    if (buf[i] == buf[max]) printf(" %c", num[i]);
+    return 0;   
+}
+
+//
 ```
 
-
+#### ACM
 
 [百练题单][百练题单-热门题-从易到难 - Virtual Judge (csgrandeur.cn)](https://vjudge.csgrandeur.cn/article/3191)
 
@@ -620,5 +680,254 @@ int main()
 }
 ```
 
+#### Game1
 
+```c++
+//头文件的包含
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+
+//函数的定义
+#define ROW 3
+#define COL 3
+
+
+//函数的声明
+
+
+//初始化棋盘
+void Initboard(char board[ROW][COL],int row,int col);
+
+//打印棋盘的函数
+void Displayboard(char board[ROW][COL], int row, int col);
+
+//玩家下棋
+void PlayerMove(char board[ROW][COL], int row, int col);
+
+//电脑下棋
+void ComputerMove(char board[ROW][COL], int row, int col);
+
+//判断输赢
+char Iswin(char board[ROW][COL], int row, int col);
+
+ void Initboard(char board[ROW][COL], int row, int col)
+{
+	 int i = 0;
+	 int j = 0;
+	 for (i = 0; i < row; i++)
+	 {
+		 for (j = 0; j < col; j++)
+		 {
+			 board[i][j] = ' ';
+		 }
+	 }
+}
+
+
+ void Displayboard(char board[ROW][COL], int row, int col)
+ {
+	 int i = 0;
+	 for (i = 0; i < row; i++)
+	 {
+		 int j = 0;
+		 for (j = 0; j < col;j++)
+		 {
+			 printf(" %c ",board[i][j]);
+			 if (j < col - 1)
+				 printf("|");
+		 }
+		 printf("\n");
+		 if (i < row - 1)
+		 {
+			 int j = 0;
+			 for (j = 0; j < col; j++)
+			 {
+				 printf("---");
+				 if (j < col - 1)
+					 printf("|");
+			 }
+		 }
+		 printf("\n");
+	 }
+ }
+
+
+
+ void PlayerMove(char board[ROW][COL], int row, int col)
+ {
+	 int x = 0;
+	 int y = 0;
+	 printf("Player Move\n");
+	 printf("Please enter coordinates\n");
+	 while (1)
+	 {
+		 scanf("%d %d", &x, &y);
+		 //判断坐标合法性
+		 if (x >= 1 && x <= row && y >= 1 && y <= col)
+		 {
+			 //下棋
+			 //判断是否被占用
+			 if (board[x - 1][y - 1]==' ')
+			 {
+				 board[x - 1][y - 1] = '*';
+				 break;
+			 }
+			 else
+			 {
+				 printf("Coordinates have been occupied,please re-enter.\n");
+			 }
+		 }
+		 else
+		 {
+			 printf("The coordinates are illegal,please re-enter.\n");
+		 }
+	 }
+ }
+
+ void ComputerMove(char board[ROW][COL], int row, int col)
+ {
+	 printf("Turn to computer\n");
+	 while (1)
+	 {
+		 int x = rand() % row;
+		 int y = rand() % col;
+		 //判断占用
+		 if (board[x][y] == ' ')
+		 {
+			 board[x][y] = '#';
+			 break;
+		 }
+	 }
+ }
+
+
+
+
+ Isfull(char board[ROW][COL], int row, int col)
+ {
+	 int i = 0;
+	 int j = 0;
+	 for (i = 0; i < row; i++)
+	 {
+		 for (j = 0; j < col; j++)
+		 {
+			 if (board[i][j] == ' ')
+				 return 0;//棋盘没满
+		 }
+	 }
+	 return 1;//棋盘已满
+ }
+
+ char Iswin(char board[ROW][COL], int row, int col)
+ {
+	 int i = 0;
+	 //判断行
+	 for (i = 0; i < row; i++)
+	 {
+		 if (board[i][0] == board[i][1] && board[i][1] == board[i][2] && board[i][1] != ' ')
+		 {
+			 return board[i][1];
+		 }
+	 }
+	 //判断列
+	 for (i = 0; i< col; i++)
+	 {
+		 if (board[0][i] == board[1][i] && board[1][i] == board[2][i] && board[0][i] != ' ')
+		 {
+			 return board[1][i];
+		 }
+	 }
+	 //判断对角线
+	 if (board[0][0] == board[1][1] && board[1][1] == board[2][2] && board[0][0] != ' ')
+	 {
+		 return board[0][0];
+	 }
+	 if (board[0][2] == board[1][1] && board[1][1] == board[2][0] && board[0][2] != ' ')
+	 {
+		 return board[0][2];
+	 }
+	 //判断是否平局
+	 int ret=Isfull(board, row, col);
+	 if (ret == 1)
+	 {
+		 return 'Q';
+	 }
+	 return 'c';
+ }
+
+void menu()
+{
+	printf("1.play\n");
+	printf("0.exit\n");
+}
+
+void game()
+{
+	//储存数据-二维数组
+	char board[ROW][COL];
+	//初始化棋盘-初始化空格
+	Initboard(board, ROW, COL);
+	//打印棋盘-本质是打印数组内容
+	Displayboard(board, ROW, COL);
+	char ret = 0;
+	while (1)
+	{
+		//玩家下棋
+		PlayerMove(board, ROW, COL);
+		Displayboard(board, ROW, COL);
+		//判断玩家是否赢得游戏
+		ret = Iswin(board, ROW, COL);
+		if (ret != 'c')
+			break;
+		//电脑下棋
+		ComputerMove(board, ROW, COL);
+		Displayboard(board, ROW, COL);
+		//判断电脑是否赢得游戏
+		ret = Iswin(board, ROW, COL);
+		if (ret != 'c')
+			break;
+	}
+	if (ret == '*')
+	{
+		printf("Player Win!\n");
+	}
+	else if (ret == '#')
+	{
+		printf("Computer Win!\n");
+	}
+	else
+	{
+		printf("Q.\n");  
+	}
+	Displayboard(board, ROW, COL);
+
+}
+
+
+int main()
+{
+	int input = 0;
+	srand((unsigned int)time(NULL));	//设置随机值
+	do
+	{
+		menu();
+		scanf("%d", &input);
+		switch(input)
+		{
+		case 1:
+			    game();
+				break;
+		case 0:
+				printf("Quit the game\n");
+				break;
+		default :
+				printf("Incorrect selection,please reselect\n");
+				break;
+		}
+	} while (input);
+
+	return 0;
+}
+```
 

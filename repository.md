@@ -293,7 +293,142 @@ int main()
     return 0;   
 }
 
-//
+//找出不是两个数组共有的元素
+#include <stdio.h>
+#include <string.h>
+int main()
+{
+    int a, b, aarr[2][100], barr[2][100], flag = 0;
+    memset(aarr, 0, sizeof(aarr));
+    memset(barr, 0, sizeof(barr));
+    scanf("%d", &a);
+    for (int i = 0; i < a; i++) scanf("%d", &aarr[0][i]);
+    scanf("%d", &b);
+    for (int i = 0; i < b; i++) scanf("%d", &barr[0][i]);
+    for (int i = 0; i < a; i++)
+    {
+        for (int j = 0; j < b; j++)
+                if (aarr[0][i] == barr[0][j])
+                {
+                    aarr[1][i] = 1;
+                    barr[1][j] = 1;
+                }
+    }
+    for (int i = 0; i < a; i++) 
+    {
+        for (int j = i + 1; j < a; j++)
+            if (aarr[0][i] == aarr[0][j])  aarr[1][j] = 1;
+    }
+    for (int i = 0; i < b; i++) 
+    {
+        for (int j = i + 1; j < b; j++)
+            if (barr[0][i] == barr[0][j])  barr[1][j] = 1;
+    }
+    for (int i = 0; i < a; i++) 
+    {
+        if (!aarr[1][i])  
+        {
+            printf(" %d" + !flag, aarr[0][i]);
+            flag = 1;
+        }
+    }
+    for (int i = 0; i < b; i++)
+    {
+        if (!barr[1][i])  
+        {
+            printf(" %d" + !flag, barr[0][i]);
+            flag = 1;
+        }
+    }
+    return 0;
+}
+
+//求整数序列中出现次数最多的数
+int main()
+{
+    int n, a, cnt = 0, max = 0, arr[2][1500];
+    memset(arr, 0, sizeof(arr));
+    scanf("%d", &n);
+    for (int i = 0; i < n; i++)
+    {
+        int flag = 1;
+        scanf("%d", &a);
+        for (int j = 0; j < cnt; j++)
+        {
+            if (arr[0][j] == a) 
+            {
+                arr[1][j]++;
+                flag = 0;
+                break;
+            }
+        }
+        if (flag == 1)  
+        {
+            arr[1][cnt] = 1;
+            arr[0][cnt++] = a;
+        }
+    }
+    for (int i = 0; i < cnt; i++)
+        max = arr[1][i]>arr[1][max]?i:max;
+    printf("%d %d", arr[0][max], arr[1][max]);
+    return 0;
+}
+
+//奖金提成
+double Awd(int mon)
+{
+    double sum;
+    switch(mon/10000)
+    {
+        case 0: sum = mon * 0.1;
+                break;
+        case 1: sum = 10000 * 0.1 + (mon - 10000) *0.075;
+                break;
+        case 2:
+        case 3: sum = 10000 * 0.1 + 10000 * 0.075 + (mon - 20000) * 0.05;
+                break;
+        case 4: 
+        case 5: sum = 10000 * 0.1 + 10000 * 0.075 + 20000 * 0.05 + (mon - 40000) * 0.03;
+                break;
+        case 6:
+        case 7:
+        case 8:
+        case 9: sum = 10000 * 0.1 + 10000 * 0.075 + 20000 * 0.05 + 20000 * 0.03 + (mon - 60000) * 0.015;
+                break;
+        default:
+                sum = 10000 * 0.1 + 10000 * 0.075 + 20000 * 0.05 + 20000 * 0.03 + 40000 * 0.015 + (mon - 100000) * 0.01;
+                break;
+    }
+    return sum;
+}
+int main()
+{
+    int t, mon;
+    scanf("%d", &t);
+    while (t--)
+    {
+        scanf("%d", &mon);
+        printf("%0.lf\n", Awd(mon));
+    }
+    return 0;
+}
+
+//扫雪挑战
+int buf[1000100] = {0};
+int main()
+{
+    int len, t, cnt = 0;
+    scanf("%d %d", &len, &t);
+    while (t--)
+    {
+        int m, n;
+        scanf("%d %d", &m, &n);
+        for (int i = m; i <= n; i++) buf[i] = 1;
+    }
+    for (int i = 1; i <= len; i++)   if (!buf[i]) cnt++;
+    printf("%d", cnt);
+    return 0;
+}
 ```
 
 #### ACM

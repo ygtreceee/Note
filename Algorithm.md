@@ -42,9 +42,228 @@ int main()
 
 [Biorhythms](https://vjudge.csgrandeur.cn/problem/OpenJ_Bailian-1006)	[Analysis](https://www.cnblogs.com/MashiroSky/p/5918158.html)
 
-#### 深搜
+#### DFS
 
-[城堡问题(DFS)](https://vjudge.csgrandeur.cn/problem/OpenJ_Bailian-2815)	[Analysis](https://blog.csdn.net/qq_61903556/article/details/124138455?ops_request_misc=&request_id=&biz_id=102&utm_term=城堡问题&utm_medium=distribute.pc_search_result.none-task-blog-2~all~sobaiduweb~default-1-124138455.142^v59^control_1,201^v3^control_2&spm=1018.2226.3001.4187)
+[城堡问题](https://vjudge.csgrandeur.cn/problem/OpenJ_Bailian-2815)
+
+```c
+#include <stdio.h>
+#include <math.h>
+#include <string.h>
+
+int col, row;
+int book[100][100];
+int room[100][100];
+int maxroom, num = 0, anum = 0;
+void Search(int i, int j)
+{
+    if(book[i][j])  return;
+    anum++;
+    book[i][j] = 1;
+    if((room[i][j] & 1) == 0)   Search(i, j - 1);
+    if((room[i][j] & 2) == 0)   Search(i - 1, j);
+    if((room[i][j] & 4) == 0)   Search(i, j + 1);
+    if((room[i][j] & 8) == 0)   Search(i + 1, j);
+}
+int main()
+{
+    scanf("%d %d", &col, &row);
+    memset(book, 0, sizeof(book));
+    for(int i = 0; i < col; i++)
+        for(int j = 0; j < row; j++)
+            scanf("%d", &room[i][j]);
+    for(int i = 0; i < col; i++)   
+        for(int j = 0; j < row; j++)
+        {
+            if(!book[i][j])
+            {
+                num++;
+                anum = 0;
+                Search(i, j);
+                maxroom = maxroom > anum ? maxroom : anum;
+            }
+        }
+    printf("%d\n%d", num, maxroom);
+    return 0;
+}
+```
+
+[校题](https://vjudge.csgrandeur.cn/contest/531260#overview)
+
+```c++
+//马走日
+#include <iostream>
+#include <algorithm>
+#include <cstring>
+using namespace std;
+#define LENTH 12
+bool board[LENTH][LENTH];
+int step[8][2] = {{2, 1}, {2, -1}, {1, -2}, {-1, -2}, {-2, -1}, {-2, 1}, {-1, 2}, {1, 2}};
+int n, m, maxn, sum;
+void DFS(int x, int y, int num)
+{
+    if (num >= maxn) //边界
+    {
+        sum++;
+        return;
+    }
+    for (int i = 0; i < 8; i++) //八个方向
+    {
+        int nx = x + step[i][0];
+        int ny = y + step[i][1];
+        if (nx >= 0 && nx < n && ny >= 0 && ny < m && !board[nx][ny]) //判断是否已走过
+        {
+            board[nx][ny] = true;
+            DFS(nx, ny, num + 1);
+            board[nx][ny] = false;
+        }
+    }
+    return;
+}
+int main()
+{
+    int t, x, y;
+    cin >> t;
+    while (t--)
+    {
+        memset(board, 0, sizeof(board));
+        cin >> n >> m >> x >> y;
+        board[x][y] = 1;
+        maxn = n * m;
+        sum = 0;
+        DFS(x, y, 1);
+        cout << sum << endl;
+    }
+    return 0;
+}
+
+//红与黑
+#include <iostream>
+#include <algorithm>
+#include <cstring>
+using namespace std;
+#define LENTH 20
+char buf[LENTH][LENTH];
+int step[4][2] = {{1, 0}, {0, -1}, {-1, 0}, {0, 1}};
+int res, x, y;
+int DFS(int m, int n)
+{
+    int res = 1;
+    buf[m][n] = '#';
+    for (int i = 0; i < 4; i++)
+    {
+        int nm = m + step[i][0];
+        int nn = n + step[i][1];
+        if (nm >= 0 && nm < x && nn >= 0 && nn < y && buf[nm][nn] == '.')
+            res += DFS(nm, nn);
+    }
+    return res;
+}
+int main()
+{
+    int m, n, cnt = 0;
+    while (cin >> y >> x && x && y)
+    {
+        for (int i = 0; i < x; i++) cin >> buf[i];
+        for (int i = 0; i < x; i++)
+            for (int j = 0; j < y; j++)
+                if (buf[i][j] == '@') {m = i; n = j;}
+        cout << DFS(m, n) << endl;
+    }
+    return 0;
+}
+
+//棋盘问题
+#include <iostream>
+#include <algorithm>
+#include <cstring>
+using namespace std;
+int n, k, cnt, num;
+char buf[10][10];
+int flag[10];
+void DFS(int col)
+{
+    if (num == k) //边界
+    {
+        cnt++;
+        return;
+    }
+    if (col >= n)   return; //超出边界
+    for (int i = 0; i < n; i++) //此行放棋子的情况：对一行中的所有可能进行搜索
+    {
+        if (!flag[i] && buf[col][i] == '#')
+        {
+            flag[i] = 1;
+            num++;
+            DFS(col + 1);
+            flag[i] = 0;
+            num--; //对每种情况依次搜索，搜索结束后要num--，便于继续下一种情况
+        }
+    }
+    DFS(col + 1); //此行不放棋子的情况
+}
+int main()
+{
+    while (cin >> n >> k && n != -1 && k != -1)
+    {
+        for (int i = 0; i < n; i++) cin >> buf[i];
+        cnt = num = 0;
+        DFS(0);
+        cout << cnt << endl;
+    }
+    return 0;
+}
+
+//Oil Deposits
+#include <iostream>
+#include <algorithm>
+#include <cstring>
+using namespace std;
+int m, n;
+char buf[110][110];
+bool flag[110][110];
+int step[8][2] = {{-1, 1}, {0, 1}, {1, 1}, {1, 0}, {1, -1}, {0, -1}, {-1, -1}, {-1, 0}};
+void DFS(int x, int y)
+{
+    for (int i = 0; i < 8; i++)
+    {
+        int nx = x + step[i][0], ny = y + step[i][1];
+        if (nx >= 0 && nx < m && ny >= 0 && ny < n && !flag[nx][ny] && buf[nx][ny] == '@')
+        {
+            flag[nx][ny] = true;
+            DFS(nx, ny);
+        }
+    }
+    return;
+}
+int main()
+{
+    int cnt;
+    while(cin >> m >> n && n)
+    {
+        cnt = 0;
+        memset(flag, 0, sizeof(flag));
+        for (int i = 0; i < m; i++)    cin >> buf[i];
+        for (int i = 0; i < m; i++)
+            for (int j = 0; j < n; j++)
+            {
+                if (!flag[i][j] && buf[i][j] == '@')
+                {
+                    flag[i][j] = true;
+                    DFS(i, j);
+                    cnt++;
+                }
+            }
+        cout << cnt << endl;
+    }
+    return 0;
+}
+
+//Find The Multiple
+
+```
+
+
 
 #### 贪心算法
 
@@ -388,7 +607,6 @@ public:
 };
 ```
 
-
 [45. 跳跃游戏 II - 力扣（Leetcode）](https://leetcode.cn/problems/jump-game-ii/)
 
 ```c++
@@ -469,6 +687,79 @@ public:
     }
 };
 ```
+
+[ 洛谷 ](https://www.luogu.com.cn/problem/list?keyword=贪心&page=1)
+
+```c++
+//P1614 爱与愁的心痛
+int main()
+{
+    int n, m, a, res = 1<<30;
+    cin >> n >> m;
+    vector<int> vec;
+    for (int i = 0; i < n; i++)
+    {
+        cin >> a;
+        vec.push_back(a);
+    }
+    for (int i = 0; i < n - m + 1; i++)
+    {
+        int sum = 0;
+        for (int j = 0; j < m; j++)
+        {
+            sum += vec[j + i];
+        }
+        res = min(res, sum);
+    }
+    cout << res;
+    return 0;
+}
+
+//P7814 「小窝 R3」心の記憶
+#include <cstdio>
+#include <vector>
+using namespace std;
+int main()
+{
+    int T;
+    scanf("%d", &T);
+    while (T--)
+    {
+        int m, n;
+        scanf("%d%d", &n, &m);
+        vector<bool> a(m + 10);
+        for (int i = 1; i <= n; i++)
+        {
+            int x;
+            scanf("%1d", &x);
+            a[i] = x;
+        }
+        if (n == m || n == 1 || (n == 2 && (a[1] ^ a[2])))
+        {
+            puts("-1");
+            continue;
+        }
+        int cnt0 = 0, cnt1 = 0;
+        for (int i = 1; i <= n; i++)
+            a[i] ? cnt1++ : cnt0++;
+        bool f = false;
+        for (int i = 1; i <= n; i++)
+        {
+            printf("%d", int(a[i]));
+            if (!f && (cnt1 < cnt0 ? !a[i] : a[i]))
+            {
+                for (int j = 1; j <= m - n; j++)
+                    printf("%d", int(cnt1 < cnt0));
+                f = true;
+            }
+        }
+        putchar('\n');
+    }
+    return 0;
+}
+```
+
+
 
 #### 分治法
 

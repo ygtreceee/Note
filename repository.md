@@ -1107,7 +1107,7 @@ int main()
     }
 ```
 
-圆桌问题
+hdu 4841 圆桌问题
 
 ```c++
 #include <iostream>
@@ -1145,7 +1145,7 @@ int main()
 }
 ```
 
-“Text Reverse"
+hdu 1062 “Text Reverse"
 
 ```c++
 #include <iostream>
@@ -1183,7 +1183,7 @@ int main()
 }
 ```
 
-"ACboy needs your help again!"
+hdu 1702 "ACboy needs your help again!"
 
 ```c++
 //模拟栈和队列
@@ -1245,7 +1245,7 @@ int main()
 }
 ```
 
-士兵队列训练问题
+hdu 1276 士兵队列训练问题
 
 ```c++
 #include <iostream>
@@ -1288,7 +1288,7 @@ int main()
 }
 ```
 
-产生冠军
+hdu 2094 产生冠军
 
 ```c++
 #include <iostream>
@@ -1319,6 +1319,70 @@ int main()
             cout << "No" << endl;
         A.clear();
         B.clear();
+    }
+    return 0;
+}
+```
+
+hdu 2648 “shopping"
+
+```c++
+#include <iostream>
+#include <map>
+using namespace std;
+
+int main()
+{
+    int n, m, p;
+    map<string, int> shop;
+    while (cin >> n)
+    {
+        string s;
+        for (int i = 1; i <= n; i++)  cin >> s;
+        cin >> m;
+        while (m--)
+        {
+            for (int i = 1; i <= n; i++)
+            {
+                cin >> p >> s;
+                shop[s] += p;
+            }
+            int rank = 1;
+            map<string, int>::iterator it;
+            for (it = shop.begin(); it != shop.end(); it++)
+                if (it -> second > shop["memory"])
+                    rank++;
+            cout << rank << endl;
+        }
+        shop.clear();
+    }
+    return 0;
+}
+```
+
+hdu 1027 "Ignatius and the Princess II"
+
+```c++
+#include <iostream>
+#include <algorithm>
+using namespace std;
+
+int a[1001];
+int main()
+{
+    int n, m;
+    while (cin >> n >> m)
+    {
+        for (int i = 1; i <= n; i++)    a[i] = i;
+        int b = 1;
+        do
+        {
+            if (b == m) break;
+            b++;
+        } while (next_permutation(a + 1, a + n + 1));
+        for (int i = 1; i < n; i++)
+            cout << a[i] << ' ';
+        cout << a[n] << endl;
     }
     return 0;
 }

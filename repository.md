@@ -1245,5 +1245,82 @@ int main()
 }
 ```
 
+士兵队列训练问题
 
+```c++
+#include <iostream>
+#include <vector>
+#include <stack>
+#include <queue>
+#include <list>
+using namespace std;
+
+int main()
+{
+    int t, n;
+    cin >> t;
+    while (t--)
+    {
+        cin >> n;
+        int k = 2;
+        list<int> mylist;
+        list<int>::iterator it;
+        for (int i = 1; i <= n; i++)
+            mylist.push_back(i);
+        while (mylist.size() > 3)
+        {
+            int num = 1;
+            for (it = mylist.begin(); it != mylist.end(); )
+            {
+                if (num++ % k == 0)  it = mylist.erase(it);
+                else  it++;
+            }
+            k == 2 ? k = 3 : k = 2;
+        }
+        for (it = mylist.begin(); it != mylist.end(); it++)
+        {
+            if (it != mylist.begin())  cout << ' ';
+            cout << * it;
+        }
+        cout << endl;
+    }
+    return 0;
+}
+```
+
+产生冠军
+
+```c++
+#include <iostream>
+#include <vector>
+#include <stack>
+#include <queue>
+#include <list>
+#include <set>
+using namespace std;
+
+int main()
+{
+    set<string> A, B;
+    string s1, s2;
+    int n;
+    while (cin >> n && n)
+    {
+        for (int i = 0; i < n; i++)
+        {
+            cin >> s1 >> s2;
+            A.insert(s1);
+            A.insert(s2);
+            B.insert(s2);
+        }
+        if (A.size() - B.size() == 1)
+            cout << "Yes" << endl;
+        else
+            cout << "No" << endl;
+        A.clear();
+        B.clear();
+    }
+    return 0;
+}
+```
 

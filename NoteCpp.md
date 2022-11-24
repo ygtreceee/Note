@@ -89,3 +89,102 @@ Bits per byte = 8
 
 [sort](https://cplusplus.com/reference/algorithm/sort/)
 
+
+
+
+
+关于priority_queue的用法
+
+```c++
+#include <iostream>
+#include <vector>
+#include <stack>
+#include <queue>
+using namespace std;
+
+//基本类型例子：
+
+int main()
+{
+    priority_queue<int, vector<int>, greater<int>> que;
+    //priority_queue<int, vector<int>, less<int>> que;
+    //priority_queue<int> que;
+    int a = 2, b = 1, c = 3;
+    que.push(a);
+    que.push(b);
+    que.push(c);
+    while (!que.empty())
+    {
+        cout << que.top() << endl;
+        que.pop();
+    }
+    return 0;
+}
+
+//pari的比较，先比较第一个元素，第一个相等比较第二个
+
+int main()
+{
+    priority_queue<pair<int, int>, vector<pair<int, int>>, greater<pair<int, int>>> que;
+    //priority_queue<pair<int, int>> que;
+    pair<int, int> b(1, 2);
+    pair<int, int> c(1, 2);
+    pair<int, int> d(2, 5);
+    que.push(b);
+    que.push(c);
+    que.push(d);
+    while (!que.empty())
+    {
+        cout << que.top().first << " " << que.top().second << endl;
+        que.pop();
+    }
+    return 0;
+}
+
+//对于自定义类型
+struct tmp1 //运算符重载
+{
+    int x;
+    tmp1(int a) {x = a;}
+    bool operator<(const tmp1& a) const
+    {
+        return x < a.x;//大顶堆
+
+    }
+};
+
+struct tmp2 //重写仿函数
+{
+    bool operator() (tmp1 a, tmp1 b)
+    {
+        return a.x < b.x;//大顶堆
+    }
+};
+int main()
+{
+    tmp1 a(1);
+    tmp1 b(2);
+    tmp1 c(3);
+    priority_queue<tmp1> que;
+    que.push(a);
+    que.push(b);
+    que.push(c);
+    while (!que.empty())
+    {
+        cout << que.top().x << endl;
+        que.pop();
+    }
+
+    priority_queue<tmp1, vector<tmp1>, tmp2> quee;
+    quee.push(a);
+    quee.push(b);
+    quee.push(c);
+    while (!quee.empty())
+    {
+        cout << quee.top().x << endl;
+        quee.pop();
+    }
+    return 0;
+}
+```
+

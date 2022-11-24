@@ -1066,3 +1066,184 @@ int main()
 }
 ```
 
+#### Others
+
+[约瑟夫问题](https://vjudge.csgrandeur.cn/problem/OpenJ_Bailian-2746)
+
+```c++
+#include <stdio.h>
+#include <math.h>
+#define MAX 10010
+
+    int main()
+    {
+        int mon[300] = {0};
+        int n, m, cnt;
+        int out;
+        while(scanf("%d %d", &n, &m) && n != 0 && m != 0)//111111
+        {
+            out = 0;
+            cnt = 0;
+            for(int i = 0; i < n; i ++)   mon[i] = 1;
+            for(int i = 0; i < n && n != 1; i ++)
+            {
+                if(out == n-1 && i == n - 1)    break;
+                if(mon[i] != 0) cnt++;
+                if(cnt == m)    
+                {
+                    mon[i] = 0;
+                    cnt = 0;
+                    out++;
+                }
+                if(out != n-1 && i == n - 1)
+                {
+                    i = -1;
+                }
+            }
+            for(int i = 0; i< n; i ++)
+                if(mon[i] == 1) printf("%d\n", i+1);
+        }
+        return 0;
+    }
+```
+
+圆桌问题
+
+```c++
+#include <iostream>
+#include <vector>
+using namespace std;
+
+int main()
+{
+    vector<int> table;
+    int n, m;
+    while (cin >> n >> m)
+    {
+        table.clear();
+        int pos = 0;
+        for (int i = 0; i < n; i++)
+        {
+            pos = (pos + m - 1) % table.size();
+            table.erase(table.begin() + pos);
+        }
+        int j = 0;
+        for (int i = 0; i < 2 * n; i++)
+        {
+            if (!(i % 50) && i) cout << endl;
+            if (j < table.size() && i == table[j])
+            {
+                j++;
+                cout << "G";
+            }
+            else
+                cout << "B";
+        }
+        cout << endl << endl;
+    }
+    return 0;
+}
+```
+
+“Text Reverse"
+
+```c++
+#include <iostream>
+#include <vector>
+#include <stack>
+using namespace std;
+
+int main()
+{
+    int n;
+    char ch;
+    cin >> n;
+    cin.get();
+    while (n--)
+    {
+        stack<char> s;
+        while (true)
+        {
+            ch = cin.get();
+            if (ch == ' ' || ch == '\n' || ch == EOF)
+            {
+                while (!s.empty())
+                {
+                    cout << s.top();
+                    s.pop();
+                }
+                if (ch == '\n' || ch == EOF)    break;
+                cout << ' ';            
+            }
+            else    s.push(ch);
+        }
+        cout << endl;
+    }
+    return 0;
+}
+```
+
+"ACboy needs your help again!"
+
+```c++
+//模拟栈和队列
+#include <iostream>
+#include <vector>
+#include <stack>
+#include <queue>
+using namespace std;
+
+int main()
+{
+    int t, n, temp;
+    cin >> t;
+    while (t--)
+    {
+        string str, str1;
+        queue<int> Q;
+        stack<int> S;
+        cin >> n >> str;
+        for (int i = 0; i < n; i++)
+        {
+            if (str == "FIFO")          //队列
+            {
+                cin >> str1;
+                if (str1 == "IN")
+                {
+                    cin >> temp;
+                    Q.push(temp);
+                }
+                if (str1 == "OUT")
+                {
+                    if (Q.empty())  cout << "None" << endl;
+                    else{
+                        cout << Q.front() << endl;
+                        Q.pop();
+                    }
+                }
+            }
+            else                        //栈
+            {
+                if (str1 == "IN")
+                {
+                    cin >> temp;
+                    S.push(temp);
+                }
+                if (str1 == "OUT")
+                {
+                    if (S.empty())  cout << "None" << endl;
+                    else
+                    {
+                        cout << S.top() << endl;
+                        S.pop();
+                    }
+                }
+            }
+        }
+    }
+    return 0;
+}
+```
+
+
+

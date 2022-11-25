@@ -137,6 +137,7 @@ int main()
     return 0;
 }
 
+
 //红与黑
 #include <iostream>
 #include <algorithm>
@@ -172,6 +173,7 @@ int main()
     }
     return 0;
 }
+
 
 //棋盘问题
 #include <iostream>
@@ -213,6 +215,7 @@ int main()
     }
     return 0;
 }
+
 
 //Oil Deposits
 #include <iostream>
@@ -259,8 +262,329 @@ int main()
     return 0;
 }
 
-//Find The Multiple
 
+
+```
+
+#### BFS
+
+```c++
+//Find The Multiple
+#include <iostream>
+#include <algorithm>
+#include <cstring>
+#include <queue>
+using namespace std;
+void BFS(int n)
+{
+    long long top;
+    queue<long long> que;
+    que.push(1);
+    while (!que.empty())
+    {
+        top = que.front();
+        que.pop();
+        if (top % n == 0) break;
+        que.push(top * 10);
+        que.push(top * 10 + 1);
+    }
+    cout << top << endl;
+}
+int main()
+{
+    int n;
+    while(cin >> n && n) BFS(n);
+    return 0;
+}
+
+
+//Catch That Cow
+#include <iostream>
+#include <algorithm>
+#include <cstring>
+#include <queue>
+using namespace std;
+int flag[100005], step[100005]; //flag标记走过的坐标，避免重复；step记录到达每一个坐标需要的步数
+int BFS(int p, int k)
+{
+    queue<int> que;
+    que.push(p);
+    flag[p] = 1;
+    step[p] = 0;
+    if (p >= k)  return p - k; //农民在奶牛前面，只能后退
+    while (!que.empty())
+    {
+        int n = que.front();
+        que.pop();
+        if (n == k)   return step[n]; //结束
+        else
+        {
+            if (!flag[n - 1] && n - 1 >= 0 && n - 1 <= 100000)
+            {
+                que.push(n - 1);
+                step[n - 1] = step[n] + 1;
+                flag[n - 1] = 1;
+            }
+            if (!flag[n + 1] && n + 1 >= 0 && n + 1 <= 100000)
+            {
+                que.push(n + 1);
+                step[n + 1] = step[n] + 1;
+                flag[n + 1] = 1;
+            }
+            if (!flag[n * 2] && n * 2 >= 0 && n * 2 <= 100000)
+            {
+                que.push(n * 2);
+                step[n * 2] = step[n] + 1;
+                flag[n * 2] = 1;
+            }
+        }
+    }
+    return 0;
+}
+int main()
+{
+    int p, k;
+    while (cin >> p >> k)   
+    {
+        memset(flag, 0, sizeof flag); //初始化
+        memset(step, 0, sizeof step);
+        cout << BFS(p, k) << endl;
+    }
+    return 0;
+}
+
+
+//Prime Path
+#include <iostream>
+#include <algorithm>
+#include <cstring>
+#include <queue>
+#include <string>
+using namespace std;
+const int N = 10010;
+int step[N];
+bool check[N];
+int p[N], tot = 0;
+int my_stoi(string str) //字符型转换为整型
+{
+    int num = 0;
+    for (int i = 0; i < 4; i++)
+    {
+        num = num * 10 + str[i] - '0'; //巧妙
+    }
+    return num;
+}
+string my_to_string(int n) //整型转换为字符型
+{
+    string s;
+    int t = 1000;
+    for (int i = 0; i < 4; i++)
+    {
+        s += n / t % 10 + '0'; //注意此处将各个位数存入string类型的s是用+=，也就是说可以用+存入s
+        t /= 10;
+    }
+    return s;
+}
+int BFS(int a, int b) //操作
+{
+    queue<int> que;
+    que.push(a); //初始状态入列
+    string str;
+    step[a] = 0;
+    while (!que.empty())
+    {
+        int top = que.front();
+        que.pop();
+        if (top == b)   return step[top];
+        for (int i = 0; i < 4; i++) //不同位数
+            for (int j = 0; j < 10; j++) //改变为
+                {
+                    str = my_to_string(top); //转换为字符类型便于改变
+                    str[i] = j + '0'; //改变某一位， 注意要加‘0’
+                    int ret = my_stoi(str); //新数字
+                    if (ret < 1000 || ret > 9999) continue; //越界
+                    if (step[ret] != -1) continue; //已走过
+                    if (check[ret]) continue; //非素数
+                    que.push(ret); //符合条件入列
+                    step[ret] = step[top] + 1;
+                }
+    }
+    return -1; //没有找到符合条件的叔
+}
+void set_prime()
+{
+    for (int i = 2; i <= 9999; i++)
+    {
+        if (!check[i]) p[tot++] = i;
+        for (int j = 0; j < tot && i * p[j] <= 9999; j++)
+        {
+            check[i * p[j]] = true;
+            if (!(i % p[j])) break;
+        }
+    }
+}
+int main()
+{
+    int t;
+    cin >> t;
+    set_prime(); //筛选素数
+    while (t--)
+    {
+        int a, b;
+        cin >> a >> b;
+        memset(step, -1, sizeof step);
+        int tmp = BFS(a, b);
+        if (tmp == -1)  cout << "Impossible" << endl;
+        else    cout << tmp << endl;
+    }
+    return 0;
+}
+
+//Find a way
+//TLE code
+#include <iostream>
+#include <algorithm>
+#include <cstring>
+#include <queue>
+#include <string>
+using namespace std;
+int n, m, fx, fy, mx, my, nx, ny;
+char road[220][220];
+priority_queue<int, vector<int>, greater<int>> time;
+int step[220][220];
+int goo[4][2] = {{0, 1}, {-1, 0}, {1, 0}, {0, -1}};
+struct point
+{
+    int x;
+    int y;
+};
+int BFS(int x, int y)
+{
+    queue<point> que;
+    step[x][y] = 0;
+    point p = {x, y};
+    que.push(p);
+    while (!que.empty())
+    {
+        p = que.front();
+        que.pop();
+        if (p.x == nx && p.y == ny)  
+        {
+            return step[p.x][p.y];
+        }
+        for (int i = 0; i < 4; i++)
+        {
+            int ax = p.x + goo[i][0]; 
+            int ay = p.y + goo[i][1];
+            if (ax >= 0 && ax < n && ay >= 0 && ay < m && step[ax][ay] == -1 && (road[ax][ay] == '.' || road[ax][ay] == '@'))
+            {
+                step[ax][ay] = step[p.x][p.y] + 1;
+                point tmp = {ax, ay};
+                que.push(tmp);
+            }
+        }
+    }
+    return 0x3f3f3f;
+}
+int main()
+{
+    while (cin >> n >> m)
+    {
+        while (!time.empty())  time.pop();
+        for (int i = 0; i < n; i++)
+            for (int j = 0; j < m; j++)
+                {
+                    cin >> road[i][j];
+                    if (road[i][j] == 'Y')
+                        {fx = i; fy = j;}
+                    if (road[i][j] == 'M')
+                        {mx = i; my = j;}
+                }
+        for (int i = 0; i < n; i++)
+            for (int j = 0; j < m; j++)
+            {
+                if (road[i][j] == '@')
+                {
+                    nx = i; ny = j;
+                    memset(step, -1, sizeof step);
+                    int ftime = 11 * BFS(fx, fy);
+                    memset(step, -1, sizeof step);
+                    int mtime = 11 * BFS(mx, my);
+                    int sum = ftime + mtime;
+                    time.push(sum);
+                }
+            }
+        cout << time.top() << endl;
+    }
+    return 0;
+}
+
+
+//迷宫问题
+#include <iostream>
+#include <algorithm>
+#include <cstring>
+#include <queue>
+#include <string>
+using namespace std;
+int road[5][5];
+int flag[10][10];
+struct point
+{
+    int x;
+    int y;
+} Point[10][10];
+int goo[4][2] = {{0, 1}, {0, -1}, {1, 0}, {-1, 0}};
+void BFS()
+{
+    queue<point> que;
+    point s;
+    s.x = 0; s.y = 0;
+    que.push(s);
+    flag[0][0] = 1;
+    while (!que.empty())
+    {
+        point p = que.front();
+        que.pop();
+        if (p.x == 4 && p.y == 4)  return;
+        for (int i = 0; i < 4; i++)
+        {
+            int ax = p.x + goo[i][0];
+            int ay = p.y + goo[i][1];
+            if (!road[ax][ay] && !flag[ax][ay] && ax >= 0 && ax < 5 && ay >= 0 && ay < 5)
+            {
+                point t;
+                t.x = ax;
+                t.y = ay;
+                que.push(t);
+                flag[ax][ay] = 1;
+                Point[ax][ay] = p;
+            }
+        }
+    }
+}
+void output(point p)
+{
+    if (!p.x && !p.y)
+    {
+        cout << "(0, 0)" << endl;
+        return;
+    }
+    output(Point[p.x][p.y]);
+    cout << "(" << p.x << ", " << p.y << ")" << endl;
+}
+int main()
+{
+    for (int i = 0; i < 5; i++)
+        for (int j = 0; j < 5; j++)
+            cin >> road[i][j];
+    BFS();
+    point end;
+    end.x = 4;
+    end.y = 4;
+    output(end);
+    return 0;
+}
 ```
 
 

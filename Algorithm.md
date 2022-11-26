@@ -219,50 +219,42 @@ int main()
 
 //Oil Deposits
 #include <iostream>
-#include <algorithm>
-#include <cstring>
+#include <queue>
 using namespace std;
-int m, n;
-char buf[110][110];
-bool flag[110][110];
-int step[8][2] = {{-1, 1}, {0, 1}, {1, 1}, {1, 0}, {1, -1}, {0, -1}, {-1, -1}, {-1, 0}};
-void DFS(int x, int y)
+int cnt, m, n;
+char room[110][110];
+int dir[8][2] = {{1, 1}, {1, 0}, {1, -1}, {0, -1}, {-1, -1}, {-1, 0}, {-1, 1}, {0, 1}};
+#define CHECK(x, y) (x >= 0 && x < m && y >= 0 && y < n && room[y][x] == '@')
+void dfs(int x, int y)
 {
     for (int i = 0; i < 8; i++)
     {
-        int nx = x + step[i][0], ny = y + step[i][1];
-        if (nx >= 0 && nx < m && ny >= 0 && ny < n && !flag[nx][ny] && buf[nx][ny] == '@')
+        int nextx = x + dir[i][0];
+        int nexty = y + dir[i][1];
+        if (CHECK(nextx, nexty))
         {
-            flag[nx][ny] = true;
-            DFS(nx, ny);
+            room[nexty][nextx] = '#';
+            dfs(nextx, nexty);
         }
     }
-    return;
 }
 int main()
 {
-    int cnt;
-    while(cin >> m >> n && n)
+    while (cin >> n >> m && m)
     {
         cnt = 0;
-        memset(flag, 0, sizeof(flag));
-        for (int i = 0; i < m; i++)    cin >> buf[i];
-        for (int i = 0; i < m; i++)
-            for (int j = 0; j < n; j++)
-            {
-                if (!flag[i][j] && buf[i][j] == '@')
+        for (int i = 0; i < n; i++)  cin >> room[i];
+        for (int x = 0; x < m; x++)
+            for (int y = 0; y < n; y++)
+                if (room[y][x] == '@')
                 {
-                    flag[i][j] = true;
-                    DFS(i, j);
+                    dfs(x, y);
                     cnt++;
                 }
-            }
         cout << cnt << endl;
     }
     return 0;
 }
-
-
 
 ```
 
@@ -360,51 +352,43 @@ int main()
 #include <cstring>
 #include <queue>
 using namespace std;
-int flag[100005], step[100005]; //flag标记走过的坐标，避免重复；step记录到达每一个坐标需要的步数
-int BFS(int p, int k)
+int step[100010];
+int n, m;
+int BFS()
 {
-    queue<int> que;
-    que.push(p);
-    flag[p] = 1;
-    step[p] = 0;
-    if (p >= k)  return p - k; //农民在奶牛前面，只能后退
-    while (!que.empty())
+    queue<int> q;
+    q.push(n);
+    step[n] = 0;
+    if (n >= m)  return n - m;
+    while (!q.empty())
     {
-        int n = que.front();
-        que.pop();
-        if (n == k)   return step[n]; //结束
-        else
+        int s = q.front();
+        q.pop();
+        if (s == m)  return step[m];
+        if (s - 1 >= 0 && step[s - 1] == -1)  //判断数字要在前面，否则会越界访问
         {
-            if (!flag[n - 1] && n - 1 >= 0 && n - 1 <= 100000)
-            {
-                que.push(n - 1);
-                step[n - 1] = step[n] + 1;
-                flag[n - 1] = 1;
-            }
-            if (!flag[n + 1] && n + 1 >= 0 && n + 1 <= 100000)
-            {
-                que.push(n + 1);
-                step[n + 1] = step[n] + 1;
-                flag[n + 1] = 1;
-            }
-            if (!flag[n * 2] && n * 2 >= 0 && n * 2 <= 100000)
-            {
-                que.push(n * 2);
-                step[n * 2] = step[n] + 1;
-                flag[n * 2] = 1;
-            }
+            q.push(s - 1);
+            step[s - 1] = step[s] + 1;
+        }
+        if (s + 1 <= 100000 && step[s + 1] == -1)  
+        {
+            q.push(s + 1);
+            step[s + 1] = step[s] + 1;
+        }
+        if (s * 2 <= 100000 && step[s * 2] == -1)  
+        {
+            q.push(s * 2);
+            step[s * 2] = step[s] + 1;
         }
     }
     return 0;
 }
 int main()
 {
-    int p, k;
-    while (cin >> p >> k)   
+    while(cin >> n >> m)
     {
-        memset(flag, 0, sizeof flag); //初始化
-        memset(step, 0, sizeof step);
-        cout << BFS(p, k) << endl;
+        memset(step, -1, sizeof step);
+        cout << BFS() << endl;
     }
     return 0;
 }
@@ -850,6 +834,55 @@ int main()
     }
     return 0;
 }
+
+
+//Oil Deposits
+#include <iostream>
+#include <queue>
+using namespace std;
+int cnt, m, n;
+char room[110][110];
+struct node {int x, y;};
+int dir[8][2] = {{1, 1}, {1, 0}, {1, -1}, {0, -1}, {-1, -1}, {-1, 0}, {-1, 1}, {0, 1}};
+#define CHECK(x, y) (x >= 0 && x < m && y >= 0 && y < n && room[y][x] == '@')
+void bfs(int x, int y)
+{
+    node start, next;
+    queue<node> q;
+    start = {x, y};
+    q.push(start);
+    while (!q.empty())
+    {
+        start = q.front();
+        q.pop();
+        for (int i = 0; i < 8; i++)
+        {
+            next.x = start.x + dir[i][0];
+            next.y = start.y + dir[i][1];
+            if (CHECK(next.x, next.y))
+            {
+                q.push(next);
+                room[next.y][next.x] = '*';
+            }
+        }
+    }
+    cnt++;
+}
+int main()
+{
+    while (cin >> n >> m && m)
+    {
+        cnt = 0;
+        for (int i = 0; i < n; i++)  cin >> room[i];
+        for (int x = 0; x < m; x++)
+            for (int y = 0; y < n; y++)
+            {
+                if (room[y][x] == '@')  bfs(x, y);
+            }
+        cout << cnt << endl;
+    }
+    return 0;
+}
 ```
 
 #### 回溯与剪枝
@@ -901,7 +934,100 @@ int main()
     }
     return 0;
 }
+
+//尝试用BFS
+#include <iostream>
+#include <algorithm>
+#include <cstring>
+#include <queue>
+#include <string>
+#include <cmath>
+using namespace std;
+
+int n, tot;
+int col[12];
+struct node {int x, y;};
+bool check(int x, int y)
+{
+    //？
+}
+void BFS()
+{
+    queue<node> q;
+    node start, next;
+    for (int i = 0; i < n; i++)
+    {
+        start = {i, 0};
+        q.push(start);
+    }
+    while (!q.empty())
+    {
+        start = q.front();
+        q.pop();
+        for (int i = 0; i < n; i++)
+        {
+            next.x = i;
+            next.y = start.y + 1;
+            if (check(next.x, next.y))
+            {
+                q.push(next);
+                //？
+            }
+        }
+    }
+}
+int main()
+{
+    int ans[12] = {0};
+    for (n = 0; n < 12; n++)
+    {
+        memset(col, 0, sizeof col);
+        tot = 0;
+        BFS();
+        ans[n] = tot;
+    }
+    while (cin >> n)  cout << ans[n] << endl;
+    return 0;
+}
 ```
+
+Find The Multiple
+
+```c++
+#include <iostream>
+using namespace std;
+int n, i;
+bool flag;
+long long ans[220];
+void bfs(long long num, int times)
+{
+    if (times > 19 || flag) return; //回溯剪枝
+    else if (!(num % i))
+    {
+        flag = true;
+        ans[i] = num;
+        return;
+    }
+    else
+    {
+        bfs(num * 10, times + 1);
+        bfs(num * 10 + 1, times + 1);
+    }
+}
+int main()
+{
+    for (i = 1; i <= 200; i++)  //打表
+    {
+        bfs(1, 1);
+        flag = false;
+    }
+    while (cin >> n && n)
+        cout << ans[n] << endl;
+    return 0;
+}
+```
+
+
 
 #### IDA *
 

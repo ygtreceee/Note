@@ -266,6 +266,62 @@ int main()
 
 ```
 
+```c++
+//hdu 1312 "Red and Black"
+#include <iostream>
+using namespace std;
+char room[23][23];
+int dir[4][2] = {{-1, 0}, {0, -1}, {1, 0}, {0, 1}};
+int Wx, Hy, num;
+#define CHECK(x, y) (x < Wx && x >= 0 && y < Hy && y >= 0)
+struct node {int x, y;};
+void DFS(int dx, int dy)
+{
+    room[dx][dy] = '#'; //标记这个位置，代表已经走过
+    //cout << "walk:" << dx << dy << endl; //在此处打印走过的位置，验证是否符合
+    num++;
+    for (int i = 0; i < 4; i++) //左上右下4个方向顺时针给深搜
+    {
+        int newx = dx + dir[i][0];
+        int newy = dy + dir[i][1];
+        if (CHECK(newx, newy) && room[newx][newy] == '.')
+        {
+            DFS(newx, newy);
+            // cout << "    back:" << dx << dy << endl;
+            //在此处打印回退的点的坐标，观察深搜到底后回退的情况
+            //例如到达最后的15这个位置会一直回退到起点
+            //即打印出14-11-10-9-8-7-6-5-4-3-2-1，这也是递归程序返回的过程
+        }
+    }
+}
+int main()
+{
+    int x, y, dx, dy;
+    while (cin >> Wx >> Hy)
+    {
+        if (Wx == 0 && Hy == 0)  break;
+        for (y = 0; y < Hy; y++)
+        {
+            for (x = 0; x < Wx; x++)
+            {
+                cin >> room[x][y];
+                if (room[x][y] == '@') //读入起点
+                {
+                    dx = x;
+                    dy = y;
+                }
+            }
+        }
+        num = 0;
+        DFS(dx, dy);
+        cout << num << endl;
+    }
+    return 0;
+}
+```
+
+
+
 #### BFS
 
 ```c++
@@ -585,21 +641,277 @@ int main()
     output(end);
     return 0;
 }
+
+
+//hdu 1312 “Red and Black”
+#include <algorithm>
+#include <queue>
+#include <ctime>
+using namespace std;
+char room[23][23];
+int dir[4][2] = {{-1, 0}, {0, -1}, {1, 0}, {0, 1}};
+int Wx, Hy, num;
+#define CHECK(x, y) (x < Wx && x >= 0 && y < Hy && y >= 0)
+struct node {int x, y;};
+void BFS(int dx, int dy)
+{
+    num = 1;
+    queue<node> q;
+    node start, next;
+    start.x = dx;
+    start.y = dy;
+    q.push(start);
+    while (!q.empty())
+    {
+        start = q.front();
+        q.pop();
+        //cout << "out" << start.x << start.y << endl; //打印出队列情况进行验证
+        for (int i = 0; i < 4; i++) //按左上右下四个方向顺时针逐一搜索
+        {
+            next.x = start.x + dir[i][0];
+            next.y = start.y + dir[i][1];
+            if (CHECK(next.x, next.y) && room[next.x][next.y] == '.')
+            {
+                room[next.x][next.y] = '#'; //标记已经处理过
+                num++;
+                q.push(next);
+            } 
+        }
+    }
+}
+int main()
+{
+    int x, y, dx, dy;
+    while (cin >> Wx >> Hy)
+    {
+        if (Wx == 0 && Hy == 0)  break;
+        for (y = 0; y < Hy; y++)
+        {
+            for (x = 0; x < Wx; x++)
+            {
+                cin >> room[x][y];
+                if (room[x][y] == '@') //读入起点
+                {
+                    dx = x;
+                    dy = y;
+                }
+            }
+        }
+        num = 0;
+        BFS(dx, dy);
+        cout << num << endl;
+    }
+    return 0;
+}
+
+
+//BFS+Cantor 解决八数码问题
+#include <iostream>
+#include <algorithm>
+#include <cstring>
+#include <queue>
+#include <string>
+#include <ctime>
+using namespace std;
+const int LEN = 362880; //状态一共9！= 362880种
+struct node
+{
+    int state[9]; //记录一个八数码的排列，即一个状态
+    int dis; //记录到起点的位置
+};
+int dir[4][2] = {{-1, 0}, {0, -1}, {1, 0}, {0, 1}}; //左上右下顺时针方向，左上角的坐标是(0, 0)
+int visited[LEN] = {0}; //与每个状态对应的记录，Cantor()函数对它置数，并判重
+int start[9]; //开始状态
+int goal[9]; //目标状态
+long int factory[] = {1, 1, 2, 6, 24, 120, 720, 5040, 40320, 362880}; //Cantor()用到的常数
+bool Cantor(int str[], int n) //用Cantor()展开判重
+{
+    long result = 0;
+    for (int i = 0; i < n; i++)
+    {
+        int counted = 0;
+        for (int j = i + 1; j < n; j++)
+        {
+            if (str[i] > str[j])  //当前未出现的元素排在第几个
+                counted++;
+        }
+        result += counted * factory[n - i - 1];
+    }
+    if (!visited[result])  //没有被访问过
+    {
+        visited[result] = 1;
+        return 1;
+    }
+    else
+        return 0;
+}
+int bfs()
+{
+    node head;
+    memcpy(head.state, start, sizeof(head.state)); //复制起点的状态
+    head.dis = 0;
+    queue<node> q; //队列中的内容是记录状态
+    Cantor(head.state, 9); //用康托展开判重，目的是对起点的visited[]赋初值
+    q.push(head); //第一个进队列的是起点状态
+
+    while (!q.empty()) //处理队列
+    {
+        head = q.front();
+        if (memcmp(head.state, goal, sizeof(goal)) == 0) //与目标状态对比
+            return head.dis; //到达目标状态，返回距离，结束
+        q.pop(); //可在此处打印head.state,看弹出队列的情况
+        int z;
+        for (z = 0; z < 9; z++) //找到这个状态中0的位置
+            if (head.state[z] == 0) break; //找到了
+            //转化为二维，左上角是原点(0, 0)
+        int x = z % 3; //横坐标
+        int y = z / 3; //纵坐标
+        for (int i = 0; i < 4; i++) //上下左右最多可能有4个新的状态
+        {
+            int newx = x + dir[i][0]; //元素0转移后的新坐标
+            int newy = y + dir[i][1];
+            int nz = newx + 3 * newy; //转化为一维
+            if (newx >= 0 && newx < 3 && newy >= 0 && newy < 3) //判断是否越界
+            {
+                node newnode;
+                memcpy(&newnode, &head, sizeof(struct node)); //复制这个新的状态
+                swap(newnode.state[z], newnode.state[nz]); //把0移动到新的位置
+                newnode.dis++;
+                if (Cantor(newnode.state, 9)) //用康托展开判重
+                    q.push(newnode); //把新的状态放入队列
+            }
+        }
+    }
+    return -1; //没找到
+}
+int main()
+{
+    for (int i = 0; i < 9; i++)  cin >> start[i]; //初始状态
+    for (int i = 0; i < 9; i++)  cin >> goal[i]; //目标状态
+    int num = bfs();
+    if (num != -1)  cout << num << endl;
+    else  cout << "Impossible" << endl;
+    return 0;
+}
+
+
+//马走日--判断能否走完整个棋盘
+#include <iostream>
+#include <algorithm>
+#include <cstring>
+#include <queue>
+#include <string>
+#include <cmath>
+using namespace std;
+#define CHECK(x, y) (x >= 0 && x < m && y >= 0 && y < n && !flag[x][y])
+int dir[8][2] = {{2, 1}, {2, -1}, {1, -2}, {-1, -2}, {-2, -1}, {-2, 1}, {-1, 2}, {1, 2}};
+bool flag[12][12];
+int cnt = 1, n, m, x, y, t;
+struct node {int x, y;};
+void BFS(int nx, int ny)
+{
+    queue<node> q;
+    node top;
+    flag[nx][ny] = true;
+    top.x = nx;
+    top.y = ny;
+    q.push(top);
+    while (!q.empty())
+    {
+        top = q.front();
+        q.pop();
+        for (int i = 0; i < 8; i++)
+        {
+            int newx = top.x + dir[i][0];
+            int newy = top.y + dir[i][1];
+            if (CHECK(newx, newy))
+            {
+                flag[newx][newy] = true;
+                node nd;
+                nd.x = newx;
+                nd.y = newy;
+                q.push(nd);
+                cnt++;
+            }
+        }
+    }
+}
+int main()
+{
+    cin >> t;
+    while (t--)
+    {
+        cnt = 1;
+        memset(flag, 0, sizeof flag);
+        cin >> n >> m >> x >> y;
+        BFS(x, y);
+        if (cnt == n * m)  cout << "Successful!\n";
+        else  cout << "Sorry, you can't do it!\n";
+    }
+    return 0;
+}
+```
+
+#### 回溯与剪枝
+
+hdu 2553 "N皇后问题"  N <= 10
+
+```c++
+#include <iostream>
+#include <algorithm>
+#include <cmath>
+using namespace std;
+int n, tot = 0;
+int col[12] = {0}; //储存放置的皇后的位置信息
+bool check(int c, int r)
+{
+    for (int i = 0; i < r; i++)
+        if (col[i] == c || (abs(col[i] - c) == abs(i - r)))
+            return false;
+    return true;
+}
+void DFS(int r) //一行一行地放皇后，这一次是第r行
+{
+    if (r == n) //所有皇后都放好了，递归返回
+    {
+        tot++; //统计合法的棋局个数
+        return;
+    }
+    for (int c = 0; c < r; c++) //在每一列放皇后
+        if (check(c, r)) //检查是否合法
+        {
+            col[r] = c; //在第r行的c列放皇后
+            DFS(r + 1);//继续放下一行皇后
+        }
+}
+int main()
+{
+    int ans[12] = {0};
+    for (n = 0; n <= 10; n++) //算出所有N皇后的答案，先打表，不然会超时
+    {
+        memset(col, 0, sizeof col); //清空，准备计算下一个N皇后问题
+        tot = 0;
+        DFS(0);
+        ans[n] = tot; //打表
+    }
+    while (cin >> n)
+    {
+        if (n == 0)  return 0;
+        cout << ans[n] << endl;
+    }
+    return 0;
+}
+```
+
+#### IDA *
+
+```
+
 ```
 
 
 
 #### 贪心算法
-
-[Analysis](https://blog.csdn.net/weixin_46272350/article/details/120908253?ops_request_misc=%7B%22request%5Fid%22%3A%22166731629216782414915724%22%2C%22scm%22%3A%2220140713.130102334..%22%7D&request_id=166731629216782414915724&biz_id=0&utm_medium=distribute.pc_search_result.none-task-blog-2~all~top_click~default-4-120908253-null-null.142^v62^pc_search_tree,201^v3^control_1,213^v1^control&utm_term=贪心算法&spm=1018.2226.3001.4187)
-
-定义：
-贪心算法是指在对问题求解时，总是做出在当前看来是最好的选择。也就是说，不从整体最优上加以考虑，只做出在某种意义上的局部最优解。贪心算法不是对所有问题都能得到整体最优解，关键是贪心策略的选择，选择的贪心策略必须具备无后效性，即某个状态以前的过程不会影响以后的状态，只与当前状态有关。
-解题的一般步骤是：
-1.建立数学模型来描述问题；
-2.把求解的问题分成若干个子问题；
-3.对每一子问题求解，得到子问题的局部最优解；
-4.把子问题的局部最优解合成原来问题的一个解。
 
 [校题](https://vjudge.csgrandeur.cn/contest/526923)
 
@@ -1087,7 +1399,43 @@ int main()
 
 #### 分治法
 
-[大整数乘法](https://blog.csdn.net/hgnuxc_1993/article/details/110297000?ops_request_misc=%7B%22request%5Fid%22%3A%22166791849016782395399619%22%2C%22scm%22%3A%2220140713.130102334..%22%7D&request_id=166791849016782395399619&biz_id=0&utm_medium=distribute.pc_search_result.none-task-blog-2~all~top_positive~default-1-110297000-null-null.142^v63^control,201^v3^control_1,213^v2^t3_esquery_v3&utm_term=大整数乘法&spm=1018.2226.3001.4187)
+大整数乘法
+
+```c++
+#include <iostream>
+#include <cstdio>
+#include <cstring>
+#include <algorithm>
+#include <cmath>
+using namespace std;
+int main()
+{
+    char a[210] = {0}, b[210] = {0};
+    cin >> a >> b;
+    int aa[210], bb[210], tmp, flag = 0;
+    memset(aa, 0, 210);
+    memset(bb, 0, 210);
+    int al = strlen(a), bl = strlen(b);
+    for (int i = al; i > 0; i--)   aa[al - i + 1] = a[i - 1] - '0';
+    for (int i = bl; i > 0; i--)   bb[bl - i + 1] = b[i - 1] - '0';
+    int buf[100000] = {0};
+    for (int i = 1; i <= bl; i++)
+    {
+        for (int j = 1; j <= al; j++)
+        {
+            tmp = bb[i] * aa[j] + buf[i + j - 1];
+            buf[i + j - 1] = tmp % 10;
+            buf[i + j]  += tmp / 10;
+        }
+    }
+    for (int i = al + bl; i > 0; i--)
+    {
+        if (buf[i] != 0)  flag = 1;
+        if (flag || i == 1)   cout << buf[i];
+    }
+    return 0;
+}
+```
 
 #### 递归
 

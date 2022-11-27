@@ -480,6 +480,7 @@ int main()
     return 0;
 }
 
+
 //Find a way
 //TLE code
 #include <iostream>
@@ -558,71 +559,297 @@ int main()
     }
     return 0;
 }
-
-
-//迷宫问题
-#include <iostream>
-#include <algorithm>
-#include <cstring>
-#include <queue>
-#include <string>
-using namespace std;
-int road[5][5];
-int flag[10][10];
-struct point
+//failure try
+int n, m, yx, yy, mx, my, rx, ry, tot, nextx, nexty, num;
+char room[220][220];
+int time[50000];
+int step[220][220];
+int dir[4][2] = {{0, 1}, {1, 0}, {0, -1}, {-1, 0}};
+struct node {int x, y;};
+#define CHECK(x, y) (x >= 0 && x < m && y >= 0 && y < n && room[y][x] != '#')
+void bfs(int x, int y)
 {
-    int x;
-    int y;
-} Point[10][10];
-int goo[4][2] = {{0, 1}, {0, -1}, {1, 0}, {-1, 0}};
-void BFS()
-{
-    queue<point> que;
-    point s;
-    s.x = 0; s.y = 0;
-    que.push(s);
-    flag[0][0] = 1;
-    while (!que.empty())
+    queue<node> q;
+    node start, next;
+    start = {x, y};
+    step[y][x] = 0;
+    q.push(start);
+    while (!q.empty())
     {
-        point p = que.front();
-        que.pop();
-        if (p.x == 4 && p.y == 4)  return;
+        start = q.front();
+        q.pop();
+        if (start.x == rx && start.y == ry) return;
         for (int i = 0; i < 4; i++)
         {
-            int ax = p.x + goo[i][0];
-            int ay = p.y + goo[i][1];
-            if (!road[ax][ay] && !flag[ax][ay] && ax >= 0 && ax < 5 && ay >= 0 && ay < 5)
+            nextx = start.x + dir[i][0];
+            nexty = start.y + dir[i][1];
+            if (CHECK(nextx, nexty))
             {
-                point t;
-                t.x = ax;
-                t.y = ay;
-                que.push(t);
-                flag[ax][ay] = 1;
-                Point[ax][ay] = p;
+                next = {nextx, nexty};
+                step[nexty][nextx] = step[start.y][start.x] + 1;
+                q.push(next);
+                num++;
+            }
+        }
+        if (num >= n * m)
+        {
+            step[ry][rx] = 0x3f3f3f;
+            return;
+        }
+    }
+}
+bool cmp(int x, int y)
+{
+    return x < y;
+}
+int main()
+{
+    while (cin >> n >> m)
+    {
+        tot = 0;
+        memset(time, 0, sizeof time);
+        for (int i = 0; i < n; i++)  cin >> room[i];
+        for (int x = 0; x < m; x++)
+            for (int y = 0; y < n; y++)
+            {
+                if (room[y][x] == 'Y')  {yx = x; yy = y;}
+                if (room[y][x] == 'M')  {mx = x; my = y;}
+            }
+        for (int x = 0; x < m; x++)
+            for (int y = 0; y < n; y++)
+            {
+                if (room[y][x] == '@')
+                    {
+                        rx = x;
+                        ry = y;
+                        num = 0;
+                        memset(step, 0, sizeof step);
+                        bfs(yx, yy);
+                        time[tot++] += step[y][x] * 11;
+                        memset(step, 0, sizeof step);
+                        tot--;
+                        num = 0;
+                        bfs(mx, my);
+                        time[tot++] += step[y][x] * 11;
+                    }
+            }
+        sort(time, time + tot, cmp);
+        cout << time[0] << endl;
+    }
+    return 0;
+}
+//DFS尝试失败
+void dfs(int x, int y, int px, int py)
+{
+    if (room[py][px] == room[y][x])
+    {
+        time[tot++] += num;
+        return;
+    }
+    for (int i = 0; i < 4; i++)
+    {
+        nextx = px + dir[i][0];
+        nexty = py + dir[i][1];
+        if (CHECK(nextx, nexty))
+        {
+            num++;
+            room[py][px] = '#';
+            dfs(x, y, nextx, nexty);
+            num--;
+            room[py][px] = '.';
+        }
+    }
+}
+//GragonKingA
+#include <iostream>
+#include <cstring>
+#include <queue>
+#define N 205
+using namespace std;
+typedef pair<int, int> p;
+typedef pair<p, int> pp;
+int RES = 0, n, m, dx, dy, store[N][N], dir[4][2] = {{-1, 0}, {0, 1}, {1, 0}, {0, -1}};
+char road[N][N];
+bool vis[N][N];
+void BFS(int x, int y)
+{
+    queue<pp> q;
+    q.push(pp(p(x, y), 0));
+    memset(vis, 0, sizeof(vis));
+    while (q.size())
+    {
+        pp temp = q.front();
+        q.pop();
+        dx = temp.first.first;
+        dy = temp.first.second;
+        if (store[dy][dx] != -1)
+        {
+            store[dy][dx] += temp.second;
+            RES = store[dy][dx];
+        }
+        for (int i = 0, nx, ny; i < 4; i++)
+        {
+            nx = dx + dir[i][0];
+            ny = dy + dir[i][1];
+            if (nx >= 0 && nx < m && ny >= 0 && ny < n && road[ny][nx] != '#' && !vis[ny][nx])
+            {
+                vis[ny][nx] = 1;
+                q.push(pp(p(nx, ny), temp.second + 11));
             }
         }
     }
 }
-void output(point p)
+int main()
 {
-    if (!p.x && !p.y)
+    p pY, pM;
+    while (cin >> n >> m)
     {
-        cout << "(0, 0)" << endl;
-        return;
+        memset(store, -1, sizeof(store));
+        for (int i = 0; i < n; i++)
+            for (int j = 0; j < m; j++)
+            {
+                cin >> road[i][j];
+                switch (road[i][j])
+                {
+                case 'Y':
+                    pY = {j, i};
+                    break;
+                case 'M':
+                    pM = {j, i};
+                    break;
+                case '@':
+                    store[i][j] = 0;
+                    break;
+                }
+            }
+        BFS(pY.first, pY.second);
+        BFS(pM.first, pM.second);
+        for (int i = 0; i < N; i++)
+            for (auto x : store[i])
+                if (x != -1 && x != 0)
+                    RES = RES < x ? RES : x;
+        cout << RES << endl;
     }
-    output(Point[p.x][p.y]);
-    cout << "(" << p.x << ", " << p.y << ")" << endl;
+    return 0;
+}
+//ygtrece
+#include <iostream>
+#include <cstring>
+#include <queue>
+using namespace std;
+#define N 205
+#define CHECK(x, y) (x >= 0 && x < m && y >= 0 && y < n && room[y][x] != '#' && !vis[y][x])
+int n, m, yx, yy, mx, my, res;
+char room[N][N];
+int buf[N][N], vis[N][N];
+struct node {int x, y;};
+int dir[4][2] = {{0, 1}, {1, 0}, {-1, 0}, {0, -1}};
+void BFS(node p)
+{
+    memset(vis, 0, sizeof vis);
+    queue<pair<node, int>> q;
+    pair<node, int> start(p, 0), next;
+    q.push(start);
+    while (!q.empty())
+    {
+        start = q.front();
+        q.pop();
+        if (buf[start.first.y][start.first.x] != -1)
+        {
+            buf[start.first.y][start.first.x] += start.second;
+            res = buf[start.first.y][start.first.x];
+        }
+        for (int i = 0; i < 4; i++)
+        {
+            next.first = {start.first.x + dir[i][0], start.first.y + dir[i][1]};
+            if (CHECK(next.first.x, next.first.y))
+            {
+                next.second = start.second + 1;
+                vis[next.first.y][next.first.x] = 1;
+                q.push(next);
+            }
+        }
+    }
 }
 int main()
 {
-    for (int i = 0; i < 5; i++)
-        for (int j = 0; j < 5; j++)
-            cin >> road[i][j];
+    while (cin >> n >> m)
+    {
+        node pY, pM;
+        memset(buf, -1, sizeof buf);
+        for (int y = 0; y < n; y++)
+            for (int x = 0; x < m; x++)
+            {
+                cin >> room[y][x];
+                switch(room[y][x])
+                {
+                    case 'Y': {pY = {x, y}; break;}
+                    case 'M': {pM = {x, y}; break;}
+                    case '@': {buf[y][x] = 0; break;}
+                }
+            }
+        BFS(pY);
+        BFS(pM);
+        for (int i = 0; i < n; i++)
+            for (auto x : buf[i])
+                if (x != 0 && x != -1)
+                    res = x > res ? res : x;
+        cout << res * 11 << endl;
+    }
+    return 0;
+}
+
+
+//迷宫问题
+#include <iostream>
+#include <queue>
+using namespace std;
+int room[10][10];
+struct node {int x, y;}buf[20][20];
+int dir[4][2] = {{0, 1}, {1, 0}, {0, -1}, {-1, 0}};
+#define CHECK(x, y) (x >= 0 && x < 5 && y >= 0 && y < 5 && !room[x][y])
+void BFS()
+{
+    queue<node> q;
+    node start, next;
+    start = {0, 0};
+    q.push(start);
+    while (!q.empty())
+    {
+        start = q.front();
+        q.pop();
+        if (start.x == 4 && start.y == 4)  break;
+        for (int i = 0; i < 4; i++)
+        {
+            next.x = start.x + dir[i][0];
+            next.y = start.y + dir[i][1];
+            if (CHECK(next.x, next.y))
+            {
+                buf[next.x][next.y] = start;
+                room[next.x][next.y] = 1;
+                q.push(next);
+            }
+        }
+    }
+}
+void Output(node n) //打印
+{
+    if (!n.x && !n.y)
+    {
+        printf("(0, 0)\n");
+        return;
+    }
+    Output(buf[n.x][n.y]);
+    printf("(%d, %d)\n", n.x, n.y);
+}
+int main()
+{
+    for (int x = 0; x < 5; x++)
+        for (int y = 0; y < 5; y++)
+            cin >> room[x][y];
     BFS();
-    point end;
-    end.x = 4;
-    end.y = 4;
-    output(end);
+    node end = {4, 4};
+    Output(end);
     return 0;
 }
 

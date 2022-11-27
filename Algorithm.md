@@ -854,6 +854,376 @@ int main()
 }
 
 
+//Pots
+//CSDN
+#include <iostream>
+#include <string.h>
+#include <stdio.h>
+#include <queue>
+using namespace std;
+int f[105][105]; //用来标记当前状态是否已经有过
+int A, B, C;
+struct node
+{
+    int a, b;   //两个容器中的水
+    int sa, sb; //上个状态
+    int way;    //操作1到6
+    int step;   //当前步数
+} lu[105][105];
+queue<node> q;
+void print(int a, int b)
+{
+    if (lu[a][b].a == 0 && lu[a][b].b == 0) // 到达初始状态
+        return;
+    print(lu[a][b].sa, lu[a][b].sb);
+    switch (lu[a][b].way)
+    {
+    case 1:
+        cout << "FILL(1)" << endl;
+        break;
+    case 2:
+        cout << "FILL(2)" << endl;
+        break;
+    case 3:
+        cout << "DROP(1)" << endl;
+        break;
+    case 4:
+        cout << "DROP(2)" << endl;
+        break;
+    case 5:
+        cout << "POUR(1,2)" << endl;
+        break;
+    case 6:
+        cout << "POUR(2,1)" << endl;
+        break;
+    }
+}
+void push(node d)
+{ //入队操作
+    if (f[d.a][d.b] == 0)
+    {
+        q.push(d);
+        lu[d.a][d.b] = d;
+        f[d.a][d.b] = 1;
+    }
+}
+void bfs()
+{
+    q.push(lu[0][0]);
+    while (!q.empty())
+    {
+        node u = q.front();
+        q.pop();
+        if (u.a == C || u.b == C)
+        {
+            printf("%d\n", u.step);
+            print(u.a, u.b);
+            return;
+        }
+        node v;
+        v.sa = u.a;
+        v.sb = u.b;
+        v.step = u.step + 1;
+
+        if (u.a != A)
+        { //把1加满
+            v.a = A;
+            v.b = u.b;
+            v.way = 1;
+            push(v);
+        }
+
+        if (u.b != B)
+        { //把2加满
+            v.b = B;
+            v.a = u.a;
+            v.way = 2;
+            push(v);
+        }
+
+        if (u.a != 0)
+        { //倒光3
+            v.a = 0;
+            v.b = u.b;
+            v.way = 3;
+            push(v);
+        }
+
+        if (u.b != 0)
+        { //倒光4
+            v.a = u.a;
+            v.b = 0;
+            v.way = 4;
+            push(v);
+        }
+
+        if (u.a != 0 && u.b != B)
+        { //把1倒给2
+            if (u.a + u.b >= B)
+            {
+                v.b = B;
+                v.a = u.a + u.b - B;
+            }
+            else
+            {
+                v.a = 0;
+                v.b = u.a + u.b;
+            }
+            v.way = 5;
+            push(v);
+        }
+
+        if (u.a != A && u.b != 0)
+        { //把2倒给1
+            if (u.a + u.b >= A)
+            {
+                v.a = A;
+                v.b = u.a + u.b - A;
+            }
+            else
+            {
+                v.a = u.a + u.b;
+                v.b = 0;
+            }
+            v.way = 6;
+            push(v);
+        }
+    }
+    printf("impossible\n");
+}
+int main()
+{
+    memset(f, 0, sizeof(f));
+    lu[0][0].a = lu[0][0].b = 0;
+    lu[0][0].sa = lu[0][0].sb = -1;
+    lu[0][0].step = 0;
+    scanf("%d %d %d", &A, &B, &C);
+    bfs();
+    return 0;
+}
+//ygtrece‘s AC Code
+//如果题目需要记录整个过程，那么开一个结构体，每一个点储存上一个位置的信息是最好的选择
+//用搜索一定要记得判断是否走过
+//对于无法实现，即不可能的情况，在BFS函数后加上不可能的情况所需要应对的情况即可，因为BFS在搜索走完全部区域的时候，还没有找到符合的情况时，while就会结束，继续走到后面，如果中途实现了，就会有return，所以巧妙地解决了不可能的情况
+#include <iostream>
+#include <string.h>
+#include <stdio.h>
+#include <queue>
+using namespace std;
+#define N 205
+int flag[N][N];
+int A, B, C;
+struct node
+{
+    int a, b;
+    int way;
+    int step;
+}buf[N][N];
+node s, n;
+queue<node> q;
+void print(node d)
+{
+    if (d.a == 0 && d.b == 0)  return;
+    print(buf[d.a][d.b]);
+    switch(d.way)
+    {
+        case 1: cout << "FILL(1)" << endl; 
+                break;
+        case 2: cout << "FILL(2)" << endl;
+                break;
+        case 3: cout << "DROP(1)" << endl;
+                break;
+        case 4: cout << "DROP(2)" << endl;
+                break;
+        case 5: cout << "POUR(1,2)" << endl;
+                break;
+        case 6: cout << "POUR(2,1)" << endl;
+                break;
+    }
+}
+void push(node d)
+{
+    if (!flag[d.a][d.b])
+    {
+        flag[d.a][d.b] = 1;
+        buf[d.a][d.b] = s;
+        q.push(d);
+    }
+}
+void bfs()
+{
+    buf[0][0].a = buf[0][0].b = buf[0][0].step = 0;
+    s = buf[0][0];
+    q.push(s);
+    while (!q.empty())
+    {
+        s = q.front();
+        q.pop();
+        if (s.a == C || s.b == C)
+        {
+            cout << s.step << endl;
+            print(s);
+            return;
+        }
+        n.step = s.step + 1;
+        if (s.a != A) //fill(1)
+        {
+            n.a = A;
+            n.b = s.b;
+            n.way = 1;
+            push(n);
+        }
+        if (s.b != B) //fill(2)
+        {
+            n.b = B;
+            n.a = s.a;
+            n.way = 2;
+            push(n);
+        }
+        if (s.a != 0) //drop(1)
+        {
+            n.a = 0;
+            n.b = s.b;
+            n.way = 3;
+            push(n);
+        }
+        if (s.b != 0) //drop(2)
+        {
+            n.b = 0;
+            n.a = s.a;
+            n.way = 4;
+            push(n);
+        }
+        if (s.a != 0 && s.b != B) //pour(1, 2)
+        {
+            if (s.a + s.b >= B)
+            {
+                n.b = B;
+                n.a = s.a - (B - s.b);
+            }
+            else
+            {
+                n.b = s.a + s.b;
+                n.a = 0;
+            }
+            n.way = 5;
+            push(n);
+        }
+        if (s.b != 0 && s.a != A) //pour(2, 1)
+        {
+            if (s.a + s.b >= A)
+            {
+                n.a = A;
+                n.b = s.b - (A - s.a);
+            }
+            else
+            {
+                n.a = s.a + s.b;
+                n.b = 0;
+            }
+            n.way = 6;
+            push(n);
+        }
+    }
+    cout << "impossible" << endl;
+}
+int main()
+{
+    cin >> A >> B >> C;
+    memset(flag, 0, sizeof flag);
+    bfs();
+    return 0;
+}
+//Failure Try
+//没判断走过的路
+//如何判断无可能？
+//三个及以上变量，还是选择结构体吧，用pari实在过于繁琐且杂乱
+#include <iostream>
+#include <cstring>
+#include <queue>
+using namespace std;
+int a, b, c;
+typedef pair<int, int> p;
+typedef pair<p, int> pp;
+typedef pair<pp, string> ppp;
+ppp = <<<int, int>, int>, string>
+int bfs()
+{
+    queue<ppp> q;
+    ppp start, next;
+    start.first.first = {0, 0};
+    start.first.second = 0;
+    q.push(start);
+    while (!q.empty())
+    {
+        start = q.front();
+        q.pop();
+        if (start.first.first.first == c || start.first.first.second == c)
+        {
+            return start.first.second;
+        }
+        for (int i = 0, na, nb; i < 6; i++)
+        {
+            next = start;
+            switch(i)
+            {
+                //pull(1)
+                case 1: next.first.first.first = a;
+                        next.second = "PULL(1)";
+                        break;
+                //pull(2)
+                case 2: next.first.first.second = b;
+                        next.second = "PULL(2)";
+                        break;
+                //drop(1)
+                case 3: next.first.first.first = 0;
+                        next.second = "DROP(1)";
+                        break;
+                //drop(2)
+                case 4: next.first.first.second = 0;
+                        next.second = "DROP(2)";
+                        break;
+                //pour(1, 2)
+                case 5: if (next.first.first.first < (b - next.first.first.second))
+                        {
+                            next.first.first.second += next.first.first.first;
+                            next.first.first.first = 0;
+                        }
+                        else
+                        {
+                            next.first.first.first -= b - next.first.first.second;
+                            next.first.first.second = b;
+                        }
+                        next.second = "POUR(1, 2)";
+                        break;
+                //pour(2, 1)
+                case 6: if (next.first.first.second < (a - next.first.first.first))
+                        {
+                            next.first.first.first += next.first.first.second;
+                            next.first.first.second= 0;
+                        }
+                        else
+                        {
+                            next.first.first.second -= a - next.first.first.first;
+                            next.first.first.second = a;
+                        }
+                        next.second = "POUR(2, 1)";
+                        break;
+            }
+            next.first.second += 1;
+            q.push(next);
+        }
+    }
+}
+int main()
+{
+    cin >> a >> b >> c;
+    cout << bfs() << endl;
+    return 0;
+}
+//
+
+
 //hdu 1312 “Red and Black”
 #include <algorithm>
 #include <queue>

@@ -246,11 +246,7 @@ int main()
         for (int i = 0; i < n; i++)  cin >> room[i];
         for (int x = 0; x < m; x++)
             for (int y = 0; y < n; y++)
-                if (room[y][x] == '@')
-                {
-                    dfs(x, y);
-                    cnt++;
-                }
+                if (room[y][x] == '@') cnt++, dfs(x, y); //此处巧用逗号表达式，同时完成了计数和消除
         cout << cnt << endl;
     }
     return 0;
@@ -395,6 +391,7 @@ int main()
 
 
 //Prime Path
+//ygtrece
 #include <iostream>
 #include <algorithm>
 #include <cstring>
@@ -476,6 +473,107 @@ int main()
         int tmp = BFS(a, b);
         if (tmp == -1)  cout << "Impossible" << endl;
         else    cout << tmp << endl;
+    }
+    return 0;
+}
+//CSGrandeur
+#include<cstdio>
+#include<cstring>
+#include<cstdlib>
+#include<algorithm>
+#include<queue>
+const int maxn = 1e5 + 10;
+int step[maxn], a, b, t, ans;
+bool isPrime[maxn];
+void SetPrime()
+{
+    memset(isPrime, 1, sizeof(isPrime));
+    isPrime[0] = isPrime[1] = false;
+    for(int i = 2; i * i < maxn; i ++)
+    {
+        if(!isPrime[i])
+            continue;
+        for(int j = i * i; j < maxn; j += i)
+            isPrime[j] = false;
+    }
+}
+int BFS() {
+    memset(step, 0, sizeof(step));
+    std::queue<int> q;
+    q.push(a);
+    step[a] = 1;
+    while(!q.empty()) {
+        int now = q.front();
+        q.pop();
+        if(now == b) return step[now] - 1;
+        for(int i = 0; i < 4; i ++) {
+            for(int j = 0; j < 10; j ++) {
+                if(!j && i == 3) continue;
+                int nex = now, tmp = j;
+                for(int k = 0; k < i; k ++)
+                    nex /= 10;
+                nex %= 10;
+                for(int k = 0; k < i; k ++)
+                    nex *= 10, tmp *= 10;
+                nex = now - nex + tmp;
+                if(!step[nex] && isPrime[nex]) {
+                    q.push(nex);
+                    step[nex] = step[now] + 1;
+                }
+            }
+        }
+    }
+    return -1;
+}
+int main() {
+    SetPrime();
+    for(scanf("%d", &t); t --; ) {
+        scanf("%d%d", &a, &b);
+        if((ans = BFS()) == -1) printf("Impossible\n");
+        else printf("%d\n", ans);
+    }
+    return 0;
+}
+
+
+//Oil Deposits
+//CSGrandeur BFS
+#include<cstdio>
+#include<cstring>
+#include<cstdlib>
+#include<queue>
+typedef std::pair<int, int> pii;
+int n, m, ans;
+int dx[8] = {-1, 0, 1, -1, 1, -1, 0, 1};
+int dy[8] = {-1, -1, -1, 0, 0, 1, 1, 1};
+char g[111][111];
+void BFS(int y, int x) {
+    std::queue<pii> q;
+    q.push(pii(y, x));
+    g[y][x] = '.';
+    while(!q.empty()) {
+        pii now = q.front();
+        q.pop();
+        for(int i = 0; i < 8; i ++) {
+            int ny = now.first + dy[i];
+            int nx = now.second + dx[i];
+            if(ny < 0 || ny >= n || nx < 0 || nx >= m || g[ny][nx] != '@') 
+                continue;
+            g[ny][nx] = '.';
+            q.push(pii(ny, nx));            
+        }
+    }
+}
+int main()
+{
+    while(scanf("%d%d", &n, &m) != EOF && (n != 0 || m != 0)) {
+        for(int i = 0; i < n; i ++)
+            scanf("%s", g[i]);
+        ans = 0;
+        for(int i = 0; i < n; i ++)
+            for(int j = 0; j < m; j ++)
+                if(g[i][j] == '@') ans ++, BFS(i, j);
+        printf("%d\n", ans);
     }
     return 0;
 }
@@ -795,6 +893,63 @@ int main()
                 if (x != 0 && x != -1)
                     res = x > res ? res : x;
         cout << res * 11 << endl;
+    }
+    return 0;
+}
+//CSGrandeur
+#include<cstdio>
+#include<cstring>
+#include<cstdlib>
+#include<queue>
+typedef std::pair<int, int> pii;
+const int maxn = 222;
+char g[maxn][maxn];
+int step1[maxn][maxn], step2[maxn][maxn];
+int dx[4] = {-1, 1, 0, 0};
+int dy[4] = {0, 0, -1, 1};
+int n, m, yi, yj, mi, mj;
+void BFS(int si, int sj, int step[][maxn]) {
+    std::queue<pii> q;
+    q.push(pii(si, sj));
+    memset(step, 0, sizeof(int) * maxn * maxn);
+    step[si][sj] = 1;
+    while(!q.empty()) {
+        pii now = q.front();
+        q.pop();
+        for(int i = 0; i < 4; i ++) {
+            int di = now.first + dx[i];
+            int dj = now.second + dy[i];
+            if(di >= 0 && di < n && dj >= 0 && dj < m && g[di][dj] != '#' && !step[di][dj]) {
+                step[di][dj] = step[now.first][now.second] + 1;
+                q.push(pii(di, dj));
+            }
+        }
+    }
+}
+int main() {
+    while(scanf("%d%d", &n, &m) != EOF) {
+        for(int i = 0; i < n; i ++) {
+            scanf("%s", g[i]);
+            char *tmp;
+            if((tmp = strstr(g[i], "Y")) != NULL) { //用指针和strstr找坐标
+                yi = i;
+                yj = tmp - g[i];
+            }
+            if((tmp = strstr(g[i], "M")) != NULL) {
+                mi = i;
+                mj = tmp - g[i];
+            }
+        }
+        BFS(yi, yj, step1);
+        BFS(mi, mj, step2);
+        int ans = 0x3f3f3f3f;
+        for(int i = 0; i < n; i ++) {
+            for(int j = 0; j < m; j ++) {
+                if(g[i][j] != '@' || !step1[i][j] || !step2[i][j]) continue;//注意考虑到达不了的情况
+                ans = std::min(ans, (step1[i][j] + step2[i][j] - 2) * 11);
+            }
+        }
+        printf("%d\n", ans);
     }
     return 0;
 }
@@ -1134,6 +1289,8 @@ int main()
     bfs();
     return 0;
 }
+//CSGrandeur
+
 //Failure Try
 //没判断走过的路
 //如何判断无可能？
@@ -2479,4 +2636,33 @@ int main()
 ```
 
 #### 前缀和与差分
+
+```c++
+#include <iostream>
+using namespace std;
+
+//一维前缀和
+
+const int N = 1e5 + 10;
+int m, n, l, r, sum[N], a[N];
+void set() //前缀和的初始化
+{
+    for (int i = 1; i <= n; i++)
+        sum[i] = sum[i - 1] + a[i];
+}
+int main()
+{
+    cin >> n >> m;
+    for (int i = 1; i <= n; i++) cin >> a[i];
+    set();
+    while (m--)
+    {
+        cin >> l >> r;
+        cout << sum[r] - sum[l - 1] << endl; //区间和的计算
+    }
+    return 0;
+}
+
+//二维前缀和
+```
 

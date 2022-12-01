@@ -2641,28 +2641,163 @@ int main()
 #include <iostream>
 using namespace std;
 
-//一维前缀和
 
+//一维前缀和
 const int N = 1e5 + 10;
 int m, n, l, r, sum[N], a[N];
-void set() //前缀和的初始化
-{
-    for (int i = 1; i <= n; i++)
-        sum[i] = sum[i - 1] + a[i];
-}
 int main()
 {
-    cin >> n >> m;
-    for (int i = 1; i <= n; i++) cin >> a[i];
-    set();
+   cin >> n >> m;
+   for (int i = 1; i <= n; i++) cin >> a[i];
+   for (int i = 1; i <= n; i++) //前缀和的初始化
+       sum[i] = sum[i - 1] + a[i];
+   //or 直接改变数组
+   //for (int i = 1; i <= n; i++)
+       a[i] = a[i - 1] + a[i];
     while (m--)
+   {
+       cin >> l >> r;
+       cout << sum[r] - sum[l - 1] << endl; //区间和的计算
+   }
+   return 0;
+}
+
+
+//二维前缀和
+const int N = 1010;
+int n, m, q;
+int s[N][N];
+int main()
+{
+    scanf("%d%d%d", &n, &m, &q);
+    for (int i = 1; i <= n; i++)
+        for (int j = 1; j <= n; j++)
+            scanf("%d", &s[i][j]);
+    for (int i = 1; i <= n; i++)
+        for (int j = 1; j <= n; j++)
+            s[i][j] = s[i - 1][j] + s[i][j - 1] - s[i - 1][j - 1];
+    while (q--)
     {
-        cin >> l >> r;
-        cout << sum[r] - sum[l - 1] << endl; //区间和的计算
+        int x1, x2, y1, y2;
+        scanf("%d%d%d%d", &x1, &x2, &y1, &y2);
+        printf("%d\n", s[x2][y2] - s[x1 - 1][y2] - s[x2][y1 - 1] + s[x1 - 1][y1 - 1]); 
     }
     return 0;
 }
 
-//二维前缀和
+
+//一维差分
+#include <iostream>
+using namespace std;
+const int N = 1e5 + 10;
+int a[N], b[N];
+int main()
+{
+    int n, m;
+    scanf("%d%d", &n, &m);
+    for (int i = 1; i <= n; i++)
+    {
+        scanf("%d", &a[i]);
+        b[i] = a[i] - a[i - 1]; //构建差分数组
+    }
+    int l, r, c;
+    while (m--)
+    {
+        scanf("%d%d%d", &l, &r, &c);
+        b[l] += c; //表示将序列中[l, r]之间的每个数加上c
+        b[r + 1] -= c;
+    }
+    for (int i = 1; i <= n; i++)
+    {
+        b[i] += b[i - 1]; //求前缀和运算
+        printf("%d ", b[i]);
+    }
+    return 0;
+}
+
+
+//二维差分
+#include <iostream>
+using namespace std;
+const int N = 1e3 + 10;
+int a[N][N], b[N][N];
+void insert(int x1, int x2, int y1, int y2, int c)
+{
+    b[x1][y1] += c;
+    b[x2 + 1][y1] -= c;
+    b[x1][y2 + 1] -= c;
+    b[x2 + 1][y2 + 1] += c;
+}
+int main()
+{
+    int n, m, q;
+    scanf("%d%d%d", &n, &m, &q);
+    for (int i = 1; i <= n; i++)
+        for (int j = 1; j <= m; j++)
+            scanf("%d", &a[i][j]);
+    for (int i = 1; i <= n; i++)
+        for (int j = 1; j <= m; j++)
+        {
+            insert(i, j, i, j, a[i][j]); //构建差分数组
+        }
+    while (q--)
+    {
+        int x1, x2, y1, y2, c;
+        scanf("%d%d%d%d", &x1, &x2, &y1, &y2);
+        insert(x1, y1, x2, y2, c);
+    }
+    for (int i = 1; i <= n; i++)
+        for (int j = 1; j <= m; j++)
+        {
+            b[i][j] += b[i - 1][j] + b[i][j - 1] - b[i - 1][j - 1]; //二维前缀和
+        }
+    for (int i = 1; i <= n; i++)
+    {
+        for (int j = 1; j <= m; j++)
+        {
+            printf("%d", b[i][j]);
+        }
+        printf("\n");
+    }
+    return 0;
+}
+```
+
+[【新手课堂训练】前缀和、差分 - Virtual Judge (csgrandeur.cn)](https://vjudge.csgrandeur.cn/contest/532263#overview)
+
+```c++
+//Olympiad
+#include <iostream>
+using namespace std;
+const int N = 1e5 + 10;
+int buf[N];
+int t, m, n;
+bool Judge(int a)
+{
+    int cnt = 0, lib[10];
+    while (a)
+    {
+        lib[cnt++] = a % 10;
+        a /= 10;
+    }
+    for (int i = 0; i < cnt; i++)
+        for (int j = i + 1; j < cnt; j++)
+            if (lib[i] == lib[j]) return false;
+    return true;
+}
+int main()
+{
+    for (int i = 0; i <= N; i++) if(Judge(i)) buf[i] = 1;
+    for (int i = 1; i <= N; i++) buf[i] += buf[i - 1]; //构造前缀和
+    for (scanf("%d", &t); t--; )
+    {
+        scanf("%d%d", &m, &n);
+        printf("%d\n", buf[n] - buf[m - 1]);
+    }
+    return 0;
+}
+
+
+//
 ```
 

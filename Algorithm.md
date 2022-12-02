@@ -2796,8 +2796,299 @@ int main()
     }
     return 0;
 }
+//本题中判断是否出现相同数字的方法
+//本方法的关键在于明白，%的优先级大于>>大于&, %的优先级大于<<大于|=
+bool Judge(int i)
+{
+    int flag = 0;
+    for ( ; i; i / 10)
+    {
+        if (flag >> i % 10 & 1) return false; //先检查是否重复
+        flag |= 1 << i % 10 ; //将1的二进制位向右移动i%10位，相当于储存了这个位的数
+    }
+    return true;
+}
+//可以用set或者map判断是否重复,此方法还不局限于判断不同位的数,可以用于判断数组的元素是否重复
+//set
+bool Judge(int i, set<int> &s)
+{
+    if (!i) return true;
+    if(!s.count(i % 10)) s.insert(i % 10), Judge(i / 10);
+    else return false;
+}
+int main()
+{
+    for (int i = 0; i <= N; i++) 
+    {
+        set<int> s; //注意set不能放在全局变量, 否则会出现奇怪错误
+        if(Judge(i)) buf[i] = 1;
+    }
+    for (int i = 1; i <= N; i++) buf[i] += buf[i - 1]; //构造前缀和
+    for (scanf("%d", &t); t--; )
+    {
+        scanf("%d%d", &m, &n);
+        printf("%d\n", buf[n] - buf[m - 1]);
+    }
+    return 0;
+}
+//map
+#include <iostream>
+#include <map>
+using namespace std;
+const int N = 1e5 + 10;
+int buf[N];
+int t, m, n;
+bool Judge(int i)
+{
+    map<int, bool> m;
+    while (i)
+    {
+        if (m[i % 10]) return false;
+        m[i % 10] = true;
+        i /= 10;
+    }
+    return true;
+}
+int main()
+{
+    for (int i = 0; i <= N; i++) 
+    {
+        
+        if(Judge(i)) buf[i] = 1;
+    }
+    for (int i = 1; i <= N; i++) buf[i] += buf[i - 1]; //构造前缀和
+    for (scanf("%d", &t); t--; )
+    {
+        scanf("%d%d", &m, &n);
+        printf("%d\n", buf[n] - buf[m - 1]);
+    }
+    return 0;
+}
 
 
-//
+//Intense Heat
+#include <iostream>
+using namespace std;
+const int N = 5010;
+int num[N], buf[N];
+int t, a, i;
+double ans;
+int main()
+{
+    scanf("%d%d", &t, &a);
+    for (i = 1; i <= t; i++)
+    {
+        scanf("%d", &num[i]);
+        num[i] += num[i - 1];
+    }
+    for (int h = a; h <= t; h++)
+        for (int i = h; i <= t; i++)
+            ans = max(ans, 1.0 * (num[i] - num[i - h]) / h);
+    printf("%.8f", ans);
+    return 0;
+}
+
+
+
+//Color the ball
+#include <iostream>
+#include <cstring>
+using namespace std;
+const int N = 1e5 + 10;
+int t, ret, a, b, room[N];
+int main()
+{
+    while (scanf("%d", &t), ret = t)
+    {
+        memset(room, 0, sizeof room);
+        while (ret--)
+        {
+            scanf("%d%d", &a, &b);
+            room[a] += 1;
+            room[b + 1] -= 1;
+        }
+        for (int i = 1; i <= t; i++)
+        {
+            room[i] += room[i - 1];
+            printf(" %d" + !(i - 1), room[i]);
+        }
+        printf("\n");
+    }
+    return 0;
+}
+
+
+//Tallest Cow
+#include <cstdio>
+#include <cstring>
+#include <map>
+#include <iostream>
+#include <algorithm>
+using namespace std;
+const int N = 1e5 + 10;
+int room[N], n, i, h, r, a, b;
+map<pair<int, int>, bool> existed;
+int main()
+{
+    scanf("%d%d%d%d", &n, &i, &h, &r);
+    while (r--)
+    {
+        scanf("%d%d", &a, &b);
+        if (a > b) swap(a, b);
+        if (existed[make_pair(a, b)]) continue;
+        room[a + 1] -= 1;
+        room[b] += 1;
+        existed[make_pair(a, b)] = true;
+    }
+    for (int i = 1; i <= n; i++)
+    {
+        room[i] += room[i - 1];
+        printf("%d\n", room[i] + h);
+    }
+    return 0;
+}
+//set
+#include<cstdio>
+#include<cstring>
+#include<cstdlib>
+#include<algorithm>
+#include<queue>
+#include<set>
+const int maxn = 1e4 + 10;
+int N, I, H, R, a, b;
+int ms[maxn];
+int main() {
+    while(scanf("%d%d%d%d", &N, &I, &H, &R) != EOF) {
+        memset(ms, 0, sizeof(ms));
+        std::set<int> s;
+        for(int i = 0; i < R; i ++) {
+            scanf("%d%d", &a, &b);
+            if(a > b) std::swap(a, b);
+            if(s.count(a * maxn + b)) continue; //用*maxn巧妙化两个数为一个数储存
+            s.insert(a * maxn + b); // 重复的a, b只算一次
+            ms[a + 1] --;
+            ms[b] ++;
+        }
+        for(int i = 1; i <= N; i ++)
+            ms[i] += ms[i - 1];
+        for(int i = 1; i <= N; i ++)
+            printf("%d\n", ms[i] + H);
+    }
+    return 0;
+}
+
+
+
+//最大子矩阵
+#include <cstdio>
+#include <cstring>
+#include <map>
+#include <iostream>
+#include <algorithm>
+using namespace std;
+const int N = 1e3 + 10;
+int buf[N][N], t, m, n, x, y, tmp, res;
+int main()
+{
+    for (scanf("%d", &t); t--; )
+    {
+        scanf("%d%d%d%d", &m, &n, &x, &y);
+        for (int i = 1; i <= m; i++)
+            for (int j = 1; j <= n; j++)
+                scanf("%d", &buf[i][j]);
+        for (int i = 1; i <= m; i++)
+            for (int j = 1; j <= n; j++)
+                buf[i][j] += buf[i][j - 1] + buf[i - 1][j] - buf[i - 1][j - 1];
+        x--;y--;
+        for (int i = 1; i <= m - x; i++)
+            for (int j = 1; j <= n - y; j++)
+            {
+                tmp = buf[i + x][j + y] - buf[i + x][j - 1] - buf[i - 1][j + y] + buf[i - 1][j - 1]; 
+                res = max(tmp, res);
+            }
+        printf("%d\n", res);
+    }
+    return 0;
+}
+
+
+//sum
+#include <cstdio>
+#include <cstring>
+#include <map>
+#include <iostream>
+#include <algorithm>
+using namespace std;
+const int N = 1e5 + 10;
+int buf[N], t, n, m;
+bool Judge()
+{
+    if (n > m) return true;
+    for (int i = 1; i <= n; i++)
+        for (int j = 0; j < i; j++)
+            if (buf[i] - buf[j] == m) return true;
+    return false;
+}
+int main()
+{
+    for (scanf("%d", &t); t--; )
+    {
+        scanf("%d%d", &n, &m);
+        for (int i = 1; i <= n; i++)
+        {
+            scanf("%d", &buf[i]);
+            buf[i] += buf[i - 1];
+        }
+        printf(Judge() ? "YES\n" : "NO\n");
+    }
+    return 0;
+}
+
+
+//Monitor HDU
+#include <cstdio>
+#include <cstring>
+#include <vector>
+#include <iostream>
+#include <algorithm>
+const int N = 1e7;//题目中n*m <= 10^7, 所以可能会出现1 * 1e7的情况, 但是不能开辟[1e7][1e7]的二维数组,因为会爆堆栈,必须采用动态数组vector
+using namespace std;
+int n, m, p, q;
+int main()
+{
+    int x1, x2, y1, y2;//注意：由于cmath头文件里面定义了y1,j0,j1,jn,y0,yn(均用于贝塞尔函数解)，所以这些变量尽量不用在全局变量中，例如这里的y1，如果定义在全局变量，会报错
+    while(~scanf("%d%d", &n, &m))
+    {
+        vector<vector<int> > buf(n + 10, vector<int>(m + 10, 0));//vector嵌套, 相当于动态二维数组
+        for (scanf("%d", &p); p--; )
+        {
+            scanf("%d%d%d%d", &x1, &y1, &x2, &y2);
+            buf[x1][y1] += 1;
+            buf[x2 + 1][y1] -= 1;
+            buf[x1][y2 + 1] -= 1;
+            buf[x2 + 1][y2 + 1] += 1;
+        }
+        for (int i = 1; i <= n; i++)
+            for (int j = 1; j <= m; j++)
+                    buf[i][j] += buf[i - 1][j] + buf[i][j - 1] - buf[i - 1][j - 1];
+        for (int i = 1; i <= n; i++)
+            for (int j = 1; j <= m; j++)
+                buf[i][j] = (!!buf[i][j]) + buf[i][j - 1] + buf[i - 1][j] - buf[i - 1][j - 1];
+                //巧妙双取反, 直接使非零数变为1
+        for (scanf("%d", &q); q--; )
+        {
+            scanf("%d%d%d%d", &x1, &y1, &x2, &y2);
+            int sum = buf[x2][y2] + buf[x1 - 1][y1 - 1] - buf[x2][y1 - 1] - buf[x1 - 1][y2];
+            printf(sum == (x2 - x1 + 1) * (y2 - y1 + 1) ? "YES\n" : "NO\n");
+        }
+    }
+    return 0;
+}
+//* * * * * *
+//* + + + * *
+//* + + + + +
+//* + + + + +
+//+ + + + + +
+//+ + * * * *
 ```
 

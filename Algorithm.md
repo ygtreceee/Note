@@ -758,7 +758,7 @@ void dfs(int x, int y, int px, int py)
         }
     }
 }
-//GragonKingA
+//DragonKingA
 #include <iostream>
 #include <cstring>
 #include <queue>
@@ -3043,6 +3043,38 @@ int main()
     }
     return 0;
 }
+//TLE
+#include <cstdio>
+#include <iostream>
+#include <algorithm>
+using namespace std;
+const int N = 1e5 + 10;
+int buf[N], t, n, m;
+bool Judge()
+{
+    for (int i = 1; i <= n; i++)
+        for (int j = i; j <= n; j++)
+         //if (!((buf[j] - buf[j - i]) % m)) return true;  TLE
+    	//if (!((buf[j] - buf[i - 1]) % m)) return true;  AC
+        //暴搜在处理顺序上不同造成超时
+    return false;
+}
+int main()
+{
+    for (scanf("%d", &t); t--; )
+    {
+        scanf("%d%d", &n, &m);
+        for (int i = 1; i <= n; i++)
+        {
+            scanf("%d", &buf[i]);
+            buf[i] += buf[i - 1];
+        }
+        if (Judge()) printf("YES\n");
+        else printf("NO\n");
+    }
+    return 0;
+}
+
 
 
 //Monitor HDU

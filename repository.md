@@ -429,7 +429,459 @@ int main()
     printf("%d", cnt);
     return 0;
 }
+
+//判断上三角矩阵
+#include <stdio.h>
+#include <string.h>
+int Judge(int a[15][15], int m)
+{
+    for (int i = 0; i < m; i++)
+        for (int j = 0; j < i; j++)
+            if (a[i][j]) return 0;
+    return 1;
+}
+int main()
+{
+    int t, m, a[15][15];
+    scanf("%d", &t);
+    while (t--)
+    {
+        scanf("%d", &m);
+        for (int i = 0; i < m; i++)
+            for (int j = 0; j < m; j++)
+                scanf("%d", &a[i][j]);
+        if(Judge(a, m)) printf("YES\n");
+        else printf("NO\n");
+    }
+    return 0;
+}
+
+//打印杨辉三角
+#include <stdio.h>
+#include <string.h>
+void set(int a[20][20])
+{
+    a[0][0] = 1;
+    for (int i = 1; i < 20; i++)
+        for (int j = 0; j <= i; j++) 
+            a[i][j] = a[i - 1][j] +  a[i - 1][j - 1];
+}
+int main()
+{
+    int a[20][20] = {0};
+    int n;
+    set(a);
+    scanf("%d", &n);
+    for (int i = 1; i <= n; i++)
+    {
+        for (int j = n - i; j > 0; j--) printf(" ");
+        for (int j = 1; j <= i; j++) printf("%4.d", a[i - 1][j - 1]);
+        printf("\n");
+    }
+    return 0;
+}
+
+//方阵循环右移
+#include <stdio.h>
+#include <string.h>
+int n, m, tmp, a[10][10];
+void action()
+{
+    for (int i = 0; i < m; i++)
+        for (int k = 0; k < n; k++)
+            {
+                tmp = a[i][m - 1];
+                for (int j = m - 1; j >= 0; j--)
+                    a[i][j] = a[i][j - 1];
+                a[i][0] = tmp;
+            }
+}
+int main()
+{
+    scanf("%d %d", &n, &m);
+    for (int i = 0; i < m; i++)
+        for (int j = 0; j < m; j++)
+            scanf("%d", &a[i][j]);
+    action();
+    for (int i = 0; i < m; i++)
+    {
+        for (int j = 0; j < m; j++)
+            printf("%d ", a[i][j]);
+        printf("\n");
+    }
+    return 0;
+}
+
+//找鞍点
+#include <stdio.h>
+#include <string.h>
+int n, max, ret, a[10][10], flag = 1, ffl = 0;
+int main()
+{
+    scanf("%d", &n);
+    for (int i = 0; i < n; i++)
+        for (int j = 0; j < n; j++)
+            scanf("%d", &a[i][j]);
+    for (int i = 0; i < n; i++)
+    {
+        max = 0;
+        flag = 1;
+        for (int j = 0; j < n; j++) 
+        {
+            if (a[i][j] > max)
+            {
+                max = a[i][j];
+                ret = j;
+            }
+        }
+        for (int j = 0; j < n; j++)
+        {
+            if (a[j][ret] < max)
+            {
+                flag = 0;
+                break;
+            }
+        }
+        if (flag)
+        {
+            ffl = 1;
+            printf("%d %d", i, ret);
+            break;
+        }
+        if (!ffl && i == n - 1) printf("NONE");
+    }
+}
+
+//螺旋方阵
+#include <stdio.h>
+#include <string.h>
+int main()
+{
+    int n, num = 1, a[15][15];
+    scanf("%d", &n);
+    for (int i = 1; i <= n; i++) //n = 5 
+    {
+        for (int j = i; j <= n + 1 - i; j++) a[i][j] = num++;
+        for (int j = i + 1; j <= n + 1 - (i + 1); j++) a[j][n + 1 - i] = num++;
+        if (n % 2 == 1 && i == n - n/2) break;
+        for (int j = n + 1 - i; j >= i; j--) a[n + 1 - i][j] = num++;
+        for (int j = n + 1 - (i + 1); j >= i + 1; j--) a[j][i] = num++;
+    }
+    for (int i = 1; i <= n; i++)
+    {
+        for (int j = 1; j <= n; j++)
+            printf("%3.d", a[i][j]);
+        printf("\n");
+    }
+    return 0;
+}
+
+//简易连连看
+#include <stdio.h>
+#include <string.h>
+char room[15][15];
+int n, m, x1, x2, y1, y2, cnt = 0, flag = 1, ffl = 0;
+void print()
+{
+    for (int i = 1; i <= 2 * n; i++)
+        for (int j = 1; j <= 2 * n; j++)
+            if (room[i][j] != '*') 
+            {
+                flag = 0;
+                break;
+            }
+    if (flag)
+    {
+        printf("Congratulations!\n");
+        ffl = 1;
+        return;
+    }
+    for (int i = 1; i <= 2 * n; i++)
+    {
+        for (int j = 1; j <= 2 * n; j++) printf(" %c" + !(j - 1), room[i][j]);
+        printf("\n");
+    }      
+}
+int main()
+{
+    scanf("%d", &n);
+    getchar();
+    for (int i = 1; i <= 2 * n; i++)
+        for (int j = 1; j <= 2 * n; j++)
+        {
+            scanf("%c", &room[i][j]);
+            getchar();
+        }
+    scanf("%d", &m);
+    while (m--)
+    {
+        scanf("%d %d %d %d", &x1, &y1, &x2, &y2);
+        flag = 1;
+        if (ffl) break;
+        if (cnt == 3)
+        {
+            printf("Game Over\n");
+            break;
+        }
+        if (room[x1][y1] == room[x2][y2] && room[x1][y1] != '*')
+        {
+            room[x1][y1] = room[x2][y2] = '*';
+            print();
+        }
+        else if (cnt < 4 && (room[x1][y1] != room[x2][y2] || room[x1][y1] == '*'))
+        {
+            printf("Uh-oh\n");
+            cnt++;
+        }
+    }
+    return 0;
+}
+
+//单月的日历
+#include <stdio.h>
+#include <string.h>
+int main()
+{
+    int n, m;
+    scanf("%d %d", &n, &m);
+    int cnt = m - 1;
+    for (int j = 1; j < m; j++) printf("   " + !(j - 1));
+    for (int i = 1; i <= n; i++)
+    {
+        printf(" %2.d" + !cnt, i);
+        cnt++;
+        if (cnt == 7)
+        {
+            printf("\n");
+            cnt = 0;
+        }
+    }
+    return 0;
+}
 ```
+
+#### 校赛
+
+```c++
+//A + B
+#include <iostream>
+using namespace std;
+#define ull unsigned long long
+int main()
+{
+    ull a, b;
+    scanf("%llu%llu", &a, &b);
+    printf("%llu", a + b);
+    return 0;
+}
+
+
+//梦里什么都有
+//
+#include <iostream>
+#include <algorithm>
+#include <string> //注意string头文件，虽然iostream会隐式包含，但是还是要养成好习惯，写上头文件
+using namespace std;
+int n, m;
+string name, s;
+int Judge(int a)
+{
+    for (int i = 0; i < m - 2; i++)
+    {
+        if (s[a + i] == name[0])
+        {
+            int flag = 0;
+            for (int j = 0; j < 3; j++)
+            {
+                if (s[i + j + a] != name[j])
+                {
+                    flag = 1;
+                    break;
+                }
+            }
+            if (!flag) return 1;
+        }
+    }
+    return 0;
+}
+int main()
+{
+    scanf("%d %d", &n, &m);
+    cin >> n >> m;
+    cin >> name >> s; //输入输出string类最好使用cin和cout
+    //若使用scanf，要在变量名后加上[0]，甚至有的时候需要预先分配好空间
+    //s.resize(100);
+    //name.resize(100);
+    //scanf("%s", &name[0]); 
+    //scanf("%s", &s[0]);
+    
+    for (int i = 1, j = i + m - 1; j <= n; i++, j++)
+    {
+        if (Judge(i))
+        {
+            for (int k = i; k <= j; k++) cout << s[k];
+            cout << endl;
+        }
+    }
+    return 0;
+}
+//
+#include <iostream>
+#include <algorithm>
+#include <string>
+using namespace std;
+int main()
+{
+    int n, m;
+    cin >> n >> m;
+    string name, s;
+    cin >> name >> s;
+    for (int i = m; i <= s.length(); i++) //s.length()可以返回该字符串的长度
+    {
+        int flag = 0;
+        for (int j = i - m + 3; j <= i && !flag; j++)
+        {
+            string ret = string(s, j - 3, 3); //string类字符串可以直接用=进行赋值，也可以用==进行直接比较
+            if (ret == name) flag = 1;
+        }
+        if (flag) cout << string(s, i - m, m) << endl; //可以对string类字符串截断输出，第一个参数是该string类变量的名字，第二个参数是起始下标，第三个参数是所要截取的字符串大小
+    }
+    return 0;
+}
+//
+#include <iostream>
+#include <algorithm>
+#include <string>
+using namespace std;
+int main()
+{
+    cin.tie(0) -> sync_with_stdio(false);
+    int n, m;
+    cin >> n >> m;
+    string name, s;
+    cin >> name >> s;
+    for (int i = 0; i < n - m + 1; i++)
+    {
+        string ret = s.substr(i, m); //substr可以用于截断，第一个参数是索引值，第二个是字符串长度
+        if (ret.find(name) != ret.npos) //find可以查找字符串，并返回第一个下标，而如果查找不到，string::find会返回string::npos，所以可以用!= 来判断能否找到
+            cout << ret << endl;
+    }
+    return 0;
+}
+
+
+//关于我转生成为一匹赛马娘这档事
+//由于马可以走不同形状的日字，又因为只能向右下方移动。可设方程2x1 + x2 = dis(x), x1 + 2x2 = dis(y)，合并方程可得3(x1+x2)=两点间曼哈顿距离，所以只要终点与起点之间曼哈顿距离可以被3整除，就可以达到。但此题还有一个关键点是马不能往上走，所以需要再加入个限定条件判断一下，最终走的趋势是一个扇形。 关于曼哈顿距离，点i和点j之间的曼哈顿距离为:d(i,j) = |xi−xj| + |yi−yj|。
+#include <iostream>
+#include <algorithm>
+using namespace std;
+int main()
+{
+    int n, res = 0;
+    for (scanf("%d", &n); n--; )
+    {
+        int x, y;
+        scanf("%d%d", &x, &y);
+        int a = (x + y - 2);
+        if (a % 3 == 0 && x > a / 3 && y > a / 3) res++;
+    }
+    printf("%d\n", res);
+    return 0;
+}
+//此代码是利用 bitset 强行 bfs 暴力搜索过的(?)
+#include <iostream>
+#include <bitset>
+using namespace std;
+bitset<20010>st[20010];
+int main()
+{
+    ios::sync_with_stdio(false);
+    cin.tie(0);
+    cout.tie(0);
+    int n;
+    cin >> n;
+    st[1][1] = 1;
+    for(int i=1; i<=20000; i++)
+    {
+        st[i + 2] |= (st[i] << 1);
+        st[i + 1] |= (st[i] << 2);
+    }
+    int ans = 0;
+    while(n--)
+    {
+        int a, b;
+        cin >> a >> b;
+        if(st[a][b]) ans++;
+    }
+    cout << ans << "\n";
+    return 0;
+}
+
+
+//封校之我想吃麦当劳
+
+
+//面基大作战
+#include <iostream>
+#include <algorithm>
+using namespace std;
+const int N = 1e5 + 100;
+struct node
+{
+    string s;
+    int xg, cf, atc, yan, sc, id;
+}a[N];
+bool cmp(node a, node b)
+{
+    if (a.xg != b.xg) return a.xg > b.xg;
+    if (a.cf != b.cf) return a.cf > b.cf;
+    if (a.atc != b.atc) return a.atc > b.atc;
+    if (a.yan != b.yan) return a.yan > b.yan;
+    if (a.sc != b.sc) return a.sc > b.sc;
+    return a.id < b.id;
+}
+int n;
+int main()
+{
+    ios::sync_with_stdio(false);//用于打消iostream的输入输出缓存，节省许多时间，使得cin与cout 的效率和scanf与printf相差无几
+    cin.tie(0);//0代表cin解绑
+    cout.tie(0);
+    
+    cin >> n;
+    for (int i = 1; i <= n; i++)
+    {
+        cin >> a[i].s >> a[i].xg >> a[i].cf >> a[i].atc >> a[i].yan >> a[i].sc;
+        a[i].id = i;
+    }
+    sort(a + 1, a + 1 + n, cmp); //sort排序速度快
+    for (int i = 1; i <= n; i++)
+    {
+        cout << a[i].s << " " << a[i].xg << " " << a[i].cf << " " << a[i].atc << " " << a[i].yan << " " << a[i].sc << endl;
+    }
+    return 0;
+}
+
+
+//删库跑路
+#include <bits/stdc++.h>
+using namespace std;
+const int N = 3e4 + 100;
+int a[N];
+int main()
+{
+    long long n, x, y, sum;
+    sum = 0;
+    cin >> n;
+    for (int i = 1; i <= n; i++) cin >> a[i];
+    cin >> x >> y;
+    for (int i = 1; i <= n; i++) {
+        sum += a[i] * x <= y ? a[i] * x : y;
+    }
+    cout << sum;
+}
+```
+
+
 
 #### ACM
 
@@ -939,7 +1391,7 @@ char Iswin(char board[ROW][COL], int row, int col);
 
 
 
- Isfull(char board[ROW][COL], int row, int col)
+ int Isfull(char board[ROW][COL], int row, int col)
  {
 	 int i = 0;
 	 int j = 0;
@@ -1384,6 +1836,45 @@ int main()
             cout << a[i] << ' ';
         cout << a[n] << endl;
     }
+    return 0;
+}
+```
+
+递归打印全排列
+
+```c++
+#include <iostream>
+#include <ctime>
+using namespace std;
+
+//递归打印全排列
+#define Swap(a, b) {int temp = a; a = b; b = temp;}
+int dt[] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+int num = 0;
+void Perm(int begin, int end)
+{
+    int i;
+    if (begin == end)  num++;
+    //打印n个数中任意m个数的全排列
+    //m = 3  n = 10
+    //if (begin == 3)
+    //    cout << dt[0] << dt[1] << dt[2] << endl;
+    else
+        for (i = begin; i <= end; i++)
+        {
+            Swap(dt[begin], dt[i]);
+            Perm(begin + 1, end);
+            Swap(dt[begin], dt[i]);
+        }
+}
+int main()
+{
+    clock_t start, end; //统计时间
+    start = clock();
+    Perm(0, 11);
+    end = clock();
+    cout << num << endl;
+    cout << (double)(end - start) / CLOCKS_PER_SEC << endl;
     return 0;
 }
 ```

@@ -663,6 +663,7 @@ int main()
 #### 校赛
 
 ```c++
+//SZTU Monthly 2022 Oct.
 //A + B
 #include <iostream>
 using namespace std;
@@ -878,6 +879,247 @@ int main()
         sum += a[i] * x <= y ? a[i] * x : y;
     }
     cout << sum;
+}
+
+```
+
+
+
+12/4/22 迎新赛
+
+总结：
+
+- 一定要浏览所有题目，防止后面出现简单题； 
+
+- 数据范围一定要注意！
+
+- 审题时要小心细心！
+          
+
+```c++
+//缺失的数字
+#include <iostream>
+#include <algorithm>
+#include <string>
+using namespace std;
+int main()
+{
+    int flag = 1;
+    char num[10];
+    char buf[10] = {'1', '2', '3', '4', '5', '6', '7', '8', '9', '0'};
+    scanf("%s", num);
+    for (int i = 0; i < 10 && flag; i++)
+    {
+        for (int j = 0; j < 9 && flag; j++)
+        {
+            if (buf[i] == num[j]) break;
+            if (j == 8)
+            {
+                printf("%c", buf[i]);
+                flag = 0;
+            }
+        }
+    }
+    return 0;
+}
+
+
+
+//“本”
+#include <iostream>
+#include <algorithm>
+#include <string>
+using namespace std;
+int main()
+{
+    int n;
+    cin >> n;
+    switch(n % 10)
+    {
+        case 0:
+        case 1:
+        case 6:
+        case 8: cout << "pon";
+                break;
+        case 2:
+        case 4:
+        case 5:
+        case 7:
+        case 9: cout << "hon";
+                break;
+        case 3: cout << "bon";
+                break;
+    }
+    return 0;
+}
+
+
+//取数
+int main()
+{
+    int n, m, sum, a = 0, b = 0;
+    cin >> n >> m;
+    if (n > 1) a = n * (n - 1) / 2;
+    if (m > 1) b = m * (m - 1) / 2;
+    cout << a + b;
+    return 0;
+}
+
+
+//When？
+#include <iostream>
+#include <algorithm>
+#include <string>
+using namespace std;
+int main()
+{
+    int n;
+    cin >> n;
+    if (n != 120) printf("%d:%.2d", 22 + n / 60, 0 + n % 60);
+    else printf("00:00");
+    return 0;
+}
+
+
+//摆木棍
+#include <iostream>
+#include <algorithm>
+#include <string>
+#include <set>
+using namespace std;
+int num[100001];
+int n, a, i;
+int main()
+{
+    set<int> s;
+    for (scanf("%d", &n); n--; )
+    {
+        scanf("%d", &a);
+        if (s.count(a))
+        {
+            num[i++] = a;
+            s.erase(a);
+        }
+        else s.insert(a);
+    }
+    sort(num, num + i);
+    if (i < 2) printf("-1");
+    else printf("%lld", num[0] * num[1]);
+    return 0;
+}
+
+
+//开趴
+//TLE
+#include <iostream>
+#include <algorithm>
+#include <string>
+#include <set>
+using namespace std;
+int n, num[100010], dis[100010];
+long long int sum, ans;
+int main()
+{
+    scanf("%d", &n);
+    for (int i = 1; i <= n; i++)
+    {
+        scanf("%d", &num[i]);
+    }
+    sort(num + 1, num + 1 + n);
+    for (int i = 1; i <= n; i++)
+    {
+        if (i == 1) dis[i] = 0;
+        else dis[i] = num[i] - num[i - 1];
+    }
+    for (int i = 1; i <= n; i++) dis[i] += dis[i - 1];
+    for (int i = n / 2; i <= n / 2 + 1; i++)
+    {
+        sum = 0;
+        for (int j = 1; j <= n; j++)
+        {
+            if (j == i) continue;
+            if (j > i) sum += dis[j] - dis[i];
+            else sum += dis[i] - dis[j];
+            if (sum > ans && i > 1) break;
+            if (i == 1 && j == n) ans = sum;
+            else if (i != 1 && j == n) ans = min(sum, ans);
+        }
+    }
+    printf("%lld", ans);
+    return 0;
+}
+//？
+#include <iostream>
+#include <algorithm>
+#include <string>
+#include <set>
+using namespace std;
+int n, num[100010], dis[100010];
+long long int sum, ans = INT64_MAX;
+int main()
+{
+    scanf("%d", &n);
+    for (int i = 1; i <= n; i++)
+    {
+        scanf("%d", &num[i]);
+    }
+    sort(num + 1, num + 1 + n);
+    for (int i = 1; i <= n; i++)
+    {
+        if (i == 1) dis[i] = 0;
+        else dis[i] = num[i] - num[i - 1];
+    }
+    for (int i = 1; i <= n; i++) dis[i] += dis[i - 1];
+    for (int i = n / 2; i <= n / 2 + 1; i++)
+    {
+        for (int j = 1; j <= n; j++)
+        {
+            if (j > i) sum += dis[j] - dis[i];
+            else sum += dis[i] - dis[j];
+        }
+        ans = min(sum, ans);
+    }
+    printf("%lld", ans);
+    return 0;
+}
+//巧妙取中点
+int main()
+{
+    std::ios::sync_with_stdio(false);
+    cin.tie(NULL):cout.tie(NULL);
+    int n;
+    cin >> n;
+    for (int i = 1; i <= n; i++) cin >> a[i];
+    sort(a + 1, a + 1 + n);
+    for (int i = 1, r = n; 1 < r; l++, r--) ans += a[r] - a[i];
+    cout << ans << endl;
+    return 0;
+}
+//
+
+
+//复合函数
+#include <iostream>
+#include <algorithm>
+#include <string>
+#include <set>
+using namespace std;
+int n, q, val[110], a, b;
+int alg(int a, int b)
+{
+    if (b == 1) return val[a];
+    if (b > 1) return val[alg(a, b - 1)];
+}
+int main()
+{
+    scanf("%d", &n);
+    for (int i = 1; i <= n; i++) scanf("%d", &val[i]);
+    for (scanf("%d", &q); q--; )
+    {
+        scanf("%d%d", &a, &b);
+        printf("%d\n", alg(a, b));
+    }
+    return 0;
 }
 ```
 
@@ -1515,7 +1757,7 @@ int main()
 	} while (input);
 
 	return 0;
-}
+}//
 ```
 
 #### Others

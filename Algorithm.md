@@ -3124,3 +3124,73 @@ int main()
 //+ + * * * *
 ```
 
+
+
+#### 二分
+
+```c++
+//左闭右闭写法
+#include <iostream>
+#include <algorithm>
+using namespace std;
+int target;
+int nums[] = {1, 3, 5, 7, 10, 33, 45, 67, 90};
+int sz = sizeof(nums) / sizeof(int);
+int Search(int nums[], int size, int target)
+{
+    int left = 0;
+    int right = size - 1; //定义target在左闭右闭的区间内, [left, right]
+    while (left <= right) //当left == right时，区间[left, right]仍然有效，此处必须是小于等于
+    {
+        int middle = (left + right) / 2; //取中点
+        if (nums[middle] > target) right = middle - 1; //target在左区间，所以[left, middle - 1]
+        else if (nums[middle] < target) left = middle + 1; //target在右区间，所以[middle + 1, right]
+        else return middle; //即不在左边，也不在右边，那就是找到了
+    }
+    return -1; //没有找到目标值
+}
+int main()
+{
+    ios::sync_with_stdio(false);
+    cin.tie(0);
+    cout.tie(0);
+    cin >> target;
+    cout << Search(nums, sz, target) << endl;
+    return 0;
+}
+
+
+//左闭右开写法
+#include <iostream>
+#include <algorithm>
+using namespace std;
+int target;
+int nums[] = {1, 3, 5, 7, 10, 33, 45, 67, 90};
+int sz = sizeof(nums) / sizeof(int);
+int Search(int nums[], int size, int target)
+{
+    int left = 0;
+    int right = sz;
+    while (left < right) //因为left == right的时候，在[left, right)区间上已经无意义，所以不能取等号
+    {
+        int middle = (left + right) / 2;
+        if (nums[middle] > target) right = middle;
+        else if (nums[middle] < target) left = middle + 1;
+        else return middle;
+    }
+    return -1;
+}
+int main()
+{
+    ios::sync_with_stdio(false);
+    cin.tie(0);
+    cout.tie(0);
+    cin >> target;
+    cout << Search(nums, sz, target) << endl;
+    return 0;
+}
+
+
+//两种方法的区别就是右区间的闭开会导致下面的while循环判断条件写法不同，需要特别注意
+```
+

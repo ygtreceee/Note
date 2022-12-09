@@ -658,12 +658,307 @@ int main()
     }
     return 0;
 }
+
+
+//英文字母替换加密
+#include <stdio.h>
+#include <string.h>
+char words[10000];
+int main()
+{
+    gets(words);
+    for (int i = 0; words[i] != '\0'; i++)
+    {
+        char a = words[i];
+        if (a >= 'a' && a < 'z')
+            words[i] = a - 31;
+        if (a >= 'A' && a < 'Z')
+            words[i] = a + 33;
+        if (a == 'z') words[i] = 'A';
+        if (a == 'Z') words[i] = 'a';
+    }
+    printf("%s", words);
+    return 0;
+}
+
+
+//近似求PI
+#include <stdio.h>
+#include <string.h>
+int main()
+{
+    double eps;
+    scanf("%le", &eps);
+    double sum=1;
+    double temp=1;
+    for(int i=1;temp>=eps;i++)
+	{
+        temp = temp*i/(2*i+1);
+        sum += temp;
+    }
+    printf("PI = %.5f\n", 2*sum);
+    return 0;
+}
+
+
+//简单计算器
+#include <stdio.h>
+#include <string.h>
+int main()
+{
+    int a, b, flag = 1;
+    char c;
+    scanf("%d%c", &a, &c);
+    int res = a;
+    while (c != '=')
+    {
+        scanf("%d", &b);
+        if (c == '/' && b == 0)
+        {
+            printf("ERROR\n");
+            flag = 0;
+            break;
+        }
+        switch(c)
+        {
+            case '+': res += b;
+            break;
+            case '-': res -= b;
+            break;
+            case '*': res *= b;
+            break;
+            case '/': res /= b;
+            break;
+            default: printf("ERROR\n");
+                     flag = 0;
+        }
+        if (!flag) break;
+        scanf("%c", &c);
+    }
+    if (flag) printf("%d", res);
+    return 0;
+}
+
+
+//单词首字母大写
+#include <stdio.h>
+#include <string.h>
+char words[10000];
+int main()
+{
+    gets(words);
+    for (int i = 0; words[i] != '\0'; i++)
+    {
+        if (i == 0 && words[i] != ' ' && words[i] >= 'a' && words[i] <= 'z')
+            words[i] -= 32;
+        if (words[i] == ' ' && words[i + 1] != ' ' && words[i + 1] >= 'a' && words[i + 1] <= 'z')
+            words[i + 1] -= 32;
+    }
+    printf("%s", words);
+    return 0;
+}
+
+
+//统计单词的长度
+#include <stdio.h>
+#include <string.h>
+char words[10000];
+int main()
+{
+    char a;
+    int cnt = 0, flag = 1;
+    while (1)
+    {
+        scanf("%c", &a);
+        if (a != ' ' && a!= '\n')
+        {
+            flag = 1;
+            cnt++;
+        }
+        if (a == ' ' || a == '\n')
+        {
+            if (flag) printf("%d ", cnt);
+            cnt = 0;
+            flag = 0;
+        }
+        if (a == '\n') break;
+    }
+    return 0;
+}
+
+
+//使用函数输出水仙花数
+#include <stdio.h>
+#include <string.h>
+#include <math.h>
+int m, n;
+int Judge(int i)
+{
+    int tmp = i, sum = 0, cnt = 0;
+    while (tmp)
+    {
+        cnt++;
+        tmp /= 10;
+    }
+    tmp = i;
+    while (tmp)
+    {
+        int ret = tmp % 10;
+        sum += pow(ret, cnt);
+        tmp /= 10;
+    }
+    if (sum == i) return 1;
+    else return 0;
+}
+int main()
+{
+    scanf("%d %d", &m, &n);
+    for (int i = m + 1; i < n; i++)
+        if (Judge(i)) printf("%d\n", i);
+    return 0;
+}
+
+
+//转化数为英文单词
+#include <stdio.h>
+#include <string.h>
+#include <math.h>
+int main()
+{
+    int a;
+    scanf("%d", &a);
+    if (a > 99 || a < 10)
+    {
+        printf("Illegal number!");
+        a = 0;
+    }
+    switch (a / 10)
+    {
+    case 2:
+        printf("twenty");
+        break;
+    case 3:
+        printf("thirty");
+        break;
+    case 4:
+        printf("forty");
+        break;
+    case 5:
+        printf("fifty");
+        break;
+    case 6:
+        printf("sixty");
+        break;
+    case 7:
+        printf("seventy");
+        break;
+    case 8:
+        printf("eighty");
+        break;
+    case 9:
+        printf("ninety");
+    }
+    if (a / 10 != 1)
+    {
+        switch (a % 10)
+        {
+        case 1:
+            printf("-one");
+            break;
+        case 2:
+            printf("-two");
+            break;
+        case 3:
+            printf("-three");
+            break;
+        case 4:
+            printf("-four");
+            break;
+        case 5:
+            printf("-five");
+            break;
+        case 6:
+            printf("-six");
+            break;
+        case 7:
+            printf("-seven");
+            break;
+        case 8:
+            printf("-eight");
+            break;
+        case 9:
+            printf("-nine");
+        }
+    }
+    if (a / 10 == 1)
+    {
+        switch (a % 10)
+        {
+        case 0:
+            printf("ten");
+            break;
+        case 1:
+            printf("eleven");
+            break;
+        case 2:
+            printf("twelve");
+            break;
+        case 3:
+            printf("thirteen");
+            break;
+        case 4:
+            printf("fourteen");
+            break;
+        case 5:
+            printf("fifteen");
+            break;
+        case 6:
+            printf("sixteen");
+            break;
+        case 7:
+            printf("seventeen");
+            break;
+        case 8:
+            printf("eighteen");
+            break;
+        case 9:
+            printf("nineteen");
+        }
+    }
+    return 0;
+}
+
+
+//碰撞检测
+#include <stdio.h>
+#include <string.h>
+#include <math.h>
+int main()
+{
+    int t, x1, x2, x3, x4, y1, y2, y3, y4, flag = 0;
+    for (scanf("%d", &t); t--; )
+    {
+        flag = 0;
+        scanf("%d%d%d%d", &x1, &y1, &x2, &y2);
+        scanf("%d%d%d%d", &x3, &y3, &x4, &y4);
+        int col = x2 - x1 + x4 - x3;
+        int row = y2 - y1 + y4 - y3;
+        if (col >= x4 - x1 && row >= y4 - y1)
+            flag = 1;
+        printf(flag ? "YES\n" : "NO\n");
+    }
+    return 0;
+}
 ```
+
+
 
 #### 校赛
 
+SZTU Monthly 2022 Oct.
+
 ```c++
-//SZTU Monthly 2022 Oct.
+
 //A + B
 #include <iostream>
 using namespace std;
@@ -885,7 +1180,7 @@ int main()
 
 
 
-12/4/22 迎新赛
+22/12/4	迎新赛网络选拔
 
 总结：
 
@@ -1122,6 +1417,180 @@ int main()
     return 0;
 }
 ```
+
+22/12/7	迎新赛
+
+总结：
+
+- 比赛前一定要先适应比赛环境，包括编译器，要争取早到，而不是很赶
+- 比赛的时候，遇到意料之外的情况，要沉着冷静，调整心态，只有稳住心态才能发挥实力
+- 提交的时候再次检查数据范围，再次浏览题目
+- 要善于从每道题的提交与ac次数，推测题目难度，从而避免死磕难题，没时间做简单题
+- 阅读题目不要图快！把题目大意和出题者意图理解好才是最关键的，否则思路错，写错重改反而浪费时间
+- 有些题目可以尝试列出所有可能，也是解题的一种方法
+
+```c++
+//阶梯数
+//枚举
+#include <iostream>
+#include <vector>
+using namespace std;
+int k;
+bool Judge(int i)
+{
+    int a = 10;
+    while (i)
+    {
+        if (a <= (i % 10)) return false;
+        a = i % 10;
+        i /= 10;
+    }
+    return true;
+}
+int main()
+{
+    vector<int> v;
+    cin >> k;
+    for (int i = 0; i <= 123456789; i++)
+        if (Judge(i)) v.push_back(i);
+    cout << v[v.size() - k];
+}
+//递归
+#include <iostream>
+#include <vector>
+#include <algorithm>
+using namespace std;
+vector<int> v;
+void dfs(int x, int lst)
+{
+    v.push_back(x);
+    for (int i = lst + 1; i < 10; i++)
+        dfs(x * 10 + i, i);
+}
+int main()
+{
+    dfs(0, 0);
+    sort(v.begin(), v.end());
+    int k;
+    cin >> k;
+    cout << v[512 - k];
+    return 0;
+}
+
+
+//宝石冒险
+#include <iostream>
+#include <vector>
+#include <algorithm>
+using namespace std;
+long long ar[100005];
+
+int main()
+{
+	int n,k;
+	cin >> n >> k;
+	long long ans = 0;
+	for (int i = 1; i <= n; ++i)
+	{
+		long long a, b;
+		scanf("%lld %lld", &a, &b);
+		ans += a;
+		ar[i] = b-a;
+	}
+    sort(ar + 1, ar + n + 1);
+	for (int i = n - k + 1; i <= n; ++i)
+        ans += ar[i];
+	cout << ans;
+}
+
+
+//快来玩2048！
+
+
+//卡牌游戏
+//前缀差
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <cmath>
+using namespace std;
+const int N = 1e5 + 5;
+int d[N];
+int main()
+{
+    cin.tie(0) -> sync_with_stdio(false);
+    int n, m, X, q;
+    cin >> n >> X >> m >> q;
+    int a = 0, b = 0;
+    while (m--)
+    {
+        int l, r, c;
+        cin >> l >> r >> c;
+        d[l] += c;
+        d[r + 1] -= c;
+    }
+    for (int i = 2; i <= n; i++)
+    {
+        if (d[i] > 0) a += d[i];
+        else b += d[i];
+    }
+    int ans = max(a, abs(b));
+    if (ans > q) cout << "-1";
+    else cout << ans;
+    return 0;
+}
+
+//新年好
+//er'fen
+#include <iostream>
+#include <vector>
+#include <algorithm>
+using namespace std;
+long long ans, n, m, a[200010];
+bool check(long long x)
+{
+    if (x == 0) return 1; 
+    long long cnt = 0, sum = 0;
+    for (int i = 1; i <= n; i++)
+    {
+        if (a[i] >= x) cnt++;
+        else sum += a[i];
+    }
+    cnt += sum / x;
+    if (cnt >= m) return 1;
+    else return 0;
+}
+int main()
+{
+    scanf("%d%d", &n, &m);
+    for (int i = 1; i <= n; i++)
+        scanf("%lld", &a[i]);
+    long long l = 0, r = 1e18;
+    while (l <= r)
+    {
+        long long mid = l + (r - l) / 2;
+        if (check(mid))
+        {
+            l = mid + 1;
+            ans = mid;
+        }
+        else r = mid - 1;
+    }
+    printf("%lld", ans);
+    return 0;
+}
+
+
+//要是不难，也挺简单的
+```
+
+
+
+
+
+
+
+
 
 
 

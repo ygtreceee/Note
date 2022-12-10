@@ -1505,7 +1505,143 @@ int main()
 
 
 //快来玩2048！
+#include <iostream>
+#include <vector>
+#include <algorithm>
+using namespace std;
+const int maxn = 2e5 + 5;
+int G[105][105], n;
+void left()
+{
+    for (int i = 1; i <= n; ++i)
+    {
+        int a = 1, b = 2;
+        while (b <= n)
+        {
+            int t = G[i][b];
+            G[i][b++] = 0;
+            if (t == 0)
+                continue;
+            if (G[i][a] == t)
+                G[i][a++] += t;
+            else if (G[i][a] == 0)
+                G[i][a] = t;
+            else
+                G[i][++a] = t;
+        }
+    }
+}
 
+void right()
+{
+    for (int i = 1; i <= n; ++i)
+    {
+        int a = n, b = n - 1;
+        while (b >= 1)
+        {
+            int t = G[i][b];
+            G[i][b--] = 0;
+            if (t == 0)
+                continue;
+            if (G[i][a] == t)
+                G[i][a--] += t;
+            else if (G[i][a] == 0)
+                G[i][a] = t;
+            else
+                G[i][--a] = t;
+        }
+    }
+}
+
+void up()
+{
+    for (int i = 1; i <= n; ++i)
+    {
+        int a = 1, b = 2;
+        while (b <= n)
+        {
+            int t = G[b][i];
+            G[b++][i] = 0;
+            if (t == 0)
+                continue;
+            if (G[a][i] == t)
+                G[a++][i] += t;
+            else if (G[a][i] == 0)
+                G[a][i] = t;
+            else
+                G[++a][i] = t;
+        }
+    }
+}
+
+void down()
+{
+    for (int i = 1; i <= n; ++i)
+    {
+        int a = n, b = n - 1;
+        while (b >= 1)
+        {
+            int t = G[b][i];
+            G[b--][i] = 0;
+            if (t == 0)
+                continue;
+            if (G[a][i] == t)
+                G[a--][i] += t;
+            else if (G[a][i] == 0)
+                G[a][i] = t;
+            else
+                G[--a][i] = t;
+        }
+    }
+}
+
+int main()
+{
+    int m;
+    cin >> n >> m;
+    for (int i = 1; i <= n; ++i)
+    {
+        for (int j = 1; j <= n; ++j)
+            cin >> G[i][j];
+    }
+    int ok = 0;
+    for (int k = 1; k <= m; ++k)
+    {
+        char op;
+        int x, y;
+        cin >> op >> x >> y;
+        if (op == 'L')
+            left();
+        if (op == 'R')
+            right();
+        if (op == 'U')
+            up();
+        if (op == 'D')
+            down();
+        if (!G[x][y])
+            G[x][y] = 2;
+
+        for (int i = 1; i <= n; ++i)
+            for (int j = 1; j <= n; ++j)
+                if (G[i][j] == 2048)
+                    ok = 1, k = m + 1;
+    }
+    if (ok)
+        cout << "Yes\n";
+    else
+        cout << "No\n";
+    for (int i = 1; i <= n; ++i)
+    {
+        for (int j = 1; j <= n; ++j)
+        {
+            cout << G[i][j];
+            if (j == n)
+                cout << "\n";
+            else
+                cout << " ";
+        }
+    }
+}
 
 //卡牌游戏
 //前缀差
@@ -1541,7 +1677,7 @@ int main()
 }
 
 //新年好
-//er'fen
+//二分法
 #include <iostream>
 #include <vector>
 #include <algorithm>
@@ -2587,6 +2723,6 @@ int main()
     cout << num << endl;
     cout << (double)(end - start) / CLOCKS_PER_SEC << endl;
     return 0;
-}
+}//
 ```
 

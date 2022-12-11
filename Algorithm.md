@@ -3126,7 +3126,9 @@ int main()
 
 
 
-#### 二分
+#### 二分， 三分
+
+原理
 
 ```c++
 //左闭右闭写法
@@ -3192,5 +3194,273 @@ int main()
 
 
 //两种方法的区别就是右区间的闭开会导致下面的while循环判断条件写法不同，需要特别注意
+```
+
+洛谷
+
+```c++
+//P7441 「EZEC-7」Erinnerung
+#include <iostream>
+#include <algorithm>
+using namespace std;
+long long t, x, y, k;
+int main()
+{
+    ios::sync_with_stdio(false);
+    cin.tie(0);
+    cout.tie(0);
+    for (cin >> t; t--; )
+    {
+        cin >> x >> y >> k;
+        if (x == 0 && y == 0) cout << 0 << endl;
+        else if (x == 0) cout << (k % y == 0 ? 1 : 0) << endl;
+        else if (y == 0) cout << (k % x == 0 ? 1 : 0) << endl;
+        else cout << min(k / x, k / y) << endl;
+    }
+    return 0;
+}
+```
+
+vjudge
+
+```c++
+//跳石头
+#include <iostream>
+#include <algorithm>
+using namespace std;
+int d, n, m, ans, mid;
+int a[50005];
+bool Judge(int x)
+{
+    int sum = 0, i = 0, now = 0;
+    while (i < n + 1)
+    {
+        i++;
+        if (a[i] - a[now] < x)
+            sum++;
+        else now = i;
+    }
+    if (sum > m) return false;
+    else return true;
+}
+int main()
+{
+    ios::sync_with_stdio(false);
+    cin.tie(0);
+    cout.tie(0);
+    cin >> d >> n >> m;
+    for (int i = 1; i <= n; i++) cin >> a[i];
+    a[n + 1] = d; // 注意n并不包含头尾石头
+    int l = 1, r = d;
+    while (l <= r) // 二分法
+    {
+        mid = (l + r) / 2;
+        if (Judge(mid))
+        {
+            ans = mid;
+            l = mid + 1;
+        }
+        else r = mid - 1;
+    }
+    cout << ans << endl;
+    return 0;
+}
+// // 0 1  2  3  4  5  6
+// // 0 2 11 14 17 21 25
+// //x = 12  5 2 3 4
+// //r = 25 11 4 4 4
+// //l = 0   0 0 3 4
+
+
+//Cable master
+#include <iostream>
+#include <algorithm>
+#include <cmath>
+using namespace std;
+#define INT32_MAX 2147483647
+int k, n;
+double buf[10010], mid;
+bool Judge(double a)
+{
+	int cnt = 0;
+	for (int i = 0; i < k; i++)
+		cnt += int(buf[i] / a);
+	return cnt >= n;
+}
+int main()
+{
+	scanf("%d %d", &k, &n);
+	for (int i = 0; i < k; i++)
+		scanf("%lf", &buf[i]);
+	double l = 0, r = INT32_MAX;
+	while (r - l > 1e-5)
+	{
+		mid = (l + r) / 2;
+		if (!Judge(mid)) r = mid;
+		else l = mid;
+	}
+	printf("%.2f", floor(mid * 100) / 100);
+	return 0;
+}
+
+
+//Freefall
+//三分
+//?
+#include <iostream>
+#include <algorithm>
+#include <cmath>
+using namespace std;
+double a, b;
+#define eps 1e-10
+bool check(double lmid, double rmid)
+{
+	if ((lmid * b + a / sqrt(lmid + 1)) - (rmid * b + a / sqrt(rmid + 1)) > eps)
+		return true;
+	else return false;
+}
+int main()
+{
+	scanf("%lf%lf", &a, &b);
+	double l = 0, r = a, lmid, rmid; //!
+	while (l <= r)
+	{
+		lmid = l + (r - l) / 3;
+		rmid = r - (r - l) / 3;
+		if (check(lmid, rmid)) l = lmid + 1;
+		else r = rmid - 1;
+	}
+	printf("%.10lf", l * b + a / sqrt(l + 1));
+	return 0;
+}
+
+
+//Last Rook
+//
+#include <iostream>
+#include <algorithm>
+#include <cstring>
+using namespace std;
+int n, num, ax, ay, cnt, flag = 1;
+int main()
+{
+	scanf("%d", &n);
+	int up = 1, down = n; 
+	while (up < down && flag)
+	{
+		int mid = up + (down - up) / 2;
+		printf("? %d %d %d %d\n", up, mid, 1, n);
+		cnt++;
+		scanf("%d", &num);
+		if (cnt > 20 || num == -1)
+		{
+			flag = 0;
+			break;
+		}
+		if (num != (mid - up + 1)) down = mid;
+		else up = mid + 1;
+	}
+	int l = 1, r = n;
+	while (l < r && flag)
+	{
+		int mid = l + (r - l) / 2;
+		printf("? %d %d %d %d\n", 1, up, l, mid);
+		cnt++;
+		scanf("%d", &num);
+		if (cnt > 20 || num == -1)
+		{
+			flag = 0;
+			break;
+		}
+		if (num != (mid - l + 1)) r = mid;
+		else l = mid + 1;
+	}
+	if (flag) printf("! %d %d\n", up, l);
+	return 0;
+}
+
+
+//Pie
+#include <iostream>
+#include <algorithm>
+#include <cmath>
+using namespace std;
+const double pi = acos(-1.0);
+int t, m, f, buf[10010];
+double ans;
+bool check(double mid)
+{
+	int cnt = 0;
+	for (int i = 0; i < m; i++)
+		cnt += int((buf[i] * buf[i] * pi * 1.0) / mid);
+	if (cnt >= f) return false;
+	else return true;
+}
+int main()
+{
+	for (scanf("%d", &t); t--; )
+	{
+		scanf("%d%d", &m, &f);
+		f++;
+		for (int i = 0; i < m; i++) scanf("%d", &buf[i]);
+		double l = 0, r = pi * 1e10;
+		while (r - l >= 1e-6)
+		{
+			double mid = l + (r - l) / 2;
+			if (check(mid))
+			{
+				ans = mid;
+				r = mid;
+			}
+			else l = mid;
+		}
+		printf("%.4f\n", ans);
+	}
+	return 0;
+}
+
+
+//Monthly Expense
+#include <iostream>
+#include <algorithm>
+using namespace std;
+int m, n, ans, nums[100010], bot = 0;
+bool check(int mid)
+{
+	int cnt = 1, last = 0;
+	for (int i = 1; i <= m; i++)
+		if (nums[i] - nums[last] > mid) cnt++, last = i - 1;
+	if (cnt > n) return false;
+	else return true;
+}
+int main()
+{
+	while (scanf("%d%d", &m, &n) !=EOF)
+	{
+		bot = 0;
+		for (int i = 1; i <= m; i++)
+		{
+			scanf("%d", &nums[i]);
+			bot = max(bot, nums[i]);
+			nums[i] += nums[i - 1];
+		}
+		int l = bot, r = nums[m]; //注意此处l不能是0或1，必须至少等于最大的序列和，否则会被压缩到无意义的区间
+		while (l <= r)
+		{
+			int mid = l + (r - l) / 2;
+			if (check(mid))
+			{
+				ans = mid;
+				r = mid - 1;
+			}
+			else l = mid + 1;
+		}
+		printf("%d\n", ans);
+	}
+	return 0;
+}
+
+
+
 ```
 

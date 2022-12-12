@@ -3128,7 +3128,7 @@ int main()
 
 #### 二分， 三分
 
-原理
+找数原理
 
 ```c++
 //左闭右闭写法
@@ -3299,7 +3299,7 @@ int main()
 		if (!Judge(mid)) r = mid;
 		else l = mid;
 	}
-	printf("%.2f", floor(mid * 100) / 100);
+	printf("%.2f", floor(mid * 100) / 100); //注意必须利用floor向下取整，不能四舍五入
 	return 0;
 }
 
@@ -3336,7 +3336,7 @@ int main()
 
 
 //Last Rook
-//
+//TLE
 #include <iostream>
 #include <algorithm>
 #include <cstring>

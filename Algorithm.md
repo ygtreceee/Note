@@ -3196,6 +3196,34 @@ int main()
 //两种方法的区别就是右区间的闭开会导致下面的while循环判断条件写法不同，需要特别注意
 ```
 
+模板
+
+```c++
+//模板1 往左找答案
+while (l < r)
+{
+	int mid = l + r >> 1;
+	if (check(mid)) r = mid;
+	else l = mid + 1;
+}
+
+//模板2 往右找答案
+while (l < r)
+{
+	int mid = l + r + 1 >> 1; //此处mid加1
+	if (check(mid)) l = mid;
+	else r = mid + 1;
+}
+
+//模板3 浮点二分
+while (r - l > 1e-5) //
+{
+	double mid = (l + r) / 2;
+	if (check(mid)) l = mid;
+	else r = mid;
+}
+```
+
 洛谷
 
 ```c++
@@ -3217,6 +3245,106 @@ int main()
         else if (y == 0) cout << (k % x == 0 ? 1 : 0) << endl;
         else cout << min(k / x, k / y) << endl;
     }
+    return 0;
+}
+
+
+//P2249 【深基13.例1】查找
+#include <iostream>
+#include <algorithm>
+using namespace std;
+int nums[1000010];
+int s;
+bool check(int mid)
+{
+    if (nums[mid] >= s) return true;
+    else return false;
+}
+int main()
+{
+    int n, m;
+    cin >> n >> m;
+    for (int i = 1; i <= n; i++) cin >> nums[i];
+    while (m--)
+    {
+        int l = 1, r = n;
+        cin >> s;
+        while (l < r)
+        {
+            int mid = l + r >> 1;
+            if (check(mid)) r = mid;
+            else l = mid + 1;
+        }
+        if (nums[l] == s) cout << l << ' ';
+        else cout << "-1 ";
+    }
+    return 0;
+}
+
+
+//P1102 A-B 数对
+#include <iostream>
+#include <algorithm>
+using namespace std;
+long long nums[200010];
+long long st, cnt;
+int main()
+{
+    int n, c;
+    cin >> n >> c;
+    for (int i = 1; i <= n; i++) cin >> nums[i];
+    sort(nums + 1, nums + 1 + n);
+    for (int i = 1; i <= n; i++)
+    {
+        long long a = c + nums[i];
+        int l = 1, r = n;
+        while (l < r)
+        {
+            int mid = l + r >> 1;
+            if (nums[mid] >= a) r = mid;
+            else l = mid + 1;
+        }
+        if (nums[l] == a) st = l;
+        else continue;
+        l = st - 1, r = n;
+        while (l < r)
+        {
+            int mid = l + r + 1 >> 1;
+            if (nums[mid] <= a) l = mid;
+            else r = mid - 1;
+        }
+        cnt += l - st + 1;
+    }
+    cout << cnt;
+    return 0;
+}
+
+
+//P1678 烦恼的高考志愿
+#include <iostream>
+#include <algorithm>
+using namespace std;
+long long a[100010], sum, m, n, x;
+int main()
+{
+    cin >> m >> n;
+    for (int i = 1; i <= m; i++) cin >> a[i];
+    sort(a + 1, a + 1 + m);
+    a[0] = -1e12;
+    a[m + 1] = 1e12;
+    while (n--)
+    {
+        cin >> x;
+        int l = 1, r = m + 1;
+        while (l < r)
+        {
+            int mid = (l + r) / 2;
+            if (a[mid] >= x) r = mid;
+            else l = mid + 1;
+        }
+        sum += (a[l] - x) <= (x - a[l - 1]) ? (a[l] - x) : (x - a[l - 1]);
+    }
+    cout << sum;
     return 0;
 }
 ```

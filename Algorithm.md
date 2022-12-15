@@ -3128,6 +3128,21 @@ int main()
 
 #### 二分， 三分
 
+```
+如何判断一个题是不是用二分答案做的?
+1、答案在一个区间内（一般情况下，区间会很大，暴力超时）
+2、直接搜索不好搜，但是容易判断一个答案可行不可行
+3、该区间对题目具有单调性，即：在区间中的值越大或越小，题目中的某个量对应增加或减少。
+
+此外可能还会有一个典型的特征：求...最大值的最小或求...最小值的最大
+1、求...最大值的最小，我们二分答案（即二分最大值）的时候，判断条件满足后，尽量让答案往前来（即：让r=mid），对应模板1;
+2、同样，求...最小值的最大时，我们二分答案（即二分最小值）的时候，判断条件满足后，尽量让答案往后走（即：让l=mid），对应模板2；
+
+最大值最小，最小值最大 类 问题解题方向：
+最短距离最大化问题：保证任意区间距离要比最短距离mid大或相等（这样，mid才是最短距离）即：区间的距离>=mid
+最长距离最小化问题：保证任意区间距离要比最大距离mid小或相等（这样，mid才是最大距离）即：区间的距离<=mid
+```
+
 找数原理
 
 ```c++
@@ -3347,6 +3362,105 @@ int main()
     cout << sum;
     return 0;
 }
+
+
+//P1163 银行贷款
+#include <iostream>
+#include <algorithm>
+using namespace std;
+int sum, t, mon;
+double sumt;
+int check(double mid)
+{
+    sumt = sum;
+    for (int i = 1; i <= mon; i++)
+        sumt = sumt + sumt * mid - t;
+    if (sumt > 0) return 1;
+    else return 0;
+}
+int main()
+{
+    cin >> sum >> t >> mon;
+    double l = 0, r = 500;
+    while (r - l > 1e-5)
+    {
+        double mid = (r + l) / 2;
+        if (check(mid)) r = mid;
+        else l = mid;
+    }
+    printf("%.1f", l * 100);
+    return 0;
+}
+
+
+//P2440 木材加工
+#include <iostream>
+#include <algorithm>
+using namespace std;
+int n, k, room[100010];
+int check(int mid)
+{
+    int cnt = 0;
+    for (int i = 1; i <= n; i++)
+        cnt += room[i] / mid;
+    if (cnt >= k) return true;
+    else return false;
+}
+int main()
+{
+    cin >> n >> k;
+    for (int i = 1; i <= n; i++) cin >> room[i];
+    int l = 0, r = 1e8;
+    while (l < r)
+    {
+        int mid = l + r + 1 >> 1;
+        if (check(mid)) l = mid;
+        else r = mid - 1;
+    }
+    cout << l;
+    return 0;
+}
+
+
+//P1182 数列分段 Section II
+#include <iostream>
+#include <algorithm>
+using namespace std;
+long long n, m, room[100010], maxa;
+int check(int mid)
+{
+    long long cnt = 0, sum = 0;
+    for (int i = 1; i <= n - 1; i++)
+    {
+        sum += room[i];
+        if (sum + room[i + 1] > mid) cnt++, sum = 0;
+    }
+    if (cnt + 1 <= m) return true;
+    else return false;
+}
+int main()
+{
+    cin >> n >> m;
+    for (int i = 1; i <= n; i++)
+    {
+        cin >> room[i];
+        if (room[i] > maxa) maxa = room[i];
+    }
+    int l = maxa, r = 1e9;
+    while (l < r)
+    {
+        int mid = l + r >> 1;
+        if (check(mid)) r = mid;
+        else l = mid + 1;
+    }
+    cout << l;
+    return 0;
+}
+//l必须有意义，否则会出现无意义区间
+//例如当样例为
+//5 5
+//4 2 4 5 1
+//当mid为4时，cnt会变成5，导致r = mid, 此时区间为(1, 4],是无意义区间，会导致答案错误
 ```
 
 vjudge
@@ -3590,5 +3704,140 @@ int main()
 
 
 
+```
+
+#### 单调栈
+
+代码模板
+
+```c++
+//利用C++提供的stl模板库
+//一个单调递减的单调栈
+stack<int> sta;
+...
+//当栈为空时，无条件入栈，若新元素大于栈顶元素，则出站顶元素
+while (!sta.empty() && sta.top() < x)
+	sta.pop();
+sta.push(x);
+...
+    
+    
+//C代码
+int _stack[maxn];
+int pi = 0; //可以看作一个指针（pointer），含义为栈顶位置以及栈元素
+for (int i = 0; i < the_number_of_element; i++)
+{
+    while (pi && _stack[pi - 1] < element[i])
+        pi--;
+    _stack[pi++] = element[i];
+}
+```
+
+题
+
+```c++
+//luogu
+//P5788 【模板】单调栈
+#include <iostream>
+#include <stack>
+#include <cstring>
+using namespace std;
+const int maxn = 3e6 + 3;
+int an[maxn], ans[maxn];
+void solve()
+{
+    int n;
+    cin >> n;
+    memset(ans, 0, sizeof ans);
+    for (int i = 0; i < n; i++) cin >> an[i];
+    stack<int> st;
+    for (int i = 0; i < n; i++)
+    {
+        if (!st.size() || an[st.top() - 1] >= an[i])
+            st.push(i + 1);
+        else
+        {
+            while (st.size() && an[st.top() - 1] < an[i])
+            {
+                ans[st.top() - 1] = i + 1;
+                st.pop();
+            }
+        }
+        st.push(i + 1);
+    }
+    for (int i = 0; i < n; i++)
+        cout << ans[i] << ' ';
+}
+int main()
+{
+    int t = 1;
+    while (t--) solve();
+    return 0;
+}
+//or
+#include <iostream>
+#include <stack>
+#include <cstring>
+using namespace std;
+const int N = 3e6 + 5;
+int a[N], b[N];
+int n;
+int main()
+{
+    cin >> n;
+    for (int i = 1; i <= n; i++) cin >> a[i];
+    stack<int> sta;
+    for (int i = n; i >= 0; i--)
+    {
+        while (!sta.empty() && a[i] >= a[sta.top()]) sta.pop();
+        b[i] = sta.empty() ? 0 : sta.top();
+        sta.push(i);
+    }
+    for (int i = 1; i <= n; i++) cout << b[i] << " ";
+    return 0;
+}
+
+
+```
+
+
+
+#### 单调队列
+
+```c++
+//ACWing
+//154. 滑动窗口
+#include <iostream>
+#include <stack>
+#include <cstring>
+using namespace std;
+const int N = 1e6 + 5;
+int a[N], q[N];
+int n, k;
+int main()
+{
+    cin >> n >> k;
+    for (int i = 1; i <= n; i++) cin >> a[i];
+    int hh = 0, tt = -1; //hh表示队首，tt表示队尾
+    for (int i = 1; i <= n; i++)
+    {
+        while (hh <= tt && i - k >= q[hh]) hh++;
+        while (hh <= tt && a[q[tt]] >= a[i]) tt--;
+        q[++tt] = i;
+        if (i >= k) cout << a[q[hh]] << " ";
+    }
+    cout << endl;
+
+    hh = 0; tt = -1;
+    for (int i = 1; i <= n; i++)
+    {
+        while (hh <= tt && i - k >= q[hh]) hh++;
+        while (hh <= tt && a[q[tt]] <= a[i]) tt--;
+        q[++tt] = i;
+        if (i >= k) cout <<a[q[hh]] << " ";
+    }
+    cout << endl;
+    return 0;
+}
 ```
 

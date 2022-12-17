@@ -3706,7 +3706,29 @@ int main()
 
 ```
 
-#### 单调栈
+#### 单调栈与单调队列
+
+```
+二者：都可将复杂度优化至O(n)
+
+
+栈和队列的区别
+栈是只有一端可以插入和删除的线性表，他是一个先进后出的结构，而队列则是有两个端口可以分别进行插入和删除，满足先进先出的特性。但是在实际情况中，我们维持的单调栈和栈的数据结构是吻合的，而维持的单调队列则大部分可能都是双端队列。
+一个使用单调栈的问题往往需要我们维持的原始数组的区间变化情况是，只有一段增加或者减少，这个时候我们可以选择使用单调栈来维持原始数组给定区间内的最值问题。
+而对于左右端点都发生变化的问题，就要使用单调队列进行维持，只有区间变化芒族类似于队列的元素流动的方向时，才使用单调队列。前面我们已经说过，单调栈因为左端点，不变，所以可以支持一个端点左移或者右移的操作，而之所以可以左移或者右移，是因为单调栈只插入满足条件的点，而不会对以及入栈的元素进行最优性剪枝，这样，就保证了右端点可以左移的条件；而单调队列在维持的过程中，整个要维持的区间是单向移动的，假设要维持的两个端点都是向右移动的，那么当左端点右移时，实际上最次最优值是会发生变化的，这样为了保证左端点右移时候选最优值的正确性，我们在右端点右移的过程中，必须把当前元素插入到单调队列中（单调栈则不用），这样插入时，为了维持单调性，我们就需要进行最优性剪枝，此时如果我们再将右端点左移，那么上一回合插入的元素实际上需要删除，但是上一回合中我们已经进行了最优性剪枝，这样即使我们将上一回合插入的元素删除，我们也不能将单调队列在恢复到之前的状态。
+综上，我们得到使用单调队列的问题，要维持的区间一定是左右端点同时单向移动的；而使用单点栈的问题，则一定是只有一个端点左移或者右移的。
+根据以上两个特征我们可以很轻松地判断一个问题到底是应该使用那个结构来维持，当然不过单调栈还是单调队列，我们都可以用双端队列维持，这是因为双端队列可以满足单调栈或者单调队列的所有要求。
+最后，使用单调栈的问题，我们一定使用的是双端队列维持，有一个端点需要同时插入和删除，所以队列是不满足要求的。
+
+
+单调队列与单调栈的区别：
+单调栈只维护一端（栈顶）单调队列维护两端，它的头端可以出数，尾部可以进数。
+单调栈通常维护全局的单调性，而单调队列通常维护局部的单调性。
+单调栈大小没有上限，而单调队列通常有大小限制。
+由于单调队列的对首可以出队以及前面的元素一定比后面的元素先入队的性质，使得它可以维护局部的单调性。因此单调队列通常用于解决局部性的最值问题
+```
+
+###### 单调栈
 
 代码模板
 
@@ -3733,10 +3755,9 @@ for (int i = 0; i < the_number_of_element; i++)
 }
 ```
 
-题
+luogu
 
 ```c++
-//luogu
 //P5788 【模板】单调栈
 #include <iostream>
 #include <stack>
@@ -3798,11 +3819,134 @@ int main()
 }
 
 
+//P1901 发射站
+#include <iostream>
+#include <stack>
+#include <algorithm>
+using namespace std;
+const int N = 1e6 + 5;
+long long a[N], b[N], q[N], n, ans;
+int main()
+{
+    cin >> n;
+    for (int i = 1; i <= n; i++) cin >> a[i] >> b[i];
+    stack<int> sta;
+    int l = 0, r = -1;
+    for (int i = 1; i <= n; i++)
+    {
+        while (!sta.empty() && a[sta.top()] < a[i])
+        {
+            q[i] += b[sta.top()];
+            sta.pop();
+        }  
+        sta.push(i);
+    }
+    while (!sta.empty()) sta.pop();
+    for (int i = n; i >= 1; i--)
+    {
+        while (!sta.empty() && a[sta.top()] < a[i])
+        {
+            q[i] += b[sta.top()];
+            sta.pop();
+        }
+        sta.push(i);
+    }
+    for (int i = 1; i <= n; i++)
+        ans = max(ans, q[i]);
+    cout << ans;
+    return 0;
+}
+//or
+#include <iostream>
+#include <stack>
+#include <algorithm>
+using namespace std;
+const int N = 1e6 + 5;
+long long a[N], b[N], q[N], n, ans;
+int main()
+{
+    cin >> n;
+    for (int i = 1; i <= n; i++) cin >> a[i] >> b[i];
+    stack<int> sta;
+    for (int i = 1; i <= n; i++)
+    {
+        while (!sta.empty() && a[sta.top()] < a[i])
+        {
+            q[i] += b[sta.top()];
+            sta.pop();
+        }
+        if (!sta.empty()) q[sta.top()] += b[i];
+        sta.push(i);
+    }
+    for (int i = 1; i <= n; i++)
+        ans = max(ans, q[i]);
+    cout << ans;
+    return 0;
+}
+
+
+//P7399 [COCI2020-2021#5] Po
+#include <iostream>
+#include <queue>
+#include <stack>
+#include <algorithm>
+using namespace std;
+const int N = 1e5 + 5;
+int n, x, ans;
+int main()
+{
+    cin >> n;
+    stack<int> sta;
+    for (int i = 1; i <= n; i++)
+    {
+        cin >> x;
+        while (!sta.empty() && sta.top() > x) sta.pop();
+        if (!sta.empty() && sta.top() == x) continue; 
+        if (x) ans++, sta.push(x);
+    }
+    cout << ans;
+    return 0;
+}
+
+
+//P1823 [COI2007] Patrik 音乐会的等待
+#include <iostream>
+#include <queue>
+#include <stack>
+#include <algorithm>
+using namespace std;
+long long ret, n, cnt;
+int main()
+{
+    cin >> n;
+    stack<pair<int, int>> s;
+    for (int i = 1; i <= n; i++)
+    {
+        cin >> ret;
+        pair<int, int> p(ret, 1);
+        while (!s.empty() && s.top().first <= ret)
+        {
+            cnt += s.top().second;
+            if (s.top().first == ret) p.second += s.top().second;
+            s.pop();
+        }
+        if (!s.empty()) cnt++;
+        s.push(p);
+    }
+    cout << cnt << endl;
+    return 0;
+}
+```
+
+poj
+
+```c++
+
 ```
 
 
 
-#### 单调队列
+###### 单调队列
 
 ```c++
 //ACWing
@@ -3821,8 +3965,8 @@ int main()
     int hh = 0, tt = -1; //hh表示队首，tt表示队尾
     for (int i = 1; i <= n; i++)
     {
-        while (hh <= tt && i - k >= q[hh]) hh++;
-        while (hh <= tt && a[q[tt]] >= a[i]) tt--;
+        while (hh <= tt && i - k >= q[hh]) hh++;     //维护局部性
+        while (hh <= tt && a[q[tt]] >= a[i]) tt--;   //维护单调性
         q[++tt] = i;
         if (i >= k) cout << a[q[hh]] << " ";
     }
@@ -3837,6 +3981,332 @@ int main()
         if (i >= k) cout <<a[q[hh]] << " ";
     }
     cout << endl;
+    return 0;
+}
+
+
+//
+//双端队列
+#include <iostream>
+#include <stack>
+#include <queue>
+#include <algorithm>
+using namespace std;
+const int N = 3e5 + 10;
+int n, m;
+int a[N], q[N];
+int main()
+{
+    cin >> n >> m;
+    for (int i = 1; i <= n; i++) cin >> a[i], a[i] += a[i - 1];
+    deque<int> deq;
+    int ans = 0;
+    for (int i = 1; i <= n; i++)
+    {
+
+        while (!deq.empty() && a[deq.back()] > a[i]) deq.pop_back();
+        deq.push_back(i);
+        if (deq.back() - deq.front() > m) deq.pop_front();
+        ans = max(ans, a[i] - a[deq.front()]);
+    }
+    cout << ans;
+    return 0;
+}
+
+
+//
+```
+
+
+
+#### 双指针（尺取）
+
+poj 2100
+
+```c++
+#include <iostream>
+#include <queue>
+#include <stack>
+#include <vector>
+#include <algorithm>
+using namespace std;
+long long n, k, cnt;
+void solve()
+{
+    vector<int> v;
+    cin >> n;
+    long long num = 1;
+    int l = 1, r = 1;
+    while (l <= r)
+    {
+        if (num == n)
+        {
+            cnt++;
+            v.push_back(r - l + 1);
+            for (int i = l; i <= r; i++)
+                v.push_back(i);
+        }
+        if (num >= n)
+        {
+            num -= l * l;
+            l++;
+        }
+        else if (num < n)
+        {
+            r++;
+            num += r * r;
+        }
+    }
+    cout << cnt << endl;
+    for (int i = 0; i < v.size(); i++)
+    {
+        cout << v[i] << " ";
+        long long len = v[i];
+        for (int j = 0; j < len; j++, i++)
+            cout << v[i + 1] << " ";
+        cout << endl;
+    }
+}
+int main()
+{
+    solve();
+    return 0;
+}
+```
+
+HDU 5178
+
+```c++
+//二分
+#include <iostream>
+#include <queue>
+#include <stack>
+#include <vector>
+#include <algorithm>
+using namespace std;
+#define LL long long
+const int N = 1e5 + 5;
+LL n, k, cnt, t, a[N];
+void solve()
+{
+    cnt = 0;
+    for (int i = 1; i <= n; i++)
+    {
+        LL ret = a[i] - k;
+        LL l = 1, r = i;
+        while (l < r)
+        {
+            LL mid = (l + r) / 2;
+            if (a[mid] >= ret) r = mid;
+            else l = mid + 1; 
+        }
+        cnt += i - l;
+    }
+    cout << cnt << endl;
+}
+int main()
+{
+    ios::sync_with_stdio(false);
+    cin.tie(NULL);
+    cout.tie(NULL);
+    for(cin >> t; t--; )
+    {
+        cin >> n >> k;
+        for (int i = 1; i <= n; i++) cin >> a[i];
+        sort(a + 1, a + 1 + n);
+        solve();
+    }
+    return 0;
+}
+//尺取
+#include <iostream>
+#include <algorithm>
+#include <cmath>
+using namespace std;
+const int N = 1e5 + 5;
+#define LL long long
+LL a[N], n, k, cnt, t;
+void solve()
+{
+    LL l = 1, r = 1;
+    cnt = 0;
+    while (l <= r && r <= n)
+    {
+        while (l < r && abs(a[l] - a[r]) > k) l++;
+        cnt += r - l;
+        r++;
+    }
+    cout << cnt << endl;
+}
+int main()
+{
+    ios::sync_with_stdio(false);
+    cin.tie(NULL);
+    cout.tie(NULL);
+    for(cin >> t; t--; )
+    {
+        cin >> n >> k;
+        for (int i = 1; i <= n; i++) cin >> a[i];
+        sort(a + 1, a + n + 1);
+        solve();
+    }
+    return 0;
+}
+```
+
+HDU 5672
+
+```c++
+//TLE
+#include <iostream>
+#include <cstring>
+#include <algorithm>
+using namespace std;
+const int N = 1e6 + 5;
+char s[N];
+#define LL long long
+LL k, t, vis[30], cnt;
+void solve()
+{
+    LL l = 0, r = 0, ans = 0;
+    memset(vis, 0, sizeof vis);
+    vis[s[0] - 'a']++;
+    cnt = 1;
+    while (r < strlen(s))
+    {
+        if (l + k - 1 > r)
+        {
+            r++;
+            if (!vis[s[r] - 'a']) cnt++, vis[s[r] - 'a']++;
+        }
+        else if (l + k - 1 <= r)
+        {
+            if (cnt == k)
+            {
+                cnt--;
+                ans += strlen(s) - r;
+                vis[s[l] - 'a'] = 0;
+                l++;
+            }
+            else
+            {
+                r++;
+                if (!vis[s[r] - 'a'])
+                {
+                    cnt++;
+                    vis[s[r] - 'a'] = 1;
+                }
+            }
+        }
+    }
+    cout << ans << endl;
+}
+int main()
+{
+    ios::sync_with_stdio(false);
+    cin.tie(NULL);
+    cout.tie(NULL);
+    for (cin >> t; t--; )
+    {
+        cin >> s;
+        cin >> k;
+        solve();
+    }
+    return 0;
+}
+```
+
+luogu P1381 单词背诵
+
+本题的输入对象是字符串，而且又需要判断某个字符串是否出现过以及出现了几次，我们就应该想到使用**map + string**，尺取在本题中可以想象为一个**滑动窗口**（或蠕动窗口，但似乎不太好听）的维护，想象成一个窗口是十分恰当且易理解的，事实上一堆数据中寻找符合题目条件的某区间，就可以考虑选择使用滑动窗口，在本题中是向右探寻，然后左端不断维护更新，以维护ans2
+
+```c++
+#include <iostream>
+#include <cstring>
+#include <algorithm>
+#include <map>
+using namespace std;
+map<string, int> sum; //存储出现的次数
+map<string, bool> flag; //存储需要背诵的单词
+int ans1, ans2, n, m, l;
+string s[100005], s1; //因为后面要对字符串进行存储和操作，所以要用string二维数组来存储字符串
+int main()
+{
+    cin >> n;
+    for (int i = 1; i <= n; i++) cin >> s1, flag[s1] = 1; //记录背诵单词
+    cin >> m;
+    l = 1; //尺取的特点，需要设左端点，右端点在本题中跟随i即可，类似于窗口滑动
+    for (int i = 1; i <= m; i++)
+    {
+        cin >> s[i];
+        if (flag[s[i]]) sum[s[i]]++; //记录出现次数
+        if (sum[s[i]] == 1) ans1++, ans2 = i - l + 1; //为1，即此背诵单词首次出现，符合最多背诵单词的要求，应加入窗口
+        while (l <= i) //窗口左端的维护
+        {
+            if (!flag[s[l]]) {l++; continue;} //非背诵单词，舍去
+            if (sum[s[l]] > 1) {sum[s[l]]--; l++; continue;} //出现了两次而且一个在左端口的单词，也不能要
+            break; //与continue完美结合
+        }
+        ans2 = min(ans2, i - l + 1); //保持最小值
+    }
+    cout << ans1 << endl << ans2 << endl;
+    return 0;
+}
+```
+
+luogu P3143 [USACO16OPEN] Diamond Collector S
+
+本题的难点不在于求符合要求的区间内的元素个数，难的是题中出现两个陈列架，这意味着我们要找两个符合要求的区间，而且这两个区间元素个数和要最大，一开始我是只移动窗口，只想先找元素个数最大的区间，这其实无益于最终答案的求解，因为即便我找到了最大元素的区间，那加上另一个区间就能保证元素和最大吗？显然是行不通的。所以要换种思路，遍历每一个元素，存储每一个元素之前的区间中，符合要求的元素个数的最大值，然后加上该元素往后区间能符合要求的元素个数，得到该元素往左延申与往右延申的元素个数和，即将该元素作为分界点（当然，该元素在此处实际上隶属于右端符合条件的区间），左右是不同架子的元素，维护最大值即可。
+
+当然了，也可以储存该元素往后的最大储存值，然后再遍历一遍，将某元素往后的符合条件区间元素个数加上此区间最后一个元素往后的最大储存值，此时区间最后一个元素就是分界，然后维护最大值即可。
+
+```c++
+#include <iostream>
+#include <algorithm>
+using namespace std;
+int n, k, a[50005], c[50005], r = 2, maxn, ans;
+int main()
+{
+    cin >> n >> k;
+    a[n + 1] = INT32_MAX;
+    for (int i = 1; i <= n; i++) cin >> a[i];
+    sort(a + 1, a + 1 + n);
+    for (int i = 1; i <= n; i++)
+    {
+        while (a[r] <= a[i] + k) r++;
+        c[r] = max(r - i, c[r]);
+        maxn = max(maxn, c[i]);
+        ans = max(maxn + r - i, ans);
+    }
+    cout << ans;
+    return 0;
+}
+
+//
+
+#include <iostream>
+#include <algorithm>
+using namespace std;
+const int N = 5e4 + 5;
+int n, k, a[N], b[N], maxn[N], ans; 
+int main()
+{
+    cin >> n >> k;
+    for (int i = 1; i <= n; i++) cin >> a[i];
+    sort(a + 1, a + 1 + n);
+    int tt = 1, t = n;
+    for (int i = n; i >= 1; i--)
+    {
+        while (a[t] > a[i] + k) t--;
+        b[i] = t - i + 1;
+        maxn[i] = max(b[i], maxn[i + 1]);
+    }
+    for (int i = 1; i <= n; i++)
+    {
+        while (a[tt] <= a[i] + k && tt <= n + 1) tt++;
+        ans = max(ans, tt - i + maxn[tt]);
+    }
+    cout << ans;
     return 0;
 }
 ```

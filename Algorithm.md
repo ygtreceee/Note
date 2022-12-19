@@ -3239,10 +3239,9 @@ while (r - l > 1e-5) //
 }
 ```
 
-洛谷
+luogu P7441 「EZEC-7」Erinnerung
 
 ```c++
-//P7441 「EZEC-7」Erinnerung
 #include <iostream>
 #include <algorithm>
 using namespace std;
@@ -3264,7 +3263,11 @@ int main()
 }
 
 
-//P2249 【深基13.例1】查找
+```
+
+luogu P2249 【深基13.例1】查找
+
+```c++
 #include <iostream>
 #include <algorithm>
 using namespace std;
@@ -3295,9 +3298,11 @@ int main()
     }
     return 0;
 }
+```
 
+luogu P1102 A-B 数对
 
-//P1102 A-B 数对
+```c++
 #include <iostream>
 #include <algorithm>
 using namespace std;
@@ -3333,9 +3338,39 @@ int main()
     cout << cnt;
     return 0;
 }
+//
+#include <iostream>
+#include <algorithm>
+using namespace std;
+const int N = 2e5 + 5;
+#define LL long long
+LL nums[N], n, c, ans;
+int main()
+{
+    ios::sync_with_stdio(false);
+    cin.tie(NULL);
+    cout.tie(NULL);
+    cin >> n >> c;
+    for (int i = 1; i <= n; i++) cin >> nums[i];
+    sort(nums + 1, nums + 1 + n);
+    nums[n + 1] = INT64_MAX;
+    for (int i = 1; i <= n; i++)
+    {
+        int ret = nums[i] + c;
+        int x1 = lower_bound(nums + 1, nums + 2 + n, ret) - nums;
+        int x2 = upper_bound(nums + 1, nums + 2 + n, ret) - nums;
+        ans += x2 - x1;
+    }
+    cout << ans;
+    return 0;
+}
 
 
-//P1678 烦恼的高考志愿
+```
+
+luogu P1678 烦恼的高考志愿
+
+```c++
 #include <iostream>
 #include <algorithm>
 using namespace std;
@@ -3362,9 +3397,11 @@ int main()
     cout << sum;
     return 0;
 }
+```
 
+luogu P1163 银行贷款
 
-//P1163 银行贷款
+```c++
 #include <iostream>
 #include <algorithm>
 using namespace std;
@@ -3391,9 +3428,11 @@ int main()
     printf("%.1f", l * 100);
     return 0;
 }
+```
 
+luogu P2440 木材加工
 
-//P2440 木材加工
+```c++
 #include <iostream>
 #include <algorithm>
 using namespace std;
@@ -3420,9 +3459,11 @@ int main()
     cout << l;
     return 0;
 }
+```
 
+luogu P1182 数列分段 Section II
 
-//P1182 数列分段 Section II
+```c++
 #include <iostream>
 #include <algorithm>
 using namespace std;
@@ -3463,10 +3504,79 @@ int main()
 //当mid为4时，cnt会变成5，导致r = mid, 此时区间为(1, 4],是无意义区间，会导致答案错误
 ```
 
-vjudge
+luogu P8647 分巧克力
 
 ```c++
-//跳石头
+#include <iostream>
+#include <algorithm>
+using namespace std;
+const int N = 2e5 + 5;
+struct str
+{
+    int x, y;
+}area[N];
+int n, k, sum;
+bool check(int mid)
+{
+    sum = 0;
+    for (int i = 1; i <= n; i++)
+        sum += (area[i].x / mid) * (area[i].y / mid);
+    if (sum >= k) return true;
+    else return false;
+}
+int main()
+{
+    cin >> n >> k;
+    for (int i = 1; i <= n; i++) cin >> area[i].x >> area[i].y;
+    int l = 1, r = 100000;
+    while (l < r)
+    {
+        int mid = l + r + 1 >> 1;
+        if (check(mid)) l = mid;
+        else r = mid - 1;
+    }
+    cout << l << endl;
+    return 0;
+}
+```
+
+P3382 【模板】三分法
+
+```c++
+#include<iostream>
+#include<algorithm>
+#include<cmath>
+using namespace std;
+double q[15];
+double n, l, r;
+#define eps 1e-6
+double f(double x)
+{
+	double sum=0;
+	for (int i = 1; i <= n + 1; i++)
+        sum = sum * x + q[i];
+	return sum;
+}
+int main()
+{
+	cin >> n >> l >> r;
+	for (int i = 1;i <= n + 1;i++)
+		cin >> q[i];
+	while (r - l > eps)
+    {
+		double mid1 = l + (r - l) / 3;
+		double mid2 = r - (r - l) / 3;
+		if (f(mid1) < f(mid2)) l = mid1;
+		else r = mid2;
+	}
+	printf("%.5f", l);
+    return 0;
+}
+```
+
+voj 跳石头
+
+```c++
 #include <iostream>
 #include <algorithm>
 using namespace std;
@@ -3512,9 +3622,11 @@ int main()
 // //x = 12  5 2 3 4
 // //r = 25 11 4 4 4
 // //l = 0   0 0 3 4
+```
 
+Cable master
 
-//Cable master
+```c++
 #include <iostream>
 #include <algorithm>
 #include <cmath>
@@ -3544,9 +3656,13 @@ int main()
 	printf("%.2f", floor(mid * 100) / 100); //注意必须利用floor向下取整，不能四舍五入
 	return 0;
 }
+```
 
+voj Freefall
 
-//Freefall
+此题之所以前面不过，是因为在最后没有考虑取整，因为用的是double算，而能过掉一些案例，是因为可能取的小数算的答案和正确结果相差不大，但是事实上我们是需要对它作向下取整和向上取整的判断的，因为你算的小数，两侧附近的整数点都可能是答案
+
+```c++
 //三分
 //?
 #include <iostream>
@@ -3575,9 +3691,36 @@ int main()
 	printf("%.10lf", l * b + a / sqrt(l + 1));
 	return 0;
 }
+//AC
+#include <iostream>
+#include <algorithm>
+#include <cmath>
+using namespace std;
+double a, b;
+#define eps 1e-10
+double f(double x)
+{
+    return x * b + a / sqrt(x + 1);
+}
+int main()
+{
+	scanf("%lf%lf", &a, &b);
+	double l = 0, r = a, lmid, rmid; //!
+	while (r - l > eps)
+	{
+		lmid = l + (r - l) / 3;
+		rmid = r - (r - l) / 3;
+		if (f(lmid) - f(rmid) > eps) l = lmid + 1;
+		else r = rmid - 1;
+	}
+	printf("%.10f", min(f(ceil(l)), f(floor(l))));
+	return 0;
+}
+```
 
+voj Last Rook
 
-//Last Rook
+```c++
 //TLE
 #include <iostream>
 #include <algorithm>
@@ -3620,9 +3763,11 @@ int main()
 	if (flag) printf("! %d %d\n", up, l);
 	return 0;
 }
+```
 
+voj Pie
 
-//Pie
+```c++
 #include <iostream>
 #include <algorithm>
 #include <cmath>
@@ -3660,9 +3805,11 @@ int main()
 	}
 	return 0;
 }
+```
 
+voj Monthly Expense
 
-//Monthly Expense
+```c++
 #include <iostream>
 #include <algorithm>
 using namespace std;
@@ -3702,9 +3849,61 @@ int main()
 	return 0;
 }
 
-
-
 ```
+
+voj Yukari's Birthday
+
+```c++
+//？？？
+#include <iostream>
+#include <algorithm>
+#include <cmath>
+using namespace std;
+#define LL long long
+LL n, r, k, s;
+LL binary(LL x)
+{
+    LL left = 2, right = n, sum = 0;
+    while (left <= right)
+    {
+        sum = 0, s = 1;
+        LL mid = left + (right - left) / 2;
+        for (int i = 1; i <= x; i++)
+        {
+            s *= mid;
+            sum += s;
+            if (sum > n) break;
+        }
+        if (sum == n || sum == n - 1) return mid;
+        else if (sum < n - 1) left = mid + 1;
+        else right = mid - 1;
+    }
+    return -1;
+}
+int main()
+{
+    ios::sync_with_stdio(false);
+    cin.tie(NULL);
+    cout.tie(NULL);
+    while (~scanf("%d", &n))
+    {
+        r = 1, k = n - 1;
+        for (int i = 2; i <= 40; i++)
+        {
+            LL tmp = binary(i);
+            if (tmp != -1 && tmp * i < r * k)
+            {
+                r = i;
+                k = tmp;
+            }
+        }
+        cout << r << " " << k << endl;
+    }
+    return 0;
+}
+```
+
+
 
 #### 单调栈与单调队列
 
@@ -4214,6 +4413,51 @@ int main()
     }
     return 0;
 }
+
+//AC
+#include <bits/stdc++.h>
+using namespace std;
+int main()
+{
+    int t;
+    ios::sync_with_stdio(false);
+    while (cin >> t)
+    {
+        while (t--)
+        {
+            string s;
+            int n;
+            cin >> s >> n;
+            map<int, int> q;
+            int l = 0, r = 0;
+            int cnt = 0;
+            long long ans = 0;
+            int len = s.size();
+            int i = 0, j = 0;
+            while (i <= j && i < len)
+            {
+                while (j < len && cnt < n)
+                {
+                    if (!q[s[j] - 'a'])
+                        cnt++;
+                    q[s[j] - 'a']++;
+                    j++;
+                }
+                if (cnt >= n)
+                {
+                    ans += len - j + 1;
+                }
+                if (q[s[i] - 'a'] == 1)
+                {
+                    cnt--;
+                }
+                q[s[i] - 'a']--;
+                i++;
+            }
+            cout << ans << '\n';
+        }
+    }
+}
 ```
 
 luogu P1381 单词背诵
@@ -4307,6 +4551,53 @@ int main()
         ans = max(ans, tt - i + maxn[tt]);
     }
     cout << ans;
+    return 0;
+}
+```
+
+ hdu 1937 Finding Seats
+
+本题别无他法，必须遍历每一个矩形，因为题目给的行列长度数据小于300，这也注定这道题需要给到n^3的复杂度，需要注意的是，遍历每一个矩形，也不是真就从1到n*n的大小一个一个遍历，而是**给定上界和下界，再给定右界或者左界，形成一个二维滑动窗口**，维护最小值即可。
+
+```c++
+#include <iostream>
+#include <algorithm>
+using namespace std;
+const int N = 305;
+int r, c, k, ans;
+char a;
+int room[N][N];
+int main()
+{
+    ios::sync_with_stdio(false);
+    cin.tie(NULL);
+    cout.tie(NULL);
+    while (cin >> r >> c >> k && r + c + k)
+    {
+        ans = INT32_MAX;
+        for (int i = 1; i <= r; i++)
+            for (int j = 1; j <= c; j++)
+            {
+                    cin >> a;
+                    if (a == '.') room[i][j] = 1;
+                    else room[i][j] = 0;
+                    room[i][j] += room[i][j - 1] + room[i - 1][j] - room[i - 1][j - 1];
+            }
+        for (int i = 1; i <= r; i++) //(i, p) (j, l)
+            for (int j = i; j <= r; j++)
+            {
+                int p = 1;
+                for (int l = 1; l <= c; l++)
+                {
+                    while (room[j][l] - room[i - 1][l] - room[j][p - 1] + room[i - 1][p - 1] >= k)
+                    {
+                        ans = min(ans, (j - i + 1) * (l - p + 1));
+                        p++;
+                    }
+                }
+            }
+        cout << ans << endl;
+    }
     return 0;
 }
 ```

@@ -3716,6 +3716,39 @@ int main()
 	printf("%.10f", min(f(ceil(l)), f(floor(l))));
 	return 0;
 }
+//参考代码
+#include <iostream>
+#include <iomanip>
+#include <cmath>
+using namespace std;
+using LL = long long;
+int main()
+{
+    LL a, b;
+    cin >> a >> b;
+    auto f = [&](LL n) -> double 
+    { 
+        return (double) a / sqrt(n + 1) + (double) b * n;
+    };
+    LL l = 0, r = a / b;
+    while (r - l > 2)
+    {
+        LL m1 = (l * 2 + r) / 3;
+        LL m2 = (l + r * 2) / 3;
+        //LL m1 = l + (r - l) / 3;  //这种分发也可以,有些小误差,但也能ac
+        //LL m2 = r - (r - l) / 3;
+        if (f(m1) > f(m2)) l = m1;
+        else r = m2;
+    }
+    double ans = a;
+    for (LL i = l; i <= r; i++)
+    {
+        ans = min(ans, f(i));
+    }
+    cout << fixed << setprecision(10) << ans << endl;
+    return 0;
+}
+
 ```
 
 voj Last Rook
@@ -3900,6 +3933,75 @@ int main()
         cout << r << " " << k << endl;
     }
     return 0;
+}
+```
+
+voj Last Rock
+
+```
+注意点：
+题中出现的刷新缓存区，这意味着要使用endl,这是C++交互代码必须要注意的,而且若使用'\n'代替endl,缓存区可能不会刷新,所以务必注意,但是有时使用'\n'也能ac,不必太在意.
+与示例代码一样,将二叉搜索的段管理为半开放段可能很有用, [1, n + 1)以减少条件分支并帮助实现更容易(也取决于偏好)
+此题中的超过20次会自动输出-1意味着提交错误,这个系统自己完成的,无需在程序中完成,这是个比较特别的判定,需要特别注意.
+```
+
+```c++
+#include <iostream>
+using namespace std;
+int send(int a, int b, int c, int d)
+{
+    cout << "? " << a << " " << b << " " << c << " " << d << endl;
+    cin >> a;
+    return a;
+}
+int main()
+{
+    int N; 
+    cin >> N;
+    int u = 1, d = N + 1;
+    while (u + 1 != d)
+    {
+        int m = (u + d) >> 1;
+        int c = send(u, m - 1, 1, N);
+        (c == m - u ? u : d) = m;
+    }
+    int l = 1, r = N + 1;
+    while (l + 1 != r)
+    {
+        int m = (l + r) >> 1;
+        int c = send(1, N, l, m - 1);
+        (c == m - l ? l : r) = m;
+    }
+    cout << "!" << u << " " << l << endl;
+    return 0;
+}
+//
+#include <iostream>
+using namespace std;
+int n, num;
+int main()
+{
+    cin >> n;
+	int up = 1, down = n; 
+	while (up < down)
+	{
+		int mid = up + (down - up) / 2;
+        cout << "? " << up << ' ' <<  mid << ' ' << 1 << ' ' << n << endl;
+        cin >> num;
+		if (num != (mid - up + 1)) down = mid;
+		else up = mid + 1;
+	}
+	int l = 1, r = n;
+	while (l < r)
+	{
+		int mid = l + (r - l) / 2;
+        cout << "? " << 1 << ' ' << n << ' ' << l << ' ' << mid << endl;
+        cin >> num;
+		if (num != (mid - l + 1)) r = mid;
+		else l = mid + 1;
+	}
+    cout << "! " << up << ' ' << l << endl;
+	return 0;
 }
 ```
 
@@ -4596,6 +4698,172 @@ int main()
                     }
                 }
             }
+        cout << ans << endl;
+    }
+    return 0;
+}
+```
+
+
+
+#### 数论分块
+
+soj [1433 : 除法向下取整求和](https://soj.csgrandeur.cn/csgoj/problemset/problem?pid=1433)
+
+```c++
+#include <iostream>
+#include <algorithm>
+using namespace std;
+#define LL long long
+LL n, cnt;
+int main()
+{
+    while (cin >> n)
+    {
+        cnt = 0;
+        for (int l = 1, r; l <= n; l = r + 1)
+        {
+            r = n / (n / l);
+            cnt += n / l * (r - l + 1);
+        }
+        cout << cnt << endl;
+    }
+    return 0;
+}
+```
+
+soj [1434 : 两个除法向下取整求和](https://soj.csgrandeur.cn/csgoj/problemset/problem?pid=1434)
+
+```c++
+#include <iostream>
+#include <algorithm>
+using namespace std;
+#define LL long long
+LL n, m, cnt;
+int main()
+{
+    while (cin >> n >> m)
+    {
+        cnt = 0;
+        for (int l = 1, r; l <= n; l = r + 1)
+        {
+            r = min(n / (n / l), m / (m / l));
+            cnt += (n / l) * (m / l) * (r - l + 1);
+        }
+        cout << cnt << endl;
+    }
+    return 0;
+}
+```
+
+soj [1435 : 等差数列与除法向下取整之积求和](https://soj.csgrandeur.cn/csgoj/problemset/problem?pid=1435)
+
+```c++
+#include <iostream>
+#include <algorithm>
+using namespace std;
+#define LL long long
+LL n, m, cnt;
+int main()
+{
+    while (cin >> n)
+    {
+        cnt = 0;
+        for (int l = 1, r; l <= n; l = r + 1)
+        {
+            r = n / (n / l);
+            cnt += (n / l) * (l + r) * (r - l + 1) / 2; 
+        }
+        cout << cnt << endl;
+    }
+}
+```
+
+soj [1436 : 稍显复杂的数论分块](https://soj.csgrandeur.cn/csgoj/problemset/problem?pid=1436)
+
+```
+此题确实是将数论分块用到了极致，可以以3 10 20 30 为例，在纸上列出每个数对应不同i的取整数，会发现在i固定的情况下，当n递增时，相同余数的分块的长度越来越小，但在7之后也能出现相同余数
+ 
+ ... 5  6  7  8  9  10
+10    2  1  1  1  1   1   //5个1
+20    4  3  2  2  2   2   //4个2
+30    6  5  4  3  3   3   //3个3
+注意上面的相同余数区间段的长度,而8 9 10 出现了重复的区间段,所以他们的对应的取整数能相等,也就是连乘积能相等,但是遗憾的是,只有某些区间是如此而已,有些没有相同连乘积,确实是需要一个一个慢慢算,判断是否有相等连乘积的方法就是判断他们的右区间,取最小右区间即是相等的长度
+除此以外,此题还需要注意的是,取模类的题目,不但要注意超int的时候临时转long long,还要随时控制不要超long long,比如三个数连乘的时候,每次都取一下模,控制数据范围, a * b % mod * c % mod
+```
+
+```c++
+#include <iostream>
+#include <algorithm>
+using namespace std;
+#define LL long long
+const int N = 1e6 + 10;
+const int mod = 1e9 + 7;
+int fib[N], m, nums[110], minn;
+int Solve()
+{
+    int ret = 0, tmp;
+    for (int i = 1, j; i <= minn; i = j + 1)
+    {
+        j = nums[0] / (nums[0] / i);
+        for (int k = 0; k < m; k++)
+            j = min(j, nums[k] / (nums[k] / i)); //取最小右区间
+        tmp = 1;
+        for (int k = 0; k < m; k++)
+            tmp = 1LL * tmp * (nums[k] / i) % mod; //1LL可以临时转化为long long,防止超int范围,再次取模防止超LL
+        ret = (ret + 1LL * tmp * (fib[j] - fib[i - 1]) % mod) % mod;
+    }
+    return (ret + mod) % mod; //取模类题目需要特别注意的!不管是否需要,最后结果都给它加个mod再取模,防止ret为负数
+}
+void Set_Fib()
+{
+    fib[0] = 1; fib[1] = 1;
+    for (int i = 2; i < N; i++)
+        fib[i] = (fib[i - 1] + fib[i - 2]) % mod;
+    for (int i = 1; i < N; i++)
+        fib[i] = (fib[i] + fib[i - 1]) % mod;
+}
+int main()
+{
+    Set_Fib();
+    while (cin >> m)
+    {   
+        minn = INT32_MAX;
+        for (int i = 0; i < m; i++)
+        {
+            cin >> nums[i];
+            minn = min(minn, nums[i]);
+        }
+        int r = Solve();
+        cout << r << endl;
+    }
+    return 0;
+}
+```
+
+[1437 : 数论分块之小小的变通](https://soj.csgrandeur.cn/csgoj/problemset/problem?pid=1437)
+
+本题看似取模，实际上就是在整除分块，然后利用所得模是等差数列，用等差数列求和公式即可
+
+```c++
+#include <iostream>
+#include <algorithm>
+using namespace std;
+#define LL long long
+int main()
+{
+    LL n, k;
+    while (cin >> n >> k)
+    {
+        LL left = 1, right, rest, ans = 0;
+        while (left <= n && left <= k)
+        {
+            right = min(k / (k / left), n);
+            rest = k % left;
+            ans += (rest + rest - (right - left) * (k / left)) * (right - left + 1) / 2;
+            left = right + 1;
+        }
+        if (n > k) ans += k * (n - k);
         cout << ans << endl;
     }
     return 0;

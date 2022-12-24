@@ -3261,8 +3261,6 @@ int main()
     }
     return 0;
 }
-
-
 ```
 
 luogu P2249 【深基13.例1】查找
@@ -4239,10 +4237,88 @@ int main()
 }
 ```
 
-poj
+poj 2559
+
+可用数组模拟构造单调递增栈, 也可以直接用STL栈. 思路:遇到比栈顶元素大的, 可以存进一个结构体数组, 该结构体保存目前某个矩形继承的长和宽, 初始宽度为1, 当遇到小于栈顶元素高度的元素时, 栈顶元素出栈, 并且继承上一个出栈元素的宽, 如此累加, 每次操作都需要维护面积最大值 
 
 ```c++
-
+//TLE
+#include <stack>
+#include <vector>
+#include <iostream>
+using namespace std;
+int n, h, ans;
+int main()
+{
+    while(cin >> n && n)
+    {
+        ans = 0;
+        vector<pair<int, int>> vec;
+        for (int i = 0; i < n; i++)
+        {
+            cin >> h;
+            pair<int, int> p(h, h);
+            while (!vec.empty() && h < vec.back().first)
+            {
+                vec.pop_back();
+                p.second += p.first;
+            }
+            vec.push_back(p);
+            ans = max(ans, p.second);
+            if (!vec.empty() && h >= vec.back().first)
+            {
+                for (auto it = vec.begin(); it != vec.end(); it++)
+                {
+                    if (it != vec.end() - 1) (*it).second += (*it).first;
+                    ans = max(ans, (*it).second);
+                }
+            }
+        }
+        cout << ans << endl;
+    }
+    return 0;
+}
+//AC
+#include <iostream>
+#include <cstdio>
+#include <algorithm>
+using namespace std;
+long long n, ans, que, top, tmp, a[100100];
+struct str
+{
+    long long h, w;
+}f[100100]; //存储目前的长和宽
+int main()
+{
+    while (cin >> n && n)
+    {
+        que = 1;
+        ans = 0;
+        for (int i = 1; i <= n; i++) cin >> a[i];
+        for (int i = 1; i <= n; i++)
+        {
+            top = 0;                       //计算能达到的宽
+            while(que > 0 && f[que - 1].h >= a[i])
+            {
+                que--;                     //出栈
+                tmp = f[que].h * (f[que].w + top); //计算面积
+                ans = max(ans, tmp);       //维护最大值
+                top += f[que].w;           //继承宽度
+            }
+            f[que].h = a[i], f[que++].w = 1 + top;  //压入栈
+        }
+        top = 0;
+        while (que > 0)
+        {
+            que--;
+            tmp = f[que].h * (f[que].w + top);
+            ans = max(ans, tmp);
+            top += f[que].w;
+        }
+        cout << ans << endl;
+    }
+    return 0;
+}
 ```
 
 
@@ -4336,26 +4412,26 @@ void solve()
 {
     vector<int> v;
     cin >> n;
-    long long num = 1;
+    long long sum = 1;
     int l = 1, r = 1;
     while (l <= r)
     {
-        if (num == n)
+        if (sum == n)
         {
             cnt++;
             v.push_back(r - l + 1);
             for (int i = l; i <= r; i++)
                 v.push_back(i);
         }
-        if (num >= n)
+        if (sum >= n)
         {
-            num -= l * l;
+            sum -= l * l;
             l++;
         }
-        else if (num < n)
+        else if (sum < n)
         {
             r++;
-            num += r * r;
+            sum += r * r;
         }
     }
     cout << cnt << endl;
@@ -4865,6 +4941,530 @@ int main()
         }
         if (n > k) ans += k * (n - k);
         cout << ans << endl;
+    }
+    return 0;
+}
+```
+
+#### 分治
+
+[【寒期集训-入门组】复杂度分析、分治思想 - Virtual Judge (csgrandeur.cn)](https://vjudge.csgrandeur.cn/contest/535280#overview)
+
+A - 汉诺塔问题(Tower of Hanoi)
+
+```c++
+#include <iostream>
+using namespace std;
+char a, b, c;
+int n;
+void print(int n, char a, char b, char c)
+{
+    printf("%d:%c->%c\n", n, a, c);
+}
+void solve(int n, char a, char b, char c)
+{
+    if (!n) return;
+    solve(n - 1, a, c, b);
+    print(n, a, b, c);
+    solve(n - 1, b, a, c);
+}
+int main()
+{
+    cin >> n >> a >> b >> c;
+    solve(n, a, b, c);
+    return 0;
+}
+```
+
+B - 快速排序
+
+```c++
+#include <iostream>
+#include <algorithm>
+#include <vector>
+using namespace std;
+vector<int> v;
+int n, tmp;
+void my_sort(int tmp)
+{
+    int a = lower_bound(v.begin(), v.begin() + v.size(), tmp) - v.begin();
+    v.insert(v.begin() + a, tmp);
+}
+int main()
+{
+    cin >> n;
+    for (int i = 1; i <= n; i++)
+    {
+        cin >> tmp;
+        my_sort(tmp);
+    }
+    
+    for (auto it = v.begin(); it != v.end(); it++)
+    {
+        if (it == v.begin()) cout << *it;
+        else cout << " " << *it;
+        if (it == v.end() - 1) cout << endl;
+    }
+}
+```
+
+C - 逆序对
+
+**归并排序: 查找逆序对的对数, 建立在归并操作上的一种有效排序算法, 采用的是分治法(二分法)**
+
+**时间复杂度: O(nlogn)**		**空间复杂度: O(n)**
+
+该算法首先将一个序列进行二分, 直到分解成n个元素(l == r); 从最小长度的区间(2)开始对子序列排序(二分到最后的时候一个元素一定是有序的) , 同时要把每个子序列的逆序列对数加起来, 然后合并已经有序的子序列, 有序的子序列便于后面再找逆序列, 同时该子序列内的数不再参与和自身序列的数的结合, 注意每次都要将已有序的b数组复制到a数组(原数组)中, 这就是排序与合并的体现.
+
+```c++
+#include <iostream>
+#include <algorithm>
+#include <vector>
+using namespace std;
+const int N = 5e5 + 1;
+int n, a[N], b[N];
+long long ans;
+void msort(int l, int r)
+{
+    int mid = (l + r) / 2;
+    if (l == r) return;
+    else
+    {
+        msort(l, mid);
+        msort(mid + 1, r);
+    }
+    int i = l, j = mid + 1, t = l;
+    while (i <= mid && j <= r)
+    {
+        if (a[i] > a[j])
+        {
+            ans += mid - i + 1;
+            b[t++] = a[j];
+            j++;
+        }
+        else
+        {
+            b[t++] = a[i];
+            i++;
+        }
+    }
+    while (i <= mid)
+    {
+        b[t++] = a[i];
+        i++;
+    }
+    while (j <= r)
+    {
+        b[t++] = a[j];
+        j++;
+    }
+    for (int i = l; i <= r; i++) a[i] = b[i];
+    return;
+}
+int main()
+{
+    cin >> n;
+    for (int i = 1; i <= n; i++)
+        cin >> a[i];
+    msort(1, n);
+    cout << ans;
+    return 0;
+}
+```
+
+D - 最大子段和
+
+```c++
+#include <iostream>
+#include <algorithm>
+#include <vector>
+using namespace std;
+int n, ans = -1e4, ret, sum;
+int main()
+{
+    cin >> n;
+    for (int i = 0; i < n; i++)
+    {
+        cin >> ret;
+        sum = sum > 0 ? sum : 0;
+        sum += ret;
+        ans = max(ans, sum);
+    }
+    cout << ans;
+    return 0;
+}
+```
+
+E - Fractal
+
+尽量不要使用pow函数再使用除法吧, 感觉会出现很多问题, 手写pow函数或许更安全
+
+```c++
+#include <iostream>
+#include <algorithm>
+#include <cmath>
+using namespace std;
+char room[1005][1005];
+void solve(int n, int a, int b)
+{
+    if (n == 1)
+    {
+        room[a][b] = 'X';
+        return;
+    }
+    int d = pow(3.0, n - 2);
+    solve(n - 1, a, b);
+    solve(n - 1, a, b + d * 2);
+    solve(n - 1, a + d, b + d);
+    solve(n - 1, a + d * 2, b);
+    solve(n - 1, a + d * 2, b + d * 2);
+}
+int main()
+{
+    int n;
+    for (int i = 0; i <= 750; i++)
+        for (int j = 0; j <= 750; j++)
+            room[i][j] = ' ';
+    while (cin >> n && n != -1)
+    {
+        solve(n, 0, 0);
+        for (int i = 0; i < pow(3.0, n - 1); i++)
+            {
+                for(int j = 0; j < pow(3.0, n - 1); j++)
+                    cout << room[i][j];
+                cout << endl;
+            }
+        cout << "-" << endl;
+    }
+    return 0;
+}
+```
+
+F - 很大的数组的第k小
+
+**快速排序: 用于寻找第k大(第k小)的数, 时间复杂度为O(n)**
+
+这道题可作为**快速排序**的模板题, 需要记忆. 快速排序的核心思想是在要排序的数组中选择一个数, 然后将数组中比这个数小的放在这个数的左边, 比这个数大的放在他的右边, 现在我们要找第k小的数, 那么如果在数组中选了一个数, 用快排的方法, 将比这个数小的数都放在它的左边, 而左边的数(加标签个数), 若小于k个, 说明这个数应该在标签的右边,  若大于k个, 说明在标签左边, 若刚好等于k, 说明这个标签正是我们要找的数. 
+
+```
+#include<cstdio>
+#include<cstring>
+#include<cstdlib>
+using namespace std;
+const int mod = 1e9 + 7;
+const int maxn = 5e7 + 10;
+int n, m, k, a[maxn];
+int Quickfind(int l, int r, int k)
+{
+    if (l >= r - 1) return a[l];
+    int low = l, high = r - 1, center = a[low];
+    while (low < high)
+    {
+        while (low < high && a[high] >= center) high--;
+        a[low] = a[high];
+        while (low < high && a[low] <= center) low++;
+        a[high] = a[low];
+    }
+    a[low] = center;
+    if (k == low - l + 1) return a[low];
+    if (k < low - l + 1) return Quickfind(l, low, k);
+    return Quickfind(low + 1, r ,k - low + l - 1);
+}
+int main()
+{
+    while (scanf("%d%d%d", &n, &m, &k) != EOF)
+    {
+        a[0] = m;
+        for (int i = 1; i < n; i++)
+            a[i] = 1LL * a[i - 1] * m % mod;
+        printf("%d\n", Quickfind(0, n, k));
+    }
+    return 0;
+}
+```
+
+G - 地毯填补问题
+
+考虑`2*2`的情况，一个地毯可以搞定.
+
+考虑`4*4`的情况，是`4`个`2*2`的子问题拼成的，且只有一个子问题里包含公主的位置.
+
+如果在中间的`4`个格子放一块地毯，形状是覆盖三个不包含公主的子问题，相当于这三个子问题各被占据了一个格子，都把被占据的格子当作公主的话，那么`4`个子问题就都是有一个公主的子问题了.
+
+![img](https://user-images.githubusercontent.com/5326601/209115340-158f67a9-879b-41d0-a958-e76db6323d50.png)
+
+那么分治策略就是，不断把问题分成`4`个子问题，每次都将中间`4`个格子放一块地毯，缺口留给有公主的那个子问题.
+
+```c++
+//CSGrandeur
+#include<cstdio>
+#include<cstring>
+#include<cstdlib>
+int k, px, py;
+void DFS(int cur, int x, int y, int tpx, int tpy) {
+    int ps = (tpx - x) / cur << 1 | (tpy - y) / cur, c = ps ^ 3;
+    printf("%d %d %d\n", x + cur + (c >> 1), y + cur + (c & 1), ps + 1);
+    if(cur == 1) return;
+    DFS(cur >> 1, x, y, ps == 0 ? tpx : x + cur - 1, ps == 0 ? tpy : y + cur - 1);
+    DFS(cur >> 1, x, y + cur, ps == 1 ? tpx : x + cur - 1, ps == 1 ? tpy : y + cur);
+    DFS(cur >> 1, x + cur, y, ps == 2 ? tpx : x + cur, ps == 2 ? tpy : y + cur - 1);
+    DFS(cur >> 1, x + cur, y + cur, ps == 3 ? tpx : x + cur, ps == 3 ? tpy : y + cur);
+}
+int main() {
+    while(scanf("%d", &k) != EOF) {
+        scanf("%d%d", &px, &py);
+        px --, py --;
+        DFS(1 << k - 1, 0, 0, px, py);        
+    }
+    return 0;
+}
+```
+
+H - 快速幂||取余运算
+
+快速幂，就是快速计算某个数的n次幂。其时间复杂度为 O(log₂N)， 与朴素的O(N)相比效率有了极大的提高
+
+```c++
+#include <iostream>
+using namespace std;
+int PowMod(int a, int n, int mod)
+{
+    int ret = 1;
+    for ( ; n; n >>= 1, a = 1LL * a * a % mod)
+        if (n & 1) ret = 1LL * ret * a % mod;
+    return ret;
+}
+int main()
+{
+    int a, b, p;
+    while (scanf("%d%d%d", &a, &b, &p) != EOF)
+        printf("%d^%d mod %d=%d\n", a, b, p, PowMod(a, b, p));
+    return 0;
+}
+```
+
+I - 矩阵快速幂
+
+矩阵的快速幂与整数快速幂原理相同，只不过答案矩阵的初始状态不再是1，而是一个单位矩阵，因为单位矩阵在矩阵中的作用等同于整数中的1。因此矩阵快速幂的思路就是先定义好矩阵类型，再定义矩阵乘法，然后定义矩阵快速幂的函数。
+
+```c++
+//ygtrece
+#include <iostream>
+#include <cstring>
+using namespace std;
+#define LL long long
+const LL mod = 1e9 + 7;
+LL n, k;
+struct matrix
+{
+    LL mat[100][100];
+    void init ()
+    {
+        memset(mat, 0, sizeof mat);
+    }
+};
+matrix mul(matrix a, matrix b) //return a * b
+{
+    matrix c;
+    c.init();
+    for (int i = 0; i < n; i++)
+        for (int j = 0; j < n; j++)
+            for (int k = 0; k < n; k++)
+            {
+                c.mat[i][j] += ((a.mat[i][k] % mod) * (b.mat[k][j] % mod)) % mod;
+                c.mat[i][j] %= mod;
+            }
+    return c;
+}
+matrix fast_pow(matrix A, LL k) //return A ^ k % mod
+{
+    matrix B;
+    B.init();
+    for (int i = 0; i < n; i++) B.mat[i][i] = 1; //单位矩阵
+    for ( ; k; k >>= 1, A = mul(A, A))
+        if (k & 1) B = mul(A, B);
+    return B;
+}
+int main()
+{
+    while (scanf("%lld%lld", &n, &k) != EOF)
+    {
+        matrix M;
+        for (int i = 0; i < n; i++)
+            for (int j = 0; j < n; j++)
+                cin >> M.mat[i][j];
+        matrix T = fast_pow(M, k);
+        for (int i = 0; i < n; i++, printf("\n"))
+            for (int j = 0; j < n; j++)
+                printf(" %d" + !j, T.mat[i][j]);
+    }
+    return 0;
+}
+//CSGrandeur
+#include <cstdio>
+#include <vector>
+using namespace std;
+long long n, k;
+const int mod =1e9 + 7;
+struct Mat
+{
+    vector<vector<int>> v;
+    int n;
+    Mat(int n_, int val = 0)
+    {
+        n = n_;
+        v = vector<vector<int>>(n + 10, vector<int>(n + 10, val));
+    }
+    Mat operator*=(const Mat &that)
+    {
+        vector<vector<int>> c(n + 10, vector<int>(n + 10, 0));
+        for (int i = 0; i < n; i++)
+            for (int k = 0; k < n; k++)
+            {
+                int tmp = v[i][k];
+                for (int j = 0; j < n; j++)
+                    c[i][j] = (c[i][j] + 1LL * tmp * that.v[i][j] % mod) % mod;
+            }
+            v.swap(c);
+            return *this;
+    }
+};
+Mat PowMat(Mat &a, long long k)
+{
+    Mat ret(n);
+    for (int i = 0; i < n; i++) ret.v[i][i] = 1;
+    for (; k; k >>= 1, a *= a)
+        if (k & 1) ret *= a;
+    return ret;
+}
+int main()
+{
+    while (scanf("%lld%lld", &n, &k) != EOF)
+    {
+        Mat a(n);
+        for (int i = 0; i < n; i++)
+            for (int j = 0; j < n; j++)
+                scanf("%d", &a.v[i][j]);
+        a = PowMat(a, k);
+        for (int i = 0; i < n; i++, printf("\n"))
+            for (int j = 0; j < n; j++)
+                printf(" %d" + !j, a.v[i][j]);
+    }
+    return 0;
+}
+```
+
+J - Fibonacci
+
+计算**斐波那契数列**的重要方法: 矩阵快速幂
+
+```c++
+//ygtrece
+#include <cstdio>
+#include <cstring>
+using namespace std;
+long long n, k;
+const int mod = 1e4;
+struct matrix
+{
+    long long mat[2][2];
+    void init()
+    {
+        memset(mat, 0, sizeof mat);
+    }
+};
+matrix mul(matrix A, matrix B)
+{
+    matrix C;
+    C.init();
+    for (int i = 0; i < 2; i++)
+        for (int j = 0; j < 2; j++)
+            for (int k = 0; k < 2; k++)
+            {
+                C.mat[i][j] += ((A.mat[i][k] % mod) * (B.mat[k][j] % mod)) % mod;
+                C.mat[i][j] %= mod;  
+            }
+    return C;
+}
+matrix fast_pow(matrix A, long long k)
+{
+    matrix B;
+    B.init();
+    for (int i = 0; i < 2; i++) B.mat[i][i] = 1;
+    for (; k; k >>= 1, A = mul(A, A))
+        if (k & 1) B = mul(A, B);
+    return B;
+}
+int main()
+{
+    while (scanf("%lld", &n) != EOF && n != -1)
+    {
+        matrix A;
+        A.mat[0][0] = 1; A.mat[1][0] = 1;
+        A.mat[0][1] = 1; A.mat[1][1] = 0;
+        matrix M = fast_pow(A, n + 1);
+        printf("%lld\n", M.mat[1][1]);
+    }
+    return 0;
+}
+//1 1
+//1 0
+
+//2 1
+//1 1
+
+//3 2
+//2 1
+
+//5 3
+//3 2
+
+
+//CSGrandeur
+#include<cstdio>
+#include<cstring>
+#include<cstdlib>
+#include<vector>
+const int mod = 10000;
+using std::vector;
+struct Mat {
+    vector<vector<int> > v;
+    int n;
+    Mat(int n_, int val=0){
+        n = n_;
+        v = vector<vector<int> >(n + 10, vector<int>(n + 10, val));
+    }
+    Mat operator*=(const Mat &that) {
+        vector<vector<int> > c(n + 10, vector<int>(n + 10, 0));
+        for(int i = 0; i < n; i ++){
+            for(int k = 0; k < n; k ++) {
+                int tmp = v[i][k];
+                for(int j = 0; j < n; j ++)
+                    c[i][j] = (c[i][j] + 1LL * tmp * that.v[k][j] % mod) % mod;
+            }
+        }
+        v.swap(c);
+        return *this;
+    }
+};
+int n;
+Mat PowMat(Mat &a, int k)
+{
+    Mat ret(2);
+    for(int i = 0; i < 2; i ++) {
+        ret.v[i][i] = 1;
+    }
+    for(; k; k >>= 1, a *= a)
+        if(k & 1) ret *= a;
+    return ret;
+}
+int main() {
+    while(scanf("%d", &n) != EOF && n != -1) {
+        Mat a(2);
+        a.v[0][0] = 1, a.v[0][1] = 1; 
+        a.v[1][0] = 1, a.v[1][1] = 0; 
+        a = PowMat(a, n + 1);
+        printf("%d\n", a.v[1][1]);
     }
     return 0;
 }

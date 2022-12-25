@@ -5470,3 +5470,269 @@ int main() {
 }
 ```
 
+#### 并查集
+
+```c++
+//合并优化  少用
+int find_set(int x)
+{
+    return x == s[x] ? x : find_set(s[x]);
+}
+void init_set()
+{
+    for (int i = 1; i <= n; i++)
+    {
+        s[i] = i;
+        height[i] = 0;  //树的高度
+    }
+}
+void merge_set(int x, int y)
+{
+    x = find_set(x);
+    y = find_set(y);
+    if (hegiht[x] == height[y])
+    {
+        height[x] = height[x] + 1;
+        s[y] = x;      //合并，树的高度加1
+    }
+    else               //把矮树合并到高树上，高树的高度保持不变
+    {
+        if (height[x] < height[y]) s[x] = y;
+        else s[y] = x;
+    }
+}
+
+//查询优化(路径压缩) 常用
+int find_set(int x)
+{
+    if (x != s[x]) s[x] = find_set(s[x]);
+    return s[x];
+}
+
+//带权值的路径压缩
+int find_set(int x)
+{
+    if (x != s[x])
+    {
+        int t = s[x];            //记录父节点
+        s[x] = find_set(s[x]);   //路径压缩，递归最后返回的是根节点
+        d[x] += d[t];            //权值更新为x到根节点的权值
+    }
+    return s[x];
+}
+```
+
+hdu 1213
+
+```c++
+#include <iostream>
+#include <queue>
+#include <algorithm>
+using namespace std;
+const int N = 1050;
+int s[N];
+void init_set()
+{
+    for (int i = 1; i <= N; i++) s[i] = i;
+}
+int find_set(int x)
+{
+    return x == s[x] ? x : find_set(s[x]);
+}
+void merge_set(int x, int y)
+{
+    x = find_set(x);
+    y = find_set(y);
+    if (x != y) s[x] = s[y];
+}
+int main()
+{
+    int t, n, m, x, y;
+    for (cin >> t; t--; )
+    {
+        cin >> n >> m;
+        init_set();
+        for (int i = 1; i <= m; i++)
+        {
+            cin >> x >> y;
+            merge_set(x, y);
+        }
+        int ans = 0;
+        for (int i = 1; i <= n; i++)
+            if (s[i] == i) ans++;
+        cout << ans << endl;
+    }
+    return 0;
+}
+```
+
+luogu p3367
+
+```c++
+#include <iostream>
+#include <queue>
+#include <algorithm>
+using namespace std;
+int n, m, a, b, c, nums[10010];
+void init_set()
+{
+    for (int i = 1; i <= n; i++) nums[i] = i;
+}
+int find_set(int x)
+{
+    if (x != nums[x]) nums[x] = find_set(nums[x]);
+    return nums[x];
+}
+void merge_set(int x, int y)
+{
+    x = find_set(x);
+    y = find_set(y);
+    if (x != y) nums[x] = nums[y];
+}
+int main()
+{
+    cin >> n >> m;
+    init_set();
+    for (int i = 0; i < m; i++)
+    {
+        cin >> a >> b >> c;
+        if (a & 1) merge_set(b, c);
+        else
+        {
+            b = find_set(b);
+            c = find_set(c);
+            if (b == c) cout << "Y\n";
+            else cout << "N\n";
+        }
+    }
+    return 0;
+}
+```
+
+B - 修复公路
+
+```c++
+#include <iostream>
+#include <queue>
+#include <algorithm>
+using namespace std;
+struct str
+{
+    int x;
+    int y;
+    int t;
+}buf[100010];
+int n, m, x, y, t, cnt = 1, sum, s[1010];
+void init_set()
+{
+    for (int i = 1; i <= n; i++) s[i] = i;
+}
+int find_set(int x)
+{
+    if (x != s[x]) s[x] = find_set(s[x]);
+    return s[x];
+}
+void merge_set(int x, int y)
+{
+    x = find_set(x);
+    y = find_set(y);
+    if (x != y)
+    {
+        cnt++;
+        s[x] = s[y];
+    }
+}
+bool cmp(str a, str b)
+{
+    return a.t < b.t;
+}
+int main()
+{
+    cin >> n >> m;
+    init_set();
+    for (int i = 0; i < m; i++)
+    {
+        cin >> x >> y >> t;
+        buf[i] = {x, y, t};
+    }
+    sort(buf, buf + m, cmp);
+    for (int i = 0; i < m; i++)
+    {
+        merge_set(buf[i].x, buf[i].y);
+        if (cnt == n)
+        {
+            cout << buf[i].t << endl;
+            break;
+        }
+        if (i == m - 1) cout << "-1";
+    }
+    return 0;
+}
+```
+
+C - 亲戚
+
+```c++
+#include <iostream>
+#include <queue>
+#include <algorithm>
+using namespace std;
+int n, m, p, x, y, s[5010];
+void init_set()
+{
+    for (int i = 1; i <= n; i++) s[i] = i;
+}
+int find_set(int x)
+{
+    if (x != s[x]) s[x] = find_set(s[x]);
+    return s[x];
+}
+void merge_set(int x, int y)
+{
+    x = find_set(x);
+    y = find_set(y);
+    if (x != y) s[x] = s[y];
+}
+int main()
+{
+    cin >> n >> m >> p;
+    init_set();
+    while (m--)
+    {
+        cin >> x >> y;
+        merge_set(x, y);
+    }
+    while (p--)
+    {
+        cin >> x >> y;
+        x = find_set(x);
+        y = find_set(y);
+        if (x == y) cout << "Yes\n";
+        else cout << "No\n";
+    }
+    return 0;
+}
+```
+
+
+
+```
+map<string, int> s;
+int n, m, k;
+string name;
+int main()
+{
+    cin >> n >> m;
+    for (int i = 0; i < n; i++)
+    {
+        cin >> name;
+        s[name]++;
+    }
+    for (int i = 0; i < m; i++)
+    {
+        
+    }
+}
+
+```
+

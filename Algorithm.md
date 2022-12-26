@@ -5218,6 +5218,67 @@ int main() {
     }
     return 0;
 }
+
+//
+#include <algorithm>
+#include <iostream>
+#include <cstring>
+#include <queue>
+#include <map>
+using namespace std;
+int n, k, a[1201][1201];
+void dfs(int x1, int y1, int x2, int y2, int X, int Y)
+{
+    if (x2 - x1 == 1 && y2 - y1 == 1)
+    {
+        if (X == x1 && Y == y1) printf("%d %d 1\n", x2, y2);
+        if (X == x1 && Y == y2) printf("%d %d 2\n", x2, y1);
+        if (X == x2 && Y == y1) printf("%d %d 3\n", x1, y2);
+        if (X == x2 && Y == y2) printf("%d %d 4\n", x1, y1);
+        return;
+    }
+    int x = (x2 - x1 + 1) / 2 + x1 - 1;
+    int y = (y2 - y1 + 1) / 2 + y1 - 1;
+    if (X <= x && Y <= y)
+    {
+        dfs(x1, y1, x, y, X, Y);
+        printf("%d %d 1\n", x + 1, y + 1);
+        dfs(x + 1, y1, x2, y, x + 1, y);
+        dfs(x + 1, y + 1, x2, y2, x + 1, y + 1);
+        dfs(x1, y + 1, x, y2, x, y + 1);
+    }
+    if (X <= x && Y > y)
+    {
+        dfs(x1, y + 1, x, y2, X, Y);
+        printf("%d %d 2\n", x + 1, y);
+        dfs(x1, y1, x, y, x, y);
+        dfs(x + 1, y1, x2, y, x + 1, y);
+        dfs(x + 1, y + 1, x2, y2, x + 1, y + 1);
+    }
+    if (X > x && Y <= y)
+    {
+        dfs(x + 1, y1, x2, y, X, Y);
+        printf("%d %d 3\n", x, y + 1);
+        dfs(x + 1, y + 1, x2, y2, x + 1, y + 1);
+        dfs(x1, y1, x, y, x, y);
+        dfs(x1, y + 1, x, y2, x, y + 1);
+    }
+    if (X > x && Y > y)
+    {
+        dfs(x + 1, y + 1, x2, y2, X, Y);
+        printf("%d %d 4\n", x, y);
+        dfs(x1, y1, x, y, x, y);
+        dfs(x1, y + 1, x, y2, x, y + 1);
+        dfs(x + 1, y1, x2, y, x + 1, y);
+    }
+}
+int main()
+{
+    int x, y;
+    scanf("%d%d%d", &k, &x, &y);
+    dfs(1, 1, 1 << k, 1 << k, x, y);
+    return 0;
+}
 ```
 
 H - 快速幂||取余运算
@@ -5714,25 +5775,288 @@ int main()
 }
 ```
 
+D - 一中校运会之百米跑
 
-
-```
-map<string, int> s;
+```c++
+#include <iostream>
+#include <cstring>
+#include <queue>
+#include <map>
+using namespace std;
+map<string, string> s;
 int n, m, k;
-string name;
+string name, a, b;
+string find_set(string str)
+{
+    if (str != s[str]) s[str] = find_set(s[str]);
+    return s[str];
+}
+void merge_set(string x, string y)
+{
+    x = find_set(x);
+    y = find_set(y);
+    if (x != y) s[x] = s[y];
+}
 int main()
 {
     cin >> n >> m;
-    for (int i = 0; i < n; i++)
+    for (int i = 1; i <= n; i++)
     {
         cin >> name;
-        s[name]++;
+        s[name] = name;
     }
     for (int i = 0; i < m; i++)
     {
-        
+        cin >> a >> b;
+        merge_set(a, b);
     }
+    cin >> k;
+    for (int i = 0; i < k; i++)
+    {
+        cin >> a >> b;
+        a = find_set(a);
+        b = find_set(b);
+        if (a == b) cout << "Yes.\n";
+        else cout << "No.\n";
+    }
+    return 0;
 }
+```
 
+E - 朋友
+
+```c++
+#include <iostream>
+#include <cstring>
+#include <queue>
+#include <map>
+#include <algorithm>
+using namespace std;
+const int maxn = 1e4 + 10;
+int m, n, p, q, a, b, cnta, cntb, ret;
+int sa[maxn], sb[maxn];
+void init_set(int s[], int n)
+{
+    for (int i = 1; i <= n; i++) s[i] = i;
+}
+int find_set(int s[], int x)
+{
+    if (x != s[x]) s[x] = find_set(s, s[x]);
+    return s[x];
+}
+void merge_set(int x, int y, int s[])
+{
+    x = find_set(s, x);
+    y = find_set(s, y);
+    if (x != y && x == 1) s[y] = s[x];
+    else if (x != y) s[x] = s[y];
+}
+int Search_set(int s[], int n)
+{
+    int cnt = 0;
+    for (int i = 1; i <= n; i++)
+        if ((ret = find_set(s, i)) == 1) cnt++;
+    return cnt;
+}
+int main()
+{
+    cin >> n >> m >> p >> q;
+    init_set(sa, n);
+    init_set(sb, m);
+    while (p--)
+    {
+        cin >> a >> b;
+        merge_set(a, b, sa);
+    }
+    while (q--)
+    {
+        cin >> a >> b;
+        merge_set(a * (-1), b * (-1), sb);
+    }
+    cnta = Search_set(sa, n);
+    cntb = Search_set(sb, m);
+    cout << min(cnta, cntb) << endl;
+    return 0;
+}
+```
+
+F - 家谱
+
+```c++
+#include <iostream>
+#include <cstring>
+#include <queue>
+#include <map>
+#include <algorithm>
+using namespace std;
+map<string, string> m;
+string s, ret, name;
+string find_set(string x)
+{
+    if (x != m[x]) m[x] = find_set(m[x]);
+    return m[x];
+}
+int main()
+{
+    while (cin >> s && s[0] != '?')
+    {
+        name = s.substr(1, 6);
+        if (s[0] == '#')
+        {
+            ret = name;
+            if (!(m.count(name))) m[name] = name;
+        }
+        if (s[0] == '+') m[name] = ret;
+    }
+    while (s[0] != '$')
+    {
+        name = s.substr(1, 6);
+        cout << name << " " << find_set(name) << endl;
+        cin >> s;
+    }
+    return 0;
+}
+```
+
+G - 合并果子 / [USACO06NOV] Fence Repair G
+
+注意要将新生成的元素继续push进去
+
+```c++
+#include <iostream>
+#include <cstring>
+#include <queue>
+#include <map>
+#include <algorithm>
+using namespace std;
+int main()
+{
+    int n, a, sum = 0;
+    priority_queue<int, vector<int>, greater<int>> q;
+    for (cin >> n; n--; ) cin >> a, q.push(a);
+    while (q.size() > 1)
+    {
+        int x = q.top(); q.pop();
+        int y = q.top(); q.pop();
+        sum += x + y;
+        q.push(x + y);
+    }
+    cout << sum;
+    return 0;
+}
+```
+
+H - 世界杯
+
+```c++
+#include <iostream>
+#include <cstring>
+#include <queue>
+#include <map>
+#include <algorithm>
+using namespace std;
+int a, b, c, d, s;
+int main()
+{
+    cin >> a >> b >> c >> d;
+    priority_queue<int, vector<int>, less<int>> as;
+    priority_queue<int, vector<int>, less<int>> bs;
+    priority_queue<int, vector<int>, less<int>> cs;
+    priority_queue<int, vector<int>, less<int>> ds;
+    for (int i = 0; i < a; i++) cin >> s, as.push(s);
+    for (int i = 0; i < b; i++) cin >> s, bs.push(s);
+    for (int i = 0; i < c; i++) cin >> s, cs.push(s);
+    for (int i = 0; i < d; i++) cin >> s, ds.push(s);
+    for (cin >> a; a--; )
+    {
+        int sum = as.top();
+        as.pop();
+        cin >> b >> c >> d;
+        while (b--) sum += bs.top(), bs.pop();
+        while (c--) sum += cs.top(), cs.pop();
+        while (d--) sum += ds.top(), ds.pop();
+        printf("%.2f\n", sum / 11.0);
+    }
+    return 0;
+}
+```
+
+I - 序列合并
+
+`n`达到$10^5$, 使用枚举会超时. 先把A序列第一个和B序列所有数相加加入优先队列, 此时第一个数必定是对最小的, 因为它由A和B序列各自第一个元素组成, 后面的`n-1`的元素是第几小暂时不确定, 所以此题需要动态维护最小值, 每次操作, 都加进去上一个已知最小值的下一个可能的最小值, 注意优先队列的`pair`第一个元素储存和, 第二个元素储存的是该和对应的B序列的位置, 而`step[]`表示b序列位置对应上方走了多少步, 都是为了避免重复.
+
+```c++
+#include <algorithm>
+#include <iostream>
+#include <cstring>
+#include <queue>
+#include <map>
+using namespace std;
+const int maxn = 1e5 + 10;
+int a[maxn], b[maxn], step[maxn], n, ret;
+priority_queue<pair<int, int>, vector<pair<int, int>>, greater<pair<int, int>>> q;
+int main()
+{
+    scanf("%d", &n);
+    for (int i = 1; i <= n; i++) scanf("%d", &a[i]);
+    for (int i = 1; i <= n; i++)
+    {
+        scanf("%d", &b[i]);
+        step[i] = 1;
+        q.push(pair<int, int>(a[1] + b[i], i));
+    }
+    while (n--)
+    {
+        printf("%d ", q.top().first);
+        ret = q.top().second;
+        q.pop();
+        q.push(pair<int, int>(a[++step[ret]] + b[ret], ret));
+    }
+    return 0;
+}
+```
+
+
+
+J - Cow Dance Show S
+
+"求表演时间不大于$T_{max}$ 时的K的最小可能值" 纯纯二分味道, 但是理解题意时需要特别注意，此题奶牛的出场顺序已经被固定了, 所以不用考虑什么最优组合方案, 直接加入优先队列, 按表演时间长短排序, 下一只母牛接上最先结束的母牛即可.
+
+```c++
+#include <algorithm>
+#include <iostream>
+#include <cstring>
+#include <queue>
+#include <map>
+using namespace std;
+int k, t, ret, a[10010];
+priority_queue<int, vector<int>, greater<int>> q;
+bool check(int x)
+{
+    for (int i = 1; i <= x; i++) q.push(a[i]);
+    int sum;
+    for (int i = x + 1; i <= k; i++)
+    {
+        int tmp = q.top() + a[i];
+        q.pop(); q.push(tmp);
+    }   
+    while (!q.empty())
+        sum = q.top(), q.pop();
+    return sum <= t;
+}
+int main()
+{
+    scanf("%d%d", &k, &t);
+    for (int i = 1; i <= k; i++) scanf("%d", &a[i]);
+    int l = 1, r = 10000;
+    while (l < r)
+    {
+        int mid = l + r >> 1;
+        if (check(mid)) r = mid;
+        else l = mid + 1;
+    }
+    printf("%d", l);
+    return 0;
+}
 ```
 

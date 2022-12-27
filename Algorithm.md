@@ -4003,11 +4003,10 @@ int main()
 }
 ```
 
-
-
-#### 单调栈与单调队列
+#### 单调栈
 
 ```
+单调栈与单调队列
 二者：都可将复杂度优化至O(n)
 
 
@@ -4026,8 +4025,6 @@ int main()
 单调栈大小没有上限，而单调队列通常有大小限制。
 由于单调队列的对首可以出队以及前面的元素一定比后面的元素先入队的性质，使得它可以维护局部的单调性。因此单调队列通常用于解决局部性的最值问题
 ```
-
-###### 单调栈
 
 代码模板
 
@@ -4054,50 +4051,34 @@ for (int i = 0; i < the_number_of_element; i++)
 }
 ```
 
-luogu
+luogu P5788 【模板】单调栈
 
 ```c++
-//P5788 【模板】单调栈
-#include <iostream>
+#include <cstdio>
 #include <stack>
-#include <cstring>
 using namespace std;
-const int maxn = 3e6 + 3;
-int an[maxn], ans[maxn];
-void solve()
-{
-    int n;
-    cin >> n;
-    memset(ans, 0, sizeof ans);
-    for (int i = 0; i < n; i++) cin >> an[i];
-    stack<int> st;
-    for (int i = 0; i < n; i++)
-    {
-        if (!st.size() || an[st.top() - 1] >= an[i])
-            st.push(i + 1);
-        else
-        {
-            while (st.size() && an[st.top() - 1] < an[i])
-            {
-                ans[st.top() - 1] = i + 1;
-                st.pop();
-            }
-        }
-        st.push(i + 1);
-    }
-    for (int i = 0; i < n; i++)
-        cout << ans[i] << ' ';
-}
+const int maxn = 3e6 + 10;
+int a[maxn], n, ans[maxn];
+stack<int> s;
 int main()
-{
-    int t = 1;
-    while (t--) solve();
+{   
+    scanf("%d", &n);
+    for (int i = 1; i <= n; i++) scanf("%d", &a[i]);
+    for (int i = 1; i <= n; i++)
+    {
+        while (!s.empty() && a[s.top()] < a[i])
+        {
+            ans[s.top()] = i;    
+            s.pop();
+        }
+        s.push(i);
+    }
+    for (int i = 1; i <= n; i++) printf(" %d" + !(i - 1), ans[i]);
     return 0;
 }
 //or
 #include <iostream>
 #include <stack>
-#include <cstring>
 using namespace std;
 const int N = 3e6 + 5;
 int a[N], b[N];
@@ -4116,43 +4097,41 @@ int main()
     for (int i = 1; i <= n; i++) cout << b[i] << " ";
     return 0;
 }
+```
 
+luogu P1901 发射站
 
-//P1901 发射站
-#include <iostream>
+构造单调递减栈, 出栈的同时要将能量记录给入栈的元素, 算作是出栈元素向右发射的能量的归属, 而每一次入栈前, 入栈元素的能量要记录给栈顶元素, 算作是每一个入栈元素向左发射的能量的归属(注意要判断是否为空)
+
+```c++
+#include <cstdio>
 #include <stack>
-#include <algorithm>
 using namespace std;
-const int N = 1e6 + 5;
-long long a[N], b[N], q[N], n, ans;
+const int maxn = 1e6 + 10;
+int a[maxn], n, h, v, ans;
 int main()
 {
-    cin >> n;
-    for (int i = 1; i <= n; i++) cin >> a[i] >> b[i];
-    stack<int> sta;
-    int l = 0, r = -1;
-    for (int i = 1; i <= n; i++)
+    stack<int> s;
+    vector<pair<int, int>> vec;
+    scanf("%d", &n);
+    for (int i = 0; i < n; i++)
     {
-        while (!sta.empty() && a[sta.top()] < a[i])
-        {
-            q[i] += b[sta.top()];
-            sta.pop();
-        }  
-        sta.push(i);
+        scanf("%d%d", &h, &v);
+        pair<int, int> p(h, v);
+        vec.push_back(p);
     }
-    while (!sta.empty()) sta.pop();
-    for (int i = n; i >= 1; i--)
+    for (int i = 0; i < n; i++)
     {
-        while (!sta.empty() && a[sta.top()] < a[i])
+        while (!s.empty() && vec[s.top()].first < vec[i].first)
         {
-            q[i] += b[sta.top()];
-            sta.pop();
+            a[i] += vec[s.top()].second;
+            s.pop();
         }
-        sta.push(i);
+        if (!s.empty()) a[s.top()] += vec[i].second;
+        s.push(i);
     }
-    for (int i = 1; i <= n; i++)
-        ans = max(ans, q[i]);
-    cout << ans;
+    for (int i = 0; i < n; i++) ans = max(ans, a[i]);
+    printf("%d", ans);
     return 0;
 }
 //or
@@ -4182,9 +4161,13 @@ int main()
     cout << ans;
     return 0;
 }
+```
 
+luogu P7399 [COCI2020-2021#5] Po
 
-//P7399 [COCI2020-2021#5] Po
+单调递增栈, 此题与**luogu p5019**铺设道路其实很像, 但又有不同之处, 此题是可以加任意整数, 道路题(也可转换为高度)是每次只能加1, 所以此题的高度不能涵盖后面连续比它小的高度, 但是道路题可以, 因为道路题是逐一增加高度, 能涵盖后面连续比它小的高度, 所以此题需要判断后面的高度有无与前面高度一致的, 一致的才能够被前面的操作所包含, 如果是新出现的高度, 那必须得增加一次操作, 单调栈的维护正好方便后面的高度与前面的高度进行比较, 如果一样直接`continue`即可. 但是两个题都有的特点就是高度在出现递减之后就无法再传递给后面的高度, 这在本题体现在无用的高度会被`pop`, 在另一题则体现在遇到更高的时候`ans += a[i] - a[i - 1]` .
+
+```c++
 #include <iostream>
 #include <queue>
 #include <stack>
@@ -4206,9 +4189,15 @@ int main()
     cout << ans;
     return 0;
 }
+```
+
+luogu P1823 [COI2007] Patrik 音乐会的等待
+
+与p1901相似, 但有一点不同, 相同高度的人是能相互看到的, 这引发两个问题: 如果全部人身高相同, 那么在$5×10^5$的情况下答案会超过int类型, 所以必须用`long long`存答案; 身高相同可以相互看到, 并且不会互相影响视线, 所以维护单调性的时候, 去掉相同身高的人的时候(必须去掉, 否则你会发现新入栈的人与原栈中更高的那一个能看到但却没有被算进去), 该身高必须储存起来, 否则比如`5 2 2 2 5`这种数据, 你会发现每个`2`都能看见后面的`5`, 却没有被你计入对数, 当然了, 没有任何关系的相同身高, 就不用考虑了, 例如`5 2 5 1 2`;  再仔细比较, 你还会发现, 发射站的说法是"发出的能量只被两边**最近的且比它高**的发射站接收", 音乐会是"如果他们是**相邻或他们之间没有人比 a 或 b 高**，那么他们是可以互相看得见的", 研究两个说法, 会发现能接收到的发射站与发射能量的发射站是能相互看见的, 只不过相对高度不同导致谁接收谁发射不同, 所以两道题的代码思路是基本一致的, 而且音乐会相同身高的人可能相互看见, 但相同高度的发射塔不会相互接收
 
 
-//P1823 [COI2007] Patrik 音乐会的等待
+```c++
+
 #include <iostream>
 #include <queue>
 #include <stack>
@@ -4237,7 +4226,9 @@ int main()
 }
 ```
 
-poj 2559
+
+
+poj 2559 
 
 可用数组模拟构造单调递增栈, 也可以直接用STL栈. 思路:遇到比栈顶元素大的, 可以存进一个结构体数组, 该结构体保存目前某个矩形继承的长和宽, 初始宽度为1, 当遇到小于栈顶元素高度的元素时, 栈顶元素出栈, 并且继承上一个出栈元素的宽, 如此累加, 每次操作都需要维护面积最大值 
 
@@ -4323,7 +4314,7 @@ int main()
 
 
 
-###### 单调队列
+#### 单调队列
 
 ```c++
 //ACWing
@@ -4398,60 +4389,51 @@ int main()
 
 #### 双指针（尺取）
 
-poj 2100
+poj 2100 Graveyard Design
+
+注意数据范围超`int`, 注意运算过程中对`int`的运算要在必要时候强转为`long long` (也可以全部使用`long long`), 特别注意的一点, 用`scanf`时, 若出现`long long`, 在`poj`系统下, `OS`为`Linux`, 类型需写为`%I64d`, 否则会`Wrong Answer`, 若其他情况下OS为`Windows`, 则`%lld` 和`%I64d`都可以
 
 ```c++
+#include <algorithm>
 #include <iostream>
+#include <cstring>
+#include <cstdio>
 #include <queue>
 #include <stack>
-#include <vector>
-#include <algorithm>
+#include <map>
 using namespace std;
-long long n, k, cnt;
-void solve()
+int l, r, cnt;
+long long sum = 1, n;
+int main()
 {
     vector<int> v;
-    cin >> n;
-    long long sum = 1;
-    int l = 1, r = 1;
-    while (l <= r)
+    scanf("%lld", &n);
+    l = r = 1;
+    while (l <= r && r <= 1e7)
     {
         if (sum == n)
         {
             cnt++;
             v.push_back(r - l + 1);
-            for (int i = l; i <= r; i++)
-                v.push_back(i);
+            for (int i = l; i <= r; i++) v.push_back(i);
         }
-        if (sum >= n)
-        {
-            sum -= l * l;
-            l++;
-        }
-        else if (sum < n)
-        {
-            r++;
-            sum += r * r;
-        }
+        if (n < sum) sum -= 1LL * l * l, l++;
+        else if (n >= sum) r++, sum += 1LL * r * r;
     }
-    cout << cnt << endl;
+    printf("%d\n", cnt);
     for (int i = 0; i < v.size(); i++)
     {
-        cout << v[i] << " ";
-        long long len = v[i];
-        for (int j = 0; j < len; j++, i++)
-            cout << v[i + 1] << " ";
-        cout << endl;
+        int ret = v[i];
+        printf("%d", ret);
+        for (int j = 0; j < ret; i++, j++)
+            printf(" %d", v[i + 1]);
+        printf("\n");
     }
-}
-int main()
-{
-    solve();
     return 0;
 }
 ```
 
-HDU 5178
+HDU 5178 pairs
 
 ```c++
 //二分
@@ -4496,36 +4478,27 @@ int main()
     return 0;
 }
 //尺取
-#include <iostream>
 #include <algorithm>
-#include <cmath>
+#include <cstdio>
 using namespace std;
-const int N = 1e5 + 5;
-#define LL long long
-LL a[N], n, k, cnt, t;
-void solve()
-{
-    LL l = 1, r = 1;
-    cnt = 0;
-    while (l <= r && r <= n)
-    {
-        while (l < r && abs(a[l] - a[r]) > k) l++;
-        cnt += r - l;
-        r++;
-    }
-    cout << cnt << endl;
-}
+const int maxn = 1e5 + 10;
+int t, n, k, a[maxn];
 int main()
 {
-    ios::sync_with_stdio(false);
-    cin.tie(NULL);
-    cout.tie(NULL);
-    for(cin >> t; t--; )
+    for (scanf("%d", &t); t--; )
     {
-        cin >> n >> k;
-        for (int i = 1; i <= n; i++) cin >> a[i];
-        sort(a + 1, a + n + 1);
-        solve();
+        long long ans = 0;
+        scanf("%d%d", &n, &k);
+        for (int i = 1; i <= n; i++) scanf("%d", &a[i]);
+        sort(a + 1, a + 1 + n);
+        int l = 1, r = 1;
+        while (r <= n)
+        {
+            while (l <= r && a[r] - a[l] > k) l++;
+            ans += r - l;
+            r++;
+        }
+        printf("%lld\n", ans);
     }
     return 0;
 }
@@ -4533,107 +4506,37 @@ int main()
 
 HDU 5672
 
+此题不关闭流同步居然会`TLE`, 震惊
+
 ```c++
-//TLE
 #include <iostream>
-#include <cstring>
-#include <algorithm>
+#include <string>
 using namespace std;
-const int N = 1e6 + 5;
-char s[N];
-#define LL long long
-LL k, t, vis[30], cnt;
-void solve()
-{
-    LL l = 0, r = 0, ans = 0;
-    memset(vis, 0, sizeof vis);
-    vis[s[0] - 'a']++;
-    cnt = 1;
-    while (r < strlen(s))
-    {
-        if (l + k - 1 > r)
-        {
-            r++;
-            if (!vis[s[r] - 'a']) cnt++, vis[s[r] - 'a']++;
-        }
-        else if (l + k - 1 <= r)
-        {
-            if (cnt == k)
-            {
-                cnt--;
-                ans += strlen(s) - r;
-                vis[s[l] - 'a'] = 0;
-                l++;
-            }
-            else
-            {
-                r++;
-                if (!vis[s[r] - 'a'])
-                {
-                    cnt++;
-                    vis[s[r] - 'a'] = 1;
-                }
-            }
-        }
-    }
-    cout << ans << endl;
-}
+int t, k;
 int main()
 {
+    string s;
     ios::sync_with_stdio(false);
-    cin.tie(NULL);
-    cout.tie(NULL);
     for (cin >> t; t--; )
     {
-        cin >> s;
-        cin >> k;
-        solve();
-    }
-    return 0;
-}
-
-//AC
-#include <bits/stdc++.h>
-using namespace std;
-int main()
-{
-    int t;
-    ios::sync_with_stdio(false);
-    while (cin >> t)
-    {
-        while (t--)
+        int flag[26] = {0};
+        long long ans = 0;
+        cin >> s >> k;
+        int l = 0, r = 0, cnt = 0, len = s.size();
+        while (l < len)
         {
-            string s;
-            int n;
-            cin >> s >> n;
-            map<int, int> q;
-            int l = 0, r = 0;
-            int cnt = 0;
-            long long ans = 0;
-            int len = s.size();
-            int i = 0, j = 0;
-            while (i <= j && i < len)
+            while (cnt < k && r < len)
             {
-                while (j < len && cnt < n)
-                {
-                    if (!q[s[j] - 'a'])
-                        cnt++;
-                    q[s[j] - 'a']++;
-                    j++;
-                }
-                if (cnt >= n)
-                {
-                    ans += len - j + 1;
-                }
-                if (q[s[i] - 'a'] == 1)
-                {
-                    cnt--;
-                }
-                q[s[i] - 'a']--;
-                i++;
+                if (!flag[s[r] - 'a']) cnt++;
+                flag[s[r] - 'a']++;
+                r++;
             }
-            cout << ans << '\n';
+            if (cnt == k) ans += len - r + 1;
+            flag[s[l] - 'a']--;
+            if (!flag[s[l] - 'a']) cnt--;
+            l++;
         }
+        cout << ans << endl;
     }
 }
 ```

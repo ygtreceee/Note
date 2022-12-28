@@ -4226,13 +4226,52 @@ int main()
 }
 ```
 
-
-
-poj 2559 
+poj 2559 **Largest Rectangle in a Histogram**
 
 可用数组模拟构造单调递增栈, 也可以直接用STL栈. 思路:遇到比栈顶元素大的, 可以存进一个结构体数组, 该结构体保存目前某个矩形继承的长和宽, 初始宽度为1, 当遇到小于栈顶元素高度的元素时, 栈顶元素出栈, 并且继承上一个出栈元素的宽, 如此累加, 每次操作都需要维护面积最大值 
 
 ```c++
+//AC
+#include <algorithm>
+#include <iostream>
+#include <stack>
+using namespace std;
+const int maxn = 1e5 + 10;
+long long n, ans, a[maxn], tmp;
+int main()
+{
+    ios::sync_with_stdio(false);
+    cin.tie(0);
+    stack<pair<int, int>> s;
+    while (cin >> n && n)
+    {
+        ans = 0;
+        for (int i = 1; i <= n; i++) cin >> a[i];
+        for (int i = 1; i <= n; i++)
+        {
+            long long wide = 0;
+            while (!s.empty() && s.top().first >= a[i])
+            {
+                tmp = s.top().first * (s.top().second + wide);
+                ans = max(ans, tmp);
+                wide += s.top().second;
+                s.pop();
+            }
+            pair<int, int> p(a[i], 1 + wide);
+            s.push(p);
+        }
+        long long wide = 0;
+        while (!s.empty())
+        {
+            tmp = s.top().first * (s.top().second + wide);
+            ans = max(ans, tmp);
+            wide += s.top().second;
+            s.pop();
+        }
+        cout << ans << endl;
+    }
+    return 0;
+}
 //TLE
 #include <stack>
 #include <vector>
@@ -4269,56 +4308,16 @@ int main()
     }
     return 0;
 }
-//AC
-#include <iostream>
-#include <cstdio>
-#include <algorithm>
-using namespace std;
-long long n, ans, que, top, tmp, a[100100];
-struct str
-{
-    long long h, w;
-}f[100100]; //存储目前的长和宽
-int main()
-{
-    while (cin >> n && n)
-    {
-        que = 1;
-        ans = 0;
-        for (int i = 1; i <= n; i++) cin >> a[i];
-        for (int i = 1; i <= n; i++)
-        {
-            top = 0;                       //计算能达到的宽
-            while(que > 0 && f[que - 1].h >= a[i])
-            {
-                que--;                     //出栈
-                tmp = f[que].h * (f[que].w + top); //计算面积
-                ans = max(ans, tmp);       //维护最大值
-                top += f[que].w;           //继承宽度
-            }
-            f[que].h = a[i], f[que++].w = 1 + top;  //压入栈
-        }
-        top = 0;
-        while (que > 0)
-        {
-            que--;
-            tmp = f[que].h * (f[que].w + top);
-            ans = max(ans, tmp);
-            top += f[que].w;
-        }
-        cout << ans << endl;
-    }
-    return 0;
-}
 ```
 
 
 
 #### 单调队列
 
+ACWing 154. 滑动窗口
+
 ```c++
-//ACWing
-//154. 滑动窗口
+
 #include <iostream>
 #include <stack>
 #include <cstring>
@@ -4351,8 +4350,11 @@ int main()
     cout << endl;
     return 0;
 }
+```
 
 
+
+```c++
 //
 //双端队列
 #include <iostream>
@@ -4380,9 +4382,223 @@ int main()
     cout << ans;
     return 0;
 }
+```
 
+luogu P1886 滑动窗口 /【模板】单调队列
 
-//
+```c++
+#include <iostream>
+#include <queue>
+#include <stack>
+using namespace std;
+const int maxn = 1e6 + 10;
+int n, k, nums[maxn];
+int main()
+{
+    ios::sync_with_stdio(false);
+    cin.tie(0);
+    deque<int> s;
+    vector<int> ans1;
+    vector<int> ans2;
+    cin >> n >> k;
+    for (int i = 1; i <= n; i++) cin >> nums[i];
+    for (int i = 1; i <= n; i++)
+    {
+        while (!s.empty() && i - s.front() >= k) s.pop_front();
+        while (!s.empty() && nums[s.back()] > nums[i]) s.pop_back();
+        s.push_back(i);
+        if (i >= k) ans1.push_back(s.front());
+    }
+    s.clear();
+    for (int i = 1; i <= n; i++)
+    {
+        while (!s.empty() && i - s.front() >= k) s.pop_front();
+        while (!s.empty() && nums[s.back()] < nums[i]) s.pop_back();
+        s.push_back(i);
+        if (i >= k) ans2.push_back(s.front());
+    }
+    for (auto it = ans1.begin(); it != ans1.end(); it++)
+    {
+        if (it == ans1.begin()) cout << nums[(*it)];
+        else cout << " " << nums[(*it)];
+    }
+    cout << endl;
+    for (auto it = ans2.begin(); it != ans2.end(); it++)
+    {
+        if (it == ans2.begin()) cout << nums[(*it)];
+        else cout << " " << nums[(*it)];
+    }
+    return 0;
+}
+```
+
+luogu P1714 切蛋糕
+
+求连续子序列和, 所以需要先储存前缀和; 然后遍历, 遍历的同时维护遍历到的元素之前的各前缀和所组成的单调递增队列, 在前面的始终是符合区间的同时是区间内最小的前缀和, 而求最大子区间不过就是遍历到的该前缀和减去前面最小的前缀和而已.
+
+对于每一个`i`来讲, `sum[i]`是固定的，于是就转化成了`sum[i]-min(sum[j]) (i-m<=j && j<=i-1)`
+
+```c++
+#include <algorithm>
+#include <iostream>
+#include <queue>
+using namespace std;
+const int maxn = 5e5 + 10;
+int n, m, a[maxn], ans;
+int main()
+{
+    ios::sync_with_stdio(false);
+    cin.tie(0);
+    cin >> n >> m;
+    for (int i = 1; i <= n; i++) cin >> a[i], a[i] += a[i - 1];
+    deque<int> q;
+    for (int i = 1; i <= n; i++)
+    {
+        while (!q.empty() && a[q.back()] > a[i - 1]) q.pop_back();
+        while (!q.empty() && i - q.front() > m) q.pop_front();
+        q.push_back(i - 1);
+        ans = max(ans, a[i] - a[q.front()]); 
+    }
+    cout << ans;
+    return 0;
+}
+```
+
+luogu P2629 好消息，坏消息
+
+心情值相加, 首先是想到前缀和, 然后是一个关键思想"断环为链", 出现前后数据的相连, 开双倍数组储存数据, 能够完美解决. 然后题意就是要使每一个子序列的前缀和都不小于0, 那就是前缀和最小值不小于0即可, 而且子序列长度固定为n, 可以联想到窗口, 构造单调递增队列, 维护窗口和单调性即可. 
+
+```c++
+#include <algorithm>
+#include <iostream>
+#include <queue>
+using namespace std;
+const int maxn = 2e6 + 10;
+int a[maxn], n, ans;
+int main()
+{
+    cin >> n;
+    for (int i = 1; i <= 2 * n; i++)
+    {
+        if (i <= n) cin >> a[i], a[i] += a[i - 1];
+        else a[i] = a[n] + a[i - n];
+    }
+    deque<int> q;
+    for (int i = 1; i <= 2 * n - 1; i++)
+    {
+        while (!q.empty() && a[q.back()] >= a[i]) q.pop_back();
+        while (!q.empty() && i - q.front() >= n) q.pop_front();
+        q.push_back(i);
+        if (i >= n && a[q.front()] - a[i - n] >= 0) ans++;
+    }
+    cout << ans;
+    return 0;
+}
+```
+
+hdu 3415 Max Sum of Max-K-sub-sequence
+
+```c++
+//不应该有问题的, 却TLE了,奇奇怪怪
+#include <algorithm>
+#include <iostream>
+#include <queue>
+using namespace std;
+const int maxn = 2e5 + 10;
+int t, k, n, a[maxn], x, y;
+int main()
+{
+    ios::sync_with_stdio(false);
+    cin.tie(0); cout.tie(0);
+    for (cin >> t; t--; )
+    {
+        int ans = -0x3f3f3f3f;
+        cin >> n >> k;
+        for (int i = 1; i <= n + k - 1; i++)
+        {
+            if (i <= n) cin >> a[i], a[i] += a[i - 1];
+            else a[i] = a[n] + a[i - n];
+        }
+        deque<int> q;
+        for (int i = 1; i <= n + k - 1; i++)
+        {
+            while (!q.empty() && a[q.back()] >= a[i - 1]) q.pop_back();
+            while (!q.empty() && i - q.front() > k) q.pop_front();
+            q.push_back(i - 1);
+            if (a[i] - a[q.front()] > ans)
+            {
+                ans = a[i] - a[q.front()];
+                x = q.front() + 1;
+                y = i > n ? i % n : i;
+            }
+        }
+        cout << ans << " " << x << " " << y << " "  << endl;
+    }
+    return 0;
+}
+```
+
+luogu P2216 [HAOI2007]理想的正方形
+
+维护二维窗口的最值, 此题本质上和维护一维窗口最值是一样的, 或者说基于维护一维窗口之上, 例如想要维护一个`n * n`的窗口, 只需先维护每一行, 再对每一行的结果维护列最值, 即变成了维护二维窗口最值, 过程繁琐易混, 实现过程需要仔细
+
+```c++
+#include <algorithm>
+#include <iostream>
+#include <queue>
+using namespace std;
+const int maxn = 1e3 + 10;
+int a, b, n, s1[maxn][maxn], s2[maxn][maxn], s3[maxn][maxn], s4[maxn][maxn], s5[maxn][maxn], ans = 0x3f3f3f3f;
+int main()
+{
+    cin >> a >> b >> n;
+    for (int i = 1; i <= a; i++)
+        for (int j = 1; j <= b; j++)
+            cin >> s1[i][j];
+    for (int i = 1; i <= a; i++)
+    {
+        deque<int> q;
+        for (int j = 1; j <= b; j++)
+        {
+            while (!q.empty() && s1[i][q.back()] <= s1[i][j]) q.pop_back();
+            while (!q.empty() && j - q.front() >= n) q.pop_front();
+            q.push_back(j);
+            if (j >= n) s2[i][j - n + 1] = s1[i][q.front()];
+        }
+        q.clear();
+        for (int j = 1; j <= b; j++)
+        {
+            while (!q.empty() && s1[i][q.back()] >= s1[i][j]) q.pop_back();
+            while (!q.empty() && j - q.front() >= n) q.pop_front();
+            q.push_back(j);
+            if (j >= n) s3[i][j - n + 1] = s1[i][q.front()];
+        }
+    }
+    for (int i = 1; i <= b - n + 1; i++)
+    {
+        deque<int> q;
+        for (int j = 1; j <= a; j++)
+        {
+            while (!q.empty() && s2[j][i] >= s2[q.back()][i]) q.pop_back();
+            while (!q.empty() && j - q.front() >= n) q.pop_front();
+            q.push_back(j);
+            if (j >= n) s4[j - n + 1][i] = s2[q.front()][i];
+        }
+        q.clear();
+        for (int j = 1; j <= a; j++)
+        {
+            while (!q.empty() && s3[j][i] <= s3[q.back()][i]) q.pop_back();
+            while (!q.empty() && j - q.front() >= n) q.pop_front();
+            q.push_back(j);
+            if (j >= n) s5[j - n + 1][i] = s3[q.front()][i];
+        }
+    }
+    for (int i = 1; i <= a - n + 1; i++)
+        for (int j = 1; j <= b - n + 1; j++)
+            ans = min(ans, s4[i][j] - s5[i][j]);
+    cout << ans << endl;
+    return 0;
+}
 ```
 
 
@@ -5484,9 +5700,21 @@ int find_set(int x)
     }
     return s[x];
 }
+
+//带权值的路径压缩
+int find_set(int x)
+{
+    if (x != s[x])
+    {
+        int t = s[x];           //记录父节点
+        s[x] = find_set(s[x]);  //路径压缩，递归最后返回的是根节点
+        d[x] += d[t];           //权值更新为x到根节点的权值
+    }
+    return s[x];
+}
 ```
 
-hdu 1213
+hdu 1213 How many tables
 
 ```c++
 #include <iostream>
@@ -5530,7 +5758,118 @@ int main()
 }
 ```
 
-luogu p3367
+hdu 3038 How many answers are wrong
+
+```c++
+#include <iostream>
+using namespace std;
+const int maxn = 2e5 + 10;
+int s[maxn];   //集
+int d[maxn];   //权值，记录当前节点到根节点的权值
+int ans;
+void init_set()
+{
+    for (int i = 0; i <= maxn; i++) {s[i] = i; d[i] = 0;}
+}
+int find_set(int x)
+{
+    if (x != s[x])
+    {
+        int t = s[x];
+        s[x] = find_set(s[x]);
+        d[x] += d[t];
+    }
+    return s[x];
+}
+void merge_set(int a, int b, int v)
+{
+    int roota = find_set(a), rootb = find_set(b);
+    if (roota == rootb)
+    {
+        if (d[a] - d[b] != v) ans++;
+    }
+    else
+    {
+        s[roota] = rootb;
+        d[roota] = d[b] - d[a] + v;
+    }
+}
+int main()
+{
+    int n, m;
+    while (cin >> n >> m)
+    {
+        init_set();
+        ans = 0;
+        while (m--)
+        {
+            int a, b, v;
+            cin >> a >> b >> v;
+            a--;
+            merge_set(a, b, v);
+        }
+        cout << " " << ans << endl;
+    }
+    return 0;
+}
+```
+
+poj 1182 食物链
+
+```c++
+#include <algorithm>
+#include <iostream>
+using namespace std;
+const int maxn = 5e4 + 10;
+int s[maxn];   //集
+int d[maxn];   //0：同类； 1：吃； 2：被吃
+int ans;
+void init_set()
+{
+    for (int i = 0; i <= maxn; i++) {s[i] = i; d[i] = 0;}
+}
+int find_set(int x)
+{
+    if (x != s[x])
+    {
+        int t = s[x];
+        s[x] = find_set(s[x]);
+        d[x] = (d[x] + d[t]) % 3;
+    }
+    return s[x];
+}
+void merge_set(int x, int y, int relation)
+{
+    int rootx = find_set(x), rooty = find_set(y);
+    if (rootx == rooty)
+    {
+        if ((relation - 1) != ((d[x] - d[y] + 3) % 3)) ans++; //判断矛盾
+    }
+    else
+    {
+        s[rootx] = rooty;                                     //合并
+        d[rootx] = (d[y] - d[x] + relation - 1) % 3;          //更新权值
+    }
+}
+int main()
+{
+    int n, k;
+    cin >> n >> k;
+    init_set();
+    ans = 0;
+    while (k--)
+    {
+        int relation, x, y;
+        cin >> relation >> x >> y;
+        if (x > n || y > n || (relation == 2 && x == y)) ans++;
+        else merge_set(x, y, relation);
+    }
+    cout << ans;
+    return 0;
+}
+```
+
+luogu p3367 
 
 ```c++
 #include <iostream>

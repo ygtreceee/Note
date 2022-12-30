@@ -1639,7 +1639,108 @@ int main()
 }
 ```
 
-#### 回溯与剪枝
+#### 搜索剪枝
+
+```c++
+BFS剪枝通常使用判重，如果搜索到某一层时，出现重复状态就剪枝
+如何判重？用STL的map和set效率都很好，另外还有一种数学方法叫康托判重，竞赛时一般不用
+
+//康托判重
+//例如九宫最多有9！种排列组合，既362880中排列组合方式，使用数组state[362880]可以用来判断是否出现重复的元素
+bool state[362880];       //N的阶乘 
+int kangtuo(int x[])  //康拓展开进行判重， x[]储存该数的各个位的数字
+{
+    int fac[] = {1, 1, 2, 6, 24, 120, 720, 5040, 40320}; //位数阶乘
+    int sum = 0;
+    for (int i = 0; i < 9; i++)
+    {
+        int t = 0;
+        for (int j = i + 1; j < 9; j++)
+            if (x[j] < x[i]) t++;
+        sum += t * fac[8 - i];
+    }
+    if (state[sum]) return 0;
+    else return state[sum] = 1;
+}
+
+DFS剪枝技术较多
+1.可行性剪枝
+2.搜索顺序剪枝
+3.最优性剪枝
+4.排除等效冗余
+5.记忆化搜索
+```
+
+lanqiao 642 跳蚂蚱
+
+化圆为线；巧妙转换
+
+```c++
+#include <algorithm>
+#include <iostream>
+#include <string>
+#include <map>
+using namespace std;
+const int maxn = 5e4 + 10;
+struct node
+{
+    node(){}
+    node(string ss, int tt){s = ss, t = tt;}
+    string s;
+    int t;
+};
+map<string, bool> mp;
+queue<node> q;
+void bfs()
+{
+    string s = "012345678";
+    mp[s] = true;
+    q.push(node(s, 0));
+    while (!q.empty())
+    {
+        node now = q.front();
+        q.pop();
+        string s = now.s;
+        int step = now.t;
+        if (s == "087654321")
+        {
+            cout << step << endl;
+            break;
+        }
+        int i;
+        for (i = 0; i < 10; i++)
+            if (s[i] == '0') break;
+        for (int j = i - 2; j <= i + 2; j++)
+        {
+            int k = (j + 9) % 9;
+            if (k == i) continue;
+            string news = s;
+            char tmp = news[i];
+            news[i] = news[k];
+            news[k] = tmp;
+            if (!mp[news])
+            {
+                mp[news] = true;
+                q.push(node(news, step + 1));
+            }
+        }
+    }
+}
+int main()
+{
+    bfs();
+    return 0;
+}
+
+//set
+set<string> vis;
+...
+if (!vis.count(news))
+{
+    vis.insert(news);
+    q.push(node(news, step + 1));
+}
+```
 
 hdu 2553 "N皇后问题"  N <= 10
 
@@ -1778,6 +1879,236 @@ int main()
     while (cin >> n && n)
         cout << ans[n] << endl;
     return 0;
+}
+```
+
+luogu P1036 [NOIP2002 普及组] 选数
+
+DFS + 不降原则，注意方法
+
+```c++
+#include <iostream>
+using namespace std;
+int n, k, a[22], ans;
+bool check(int x)
+{
+    for (int i = 2; i * i <= x; i++)
+        if (x % i == 0) return false;
+    return true;
+}
+void dfs(int now, int sum, int last)
+{
+    if (now == k + 1)
+    {
+        if (check(sum)) ans++;
+        return;
+    }
+    for (int i = last; i <= n; i++)    //不降原则的搜索
+        dfs(now + 1, sum + a[i], i + 1);
+}
+int main()
+{
+    ios::sync_with_stdio(false);
+    cin.tie(0);
+    cin >> n >> k;
+    for (int i = 1; i <= n; i++) cin >> a[i];
+    dfs(1, 0, 1);
+    cout << ans;
+    return 0;
+}
+```
+
+[HDU 1495 非常可乐](https://www.cnblogs.com/DM11/p/17001261.html)
+
+出现最短路径至少应首选BFS
+
+```c++
+#include <algorithm>
+#include <iostream>
+#include <queue>
+#include <cstring>
+#include <map>
+using namespace std;
+const int maxn = 1e2 + 10;
+int w[3];
+int vis[maxn][maxn][maxn];  //判重
+struct node
+{
+    int v[3];  //三个杯子当前状态
+    int step;
+};
+void bfs()
+{
+    memset(vis, 0, sizeof vis);
+    queue<node> q;
+    q.push({w[0], 0, 0});
+    vis[w[0]][0][0] = 1;
+    while (!q.empty())
+    {
+        node s = q.front();
+        q.pop();
+        if (s.v[0] == s.v[2] && s.v[1] == 0) //平分判断
+        {
+            cout << s.step << endl;
+            return;
+        }
+        for (int i = 0; i < 3; i++)
+            for (int j = 0; j < 3; j++)
+            {
+                if (i != j)
+                {
+                    node temp = s;
+                    //完美解决两种情况，即倒出的杯子空了或者倒入的杯子满了
+                    int minn = min(temp.v[i], w[j] - temp.v[j]);  
+                    temp.v[i] -= minn; temp.v[j] += minn;
+                    if (!vis[temp.v[0]][temp.v[1]][temp.v[2]])
+                    {
+                        temp.step++;
+                        q.push(temp);
+                        vis[temp.v[0]][temp.v[1]][temp.v[2]] = 1;
+                    }
+                }
+            }
+    }
+    cout << "NO\n";
+}
+int main()
+{
+    while (cin >> w[0] >> w[1] >> w[2])
+    {
+        if (!w[0] && !w[1] && !w[2]) break;
+        if (w[1] > w[2]) swap(w[1], w[2]);   //默认杯2的容量大于杯1，减少编码量
+        if (w[0] % 2) cout << "NO\n";        //可行性剪枝，若容量为奇数，无法平分
+        else bfs();
+    }
+    return 0;
+}
+```
+
+luogu P1379 八数码难题
+
+BFS + 二维转一维
+
+```c++
+#include <algorithm>
+#include <iostream>
+#include <queue>
+#include <map>
+using namespace std;
+const int maxn = 3;
+struct node
+{
+    string str;
+    int step;
+};
+map<string, bool> m;
+queue<node> q;
+int step[4] = {1, -1, 3, -3};
+void bfs()
+{
+    string s;
+    cin >> s;
+    node start = {s, 0};
+    q.push(start);
+    m[s] = true;
+    while (!q.empty())
+    {
+        start = q.front();
+        q.pop();
+        if (start.str == "123804765")
+        {
+            cout << start.step;
+            return;
+        }
+        int tmp = start.str.find("0");
+        for (int i = 0; i < 4; i++)
+        {
+            if ((tmp == 0 || tmp == 3 || tmp == 6) && i == 1) continue;
+            if ((tmp == 2 || tmp == 5 || tmp == 8) && i == 0) continue;
+            if ((tmp == 0 || tmp == 1 || tmp == 2) && i == 3) continue;
+            if ((tmp == 6 || tmp == 7 || tmp == 8) && i == 2) continue;
+            node next = start;
+            char word = next.str[tmp + step[i]];
+            next.str[tmp + step[i]] = '0';
+            next.str[tmp] = word;
+            if (!m[next.str])
+            {
+                m[next.str] = true;
+                next.step++;
+                q.push(next);
+            }
+        }
+    }
+}
+int main()
+{
+    bfs();
+    return 0;
+}
+```
+
+E？
+
+```
+int n, m, t, room[10][10];
+int ste[4][2] = {{0, 1}, {0, -1}, {1, 0}, {-1, 0}};
+int vis[10][10];
+bool check(int x, int y) 
+{
+    if (x >= 0 && x < n && y >= 0 && y < m && !vis[x][y]) return true; 
+    return false;
+}
+struct node
+{
+    int x;
+    int y;
+    int step;
+};
+queue<node> q;
+void bfs(int x, int y)
+{
+    node start = {x, y, 0};
+    q.push(start);
+    vis[x][y] = 1;
+    while (!q.empty())
+    {
+        start = q.front();
+        q.pop();
+        if (room[start.x][start.y] == 'D')
+        {
+            cout << "YES" << endl;
+            return;
+        }
+        if (start.step == t)
+        {
+            cout << "NO" << endl;
+            return;
+        }
+        for (int i = 0; i < 4; i++)
+        {
+            int nx = start.x + ste[i][0];
+            int ny = start.y + ste[i][1];
+            if (check(nx, ny))
+            {
+                vis[nx][ny] = 1;
+                node next = {nx, ny, start.step + 1};
+                q.push(next);
+            }
+        }
+    }
+}
+int main()
+{
+    while (cin >> n >> m >> t)
+    {
+        if (n == m && m == t && t == 0) break;
+        for (int i = 0; i < n; i++)
+            for (int j = 0; j < m; j++)
+                cin >> room[i][j];
+        for (int i = 0; i < n; i++)
+            for (int j = 0; j < m; j++)
+                if (room[i][j] == 'S') bfs(i, j);
+    }
 }
 ```
 
@@ -6300,5 +6631,211 @@ int main()
     printf("%d", l);
     return 0;
 }
+```
+
+#### 动态规划
+
+```
+dp特征：重叠子问题，最优子结构
+
+两种编程方法：
+1.自顶向下与记忆化
+2.自底向上与制表递推
+
+空间优化技术：滚动数组
+能减少一维复杂度，但是它覆盖了中间状态只留下了最后的状态，所以损失了很多信息
+1.交替滚动
+2.自我滚动
+```
+
+hdu 2602 Bone collector
+
+```c++
+//递推代码，自底向上
+#include <algorithm>
+#include <iostream>
+#include <cstring>
+using namespace std;
+const int maxn = 1010;
+int w[maxn], c[maxn];
+int dp[maxn][maxn];
+int solve(int n, int C)
+{
+    for (int i = 1; i <= n; i++)
+        for (int j = 0; j <= C; j++)
+        {
+            if (c[i] > j) dp[i][j] = dp[i - 1][j];
+            else dp[i][j] = max(dp[i - 1][j], dp[i - 1][j - c[i]] + w[i]);
+        }
+    return dp[n][C];
+}
+int main()
+{
+    int t;
+    for (cin >> t; t--; )
+    {
+        int n, C;
+        cin >> n >> C;
+        for (int i = 1; i <= n; i++) cin >> w[i];
+        for (int i = 1; i <= n; i++) cin >> c[i];
+        memset(dp, 0, sizeof dp);
+        cout << solve(n, C) << endl;
+    }
+    return 0;
+}
+
+//记忆化代码，自顶向下
+int solve(int i, int j)
+{
+    if (dp[i][j] != 0) return dp[i][j];
+    if (i == 0) return 0;
+    int res;
+    if (c[i] > j) res = solve(i - 1, j);
+    else res = max(solve(i - 1, j), solve(i - 1, j - c[i]) + w[i]);
+    return dp[i][j] = res;
+}
+int main()
+{
+    int t;
+    for (cin >> t; t--; )
+    {
+        int n, C;
+        cin >> n >> C;
+        for (int i = 1; i <= n; i++) cin >> w[i];
+        for (int i = 1; i <= n; i++) cin >> c[i];
+        memset(dp, 0, sizeof dp);
+        cout << solve(n, C) << endl;
+    }
+    return 0;
+}
+
+//使用交替滚动优化
+int dp[2][maxn];   //替换int dp[][]
+int solve(int n, int C)
+{
+    int now = 0, old = 1;  //now指向当前正在计算的一行，old指向旧的一行
+    for (int i = 1; i <= n; i++)
+    {
+        swap(old, now);   //交替滚动，now始终指向最新的一行
+        for (int j = 0; j <= C; j++)
+        {
+            if (c[i] > j) dp[now][j] = dp[old][i];
+            else dp[now][i] = max(dp[old][j], dp[old][i - c[i]] + w[i]);
+        }
+    }
+    return dp[now][C];   //返回最新行
+}
+
+//使用自我滚动优化
+int dp[maxn];
+int sovle(itn n, int C)
+{
+    for (int i = 1; i <= n; i++)
+        for (int j = C; j >= c[i]; j--)   //必须反过来循环，即从后向前覆盖
+            dp[j] = max(dp[j], dp[j - c[i]] + w[i]);
+    return dp[C];
+}
+```
+
+hdu 1712 ACboy needs your help
+
+分组背包问题
+
+```c++
+#include <algorithm>
+#include <iostream>
+#include <cstring>
+using namespace std;
+const int maxn = 105;
+int w[maxn][maxn], c[maxn][maxn];
+int dp[maxn];
+int n, m;
+int main()
+{
+    while (cin >> n >> m && n && m)
+    {
+        for (int i = 1; i <= n; i++)
+            for (int j = 1; j <= m; j++)
+            {
+                cin >> w[i][j];
+                c[i][j] = j;  //第i组第j个物品的体积，学j天才能得分，体积就是j
+            }
+        memset(dp, 0, sizeof dp);
+        for (int i = 1; i <= n; i++)
+            for (int j = m; j >= 0; j--)
+                for (int k = 1; k <= m; k++)   //用k遍历第i组的所有物品
+                    if (j >= c[i][k])
+                        dp[j] = max(dp[j], dp[j - c[i][k]] + w[i][k]);  //第i组第k个
+        cout << dp[m] << endl; 
+    }
+    return 0;
+}
+```
+
+luogu P1776 宝物筛选
+
+多重背包问题，可使用简单方法，或者二进制拆分优化，或者单调队列优化
+
+```c++
+//简单方法
+#include <algorithm>
+#include <iostream>
+using namespace std;
+const int maxn = 1e5 + 10;
+int w[maxn], c[maxn], m[maxn];
+int dp[maxn];
+int n, C;
+int main()
+{
+    cin >> n >> C;
+    for (int i = 1; i <= n; i++) cin >> w[i] >> c[i] >> m[i];
+    for (int i = 1; i <= n; i++)
+        for (int j = C; j >= c[i]; j--)
+            for (int k = 1; k <= m[i] && k * c[i] <= j; k++)
+                dp[j] = max(dp[j], dp[j - k * c[i]] + k * w[i]);
+    cout << dp[C] << endl;
+    return 0;
+}
+
+//二进制拆分优化
+#include <algorithm>
+#include <iostream>
+using namespace std;
+const int maxn = 1e5 + 10;
+int w[maxn], c[maxn], m[maxn];
+int new_w[maxn], new_c[maxn], new_m[maxn];  //二进制拆分后的新物品
+int dp[maxn];
+int n, C；
+int new_n;   //二进制拆分后的新物品总数量
+int main()
+{
+    cin >> n >> C;
+    for (int i = 1; i <= n; i++) cin >> w[i] >> c[i] >> m[i];
+    //二进制拆分
+    int new_n = 0;
+    for (int i = 1; i <= n; i++)
+    {
+        for (int j = 1; j <= m[i]; j <<= 1)  //二进制枚举：1，2，4...
+        {
+            m[i] -= j;		//减去已拆分的
+            new_c[++new_n] = j * c[i];   //新物品
+            new_w[new_n] = j * w[i];     //新物品对应价值
+        } 
+        if (m[i])   //储存余数
+        {
+            new_c[++new_n] = m[i] * c[i];
+            new_w[new_n] = m[i] * w[i];
+        }
+    }
+	//滚动数组版本0/1背包
+    for (int i = 1; i <= new_n; i++)     //同样枚举即可
+        for (int j = C; j >= new_c[i]; j--)
+            dp[j] = max(dp[j], dp[j - new_c[i]] + new_w[i]);
+    cout << dp[C] << endl;
+    return 0;
+}
+
+//单调队列优化
+
 ```
 

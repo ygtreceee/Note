@@ -3545,6 +3545,8 @@ int main()
 模板
 
 ```c++
+注意事项：左端取1还是取0要特别注意！在二分搜不到答案的时候，倘若那个k值小于任何一个元素，那l最终会走到最左端点，所以你必须考虑在找不到答案的情况下，最终l会停留在哪里
+
 //模板1 往左找答案
 while (l < r)
 {
@@ -3558,7 +3560,7 @@ while (l < r)
 {
 	int mid = l + r + 1 >> 1; //此处mid加1
 	if (check(mid)) l = mid;
-	else r = mid + 1;
+	else r = mid - 1;
 }
 
 //模板3 浮点二分
@@ -6837,5 +6839,252 @@ int main()
 
 //单调队列优化
 
+```
+
+hdu 1159  Common Subsequence
+
+```c++
+#include <algorithm>
+#include <iostream>
+using namespace std;
+const int maxn = 1e3 + 10;
+string x, y;
+int dp[maxn][maxn];
+int main()
+{
+    while (cin >> x >> y)
+    {
+        memset(dp, 0, sizeof dp);
+        for (int i = 1; i <= x.size(); i++)
+            for (int j = 1; j <= y.size(); j++)
+            {
+                if (x[i - 1] == y[j - 1]) dp[i][j] = dp[i - 1][j - 1] + 1;
+                else dp[i][j] = max(dp[i][j - 1], dp[i - 1][j]);
+            }
+        cout << dp[x.size()][y.size()] << endl;
+    }
+    return 0;
+}
+```
+
+Longest Ordered Subsequence
+
+luogu p1020 最少拦截系统      [偏序集，哈斯图与Dilworth定理 - Tofu 的博客 - 洛谷博客 (luogu.org)](https://tofu.blog.luogu.org/pian-xu-ji-ha-si-tu-yu-dilworth-ding-li)
+
+```c++
+#include <algorithm>
+#include <iostream>
+using namespace std;
+const int maxn = 3e4 + 10;
+int dp[maxn];
+int n, a[maxn], ans;
+int main()
+{
+    while (cin >> n)
+    {
+        ans = 0;
+        for (int i = 1; i <= n; i++) dp[i] = 1, cin >> a[i];
+        for (int i = 1; i <= n; i++)
+            for (int j = 1; j <= i; j++)
+            {
+                if (a[i] > a[j]) dp[i] = max(dp[i], dp[j] + 1);
+                ans = max(ans, dp[i]);
+            }
+        cout << ans << endl;
+    }
+        return 0;
+}
+```
+
+luogu P2758 编辑距离
+
+```c++
+#include <algorithm>
+#include <iostream>
+using namespace std;
+const int maxn = 2e3 + 10;
+int dp[maxn][maxn];
+string x, y;
+int n, a[maxn], ans;
+int main()
+{
+    cin >> x >> y;
+    for (int i = 1; i <= x.size(); i++) dp[i][0] = i;
+    for (int i = 1; i <= y.size(); i++) dp[0][i] = i;
+    for (int i = 1; i <= x.size(); i++)
+        for (int j = 1; j <= y.size(); j++)
+        {
+            if (x[i - 1] == y[j - 1]) dp[i][j] = dp[i - 1][j - 1];
+            else dp[i][j] = min(dp[i - 1][j - 1], min(dp[i][j - 1], dp[i - 1][j])) + 1;
+        }
+    cout << dp[x.size()][y.size()] << endl;
+    return 0;
+}
+```
+
+POJ 1088 滑雪
+
+遍历每一个点，向四周搜索以得到该点能获得的最长递减路径，储存起来，即为该点的最优解，注意dfs过程也是对每个点的最优解进行了记忆化，所以实际上每个点只需遍历一次即可
+
+```c++
+//dfs，动态规划，记忆化搜索
+#include <algorithm>
+#include <iostream>
+using namespace std;
+const int maxn = 1e2 + 10;
+int dp[maxn][maxn];
+int step[4][2] = {{0, 1}, {1, 0}, {0, -1}, {-1, 0}};
+int r, c, a[maxn][maxn], ans;
+bool check(int i, int j)
+{
+    if (i > 0 && i <= r && j > 0 && j <= c) return true;
+    return false;
+}
+int dfs(int x, int y)
+{
+    if (dp[x][y]) return dp[x][y];
+    dp[x][y] = 1;
+    for (int i = 0; i < 4; i++)
+    {
+        int nx = x + step[i][0];
+        int ny = y + step[i][1];
+        if (check(nx, ny) && a[nx][ny] < a[x][y])
+            dp[x][y] = max(dp[x][y], dfs(nx, ny) + 1);
+    }
+    return dp[x][y];
+}
+int main()
+{
+    cin >> r >> c;
+    for (int i = 1; i <= r; i++)
+        for (int j = 1; j <= c; j++)
+            cin >> a[i][j];
+    for (int i = 1; i <= r; i++)
+        for (int j = 1; j <= c; j++)
+            ans = max(ans, dfs(i, j));
+    cout << ans << endl;
+    return 0;
+}
+```
+
+luogu P1868 饥饿的奶牛
+
+按照右区间大小先排序，遍历每个区间，每个子问题就是遍历到的区间的选择，可以不选，若是选择应该先从前面二分寻找最合适的一个区间并在其后面加上该区间，从而就可以得到动态规划的状态转移方程，得到的结果也是该区间即子问题的最优解，此题需要注意有个二分搜索减少时间复杂度，使用二分的时候注意左端点不能设为1，必须为0，因为有可能是0，而且不必担心只对结束时间排序会不会有什么其他问题，因为我们用的是尽量右找的，而最右端其实已经是其所有情况的最优解
+
+```c++
+#include <algorithm>
+#include <iostream>
+using namespace std;
+const int maxn = 2e5 + 10;
+struct node
+{
+    int b, e;
+    int dis;
+}a[maxn];
+int n;
+int dp[maxn];
+bool cmp(node x, node y)
+{
+    return x.e < y.e;
+}
+int my_binary(int l, int r, int k)
+{
+	while(l < r) 
+    {
+		int mid = l + r + 1 >> 1;
+		if(a[mid].e < k) l = mid;
+		else r = mid - 1;
+	}
+	return l;
+}
+int main()
+{
+    cin >> n;
+    for (int i = 1; i <= n; i++)
+    {
+        cin >> a[i].b >> a[i].e;
+        a[i].dis = a[i].e - a[i].b + 1;
+    }
+    sort(a + 1, a + 1 + n, cmp);
+    for (int i = 1; i <= n; i++)
+        dp[i] = max(dp[i - 1], dp[my_binary(0, i - 1, a[i].b)] + a[i].dis);
+    cout << dp[n] << endl;
+    return 0;
+}
+```
+
+codeforces 189A Cut Ribbon
+
+```c++
+#include <algorithm>
+#include <iostream>
+using namespace std;
+int n, p, q, r;
+int dp[4010];
+int a[4];
+int main()
+{
+    cin >> n >> a[1] >> a[2] >> a[3];
+    dp[a[1]] = dp[a[2]] = dp[a[3]] = 1;
+    for (int i = 1; i <= n; i++)
+        for (int j = 1; j <= 3; j++)
+            if (i > a[j] && dp[i - a[j]])
+                dp[i] = max(dp[i], dp[i - a[j]] + 1);
+    cout << dp[n] << endl;
+    return 0;
+}
+```
+
+The Triangle
+
+```c++
+#include <algorithm>
+#include <iostream>
+using namespace std;
+int nums[105][105];
+int dp[105];
+int n, ans;
+int main()
+{
+    cin >> n;
+    for (int i = 1; i <= n; i++)
+        for (int j = 1; j <= i; j++)
+            cin >> nums[i][j];
+    for (int i = 1; i <= n; i++)
+        for (int j = i; j >= 1; j--)
+            {
+                dp[j] = max(dp[j] + nums[i][j], dp[j - 1] + nums[i][j]);
+                ans = max(ans, dp[j]);
+            }
+    cout << ans << endl;
+    return 0;
+}
+```
+
+luogu P1091 [NOIP2004 提高组] 合唱队形
+
+从左往右记忆最长递增子序列，从右往左记忆最长递增子序列，和最大即为所求
+
+```c++
+#include <algorithm>
+#include <iostream>
+using namespace std;
+int a[105];
+int dp[2][105];
+int n, ans;
+int main()
+{
+    cin >> n;
+    for (int i = 1; i <= n; i++) cin >> a[i];
+    for (int i = 1; i <= n; i++)
+        for (int j = 0; j < i; j++)
+            if (a[i] > a[j]) dp[0][i] = max(dp[0][i], dp[0][j] + 1);
+    for (int i = n; i >= 1; i--)
+        for (int j = n + 1; j > i; j--)
+            if (a[i] > a[j]) dp[1][i] = max(dp[1][i], dp[1][j] + 1);
+    for (int i = 1; i <= n; i++) ans = max(ans, dp[0][i] + dp[1][i]);
+    cout << n - ans + 1 << endl;
+    return 0;
+}
 ```
 

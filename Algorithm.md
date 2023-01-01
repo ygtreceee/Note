@@ -1,43 +1,5 @@
 ## Algorithm
 
-#### 动态规划
-
-[最长上升子序列(LIS)](https://vjudge.csgrandeur.cn/problem/OpenJ_Bailian-2757)	[Anlysis](https://blog.csdn.net/lxt_Lucia/article/details/81206439?ops_request_misc=%7B%22request%5Fid%22%3A%22166623480216800182771794%22%2C%22scm%22%3A%2220140713.130102334..%22%7D&request_id=166623480216800182771794&biz_id=0&utm_medium=distribute.pc_search_result.none-task-blog-2~all~top_positive~default-2-81206439-null-null.142^v59^control_1,201^v3^control_2&utm_term=最长上升子序列&spm=1018.2226.3001.4187)
-
-```c++
-#include <iostream>
-#include <cstdio>
-#include <vector>
-#include <iomanip>
-#include <cstring>
-#include <algorithm>
-#include <cmath>
-using namespace std;
-
-//The Triangle
-
-int main()
-{
-    int arr[105][105];
-    int lib[105][105];
-    memset(arr, 0, sizeof(arr));
-    memset(lib, 0, sizeof(lib));
-    int n, maxnum = 0;
-    cin >> n;
-    for(int i = 1; i <= n; i++)
-        for(int j = 1; j <= i; j++)
-        {
-            cin >> arr[i][j];
-            lib[i][j] = max(lib[i - 1][j], lib[i - 1][j - 1]) + arr[i][j];
-            if(lib[i][j] > maxnum)  maxnum = lib[i][j];
-        }
-    cout << maxnum << endl;
-    return 0;
-}
-```
-
-
-
 #### 中国剩余定理
 
 [Biorhythms](https://vjudge.csgrandeur.cn/problem/OpenJ_Bailian-1006)	[Analysis](https://www.cnblogs.com/MashiroSky/p/5918158.html)
@@ -6749,26 +6711,22 @@ hdu 1712 ACboy needs your help
 #include <cstring>
 using namespace std;
 const int maxn = 105;
-int w[maxn][maxn], c[maxn][maxn];
-int dp[maxn];
 int n, m;
+int a[maxn][maxn];
+int dp[maxn];
 int main()
 {
     while (cin >> n >> m && n && m)
     {
-        for (int i = 1; i <= n; i++)
-            for (int j = 1; j <= m; j++)
-            {
-                cin >> w[i][j];
-                c[i][j] = j;  //第i组第j个物品的体积，学j天才能得分，体积就是j
-            }
         memset(dp, 0, sizeof dp);
         for (int i = 1; i <= n; i++)
-            for (int j = m; j >= 0; j--)
-                for (int k = 1; k <= m; k++)   //用k遍历第i组的所有物品
-                    if (j >= c[i][k])
-                        dp[j] = max(dp[j], dp[j - c[i][k]] + w[i][k]);  //第i组第k个
-        cout << dp[m] << endl; 
+            for (int j = 1; j <= m; j++)
+                cin >> a[i][j];
+        for (int i = 1; i <= n; i++)
+            for (int j = m; j > 0; j--)
+                for (int k = 1; k <= j; k++)
+                    dp[j] = max(dp[j], dp[j - k] + a[i][k]);
+        cout << dp[m] << endl;
     }
     return 0;
 }
@@ -6779,7 +6737,7 @@ luogu P1776 宝物筛选
 多重背包问题，可使用简单方法，或者二进制拆分优化，或者单调队列优化
 
 ```c++
-//简单方法
+//简单方法（超时）
 #include <algorithm>
 #include <iostream>
 using namespace std;
@@ -6799,13 +6757,13 @@ int main()
     return 0;
 }
 
-//二进制拆分优化
+//二进制拆分优化（常用）
 #include <algorithm>
 #include <iostream>
 using namespace std;
 const int maxn = 1e5 + 10;
 int w[maxn], c[maxn], m[maxn];
-int new_w[maxn], new_c[maxn], new_m[maxn];  //二进制拆分后的新物品
+int new_w[maxn], new_c[maxn];  //二进制拆分后的新物品
 int dp[maxn];
 int n, C；
 int new_n;   //二进制拆分后的新物品总数量
@@ -7084,6 +7042,252 @@ int main()
             if (a[i] > a[j]) dp[1][i] = max(dp[1][i], dp[1][j] + 1);
     for (int i = 1; i <= n; i++) ans = max(ans, dp[0][i] + dp[1][i]);
     cout << n - ans + 1 << endl;
+    return 0;
+}
+```
+
+luogu P1616 疯狂的采药
+
+本题的重点是每种草药的数量是无限的，起初我想再加一个`for`循环，但是造成超时了，事实上在自我滚动数组的基础上不要从后面往回维护，改成从前面往后面维护，就可以巧妙地避免重新开一个循环，减少了时间复杂度，因为以前的题从后面开始循环是因为在该循环中每次维护需要互不影响，但是此题的数量无限，所以每次结果可以在上一个结果的基础上进行最优解维护；此题还有一个注意的点就是极端情况下结果会爆`int`所以必须开`long long`
+
+```c++
+#include <algorithm>
+#include <iostream>
+using namespace std;
+const int maxn = 1e7 + 10;
+long long t, n;
+long long c[maxn], w[maxn];
+long long dp[maxn];
+int main()
+{
+    ios::sync_with_stdio(false);
+    cin.tie(0);
+    cin >> t >> n;
+    for (int i = 1; i <= n; i++) cin >> c[i] >> w[i];
+    for (int i = 1; i <= n; i++)
+        for (int j = c[i]; j <= t; j++)
+                dp[j] = max(dp[j], dp[j - c[i]] + w[i]);
+    cout << dp[t];
+    return 0;
+}
+```
+
+luogu P1507 NASA的食物计划
+
+本题出现两个限制条件，最大体积和最大质量，因此dp状态数组也应开到多维，其他思路与常规无异
+
+```c++
+#include <algorithm>
+#include <iostream>
+using namespace std;
+const int maxn = 550;
+int H, T, n;
+int h[maxn], t[maxn], k[maxn];
+int dp[maxn][maxn];
+int main()
+{
+    ios::sync_with_stdio(false);
+    cin.tie(0);
+    cin >> H >> T >> n;
+    for (int i = 1; i <= n; i++) cin >> h[i] >> t[i] >> k[i];
+    for (int i = 1; i <= n; i++)
+        for (int j = H; j >= h[i]; j--)
+            for (int p = T; p >= t[i]; p--)
+                dp[j][p] = max(dp[j][p], dp[j - h[i]][p - t[i]] + k[i]);
+    cout << dp[H][T];
+    return 0; 
+}
+```
+
+luogu P1757 通天之分组背包
+
+用`vector`超时，甚至无法编译，用数组模拟
+
+```c++
+#include <algorithm>
+#include <iostream>
+using namespace std;
+const int maxn = 1e3 + 10;
+int n, m, s, g_num;
+int dp[maxn];
+int nums[maxn], w[maxn], c[maxn], room[maxn][maxn];
+int main()
+{
+    cin >> m >> n;
+    for (int i = 1; i <= n; i++)
+    {
+        cin >> c[i] >> w[i] >> s; 
+        g_num = max(g_num, s);
+        room[s][++nums[s]] = i;
+    }
+    for (int i = 1; i <= g_num; i++)
+        for (int j = m; j > 0; j--)
+            for (int k = 1; k <= nums[i]; k++)
+                if (j >= c[room[i][k]]) dp[j] = max(dp[j], dp[j - c[room[i][k]]] + w[room[i][k]]);
+    cout << dp[m];
+    return 0;
+}
+```
+
+luogu P1064 [NOIP2006 提高组] 金明的预算方案
+
+此题需要多个状态转移方程，对每种可能都设一个状态转移方程即可
+
+```c++
+#include <algorithm>
+#include <iostream>
+using namespace std;
+const int maxn = 4e4 + 10;
+int n, m, v, p, q;
+int dp[maxn];
+int main_w[maxn], main_c[maxn];
+int sub_w[maxn][3], sub_c[maxn][3];
+int main()
+{
+    cin >> n >> m;
+    for (int i = 1; i <= m; i++)
+    {
+        cin >> v >> p >> q;
+        if (!q)
+        {
+            main_c[i] = v;
+            main_w[i] = v * p;
+        }
+        else
+        {
+            sub_c[q][0]++;
+            sub_c[q][sub_c[q][0]] = v;
+            sub_w[q][sub_c[q][0]] = v * p;
+        }
+    }
+    for (int i = 1; i <= m; i++)
+        for (int j = n; main_c[i] && j >= main_c[i]; j--)
+        {
+            dp[j] = max(dp[j], dp[j - main_c[i]] + main_w[i]);
+            if (j >= main_c[i] + sub_c[i][1])
+                dp[j] = max(dp[j], dp[j - main_c[i] - sub_c[i][1]] + main_w[i] + sub_w[i][1]);
+            if (j >= main_c[i] + sub_c[i][2])
+                dp[j] = max(dp[j], dp[j - main_c[i] - sub_c[i][2]] + main_w[i] + sub_w[i][2]);
+            if (j >= main_c[i] + sub_c[i][1] + sub_c[i][2])
+                dp[j] = max(dp[j], dp[j - main_c[i] - sub_c[i][1] - sub_c[i][2]] + main_w[i] + sub_w[i][1] + sub_w[i][2]);
+        }
+    cout << dp[n];
+    return 0;
+}
+```
+
+HDU 2639 Bone Collector II
+
+**第`k`优解问题**：当我们计算正常求最优解时我们只取我们所需要的解，一般是最优解，这导致我们摒弃了很多不优解，而计算第k优解时，就需要把原先摒弃的解按顺序放入一个数组，也就是说在原来求最优解的基础上再加一维数组，代表前k优解。而每次遍历时，在先前的基础上，我们要对前k的优解的操作结果都储存起来，而且存的是两种操作情况，因为我们还不知道得到的结果的前k种是什么，存完之后，我们利用存进去a[maxn]和b[maxn]的都是递减的序列，所以求前k优解相当于合并两个数组然后取前k个值，并不需要真正合并，给两个指针进行移动就行
+
+```c++
+#include <algorithm>
+#include <iostream>
+#include <cstring>
+using namespace std;
+const int maxn = 105;
+int t, n, v, k;
+int c[maxn], w[maxn];
+int dp[1010][35];
+int a[maxn], b[maxn];
+int main()
+{
+    for (cin >> t; t--; )
+    {
+        cin >> n >> v >> k;
+        memset(dp, 0, sizeof dp);
+        for (int i = 1; i <= n; i++) cin >> w[i];
+        for (int i = 1; i <= n; i++) cin >> c[i];
+        for (int i = 1; i <= n; i++)
+            for (int j = v; j >= c[i]; j--)
+            {
+                int p;
+                for (p = 1; p <= k; p++) //把所有情况都存起来
+                {
+                    a[p] = dp[j - c[i]][p] + w[i];
+                    b[p] = dp[j][p];
+                }
+                a[p] = -1; b[p] = -1;
+                int x = 1, y = 1, z = 1;
+                while (z <= k && (a[x] != -1 || b[y] != -1)) //所有解由最优到不优排列
+                {
+                    if (a[x] > b[y]) dp[j][z] = a[x++];
+                    else dp[j][z] = b[y++];
+                    if (dp[j][z] != dp[j][z - 1]) z++; //注意去掉重复解
+                }
+            }
+        cout << dp[v][k] << endl;
+    }
+    return 0;
+}
+```
+
+ luogu P1853 投资的最大效益
+
+```c++
+#include <algorithm>
+#include <iostream>
+#include <cstring>
+using namespace std;
+const int maxn = 5e6 + 10;
+int s, n, d;
+int c[15], w[15];
+int dp[maxn];
+int main()
+{
+    cin >> s >> n >> d;
+    for (int i = 1; i <= d; i++) cin >> c[i] >> w[i];
+    for (int i = 1; i <= n; i++)
+    {
+        memset(dp, 0, sizeof dp);
+        for (int j = 1; j <= d; j++)
+            for (int k = c[j]; k <= s; k++)
+                dp[k] = max(dp[k], dp[k - c[j]] + w[j]); 
+        s += dp[s];
+    }
+    cout << s << endl;
+    return 0;
+}
+```
+
+luogu P1833 樱花
+
+读取输入的时间的方式很有意思，值得学习
+
+```c++
+#include <algorithm>
+#include <iostream>
+using namespace std;
+const int maxn = 5e5 + 10;
+int a1, a2, b1, b2;
+int n, new_n;
+int c[maxn], w[maxn], m[maxn];
+int new_c[maxn], new_w[maxn];
+int dp[1010];
+int main()
+{
+    scanf("%d:%d%d:%d%d", &a1, &a2, &b1, &b2, &n);   //直接读取时间
+    int t = (b1 * 60 + b2) - (a1 * 60 + a2);
+    for (int i = 1; i <= n; i++) cin >> c[i] >> w[i] >> m[i];
+    for (int i = 1; i <= n; i++)
+    {
+        if (!m[i]) m[i] = t / c[i];
+        for (int j = 1; j <= m[i]; j++)
+        {
+            m[i] -= j;
+            new_c[++new_n] = j * c[i];
+            new_w[new_n] = j * w[i];
+        }
+        if (m[i])
+        {
+            new_c[++new_n] = m[i] * c[i];
+            new_w[new_n] = m[i] * w[i];
+        }
+    }
+    for (int i = 1; i <= new_n; i++)
+        for (int j = t; j >= new_c[i]; j--)
+            dp[j] = max(dp[j], dp[j - new_c[i]] + new_w[i]);
+    cout << dp[t];
     return 0;
 }
 ```

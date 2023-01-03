@@ -7141,7 +7141,7 @@ for (int  v : e[u])
 }
 
 
-链式向前星
+链式前向星
 #include <bits/stdc++.h>
 using namespace std;
 const int N = 1e6 + 5, M = 2e6 + 5;
@@ -7218,7 +7218,106 @@ int main()
 {
     int n, m; cin >> n >> m;
     for (int i = 0; i < m; i++) {int u, v, w; cin >> u >> v >> w; addedge(u, v, w);}
-    for (int i = head[2]; i != -1; i = edge[i].next) printf("%d", edge[i].to); //遍历节点二的所有邻居
+    for (int i = head[2]; i; i = edge[i].next) printf("%d", edge[i].to); //遍历节点二的所有邻居
+    return 0;
+}
+```
+
+luogu P3916 图的遍历
+
+```c++
+//TLE 遍历每一种情况到结束，储存走过的最大值，但是会TLE，因为要走遍每一种情况，时间复杂度太大
+#include <algorithm>
+#include <iostream>
+#include <vector>
+using namespace std;
+const int maxn = 1e5 + 10;
+int n, m, a, b;
+int vis[maxn];
+int ans[maxn];
+vector<int> v[maxn];
+void dfs(int now, int flag)
+{
+    ans[flag] = max(ans[flag], now);
+    vis[now] = 1;
+    for (int i = 0; i < v[now].size(); i++)
+        if (!vis[v[now][i]])  dfs(v[now][i], flag);
+    vis[now] = 0;
+    return;
+}
+int main()
+{
+    cin >> n >> m;
+    for (int i = 0; i < m; i++)
+    {
+        int from, to;
+        cin >> from >> to;
+        v[from].push_back(to);
+    }
+    for (int i = 1; i <= n; i++) dfs(i, i);
+    for (int i = 1; i <= n; i++) cout << ans[i] << " ";
+    return 0;
+}
+
+//AC 转化思维，考虑每个点可以到达的最大值，不如从最大的点开始，记录较大的点能到的点，前提是要反向存边
+#include <algorithm>
+#include <iostream>
+#include <vector>
+using namespace std;
+const int maxn = 1e5 + 10;
+int n, m, a, b;
+int ans[maxn];
+vector<int> v[maxn];
+void dfs(int now, int flag)
+{
+    if (ans[now]) return;
+    ans[now] = flag;
+    for (int i = 0; i < v[now].size(); i++)
+        dfs(v[now][i], flag);
+}
+int main()
+{
+    cin >> n >> m;
+    for (int i = 0; i < m; i++)
+    {
+        int from, to;
+        cin >> from >> to;
+        v[to].push_back(from);
+    }
+    for (int i = n; i > 0; i--) dfs(i, i);
+    for (int i = 1; i <= n; i++) cout << ans[i] << " ";
+    return 0;
+}
+```
+
+hdu 2094 产生冠军
+
+```c++
+#include <algorithm>
+#include <iostream>
+#include <string>
+#include <map>
+using namespace std;
+int n;
+map<string, int> m;
+int main()
+{
+    while (cin >> n && n)
+    {
+        m.clear();
+        int cnt = 0;
+        for (int i = 0; i < n; i++)
+        {
+            string a, b;
+            cin >> a >> b;
+            m[b]++;
+            if (!m.count(a)) m[a] = 0;
+        }
+        for (auto it = m.begin(); it != m.end(); it++)
+            if (it -> second == 0) cnt++;
+        if (cnt == 1) cout << "Yes" << endl;
+        else cout << "No" << endl; 
+    }
     return 0;
 }
 ```
@@ -7227,15 +7326,296 @@ int main()
 
 #### 拓扑排序
 
+```
+两种方法
+1.基于BFS的拓扑排序
+分为无前驱的顶点优先，无后继的顶点优先
+
+2.基于DFS的拓扑排序
+```
+
 poj 1270 Following orders
 
+```c++
+#include <algorithm>
+#include <iostream>
+#include <cstring>
+using namespace std;
+int n, a[25], dir[30][30];
+int topo[25], vis[30], indegree[30];
+void dfs(int z, int cnt)
+{
+    int i;
+    topo[cnt] = z;                           //记录拓扑排序
+    if (cnt == n - 1)                        //所有点取完了，输出一个拓扑排序
+    {
+        for (i = 0; i < n; i++) printf("%c", topo[i] + 'a');
+        printf("\n");
+        return;
+    }
+    vis[z] = 1;                              //标记为已访问
+    for (i = 0; i < n; i++)
+        if (!vis[a[i]] && dir[z][a[i]]) indegree[a[i]]--;      //把所有下属的入度减1
+    for (i = 0; i < n; i++)
+        if (!vis[a[i]] && !indegree[a[i]]) dfs(a[i], cnt + 1); //入度为0的点继续取
+    for (i = 0; i < n; i++)
+        if (!vis[a[i]] && dir[z][a[i]]) indegree[a[i]]++;
+    vis[z] = 0;                                                //恢复
+}
+int main()
+{
+    char s[100];
+    int len;
+    while (gets(s) != NULL)
+    {
+        memset(dir, 0, sizeof dir);
+        memset(vis, 0, sizeof vis);
+        memset(indegree, 0, sizeof indegree);
+        len = strlen(s);
+        n = 0;
+        for (int i = 0; i < len; i++)        //存字母到a[]
+            if (s[i] <= 'z' && s[i] >= 'a') a[n++] = s[i] - 'a';
+        sort(a, a + n);                      //对字母排序，能按字典序输出
+        gets(s);
+        len = strlen(s);
+        int first = 1;                       //first = 1表示当前字母是起点
+        for (int i = 0; i < len; i++)        //处理先后关系
+        {
+            int st, ed;
+            if (first && s[i] <= 'z' && s[i] >= 'a')  //起点
+            {
+                first = 0;
+                st = s[i] - 'a';              //把字母转化为数字
+                continue;
+            }
+            if (!first && s[i] <= 'z' && s[i] >= 'a')  //终点
+            {
+                first = 1;
+                ed = s[i] - 'a';
+                dir[st][ed] = 1;              //记录先后关系
+                indegree[ed]++;               //记录入度，终点入度+1
+                continue;
+            }
+        }
+        for (int i = 0; i < n; i++)
+            if (!indegree[a[i]]) dfs(a[i], 0); //从所有入度为0的点开始
+        printf("\n");
+    }
+    return 0;
+}
 ```
 
+hdu 1285 确定比赛名次
+
+```c++
+//基于DFS的拓扑排序
+#include <algorithm>
+#include <iostream>
+#include <cstring>
+using namespace std;
+const int maxn = 510;
+int n, m, x, y;
+int dir[maxn][maxn];
+int vis[maxn];
+int indegree[maxn];
+int topo[maxn];
+int a[maxn];
+void dfs(int z, int cnt)
+{
+    topo[cnt] = z;
+    if (cnt == n - 1)
+    {
+        for (int i = 0; i < n; i++) printf(" %d" + !i, topo[i]);
+        printf("\n");
+        return;
+    }
+    vis[z] = 1;
+    for (int i = 1; i <= n; i++)
+        if (!vis[i] && dir[z][i]) indegree[i]--;
+    for (int i = 1; i <= n; i++)
+        if (!vis[i] && !indegree[i]) dfs(i, cnt + 1);
+}
+int main()
+{
+    while (cin >> n >> m)
+    {
+        memset(dir, 0, sizeof dir);
+        memset(indegree, 0, sizeof indegree);
+        memset(vis, 0, sizeof vis);
+        for (int i = 0; i < m; i++)
+        {
+            cin >> x >> y;
+            if (dir[x][y]) continue;  //出现过的不能再记录
+            dir[x][y] = 1;
+            indegree[y]++;
+        }
+        for (int i = 1; i <= n; i++)
+            if (!indegree[i]) dfs(i, 0);
+    }
+    return 0;
+}
+
+
+//无前驱的顶点优先拓扑排序
+#include <algorithm>
+#include <iostream>
+#include <cstring>
+#include <vector>
+#include <queue>
+using namespace std;
+int n, m;
+int indegree[510];
+int main()
+{
+    while (cin >> n >> m)
+    {
+        vector<int> v[510];
+        memset(indegree, 0, sizeof indegree);
+        for (int i = 1; i <= m; i++)   //重复记录无所谓，因为vector会出手
+        {
+            int x, y;
+            cin >> x >> y;
+            v[x].push_back(y);
+            indegree[y]++;
+        }
+        priority_queue<int, vector<int>, greater<int>> q;
+        for (int i = 1; i <= n; i++)
+            if (!indegree[i]) q.push(i);
+        while (!q.empty())
+        {
+            int tmp = q.top();
+            q.pop();
+            for (int i: v[tmp])
+            {
+                indegree[i]--;
+                if (!indegree[i]) q.push(i);
+            }
+            cout << tmp;
+            if (!q.empty()) cout << " ";
+            else cout << endl;
+        }
+    }
+    return 0;
+}
 ```
 
+HDU 4857 逃生
 
+此题若采用**无前驱的顶点优先**，会导致`WA`，因为无前驱顶点优先得到的结果是**总体字典序最小**的拓扑排序，在此题中最小字典序不是最优解，因为还要保证没有任何联系的两个元素要保持最小字典序，尽管可能在总体上它并非最小字典序，例如输入 `(1 4), (4 2), (5 3), (3 2)` 时，无前驱顶点优先会得到`1 4 5 3 2`，但是正确答案是`1 5 3 4 2`，因为`4`和`3`没有任何联系，必须按照字典序，让`3`在`4`的前面，所以在此题可以采用**无后继的顶点优先**，也就是说**逆序存放将可以优先实现无联系的元素符合条件**，同时优先队列采用默认的`less<int>` ,但是事实上实现的时候只需要**反向存边**，按照原来**无前驱顶点优先实现**即可，队列要换成`less<int>`, 输出的时候需要**倒序**
 
+<img src="C:\Users\ygtrece\AppData\Roaming\Typora\typora-user-images\image-20230103192836219.png" alt="image-20230103192836219" style="zoom:50%;" />
 
+“ **此题要求编号小的尽量在前**，而不是字典序最小，**与字典序是两回事，不可以混淆**（字典序是让前面的编号尽量小，两者对于靠前和编号尽量小的优先级不同）”，联想`（3，1）`，正确是`3 1 2` 
+
+```c++
+//无前驱的顶点优先，wrong answer
+#include <algorithm>
+#include <iostream>
+#include <cstring>
+#include <queue>
+using namespace std;
+const int N = 3e4 + 10, M = 1e5 + 10;
+int t;
+int n, m, cnt;
+int head[N];
+int indegree[N];
+struct {int to, next;} edge[M];
+void addedge(int u, int v)
+{
+    cnt++;
+    indegree[v]++;
+    edge[cnt].to = v;
+    edge[cnt].next = head[u];
+    head[u] = cnt;
+}
+int main()
+{
+    ios::sync_with_stdio(false);
+    cin.tie(0);
+    for (cin >> t; t--; )
+    {
+        cnt = 0;  //不要忘记初始化！
+        memset(indegree, 0, sizeof indegree);
+        memset(head, 0, sizeof head);
+        memset(edge, 0, sizeof edge);
+        int n, m;
+        cin >> n >> m;
+        for (int i = 0; i < m; i++) {int u, v; cin >> u >> v; addedge(u, v);};
+        priority_queue <int, vector<int>, greater<int>> q;
+        for (int i = 1; i <= n; i++) if (!indegree[i]) q.push(i);
+        while (!q.empty())
+        {
+            int t = q.top();
+            q.pop();
+            for (int i = head[t]; i; i = edge[i].next)
+            {
+                indegree[edge[i].to]--;
+                if (!indegree[edge[i].to]) q.push(edge[i].to);
+            }
+            cout << t;
+            if (!q.empty()) cout << " ";
+            else cout << endl;
+        }
+    }
+    return 0;
+}
+
+//反向存边倒序输出
+#include <algorithm>
+#include <iostream>
+#include <cstring>
+#include <vector>
+#include <queue>
+using namespace std;
+const int N = 3e4 + 10, M = 1e5 + 10;
+int t;
+int n, m, cnt;
+int head[N];
+int indegree[N];
+struct {int to, next;} edge[M];
+void addedge(int u, int v)
+{
+    cnt++;
+    indegree[v]++;
+    edge[cnt].to = v;
+    edge[cnt].next = head[u];
+    head[u] = cnt;
+}
+vector<int> topo;
+int main()
+{
+    ios::sync_with_stdio(false);
+    cin.tie(0);
+    for (cin >> t; t--; )
+    {
+        cnt = 0;
+        memset(indegree, 0, sizeof indegree);
+        memset(head, 0, sizeof head);
+        memset(edge, 0, sizeof edge);
+        int n, m;
+        topo.clear();
+        cin >> n >> m;
+        for (int i = 0; i < m; i++) {int u, v; cin >> u >> v; addedge(v, u);};
+        priority_queue <int> q;
+        for (int i = 1; i <= n; i++) if (!indegree[i]) q.push(i);
+        while (!q.empty())
+        {
+            int t = q.top();
+            q.pop();
+            topo.push_back(t);
+            for (int i = head[t]; i; i = edge[i].next)
+                if (--indegree[edge[i].to] == 0) q.push(edge[i].to);
+        }
+        for (int i = n - 1; i >= 0; i--)
+        {
+            if (i != n - 1) cout << " " << topo[i];
+            else cout << topo[i];
+        }
+        cout << endl;
+    }
+    return 0;
+}
+```
 
 
 

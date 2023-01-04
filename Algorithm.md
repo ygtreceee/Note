@@ -5548,12 +5548,6 @@ int main()
 }
 ```
 
-#### IDA *
-
-```
-
-```
-
 
 
 ## 高级数据结构
@@ -7329,9 +7323,11 @@ int main()
 ```
 两种方法
 1.基于BFS的拓扑排序
-分为无前驱的顶点优先，无后继的顶点优先
+分为无前驱的顶点优先，无后继的顶点优先，然而第二种无后继可用无前驱的反向存储逆序输出解决，但是特别注意第一种可以处理最小字典序和，第二种可以处理小的编号尽量往前的问题，不可混淆
+无需处理重复情况
 
 2.基于DFS的拓扑排序
+需要处理重复情况，即重复有向线不能再次计入
 ```
 
 poj 1270 Following orders
@@ -7501,11 +7497,14 @@ int main()
 
 HDU 4857 逃生
 
+题意：如果有多种情况，必须考虑`1`先走，即`1`要尽可能的靠在最前，然后再考虑`2，3`等等，**此题要求编号小的尽量在前**，而不是字典序最小，**与字典序是两回事，不可以混淆**（字典序是让前面的编号尽量小，两者对于靠前和编号尽量小的优先级不同），但要注意，编号小的尽可能在前也不能保证全部无联系的编号都按照顺序，甚至可以说是牺牲较大编号的有序性保证小编号尽量靠前，能保一个是一个
+
 此题若采用**无前驱的顶点优先**，会导致`WA`，因为无前驱顶点优先得到的结果是**总体字典序最小**的拓扑排序，在此题中最小字典序不是最优解，因为还要保证没有任何联系的两个元素要保持最小字典序，尽管可能在总体上它并非最小字典序，例如输入 `(1 4), (4 2), (5 3), (3 2)` 时，无前驱顶点优先会得到`1 4 5 3 2`，但是正确答案是`1 5 3 4 2`，因为`4`和`3`没有任何联系，必须按照字典序，让`3`在`4`的前面，所以在此题可以采用**无后继的顶点优先**，也就是说**逆序存放将可以优先实现无联系的元素符合条件**，同时优先队列采用默认的`less<int>` ,但是事实上实现的时候只需要**反向存边**，按照原来**无前驱顶点优先实现**即可，队列要换成`less<int>`, 输出的时候需要**倒序**
 
 <img src="C:\Users\ygtrece\AppData\Roaming\Typora\typora-user-images\image-20230103192836219.png" alt="image-20230103192836219" style="zoom:50%;" />
 
-“ **此题要求编号小的尽量在前**，而不是字典序最小，**与字典序是两回事，不可以混淆**（字典序是让前面的编号尽量小，两者对于靠前和编号尽量小的优先级不同）”，联想`（3，1）`，正确是`3 1 2` 
+”我们发现，每一次都取入度为0的并且最小的点输出不能使得最小的点排在尽可能靠前的位置，也就是局部最优不能使得全局最优。所以可以考虑从后往前思考，就是**反向操作，以避开优先队列的缺陷**。我们发现，最后一个输出的一定是出度为0的数。相同时间如果存在多个出度为0的数，则数值大的一定是后输出的。借用一句别人总结的话小的头部不一定排在前面，但是大的尾部一定排在后面。"
+
 
 ```c++
 //无前驱的顶点优先，wrong answer
@@ -7617,25 +7616,346 @@ int main()
 }
 ```
 
+#### 最短路径
+
+```
+Floyd-Warshall算法
+模板
+for (int k = 1; k <= n; k++)
+	for (int i = 1; i <= n; i++)
+		for (int j = 1; j <= n; j++)
+			dp[i][j] = min(dp[i][j], dp[i][k] + dp[k][j]);
+```
+
+lanqiao 1121 计算最短路径
+
+```
+
+```
 
 
 
+#### 最小生成树
 
+```
+最小生成树是有边权的无向图的一个问题，也很常见
+在无向图G(V, E)中，把连通而且不含有圈(环路)的一个子图称为一棵生成树
+边权之和最小的树称为最小生成树(MST)
 
+有两种算法可以构造MST，都基于贪心算法
+1.Kruskal算法
+2.Prim算法
+区别：
+1.Prim算法效率高，算法复杂度为O(mlogn), Kruskal算法复杂度为O(mlogm), n为点数，m为边数，且图的边数一般比点数多
+2.Kruskal算法编码简单，如果题目给的数据规模不太大，就用Kruskal算法编码
+```
 
+luogu P3366 【模板】最小生成树
 
+```c++
+#include <algorithm>
+#include <iostream>
+using namespace std;
+const int N = 5005, M = 2e5 + 1;
+struct Edge{int u, v, w;}edge[M];
+bool cmp(Edge a, Edge b) {return a.w < b.w;}
+int s[N];
+int n, m;
+int find_set(int x)
+{
+    if (x != s[x]) s[x] = find_set(s[x]);
+    return s[x];
+}
+void kruskal()
+{
+    sort(edge + 1, edge + m + 1, cmp);
+    for (int i = 1; i <= n; i++) s[i] = i;
+    int ans = 0, cnt = 0;
+    for (int i = 1; i <= m; i++)
+    {
+        if (cnt == n - 1) break;
+        int e1 = find_set(edge[i].u);
+        int e2 = find_set(edge[i].v);
+        if (e1 == e2) continue;
+        else
+        {
+            ans += edge[i].w;
+            s[e1] = e2;
+            cnt++;
+        }
+    }
+    if (cnt == n - 1) cout << ans;
+    else cout << "orz";
+}
+int main()
+{
+    cin >> n >> m;
+    for (int i = 1; i <= m; i++) cin >> edge[i].u >> edge[i].v >> edge[i].w;
+    kruskal();
+    return 0;
+}
+```
 
+luogu P2330 [SCOI2005]繁忙的都市
 
+```c++
+#include <algorithm>
+#include <iostream>
+using namespace std;
+const int N = 319, M = 1e5 + 10;
+int s[N], n, m;
+struct Edge {int u, v, w;} edge[M];
+bool cmp(Edge a, Edge b) {return a.w < b.w;}
+int find_set(int x)
+{
+    if (x != s[x]) s[x] = find_set(s[x]);
+    return s[x];
+}
+void kruskal()
+{
+    sort(edge + 1, edge + 1 + m, cmp);
+    for (int i = 1; i <= n; i++) s[i] = i;
+    int ans = 0, cnt = 0;
+    for (int i = 1; i <= m; i++)
+    {
+        if (cnt == n - 1) break;
+        int e1 = find_set(edge[i].u);
+        int e2 = find_set(edge[i].v);
+        if (e1 == e2) continue;
+        else
+        {
+            cnt++;
+            ans = max(ans, edge[i].w);
+            s[e1] = e2;
+        }
+    }
+    cout << cnt << " " << ans;
+}
+int main()
+{
+    cin >> n >> m;
+    for (int i = 1; i <= m; i++) cin >> edge[i].u >> edge[i].v >> edge[i].w;
+    kruskal();
+    return 0;
+}
+```
 
+luogu P1195 口袋的天空
 
+```c++
+#include <algorithm>
+#include <iostream>
+using namespace std;
+const int N = 1e3 + 10, M = 1e4 + 10;
+int s[N], n, m, k;
+struct Edge{int u , v, w;}edge[M];
+bool cmp(Edge a, Edge b) {return a.w < b.w;}
+int find_set(int x)
+{
+    if (x != s[x]) s[x] = find_set(s[x]);
+    return s[x];
+}
+void kruskal()
+{
+    sort(edge + 1, edge + 1 + m, cmp);
+    for (int i = 1; i <= n; i++) s[i] = i;
+    int cnt = n, ans = 0;
+    for (int i = 1; i <= m; i++)
+    {
+        int e1 = find_set(edge[i].u);
+        int e2 = find_set(edge[i].v);
+        if (e1 == e2) continue;
+        else
+        {
+            s[e1] = e2;
+            cnt--;
+            ans += edge[i].w; 
+        }
+        if (cnt == k) {cout << ans; return;}
+    }
+    cout << "No Answer";
+    return;
+}
+int main()
+{
+    cin >> n >> m >> k;
+    for (int i = 1; i <= m; i++) cin >> edge[i].u >> edge[i].v >> edge[i].w;
+    kruskal();
+    return 0;
+}
+```
 
+luogu P1194 买礼物
 
+？
 
+```c++
+#include <algorithm>
+#include <iostream>
+using namespace std;
+const int N = 550, M = 3e5 + 10;
+int a, b, cnt;
+int s[N];
+struct Edge{int u, v, w;}edge[M];
+bool cmp(Edge a, Edge b) {return a.w < b.w;}
+int find_set(int x)
+{
+    if (x != s[x]) s[x] = find_set(s[x]);
+    return s[x];
+}
+void kruskal()
+{
+    sort(edge + 1, edge + 1 + cnt, cmp);
+    for (int i = 1; i <= b; i++) s[i] = i;
+    int ans = 0, n = 0;
+    for (int i = 1; i <= cnt; i++)
+    {
+        if (n == b) break;
+        int e1 = find_set(edge[i].u);
+        int e2 = find_set(edge[i].v);
+        if (e1 == e2) continue;
+        else
+        {
+            s[e1] = e2;
+            ans += edge[i].w;
+            n++;
+        }
+    }
+    cout << ans << endl;
+}
+int main()
+{
+    cin >> a >> b;
+    for (int i = 1; i <= b; i++)
+        for (int j = 1; j <= b; j++)
+        {
+            int ret;
+            cin >> ret;
+            if (!ret || j > i) continue;
+            edge[++cnt].u = i;
+            edge[cnt].v = j;
+            edge[cnt].w = ret;
+        }
+    for (int i = 1; i <= b; i++)  //与0建立权值关系
+    {
+        edge[++cnt].u = 0;
+        edge[cnt].v = i;
+        edge[cnt].w = a;
+    }
+    kruskal();
+    return 0;
+}
+```
 
+luogu P2820 局域网
 
+```c++
+#include <algorithm>
+#include <iostream>
+using namespace std;
+const int N = 105, M = 3e5 + 10;
+int s[N];
+int n, k, sum;
+struct Edge{int u, v, w;}edge[M];
+bool cmp(Edge a, Edge b) {return a.w < b.w;}
+int find_set(int x)
+{
+    if (x != s[x]) s[x] = find_set(s[x]);
+    return s[x];
+}
+void kruskal()
+{
+    sort(edge + 1, edge + 1 + k, cmp);
+    for (int i = 1; i <= n; i++) s[i] = i;
+    int ans = 0, cnt = 0;
+    for (int i = 1; i <= k; i++)
+    {
+        int e1 = find_set(edge[i].u);
+        int e2 = find_set(edge[i].v);
+        if (e1 == e2) continue;
+        else
+        {
+            s[e1] = e2;
+            ans += edge[i].w;
+            cnt++;
+        }
+        if (cnt == n - 1) break;
+    }
+    cout << sum - ans << endl;
+}
+int main()
+{
+    cin >> n >> k;
+    for (int i = 1; i <= k; i++)
+    {
+        cin >> edge[i].u >> edge[i].v >> edge[i].w;
+        sum += edge[i].w;
+    }
+    kruskal();
+    return 0;
+}
+```
 
+洛谷 P4047 JSOI2010 部落划分 
 
+二分?
 
+[题解【二分答案】【生成树】【并查集】 - wjyyy 博客](http://www.wjyyy.top/735.html)
+
+```c++
+#include <algorithm>
+#include <iostream>
+#include <cmath>
+using namespace std;
+const int N = 1e3 + 10, M = 1e6 + 10;
+int n, k, m;
+int s[N], x[N], y[N];
+struct Edge{int u, v, w;}edge[M];
+bool cmp(Edge a, Edge b) {return a.w < b.w;}
+int find_set(int x)
+{
+    if (x != s[x]) s[x] = find_set(s[x]);
+    return s[x];
+}
+void kruskal()
+{
+    sort(edge + 1, edge + 1 + m, cmp);
+    for (int i = 1; i <= n; i++) s[i] = i;
+    int cnt = n;
+    for (int i = 1; i <= m; i++)
+    {
+        int e1 = find_set(edge[i].u);
+        int e2 = find_set(edge[i].v);
+        if (e1 == e2) continue;
+        else
+        {
+            cnt--;
+            s[e1] = e2;
+        }
+        if (cnt == k - 1)
+        {
+            printf("%.2f", sqrt(edge[i].w));
+            break;
+        }
+    }
+}
+int main()
+{
+    cin >> n >> k;
+    for (int i = 1; i <= n; i++)
+    {
+        cin >> x[i] >> y[i];
+        for (int j = 1; j < i; j++)
+        {
+            edge[++m].u = i;
+            edge[m].v = j;
+            edge[m].w = (x[i] - x[j]) * (x[i] - x[j]) + (y[i] - y[j]) * (y[i] - y[j]);
+        }
+    }
+    kruskal();
+    return 0;
+}
+```
 
 
 

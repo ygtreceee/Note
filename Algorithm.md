@@ -1898,7 +1898,7 @@ int main()
        sum[i] = sum[i - 1] + a[i];
    //or 直接改变数组
    //for (int i = 1; i <= n; i++)
-       a[i] = a[i - 1] + a[i];
+   //   a[i] = a[i - 1] + a[i];
     while (m--)
    {
        cin >> l >> r;
@@ -2607,7 +2607,7 @@ F - 很大的数组的第k小
 
 这道题可作为**快速排序**的模板题, 需要记忆. 快速排序的核心思想是在要排序的数组中选择一个数, 然后将数组中比这个数小的放在这个数的左边, 比这个数大的放在他的右边, 现在我们要找第k小的数, 那么如果在数组中选了一个数, 用快排的方法, 将比这个数小的数都放在它的左边, 而左边的数(加标签个数), 若小于k个, 说明这个数应该在标签的右边,  若大于k个, 说明在标签左边, 若刚好等于k, 说明这个标签正是我们要找的数. 
 
-```
+```c++
 #include<cstdio>
 #include<cstring>
 #include<cstdlib>
@@ -6577,7 +6577,7 @@ int main()
     }
     sort(a + 1, a + 1 + n, cmp);
     for (int i = 1; i <= n; i++)
-        dp[i] = max(dp[i - 1], dp[my_binary(0, i - 1, a[i].b)] + a[i].dis);
+        dp[i] = max(dp[i - 1], dp[my_binary(0, i - 1, a[i].b)] + a[i].dis);  //起始为0
     cout << dp[n] << endl;
     return 0;
 }
@@ -7092,6 +7092,37 @@ int main()
             left = right + 1;
         }
         if (n > k) ans += k * (n - k);
+        cout << ans << endl;
+    }
+    return 0;
+}
+```
+
+G ([1467](https://soj.csgrandeur.cn/csgoj/problemset/problem?pid=1467)) : 没有题面的神秘题目-2
+
+**除法向上取整求和**
+
+<img src="https://camo.githubusercontent.com/2080c1169a009b852b035361ed89e26a8ba1bc9ca8e0895f4500a94c795aa4a5/68747470733a2f2f646f63696d67362e646f63732e71712e636f6d2f696d6167652f41674141427163327349705374757a686744354545356661585f4947625336562e706e673f696d6167654d6f6772322f7468756d626e61696c2f31363030782533452f69676e6f72652d6572726f722f31" alt="img" style="zoom: 33%;" />
+
+```c++
+#include <iostream>
+#include <algorithm>
+using namespace std;
+using LL = long long;
+int main()
+{
+    ios::sync_with_stdio(false);
+    cin.tie(0);
+    LL n; 
+    while (cin >> n)
+    {
+        LL ans = n;
+        n -= 1;
+        for (LL l = 1, r; l <= n; l = r + 1)
+        {
+            r = n / (n / l);
+            ans += (n / l) * (r - l + 1);
+        }
         cout << ans << endl;
     }
     return 0;
@@ -7618,19 +7649,158 @@ int main()
 
 #### 最短路径
 
+| 问题                 | 边权                        | 算法 | 时间复杂度 |
+| -------------------- | --------------------------- | ---- | ---- |
+| 一个起点，一个终点   | 非负数；无边权（或边权为1） | `A*`算法 | $<O((m+n)log_2n)$ |
+|  |  | 双向广搜 | $<O((m+n)log_2n)$ |
+|  |  | 贪心最优搜索 | $<O((m+n))$ |
+| 一个起点到其他所有点                              | 无边权（或边权为1） | `BFS` |$O(m+n)$|
+|                                                   | 非负数 | `Dijkstra`(堆优化优先队列) |$O((m+n)log_2n)$|
+|                                                   | 允许有负数 | `SPFA` |$<O(mn)$|
+| 所有点对之间         | 允许有负数 | `Floyd-Warshall` | $O(n^3)$ |
+
 ```
 Floyd-Warshall算法
+核心思想：
+用DP方法遍历中转点计算最短路径
+
+特征：
+1.能一次性求得所有节点之间的最短距离
+2.代码简单
+3.效率低下，只适用于 n<300 的小规模图
+4.用邻接矩阵dp[][]存图
+5.判断负环，dp[i][i] < 0 则说明出现负环
+
+适用场景：
+1.图的规模小 n<300
+2.问题解决和中转点有关
+3.路径在“兜圈子”，一个点可能多次经过
+4.可能多次查询不同点对之间的最短路径
+
 模板
-for (int k = 1; k <= n; k++)
+for (int k = 1; k <= n; k++)       //k循环在i，j循环外边
 	for (int i = 1; i <= n; i++)
 		for (int j = 1; j <= n; j++)
-			dp[i][j] = min(dp[i][j], dp[i][k] + dp[k][j]);
+			dp[i][j] = min(dp[i][j], dp[i][k] + dp[k][j]);   //比较经过k和不经过k
 ```
 
 lanqiao 1121 计算最短路径
 
+```c++
+#include <iostream>
+#include <algorithm>
+#include <cstring>
+using namespace std;
+using LL = long long;
+const long long INF = 0x3f3f3f3f3f3f3f3fLL;
+const int N = 405;
+long long dp[N][N];
+int n, m, q;
+void input()
+{
+    memset(dp, 0x3f, sizeof dp);
+    for (int i = 1; i <= m; i++)
+    {
+        int u, v;
+        long long w;
+        cin >> u >> v >> w;
+        dp[u][v] = dp[v][u] = min(dp[u][v], w);
+    }
+}
+void floyd()
+{
+    for (int k = 1; k <= n; k++)
+        for (int i = 1; i <= n; i++)
+            for (int j = 1; j <= n; j++)
+                dp[i][j] = min(dp[i][j], dp[i][k] + dp[k][j]);
+}
+void output()
+{
+    int s, t;
+    while (q--)
+    {
+        cin >> s >> t;
+        if (dp[s][t] == INF) cout << "-1" << endl;
+        else if (s == t) cout << "0" << endl;
+        else cout << dp[s][t] << endl;
+    }
+}
+int main()
+{
+    ios::sync_with_stdio(false);
+    cin.tie(0);
+    cin >> n >> m >> q;
+    input();
+    floyd();
+    output();
+    return 0;
+}
 ```
 
+hdu 1385 Minimum Transport Cost
+
+```c++
+#include <iostream>
+#include <algorithm>
+using namespace std;
+const int INF = 0x3f3f3f3f;
+const int N = 505;
+int n, dp[N][N], tax[N], path[N][N];
+void input()
+{
+    for (int i = 1; i <= n; i++)
+        for (int j = 1; j <= n; j++)
+        {
+            cin >> dp[i][j];
+            if (dp[i][j] == -1) dp[i][j] = INF;
+            path[i][j] = j;      //path[i][j]: 此时i, j相邻或者断开
+        }
+    for (int i = 1; i <= n; i++) cin >> tax[i];  //交税
+}
+void floyd()
+{
+    for (int k = 1; k <= n; k++)
+        for (int i = 1; i <= n; i++)
+            for (int j = 1; j <= n; j++)
+            {
+                int len = dp[i][k] + dp[k][j] + tax[k];   //计算最短路
+                if (len < dp[i][j])
+                {
+                    dp[i][j] = len;
+                    path[i][j] = path[i][k];   //标记走向该点需要去向的下一个点
+                }
+                else if (len == dp[i][j] && path[i][j] > path[i][k])
+                    path[i][j] = path[i][k];   //若距离相同，按字典序
+            }
+}
+void output()
+{
+    int s, t;
+    while (cin >> s >> t)
+    {
+        if (s == -1 && t == -1) break;
+        cout << "From " << s << " to " << t << ":" << endl;
+        cout << "Path: " << s;
+        int k = s;
+        while (k != t)          //输出路径从起点到终点
+        {
+            cout << " --> " << path[k][t];
+            k = path[k][t];     //一步一步走向终点
+        }
+        cout << endl;
+        cout << "Total cost : " << dp[s][t] << endl << endl;
+    }
+}
+int main()
+{
+    ios::sync_with_stdio(false);
+    cin.tie(0);
+    while (cin >> n && n)
+    {
+        input(); floyd(); output();
+    }
+    return 0;
+}
 ```
 
 

@@ -7687,6 +7687,7 @@ for (int k = 1; k <= n; k++)       //k循环在i，j循环外边
 lanqiao 1121 计算最短路径
 
 ```c++
+//Floyd
 #include <iostream>
 #include <algorithm>
 #include <cstring>
@@ -7740,6 +7741,7 @@ int main()
 hdu 1385 Minimum Transport Cost
 
 ```c++
+//Floyd
 #include <iostream>
 #include <algorithm>
 using namespace std;
@@ -7799,6 +7801,91 @@ int main()
     {
         input(); floyd(); output();
     }
+    return 0;
+}
+```
+
+luogu P1119 灾后重建
+
+```c++
+//Floyd
+#include <iostream>
+#include <algorithm>
+#include <cstring>
+using namespace std;
+const int INF = 0x3f3f3f3f;
+int n, m, q, u, v, w, now;
+int t[210];
+int dp[210][210];
+void floyd(int now)
+{
+    for (int i = 0; i < n; i++)
+        for (int j = 0; j < n; j++)
+            dp[i][j] = min(dp[i][j], dp[i][now] + dp[now][j]);
+}
+int main()
+{
+    memset(dp, 0x3f, sizeof dp);
+    cin >> n >> m;
+    for (int i = 0; i < n; i++) cin >> t[i];
+    for (int i = 0; i < m; i++)
+    {
+        cin >> u >> v >> w;
+        dp[u][v] = dp[v][u] = w;
+    }
+    for (cin >> q; q--; )
+    {
+        cin >> u >> v >> w;
+        while (t[now] <= w && now < n)
+        {
+            floyd(now);
+            now++;
+        }
+        if (u == v) cout << "0" << endl;
+        else if (t[u] > w || t[v] > w || dp[u][v] == INF) cout << "-1" << endl;
+        else cout << dp[u][v] << endl;
+    }
+    return 0;
+}
+```
+
+luogu P1613 跑路
+
+利用的是`p[i][j][t] = p[i][k][t - 1] + p[k][j][t - 1]`
+
+```c++
+//Floyd
+#include <iostream>
+#include <algorithm>
+#include <cstring>
+using namespace std;
+const int N = 55;
+bool p[N][N][34];
+int dp[N][N];
+int main()
+{
+    memset(dp, 0x3f, sizeof dp);
+    int n, m; cin >> n >> m;
+    for (int i = 1; i <= m; i++)
+    {
+        int u, v; cin >> u >> v;
+        dp[u][v] = 1;
+        p[u][v][0] = true;
+    }
+    for (int t = 1; t <= 32; t++)       //长度为2^t的路径
+        for (int k = 1; k <= n; k++)
+            for (int i = 1; i <= n; i++)
+                for (int j = 1; j <= n; j++)
+                    if (p[i][k][t - 1] && p[k][j][t - 1])
+                    {
+                        p[i][j][t] = true;
+                        dp[i][j] = 1;
+                    }
+    for (int k = 1; k <= n; k++)
+        for (int i = 1; i <= n; i++)
+            for (int j = 1; j <= n; j++)
+                dp[i][j] = min(dp[i][j], dp[i][k] + dp[k][j]);
+    cout << dp[1][n] << endl;
     return 0;
 }
 ```

@@ -3478,7 +3478,7 @@ int main()
 
 ## 搜索
 
-#### DFS
+#### BFS和DFS基础
 
 [城堡问题](https://vjudge.csgrandeur.cn/problem/OpenJ_Bailian-2815)
 
@@ -3746,7 +3746,7 @@ int main()
 
 
 
-#### BFS
+BFS
 
 ```c++
 //Find The Multiple
@@ -5075,7 +5075,7 @@ int main()
 }
 ```
 
-#### 搜索剪枝
+#### 剪枝
 
 ```c++
 BFS剪枝通常使用判重，如果搜索到某一层时，出现重复状态就剪枝
@@ -5547,6 +5547,8 @@ int main()
     }
 }
 ```
+
+#### BFS与最短路径
 
 
 
@@ -7137,6 +7139,7 @@ int main()
 
 ```c++
 图的存储方法有3种：邻接矩阵，邻接表，链式前向星
+稀疏图的储存用邻接表或链式前向星，稠密图用邻接矩阵
     
 邻接矩阵
 int graph[maxn][maxn];
@@ -7233,7 +7236,7 @@ struct
 }edge[M];
 void addedge(int u, int v, int w)
 {
-    cnt++;
+    cnt++;   //如果head初始化为0，注意cnt必须从1开始存，
     edge[cnt].to = v;
     edge[cnt].w = w;
     edge[cnt].next = head[u];
@@ -7663,25 +7666,64 @@ int main()
 Floyd-Warshall算法
 核心思想：
 用DP方法遍历中转点计算最短路径
-
 特征：
 1.能一次性求得所有节点之间的最短距离
 2.代码简单
 3.效率低下，只适用于 n<300 的小规模图
 4.用邻接矩阵dp[][]存图
 5.判断负环，dp[i][i] < 0 则说明出现负环
-
 适用场景：
 1.图的规模小 n<300
 2.问题解决和中转点有关
 3.路径在“兜圈子”，一个点可能多次经过
 4.可能多次查询不同点对之间的最短路径
-
 模板
 for (int k = 1; k <= n; k++)       //k循环在i，j循环外边
 	for (int i = 1; i <= n; i++)
 		for (int j = 1; j <= n; j++)
 			dp[i][j] = min(dp[i][j], dp[i][k] + dp[k][j]);   //比较经过k和不经过k
+			
+
+用Floyd算法求解传递闭包
+1.普通写法
+for (int k = 1; k <= n; k++)
+	for (int i = 1; i <= n; i++) 
+		for (int j = 1; j <= n; j++)
+			dp[i][j] |= dp[i][k] & dp[k][j];
+2.简单优化
+for (int k = 1; k <= n; k++)
+	for (int i = 1; i <= n; i++)
+		if (dp[i][k])
+			for (int j = 1; j <= n; j++)
+				if (dp[k][j]) dp[i][j] = 1;
+3.用bitset优化
+bitset <N> d[N];
+for (int k = 1; k <= n; k++)
+	for (int i = 1; i <= n; i++)
+		if (d[i][k]) d[i] |= d[k];    //其实与前两个方法是等价的，只是用bitset优化能加速
+```
+
+```
+Dijkstra算法
+在大多数最短路径问题中是最常用且效率最高的，是一种“单源”最短路径算法，一次计算能得到一个起点到其他所有点的最短距离长度和最短路径的途径点，本质就是“BFS+优先队列”
+局限性：
+```
+
+```
+Bellman-Ford算法
+单源最短路径算法，求一个起点s到其他所有点的最短路径，在算法竞赛中不常用，虽然比Floyd好，但也只能用于小图，Bellman-Ford算法能用于边权为负数的图，这是它比Dijkstra算法具有的优势
+```
+
+```
+SPFA
+是Bellman-Ford算法的改进，可以说是队列优化的Bellman-Ford算法
+特点：不稳定，有时需要使用更稳定的Dijkstra算法，但它的优势是边的权值可以为负
+简单优化：
+1.入队优化: SLF(Small Label First)
+使用双端队列，入队的点u与新队头v进行比较，如果dis[u]<dis[v]，将u插入对头，否则插入队尾
+2.出队的优化: LLL(Large Label Last)
+计算队列中所有点的距离的平均值x, 每次选一个小于x的点出队，如果队头u的dis[u]>x，把u弹出然后放到队尾去，然后继续检查新的队头v，直到找到一个dis[v]<x为止
+两种优化可以一起使用
 ```
 
 lanqiao 1121 计算最短路径
@@ -7886,6 +7928,340 @@ int main()
             for (int j = 1; j <= n; j++)
                 dp[i][j] = min(dp[i][j], dp[i][k] + dp[k][j]);
     cout << dp[1][n] << endl;
+    return 0;
+}
+```
+
+hdu 1704 Rank
+
+```c++
+//Floyd
+#include <iostream>
+#include <algorithm>
+#include <bitset>
+using namespace std;
+const int N = 510;
+int t, n, m, u, v;
+bitset <N> d[N];
+void Floyd()   //用bitset加速，能解决N=1000的问题
+{
+    for (int k = 1; k <= n; k++)
+        for (int i = 1; i <= n; i++)
+            if (d[i][k]) d[i] |= d[k];
+}
+int main()
+{
+    for (cin >> t; t--; )
+    {
+        cin >> n >> m;
+        for (int i = 1; i <= n; i++)
+            for (int j = 1; j <= n; j++)
+                d[i][j] = (i == j);
+        for (int i = 0; i < m; i++) {cin >> u >> v; d[u][v] = 1;}
+        Floyd();
+        int tot = 0;
+        for (int i = 1; i <= n; i++)
+            for (int j = i + 1; j <= n; j++)
+                if (!d[i][j] && !d[j][i]) tot++;
+        cout << tot << endl;
+    }
+    return 0;
+}
+```
+
+lanqiao 1122 最短路径
+
+```c++
+//Dijkstra
+#include <iostream>
+#include <algorithm>
+#include <cstring>
+#include <queue>
+#include <vector>
+using namespace std;
+const long long INF = 0x3f3f3f3f3f3f3f3fLL;
+const int N = 3e5 + 2;
+struct edge           
+{
+    int to;           //邻居点
+    long long w;      //权值
+    edge(int a, long long b){to = a; w = b;}
+};
+vector<edge> e[N];    //邻接表储存图
+struct node
+{
+    int id; long long n_dis;  //id：节点   n_dis：该节点到起点的距离
+    node(int b, long long c){id = b; n_dis = c;}
+    bool operator < (const node &a) const    //操作符重载，按照节点到起点的距离大小由小到大排序
+    {return a.n_dis < n_dis;}
+};
+int n, m;
+int pre[N];
+void print_path(int s, int t)
+{
+    if (s == t) {printf("%d", s); return;}
+    print_path(s, pre[t]);
+    printf("%d", t);
+}
+long long dis[N];    //记录所有节点到起点的距离
+bool done[N];        //true表示到节点i的最短路径已经找到
+void dijkstra()
+{
+    int s = 1;          //起点为1
+    for (int i = 1; i <= n; i++) {dis[i] = INF; done[i] = false;}  //初始化
+    dis[s] = 0;         //起点到自己的距离为0
+    priority_queue <node> Q;   //优先队列，存节点信息
+    Q.push(node(s, dis[s]));   //起点进队列
+    while (!Q.empty())
+    {
+        node u = Q.top();
+        Q.pop();
+        if (done[u.id]) continue;  //丢弃已经找到最短路径的节点
+        done[u.id] = true;
+        for (int i = 0; i < e[u.id].size(); i++)   //检查节点u的所有邻居
+        {
+            edge y = e[u.id][i];    //u.id的第i个邻居是y.to
+            if (done[y.to]) continue;    //丢弃已经找到最短路径的邻居节点
+            if (dis[y.to] > y.w + u.n_dis)       //既能用于加入新节点，也可以更新已加入队列的节点的距离
+            {
+                dis[y.to] = y.w + u.n_dis;
+                Q.push(node(y.to, dis[y.to]));   //扩展新邻居放入优先队列
+                pre[y.to] = u.id;            //记录路径
+            } 
+        }
+    }
+    //print_path(s, n);
+}
+int main()
+{
+    cin >> n >> m;
+    for (int i = 1; i <= n; i++) e[i].clear();
+    while (m--)
+    {
+        int u, v, w; cin >> u >> v >> w;
+        e[u].push_back(edge(v, w));
+        //e[v].push_back(edge(v, u, w));   //本题是单向边
+    }
+    dijkstra();
+    for (int i = 1; i <= n; i++)
+    {
+        if (dis[i] >= INF) cout << "-1";
+        else cout << dis[i];
+    }
+    return 0;
+}
+```
+
+hdu 2544 最短路径
+
+```c++
+//Bellman-Ford
+#include <iostream>
+#include <algorithm>
+using namespace std;
+const int INF = 1e6;
+const int N = 105;
+struct Edge{int u, v, w;} e[10005];
+int n, m, cnt;
+int pre[N];//记录前驱节点，用于打印路径，pre[x] = y, 在最短路径上节点x的前一个节点为y
+void print_path(int s, int t)   //记录前驱式打印函数
+{
+    if (s == t) {cout << s << " "; return;}
+    print_path(s, pre[t]);
+    cout << t << " ";
+}
+void bellman()
+{
+    int s = 1;   //定义起点
+    int d[N];    //记录第i个节点到起点s的最短距离
+    for (int i = 1; i <= n; i++) d[i] = INF;   //初始化为无穷大
+    d[s] = 0;
+    for (int k = 1; k <= n; k++)
+        for (int i = 0; i < cnt; i++)
+        {
+            int x = e[i].u, y = e[i].v;
+            if (d[x] > d[y] + e[i].w)  //x通过y到达起点s， 如果距离更短就更新
+            {
+                d[x] = d[y] + e[i].w;
+                //pre[x] = y; //记录每个点的前驱
+            }
+        }
+    cout << d[n] << endl;
+    //print_path(s, n);   //如果有需要，打印路径
+}
+int main()
+{
+    while (cin >> n >> m)
+    {
+        if (!n && !m) break;
+        cnt = 0;
+        while (m--)
+        {
+            int a, b, c; cin >> a >> b >> c;
+            e[cnt].u = a; e[cnt].v = b; e[cnt].w = c; cnt++;
+            e[cnt].u = b; e[cnt].v = a; e[cnt].w = c; cnt++;
+        }
+        bellman();
+    }
+    return 0;
+}
+
+
+//SPFA
+#include <iostream>
+#include <algorithm>
+#include <cstring>
+#include <queue>
+using namespace std;
+const int INF = 0x3f3f3f3f;
+const int N = 1e6 + 5, M = 2e6 + 5;
+int n, m;
+int pre[N];
+void print_path(int s, int t)
+{
+    if (s == t) {cout << s; return;}
+    print_path(s, pre[t]);
+    cout << t;
+}
+int head[N], cnt;
+struct {int to, next, w;}edge[M];
+void addedge(int u, int v, int w)
+{
+    cnt++;
+    edge[cnt].to = v;
+    edge[cnt].w = w;
+    edge[cnt].next = head[u];
+    head[u] = cnt;
+}
+void init()
+{
+    memset(head, 0, sizeof head);
+    memset(edge, 0, sizeof edge);
+    cnt = 0;
+}
+int dis[N];
+bool inq[N];
+int Neg[N];  //如果需要判断负环
+int spfa(int s)
+{
+    memset(Neg, 0, sizeof Neg);
+    Neg[s] = 1;
+    for (int i = 1; i <= n; i++) {dis[i] = INF; inq[i] = false;}
+    dis[s] = 0;
+    queue<int> Q;
+    Q.push(s); inq[s] = true;
+    while (!Q.empty())
+    {
+        int u = Q.front(); Q.pop();
+        inq[u] = false;
+        for (int i = head[u]; i; i = edge[i].next)
+        {
+            int v = edge[i].to, w = edge[i].w;
+            if (dis[u] + w < dis[v])
+            {
+                dis[v] = dis[u] + w;
+                pre[v] = u;
+                if (!inq[v])
+                {
+                    inq[v] = true;
+                    Q.push(v);
+                    Neg[v]++;
+                    if (Neg[v] > n) return 1;   //出现负环
+                }
+            }
+        }
+    }
+    return 0;
+}
+int main()
+{
+    ios::sync_with_stdio(false);
+    cin.tie(0);
+    while (cin >> n >> m && n && m)
+    {
+        init();
+        while (m--)
+        {
+            int u, v, w; cin >> u >> v >> w;
+            addedge(u, v, w); addedge(v, u, w);
+        }
+        spfa(1);
+        cout << dis[n] << endl;
+        // cout << "path: "; print_path(1, n); cout << endl;
+    }
+    return 0;
+}
+```
+
+luogu P2868 Sightseeing cows
+
+最优比率环？？？
+
+```
+const int N = 1e4 +5, M = 5e4 + 5;
+const int INF = 0x3f3f3f3f;
+double dis[N];
+int f[N], head[N], cnt, n, m;
+int u[M], v[M], w[M];
+struct {int to, next, w;}edge[M];
+void addedge(int u, int v, int w)
+{
+    cnt++;
+    edge[cnt].to = v;
+    edge[cnt].w = w;
+    edge[cnt].next = head[u];
+    head[u] = cnt;
+}
+bool inq[N];
+int Neg[N];
+int spfa(int s)
+{
+    Neg[s] = 1;
+    for (int i = 1; i <= n; i++) {dis[i] = INF; inq[i] = false;}
+    dis[s] = 0;
+    queue<int> Q;
+    Q.push(s); inq[s] = true;
+    while (!Q.empty())
+    {
+        int u = Q.front(); Q.pop();
+        inq[u] = false;
+        for (int i = head[u]; i; i = edge[i].next)
+        {
+            int v = edge[i].to, w = edge[i].w;
+            if (dis[u] + w < dis[v])
+            {
+                dis[v] = dis[u] + w;
+                if (!inq[v])
+                {
+                    inq[v] = true;
+                    Q.push(v);
+                    Neg[v]++;
+                    if (Neg[v] > n) return 1;   
+                }
+            }
+        }
+    }
+    return 0;
+}
+bool check(double x)
+{
+    for (int i = 1; i <= n; i++) addedge(u[i], v[i], x * w[i] - f[u[i]]);
+    return spfa(1);
+}
+int main()
+{
+    cin >> n >> m;
+    for (int i = 1; i <= n; i++) cin >> f[i];
+    for (int i = 1; i <= m; i++) {cin >> u[i] >> v[i] >> w[i];}
+    double L = 0, R = 0;
+    for (int i = 1; i <= n; i++) R += f[i];
+    for (int i = 0; i < 30; i++)
+    {
+        double mid = L + (R - L) / 2;
+        if (check(mid)) L = mid;
+        else R = mid;
+    }
+    printf("%.2f", L);
     return 0;
 }
 ```

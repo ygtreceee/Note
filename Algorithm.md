@@ -8050,6 +8050,50 @@ int main()
     }
     return 0;
 }
+
+
+
+// Dijkstra未优化版 O(n^2)
+#include <iostream>
+#include <cstdio>
+#include <cstring>
+#include <algorithm>
+using namespace std;
+int a[3010][3010], d[3010];
+bool v[3010];
+int n, m;
+
+void dijkstra() {
+	memset(d, 0x3f, sizeof(d)); // dist数组
+	memset(v, 0, sizeof(v)); // 节点标记
+	d[1] = 0;
+	for (int i = 1; i < n; i++) { // 重复进行n-1次
+		int x = 0;
+		// 找到未标记节点中dist最小的
+		for (int j = 1; j <= n; j++)
+			if (!v[j] && (x == 0 || d[j] < d[x])) x = j;
+		v[x] = 1;
+		// 用全局最小值点x更新其它节点
+		for (int y = 1; y <= n; y++)
+			d[y] = min(d[y], d[x] + a[x][y]);
+	}
+}
+
+int main() {
+	cin >> n >> m;
+	// 构建邻接矩阵
+	memset(a, 0x3f, sizeof(a));
+	for (int i = 1; i <= n; i++) a[i][i] = 0;
+	for (int i = 1; i <= m; i++) {
+		int x, y, z;
+		scanf("%d%d%d", &x, &y, &z);
+		a[x][y] = min(a[x][y], z);
+	}
+	// 求单源最短路径
+	dijkstra();
+	for (int i = 1; i <= n; i++)
+		printf("%d\n", d[i]);
+}
 ```
 
 hdu 2544 最短路径
@@ -8266,7 +8310,548 @@ int main()
 }
 ```
 
+luogu 	P3371 【模板】单源最短路径（弱化版）
 
+```c++
+#include <iostream>
+#include <algorithm>
+#include <cstring>
+#include <queue>
+using namespace std;
+const int N = 1e4 + 10, M = 5e5 + 10;
+const int INF = 0x3f3f3f3f;
+struct {int to, next, w;}edge[M];
+int head[N], cnt, n, m, s;
+void addedge(int u, int v, int w)
+{
+    edge[++cnt].to = v;
+    edge[cnt].w = w;
+    edge[cnt].next = head[u];
+    head[u] = cnt;
+}
+bool inq[N];
+int dis[N];
+void spfa(int s)
+{
+    for (int i = 1; i <= n; i++) {dis[i] = INF; inq[i] = false;}
+    dis[s] = 0;
+    queue<int> Q;
+    Q.push(s); inq[s] = true;
+    while (!Q.empty())
+    {
+        int u = Q.front(); Q.pop();
+        inq[u] = false;
+        for (int i = head[u]; i; i = edge[i].next)
+        {
+            int v = edge[i].to, w = edge[i].w;
+            if (dis[v] > dis[u] + w)
+            {
+                dis[v] = dis[u] + w;
+                if (!inq[v])
+                {
+                    Q.push(v);
+                    inq[v] = true;
+                }
+            }
+        }
+    }
+}
+int main()
+{
+    cin >> n >> m >> s;
+    for (int i = 1; i <= m; i++) {int u, v, w; cin >> u >> v >> w; addedge(u, v, w);}
+    spfa(s);
+    for (int i = 1; i <= n; i++)
+    {
+        if (dis[i] == INF) cout << "2147483647 ";
+        else cout << dis[i] << " "; 
+    }
+    return 0;
+}
+```
+
+luogu P4779 【模板】单源最短路径（标准版）
+
+```c++
+#include <iostream>
+#include <algorithm>
+#include <cstring>
+#include <queue>
+using namespace std;
+const int INF = 0x3f3f3f3f;
+const int N = 1e5 + 10, M = 2e5 + 10;
+int n, m, s;
+struct edge
+{
+    int to, w;
+    edge(int a, int b) {to = a; w = b;}
+};
+vector<edge> e[M];
+struct node
+{
+    int id, n_dis;
+    node(int a, int b) {id = a; n_dis = b;}
+    bool operator < (const node &a) const
+    {return n_dis > a.n_dis;}
+};
+int dis[N];
+bool done[N];
+void dijstra()
+{
+    int s = 1;
+    for (int i = 1; i <= n; i++) {dis[i] = INF; done[i] = false;}
+    dis[s] = 0;
+    priority_queue<node> Q;
+    Q.push(node(s, dis[s]));
+    while (!Q.empty())
+    {
+        node u = Q.top(); Q.pop();
+        if (done[u.id]) continue;
+        done[u.id] = true;
+        for (int i = 0; i < e[u.id].size(); i++)
+        {
+            edge y = e[u.id][i];
+            if (done[y.to]) continue;
+            if (dis[y.to] > u.n_dis + y.w)
+            {
+                dis[y.to] = u.n_dis + y.w;
+                Q.push(node(y.to, dis[y.to]));
+            }
+        }
+    }
+}
+int main()
+{
+    cin >> n >> m >> s;
+    for (int i = 1; i <= n; i++) e[i].clear();
+    while (m--)
+    {
+        int u, v, w; cin >> u >> v >> w;
+        e[u].push_back(edge(v, w));
+    }
+    dijstra();
+    for (int i = 1; i <= n; i++) cout << dis[i] << " ";
+    return 0;
+}
+```
+
+POJ 2387 Til the Cows Come Home
+
+```c++
+#include <iostream>
+#include <algorithm>
+#include <cstring>
+#include <queue>
+using namespace std;
+const int N = 1e4 + 10, M = 2e4 + 10;
+const int INF = 0x3f3f3f3f;
+int n, m;
+struct edge
+{
+    int v, w;
+    edge(int a, int b) {v = a; w = b;}
+};
+vector<edge> e[M];
+struct node
+{
+    int id, n_dis;
+    node(int a, int b) {id = a; n_dis = b;}
+    bool operator < (const node &a) const
+    {return a.n_dis < n_dis;}
+};
+bool done[N];
+int dis[N];
+void dijstra()
+{
+    int s = 1;
+    for (int i = 1; i <= n; i++) {dis[i] = INF; done[i] = false;}
+    priority_queue<node> Q;
+    dis[s] = 0;
+    Q.push(node(s, dis[s]));
+    while (!Q.empty())
+    {
+        node u = Q.top(); Q.pop();
+        if (done[u.id]) continue;
+        done[u.id] = true;
+        for (int i = 0; i < e[u.id].size(); i++)
+        {
+            edge y = e[u.id][i];
+            if (done[y.v]) continue;
+            if (dis[y.v] > u.n_dis + y.w)
+            {
+                dis[y.v] = u.n_dis + y.w;
+                Q.push(node(y.v, dis[y.v]));
+            }
+        }
+    }
+}
+int main()
+{
+    cin >> m >> n;
+    for (int i = 1; i <= m; i++) 
+    {
+        int u, v, w; cin >> u >> v >> w; 
+        e[u].push_back(edge(v, w));
+        e[v].push_back(edge(u, w));
+    }
+    dijstra();
+    cout << dis[n];
+    return 0;
+}
+```
+
+POJ 1797 Heavy Transportation
+
+此题是**Dijkstra变式**，与先前不同的是，它的松弛是`dis[y.to] < min(dis[u.id], y.w)`,如果成立就进行更新，原因是此题是想寻找`1`到`n`的**所有路径的最小权值的最大值**，以前的dis[N]是用来存放当前节点到起点的最短距离，现在的`dis[N]`是用来存放当前节点到起点的路径的最小权值，而且我们始终要保持这个权值取最大，使用的方法就是上面的松弛公式，如果从另一路径过来能使得某个节点的最小权值能更大，那我们就需要更新，否则就不必更新，视作抛弃该路径；如此一直操作至`dis[n]`，则`dis[n]`就是答案；值得特别注意的是，本题的优先队列采用的是大根堆，即从大到小排序，因为我们如果先操作`n_dis`较小的节点，就默认该节点已经找到最大的权值，这可能会导致有另一条能使权值更大的路径因为我们还没走，所以该节点的最大权值并不是真正的最大，而即使存在一条权值更大的，也是从权值大的边走过来的，所以我们优先操作权值大的边能避免这种情况
+
+```c++
+#include <iostream>
+#include <algorithm>
+#include <cstring>
+#include <queue>
+using namespace std;
+const int N = 1e3 + 10, M = 2e3 + 10;
+const int INF = 0x3f3f3f3f;
+int t, n, m;
+struct edge
+{
+    int to, w;
+    edge(int a, int b) {to = a; w = b;}
+};
+vector <edge> e[N];
+struct node
+{
+    int id, n_dis;
+    node(int a, int b) {id = a; n_dis = b;}
+    bool operator < (const node &a) const
+    {return a.n_dis > n_dis;}   //大根堆
+};
+int dis[N];
+bool done[N];
+void dijkstra()
+{
+    int s = 1;
+    priority_queue<node> Q;
+    for (int i = 1; i <= n; i++) {dis[i] = 0; done[i] = false;}
+    dis[s] = INF;
+    Q.push(node(s, dis[s]));
+    while (!Q.empty())
+    {
+        node u = Q.top(); Q.pop();
+        if (done[u.id]) continue;
+        done[u.id] = true;
+        for (int i = 0; i < e[u.id].size(); i++)
+        {
+            edge y = e[u.id][i];
+            if (done[y.to]) continue;
+            if (dis[y.to] < min(dis[u.id], y.w))    //新的松弛方式
+            {
+                dis[y.to] = min(dis[u.id], y.w);
+                Q.push(node(y.to, dis[y.to]));
+            }
+        }
+    }
+}
+int main()
+{
+    cin >> t;
+    for (int i = 1; i <= t; i++)
+    {
+        for (int i = 0; i < N; i++) e[i].clear();
+        cin >> n >> m;
+        for (int j = 1; j <= m; j++)
+        {
+            int u, v, w; cin >> u >> v >> w;
+            e[u].push_back(edge(v, w));
+            e[v].push_back(edge(u, w));
+        }
+        dijkstra();
+        printf("Scenario #%d:\n%d\n\n", i, dis[n]);
+    }
+    return 0;
+}
+```
+
+POJ 3660 Cow Contest
+
+Floyd传递闭包
+
+```c++
+#include <iostream>
+#include <algorithm>
+#include <bitset>
+using namespace std;
+const int N = 105;
+int n, m, tot;
+bool flag[N];
+bitset <N> d[N];
+void Floyd()
+{
+    for (int k = 1; k <= n; k++)
+        for (int i = 1; i <= n; i++)
+            if (d[i][k]) d[i] |= d[k];
+}
+int main()
+{
+    cin >> n >> m;
+    for (int i = 1; i <= n; i++)
+        for (int j = 1; j <= n; j++)
+            d[i][j] = (i == j);
+    for (int i = 1; i <= m; i++)
+    {
+        int u, v; cin >> u >> v; 
+        d[u][v] = 1;
+    }
+    Floyd();
+    for (int i = 1; i <= n; i++)
+        for (int j = i + 1; j <= n; j++)
+            if (d[i][j] == 0 && d[j][i] == 0) flag[i] = 1, flag[j] = 1;
+    for (int i = 1; i <= n; i++) if (!flag[i]) tot++;
+    cout << tot << endl;
+    return 0;
+}
+```
+
+POJ 1502 MPI Maelstrom
+
+此题的输入处理比较特殊，可以先采用`scanf`接收到字符串，然后再用`sscanf()`或者`atoi()`进行转换,他们的作用都是将字符串转换为数字， 注意while后也不必加getchar(), 因为`%d`和`%s`自动跳过空字符，只有`%c`不跳过，`cin()`也能跳过
+
+```c++
+#include <iostream>
+#include <algorithm>
+#include <cstring>
+using namespace std;
+const int N = 105;
+const int INF = 0x3f3f3f3f;
+int n, tmp;
+int dp[N][N];
+int main()
+{
+    while (~scanf("%d", &n))
+    {
+        //getchar();
+        memset(dp, 0x3f, sizeof dp);
+        for (int i = 2; i <= n; i++) 
+            for (int j = 1; j <= i - 1; j++)
+                {
+                    char ret[10]; 
+                    scanf("%s", &ret);
+                    if (ret[0] == 'x') dp[i][j] = dp[j][i] = INF;
+                    else  //转换
+                    {
+                        // sscanf(ret, "%d", &tmp);
+                        // dp[i][j] = dp[j][i] = tmp;
+                        dp[i][j] = dp[j][i] = atoi(ret);
+                    }
+                }
+        for (int k = 1; k <= n; k++)
+            for (int i = 1; i <= n; i++) 
+                for (int j = 1; j <= n; j++)
+                    dp[i][j] = min(dp[i][j], dp[i][k] + dp[k][j]);
+        int ans = 0;
+        for (int i = 2; i <= n; i++) ans = max(ans, dp[1][i]);
+        cout << ans << endl;
+    } 
+    return 0;
+}
+```
+
+POJ 1062 昂贵的聘礼
+
+本题需要对符合条件的区间进行枚举，并对子区间进行`Dijkstra`
+
+```c++
+#include <iostream>
+#include <algorithm>
+#include <queue>
+using namespace std;
+const int N = 110, M = 1e5 + 10;
+const int INF = 0x3f3f3f3f;
+int n, ans = INF, lim, cnt, num;
+int mon[N], lev[N];
+int head[N];
+struct edge{int to, next, w;}e[M];
+void addedge(int u, int v, int w)
+{
+    e[++cnt].to = v;
+    e[cnt].w = w;
+    e[cnt].next = head[u];
+    head[u] = cnt;
+}
+int dis[N];
+bool done[N];
+struct node
+{
+    int id, n_dis;
+    node(int a, int b) {id = a; n_dis = b;}
+    bool operator < (const node &a) const
+    {return a.n_dis < n_dis;}
+};
+int dijkstra(int l, int r)
+{
+    int s = 1;
+    for (int i = 1; i <= n; i++) {dis[i] = INF; done[i] = false;}
+    priority_queue<node> q;
+    dis[s] = 0; q.push(node(s, dis[s]));
+    while (q.size())
+    {
+        node u = q.top(); q.pop();
+        if (done[u.id] || lev[u.id] > r || lev[u.id] < l) continue;
+        done[u.id] = true;
+        for (int i = head[u.id]; i; i = e[i].next)
+        {
+            int v = e[i].to, w = e[i].w;
+            if (lev[v] > r || lev[v] < l || done[v]) continue;
+            if (dis[v] > u.n_dis + w)
+            {
+                dis[v] = u.n_dis + w;
+                q.push(node(v, dis[v]));
+            }
+        }
+    }
+    int tmp = mon[1];  //为什么设为INF，从i = 1开始不行？
+    for (int i = 2; i <= n; i++)
+    {
+        if (lev[i] > r || lev[i] < l) continue;
+        dis[i] += mon[i];
+        tmp = min(tmp, dis[i]);
+    }
+    return tmp;
+}
+int main()
+{
+    cin >> lim >> n;
+    for (int i = 1; i <= n; i++)
+    {
+        cin >> mon[i] >> lev[i] >> num;
+        for (int j = 1; j <= num; j++)
+        {
+            int v, w; cin >> v >> w;
+            addedge(i, v, w);        
+        }
+    }
+    for (int i = 1; i <= n; i++)
+    {
+        int ret = dijkstra(i, i + lim);
+        ans = min(ans, ret);
+    }
+    cout << ans;
+    return 0;
+}
+```
+
+POJ 2253 Frogger
+
+```c++
+//Dijkstra
+#include<iostream>
+#include<cstdio>
+#include<cmath>
+#include<stdlib.h>
+#include<algorithm>
+using namespace std;
+int n;
+const int N = 210;
+const double INF = 1e5;
+typedef pair<int, int> P;
+double dis[N];	//代表从1号到i号石头的青蛙距离
+int visit[N];
+P point[N];
+
+double getLength(double x1, double y1, double x2, double y2)
+{
+	double len = sqrt((x1 - x2)*(x1 - x2) + (y1 - y2)*(y1 - y2));
+	return len;
+}
+void init()
+{
+	for (int i = 1; i <= n; i++)
+		visit[i] = 0;
+	for (int i = 2; i <= n; i++)	//初始化各个石头到1号石头的青蛙距离
+			dis[i] = getLength(point[1].first, point[1].second, point[i].first, point[i].second);
+}
+void dijkstra()
+{
+	visit[1] = 1;	//1号石头起点，标记
+	for (int i = 2; i <= n; i++)
+	{
+		int t = -1;
+		for (int j = 2; j <= n; j++)
+		{
+			//得到距离最小的点
+			if (!visit[j] && (t==-1 || dis[j] < dis[t])) {
+				t = j;
+			}
+		}
+		visit[t] = 1;		//标记
+		for (int j = 1; j <= n; j++)
+		{
+			if (!visit[j]) {
+				double len = getLength(point[t].first, point[t].second, point[j].first, point[j].second);
+				if (dis[j] > max(len, dis[t]))dis[j] = max(len, dis[t]);
+				//松驰操作，dis[j]表示1到j的青蛙距离，max(len, dis[t])表示1通过t到达j的青蛙距离，两者取最小值
+			}
+		}
+	}
+}
+int main()
+{
+	int cnt = 1;
+	while (cin >> n, n)
+	{
+		for (int i = 1; i <= n; i++)
+		{
+			int x, y;
+			cin >> x >> y ;
+			point[i].first = x, point[i].second = y;
+		}
+		init();
+		dijkstra();
+		printf("Scenario #%d\n", cnt);
+		printf("Frog Distance = %.3lf\n", dis[2]);
+		printf("\n");
+		cnt++;
+	}
+	return 0;
+}
+```
+
+luogu P1144 最短路计数
+
+```c++
+#include <bits/stdc++.h>
+using namespace std;
+int n,m,head[1000005],to[4000005],nxt[4000005],gsize,dis[1000005],ans[1000005];
+bool book[1000005];
+queue<int> que;
+void adde(int u,int v){to[gsize]=v,nxt[gsize]=head[u],head[u]=gsize++;}
+int dfs(int u)
+{
+    if(ans[u])return ans[u];
+    for(int i=head[u];i!=-1;i=nxt[i])
+        if(dis[u]-1==dis[to[i]])ans[u]=(ans[u]+dfs(to[i]))%100003;
+    return ans[u];
+}
+int main()
+{
+    scanf("%d%d",&n,&m);
+    for(int i=1;i<=n;i++)head[i]=-1,dis[i]=INT_MAX;
+    for(int i=1,u,v;i<=m;i++)scanf("%d%d",&u,&v),adde(u,v),adde(v,u);
+    dis[1]=0,que.push(1),book[1]=1;
+    while(!que.empty())
+    {
+        int f=que.front();que.pop(),book[f]=0;
+        for(int i=head[f];i!=-1;i=nxt[i])
+            if(dis[f]+1<dis[to[i]])
+            {
+                dis[to[i]]=dis[f]+1;
+                if(!book[to[i]])que.push(to[i]),book[to[i]]=1;
+            }
+    }
+    ans[1]=1;for(int i=1;i<=n;i++)printf("%d\n",dfs(i));
+    return 0;
+}
+```
 
 #### 最小生成树
 

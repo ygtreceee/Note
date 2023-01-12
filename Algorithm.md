@@ -6206,6 +6206,202 @@ int main()
 }
 ```
 
+#### 线段树
+
+```c++
+线段树(Segment Tree)和树状数组都是用于解决区间问题的数据结构
+可以概括为：“分治思想 + 二叉树结构 + Lazy-Tag技术”
+基础应用场景：
+1.区间最值问题，包括求最值和修改元素，单点修改直接修改叶子节点上的元素值即可，区间修改需要使用Lazy-Tag技术
+2.区间和问题
+线段树适合解决的问题的特征是：大区间的解可以从小区间的解合并而来，且适用于动态维护的数组
+
+线段树的构造
+编码时可以定义标准的二叉树数据结构储存线段树，不过竞赛中一般使用静态数组实现满二叉树，虽然比较浪费空间，但是编码时较简单
+下面代码都使用静态分配的数组tree[]，父节点与子节点之间的访问非常简单，缺点是最后一行有大量节点被浪费
+    
+//定义根节点是tree[1], 即编号为1的节点是根
+//第1种方法：定义二叉树数据结构
+struct 
+{
+	int L, R, data;     //用tree[i].data记录线段i的最值或者区间和
+}tree[N * 4];           //静态分配数组，开4倍空间
+//第2种方法：直接用数组表示二叉树，更节省空间
+int tree[N * 4]         //用tree[i]记录线段i的最值或区间和
+//以上两种方法都满足下面的父子关系，p是父节点，ls(p)是左儿子，rs(p)是右儿子
+int ls(int p) {return p << 1;}     //左儿子，编号是p * 2
+int rs(int p) {return p << 1|1;}   //右儿子，编号是p * 2 + 1
+
+构造线段树代码如下
+void push_up(int p)                               //从上向下传递区间值
+{
+    tree[p] = tree[ls(p)] + tree[rs(p)];          //区间和
+    //tree[p] = min(tree[ls(p)], tree[rs(p)]);    //求最小值
+}
+void build(int p, int pl, int pr)                 //节点编号p指向区间[pl, pr]
+{
+    if (pl == pr) {tree[p] = a[p1]; return;}      //最底层叶子节点，有叶子节点的值
+    int mid = (pl + pr) >> 1;					//分治：折半
+    build(ls(p), pl, mid);                        //递归左儿子
+    buiild(rs(p), mid + 1, pr);                   //递归右儿子
+    push_up(p);                                   //从下往上传递区间值
+}
+
+
+区间查询代码
+int query(int L, int R, int p, int pl, int pr)
+{
+    if (L <= pl && R >= pr) return tree[p];       //完全覆盖
+    int mid = (pl + pr) >> 1;
+    if (L <= mid) res += query(L, R, ls(p), pl, mid);     //L与左子节点有重叠
+    if (R > mid) ret += query(L, R, rs(p), mid + 1, pr);  //R与右子节点有重叠
+    return res;
+}   //调用方式：query(L, R, l, l, n);
+```
+
+luogu P3372 【模板】线段树 1
+
+区间修改和查询区间和
+
+```c++
+#include <iostream>
+#include <algorithm>
+#include <cstring>
+#include <queue>
+using namespace std;
+using LL = long long;
+const int N = 1e5 + 10;
+LL a[N];
+LL tree[N << 2];
+LL tag[N << 2];
+LL ls(LL p) {return p << 1;}
+LL rs(LL p) {return p << 1|1;}
+void push_up(LL p)
+{
+    tree[p] = tree[ls(p)] + tree[rs(p)];
+}
+void build(LL p, LL pl, LL pr)
+{
+    tag[p] = 0;
+    if (pl == pr) {tree[p] = a[pl]; return;}
+    LL mid = (pl + pr) >> 1;
+    build(ls(p), pl, mid);
+    build(rs(p), mid + 1, pr);
+    push_up(p);
+}
+void addtag(LL p, LL pl, LL pr, LL d)
+{
+    tag[p] += d;
+    tree[p] += d * (pr - pl + 1);
+}
+void push_down(LL p, LL pl, LL pr)
+{
+    if (tag[p])
+    {
+        LL mid = (pl + pr) >> 1;
+        addtag(ls(p), pl, mid, tag[p]);
+        addtag(rs(p), mid + 1, pr, tag[p]);
+        tag[p] = 0;
+    }
+}
+void update(LL L, LL R, LL p, LL pl, LL pr, LL d)
+{
+    if (L <= pl && pr <= R)
+    {
+        addtag(p, pl, pr, d);
+        return;
+    }
+    push_down(p, pl, pr);
+    LL mid = (pl + pr) >> 1;
+    if (L <= mid) update(L, R, ls(p), pl, mid, d);
+    if (R > mid) update(L, R, rs(p), mid + 1, pr, d);
+    push_up(p); 
+}
+LL query(LL L, LL R, LL p, LL pl, LL pr)
+{
+    if (pl >= L && pr <= R) return tree[p];
+    push_down(p, pl, pr);
+    LL res = 0;
+    LL mid = (pl + pr) >> 1;
+    if (L <= mid) res += query(L, R, ls(p), pl, mid);
+    if (R > mid) res += query(L, R, rs(p), mid + 1, pr);
+    return res;
+}
+int main()
+{
+    LL n, m; cin >> n >> m;
+    for (int i = 1; i <= n; i++) cin >> a[i];
+    build(1, 1, n);    //建树
+    while (m--)
+    {
+        LL q, L, R, d; cin >> q;
+        if (q == 1)
+        {
+            cin >> L >> R >> d;
+            update(L, R, 1, 1, n, d);
+        }
+        else
+        {
+            cin >> L >> R;
+            cout << query(L, R, 1, 1, n) << endl;
+        }
+    }
+    return 0;
+}
+```
+
+luogu P1868 忠诚
+
+查询区间最小值
+
+```c++
+#include <iostream>
+#include <algorithm>
+#include <vector>
+using namespace std;
+using LL = long long;
+const LL N = 1e5 + 10, INF = 0x3f3f3f3f3f3f3f3fLL;
+LL a[N], tree[N << 2];
+LL ls(LL p) {return p << 1;}
+LL rs(LL p) {return p << 1|1;}
+void push_up(LL p)
+{
+    tree[p] = min(tree[ls(p)], tree[rs(p)]);
+}
+void build(LL p, LL pl, LL pr)
+{
+    if (pl == pr) {tree[p] = a[pl]; return;}
+    LL mid = (pl + pr) >> 1;
+    build(ls(p), pl, mid);
+    build(rs(p), mid + 1, pr);
+    push_up(p);
+}
+LL findmin(LL L, LL R, LL p, LL pl, LL pr)
+{
+    if (pl >= L && pr <= R) return tree[p];
+    LL mid = (pl + pr) >> 1, a = INF, b = INF;
+    if (L <= mid) a = findmin(L, R, ls(p), pl, mid); 
+    if (R > mid) b = findmin(L, R, rs(p), mid + 1, pr);
+    return min(a, b);
+}
+vector<LL> ans;
+int main()
+{
+    LL m, n; cin >> m >> n;
+    for (LL i = 1; i <= m; i++) cin >> a[i];
+    build(1, 1, m);
+    while (n--)
+    {
+        LL L, R; cin >> L >> R;
+        ans.push_back(findmin(L, R, 1, 1, m));
+    }
+    for (LL i = 0; i < ans.size(); i++) printf(" %lld" + !i, ans[i]);
+    return 0;
+}
+```
+
+
+
 ## 动态规划
 
 #### DP概念和编码方法
@@ -8819,36 +9015,59 @@ int main()
 luogu P1144 最短路计数
 
 ```c++
-#include <bits/stdc++.h>
+#include <iostream>
+#include <algorithm>
+#include <cstring>
+#include <queue>
 using namespace std;
-int n,m,head[1000005],to[4000005],nxt[4000005],gsize,dis[1000005],ans[1000005];
-bool book[1000005];
-queue<int> que;
-void adde(int u,int v){to[gsize]=v,nxt[gsize]=head[u],head[u]=gsize++;}
-int dfs(int u)
+const int N = 1e6 + 10, M = 2e6 + 10;
+const int INF = 0x3f3f3f3f;
+const int mod = 1e5 + 3;
+int n, m, cnt, ans[N];
+int head[N];
+struct {int to, next;}edge[M];
+void addedge(int u, int v)
 {
-    if(ans[u])return ans[u];
-    for(int i=head[u];i!=-1;i=nxt[i])
-        if(dis[u]-1==dis[to[i]])ans[u]=(ans[u]+dfs(to[i]))%100003;
-    return ans[u];
+    edge[++cnt].to = v;
+    edge[cnt].next = head[u];
+    head[u] = cnt; 
+}
+int dis[N];
+bool inq[N];
+void spfa()
+{
+    for (int i = 1; i <= n; i++) {dis[i] = INF; inq[i] = false;}
+    queue<int> q;
+    int s = 1;
+    dis[s] = 0; inq[s] = true;
+    q.push(s);
+    while (q.size())
+    {
+        int f = q.front(); q.pop(); inq[f] = false;
+        for (int i = head[f]; i; i = edge[i].next)
+        {
+            if (dis[f] + 1 < dis[edge[i].to])
+            {
+                dis[edge[i].to] = dis[f] + 1;
+                if (!inq[edge[i].to]) {q.push(edge[i].to); inq[edge[i].to] = true;}
+            }
+        }
+    }
+}
+int dfs(int x)  //记忆化搜索
+{
+    if (ans[x]) return ans[x];
+    for (int i = head[x]; i; i = edge[i].next)
+        if (dis[x] == 1 + dis[edge[i].to]) ans[x] = (ans[x] + dfs(edge[i].to)) % mod;
+    return ans[x];
 }
 int main()
 {
-    scanf("%d%d",&n,&m);
-    for(int i=1;i<=n;i++)head[i]=-1,dis[i]=INT_MAX;
-    for(int i=1,u,v;i<=m;i++)scanf("%d%d",&u,&v),adde(u,v),adde(v,u);
-    dis[1]=0,que.push(1),book[1]=1;
-    while(!que.empty())
-    {
-        int f=que.front();que.pop(),book[f]=0;
-        for(int i=head[f];i!=-1;i=nxt[i])
-            if(dis[f]+1<dis[to[i]])
-            {
-                dis[to[i]]=dis[f]+1;
-                if(!book[to[i]])que.push(to[i]),book[to[i]]=1;
-            }
-    }
-    ans[1]=1;for(int i=1;i<=n;i++)printf("%d\n",dfs(i));
+    cin >> n >> m;
+    for (int i = 1; i <= m; i++) {int u, v; cin >> u >> v; addedge(u, v); addedge(v, u);}
+    spfa();
+    ans[1] = 1;
+    for (int i = 1; i <= n; i++) cout << dfs(i) << endl;
     return 0;
 }
 ```

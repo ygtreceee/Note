@@ -3744,7 +3744,46 @@ int main()
 }
 ```
 
+POJ 2531 Network Saboteur
 
+此题n很小，直接暴搜做，从第一个数开始遍历，分成两个集合，`vis[i] = true`代表一个集合，`vis[i] = false`代表另一个集合，同时用一个`tmp`先计算若存入的情况，后面再依据两种分类传入新的`tmp`或者原本的`sum`，本题非常灵活的就是将两个集合设为集合`0`和集合`1`，方便了分类也方便了计算
+
+```c++
+#include <iostream>
+#include <algorithm>
+#include <cstring>
+#include <cmath>
+#include <queue>
+using namespace std;
+int n, ans;
+int a[22][22];
+bool vis[22];
+void dfs(int now, int sum)
+{
+    if (now == n + 1) return;
+    ans = max(ans, sum);
+    int tmp = sum;
+    for (int i = 1; i <= n; i++)
+    {
+        if (vis[i]) tmp -= a[now][i];
+        else tmp += a[now][i];
+    }
+    vis[now] = true;
+    dfs(now + 1, tmp);
+    vis[now] = false;
+    dfs(now + 1, sum);
+}
+int main()
+{
+    cin >> n;
+    for (int i = 1; i <= n; i++)
+        for (int j = 1; j <= n; j++)
+            cin >> a[i][j];
+    dfs(1, 0);
+    cout << ans << endl;
+    return 0;
+}
+```
 
 BFS
 
@@ -5548,6 +5587,75 @@ int main()
 }
 ```
 
+HDU 1010 Tempter of the Bone
+
+DFS+方格图奇偶性判断+可行性剪枝，“方格图中两点之间的曼哈顿距离的奇偶性，必然与两点之间任意路径的奇偶性相同”
+
+```c++
+#include <iostream>
+#include <algorithm>
+#include <cstring>
+#include <cmath>
+#include <queue>
+using namespace std;
+const int N = 10;
+int n, m, k, flag;
+char map[N][N];
+bool vis[N][N];
+int sx, sy, ex, ey;
+int step[4][2] = {{1, 0}, {0, 1}, {-1, 0}, {0, -1}};
+void init() {memset(vis, 0, sizeof vis); flag = 0;}
+bool check(int x, int y) {if (x >= 1 && x <= n && y >= 1  && y <= m) return true; return false;}
+void dfs(int x, int y, int tot)
+{
+    if (flag) return;
+    if (map[x][y] == 'D')
+    {
+        if (tot == k) flag = true;
+        return;
+    }
+    if (tot + abs(x - ex) + abs(y - ey) > k) return;  //可行性剪枝：如果当前加上最短距离之后大于k，显然无效
+    for (int i = 0; i < 4; i++)
+    {
+        int nx = x + step[i][0], ny = y + step[i][1];
+        if (check(nx, ny) && !vis[nx][ny] && map[nx][ny] != 'X')
+        {
+            vis[nx][ny] = true;
+            dfs(nx, ny, tot + 1);
+            vis[nx][ny] = false;//回溯
+        }
+    }
+}
+int main()
+{
+    while (cin >> n >> m >> k)
+    {
+        if (!n && !m && !k) break;
+        for (int i = 1; i <= n; i++) cin >> map[i] + 1;
+        for (int i = 1; i <= n; i++)
+            for (int j = 1; j <= m; j++)
+            {
+                if (map[i][j] == 'S') sx = i, sy = j;
+                if (map[i][j] == 'D') ex = i, ey = j;
+            }
+        int dis = abs(sx - ex) + abs(sy - ey);   //曼哈顿距离公式
+        if (k - dis < 0 || dis % 2 != k % 2)     //曼哈顿距离和最短步数奇偶性必然相同
+        {
+            cout << "NO" << endl;
+            continue;
+        }
+        init();
+        vis[sx][sy] = true;
+        dfs(sx, sy, 0);
+        if (flag) cout << "YES" << endl;
+        else cout << "NO" << endl;
+    }
+    return 0;
+}
+```
+
+
+
 #### BFS与最短路径
 
 
@@ -7124,6 +7232,43 @@ int main()
         for (int j = m; j >= a[i]; j--)
             dp[j] += dp[j - a[i]];
     cout << dp[m];
+    return 0;
+}
+```
+
+ [HDU-1024 Max Sum Plus Plus](https://vjudge.csgrandeur.cn/problem/HDU-1024)
+
+本题难点在于如何思考子问题，即构造最优子结构。首先题目说一共`n`个人，要截取m组，那自然要想到设为行代表组数，列代表人数，即`dp[m][n]`, 然后就是如何列状态方程呢? 按照以往的惯例应该是分为`a[j]`这个数要不要选, 在最优情况下进行选择, 当时此题却是设一个`a[j]`必须选, 有两种选择方式的状态转移方程, 即`dp[i][j] = min(dp[i][j - 1], dp[i - 1][k]) + a[j], i <= k <= i - 1`, 后面的`a[j]`是必须加的, 而第一种情况是这个数直接加入最后的那个区间, 总组数`i`不变, 第二种情况是这个数自成为一个组, 那就要从` d[i - 1]` 中取一个最大的数,  在此题中`dp[]`的每一个值并不是代表`(dp[i][1], dp[i][j]) `的最大值, 而是你必须选那个数而能得到的最大值, 事实上可以不选, 数组如此设计是为后面可能出现的更大值保留连续性, 所以我们第二种情况需要找上一行的最小值; 又考虑到此题`n`的范围达到$10^6$级别, 所以m也不确定, 所以不能简单二维数组, 考虑滚动, 而且另外开一个数组储存前`j - 1`个数的最大值, dp数组直接自我滚动即可, 特别注意, 状态方程需要利用同一行中之前计算的数据, 所以自我滚动时从前往后遍历,同时注意 `pre[]`的更新时机, 必须状态转移后再更新`pre[j - 1]`
+
+```c++
+#include <iostream>
+#include <algorithm>
+#include <cstring>
+using namespace std;
+const int N = 1e6 + 10;
+const int INF = 0x3f3f3f3f;
+int dp[N], pre[N], a[N];
+int n, m;
+int main()
+{
+    while (cin >> m >> n)
+    {
+        for (int i = 1; i <= n; i++) cin >> a[i];
+        int tmp;
+        memset(dp, 0, sizeof dp);
+        memset(pre, 0, sizeof pre);
+        for (int i = 1; i <= m; i++)
+        {
+            tmp = -INF;
+            for (int j = i; j <= n; j++)
+            {
+                dp[j] = max(dp[j - 1], pre[j - 1]) + a[j];
+                pre[j - 1] = tmp;
+                tmp = max(tmp, dp[j]);
+            }
+        }
+        cout << tmp << endl;
+    }
     return 0;
 }
 ```

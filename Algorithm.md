@@ -7273,6 +7273,113 @@ int main()
 }
 ```
 
+HDU 1069 Monkey and Banana
+
+关键是先对其排序，三个维度就储存三个不同基底的矩阵即可，用一维`dp[]`不断更新即可	
+
+```c++
+#include <iostream>
+#include <algorithm>
+#include <cstring>
+using namespace std;
+int n, cnt, tmp[3], tot;
+int dp[105];
+struct tec {int x, y, z;}t[105];
+bool cmp(tec a, tec b)
+{
+    if (a.x != b.x) return a.x > b.x;
+    else return a.y > b.y;
+}
+int main()
+{
+    while (cin >> n && n)
+    {
+        int cnt = 0, ans = 0;
+        memset(dp, 0, sizeof dp);
+        memset(t, 0, sizeof t);
+        for (int i = 0; i < n; i++)
+        {
+            cin >> tmp[0] >> tmp[1] >> tmp[2];
+            sort(tmp, tmp + 3);
+            t[++cnt].x = tmp[2]; t[cnt].y = tmp[1]; t[cnt].z = tmp[0];
+            t[++cnt].x = tmp[2]; t[cnt].y = tmp[0]; t[cnt].z = tmp[1];
+            t[++cnt].x = tmp[1]; t[cnt].y = tmp[0]; t[cnt].z = tmp[2];
+        }
+        sort(t + 1, t + 1 + cnt, cmp);
+        for (int i = 1; i <= cnt; i++)
+        {
+            dp[i] = t[i].z;
+            for (int j = 1; j <= i; j++)
+                if (t[j].x > t[i].x && t[j].y > t[i].y) dp[i] = max(dp[i], dp[j] + t[i].z);
+            ans = max(ans, dp[i]);
+        }
+        printf("Case %d: maximum height = %d\n", ++tot, ans);
+    }
+    return 0;
+}
+```
+
+
+
+```
+
+```
+
+HDU 1087 Super Jumping! Jumping! Jumping!
+
+```c++
+#include <iostream>
+#include <algorithm>
+using namespace std;
+int n;
+int dp[1020], a[1020];
+int main()
+{
+    while (cin >> n && n)
+    {
+        int ans = 0;
+        for (int i = 1; i <= n; i++) cin >> a[i];
+        for (int i = 1; i <= n; i++)
+        {
+            dp[i] = a[i];
+            for (int j = 1; j < i; j++)
+                if (a[i] > a[j]) dp[i] = max(dp[i], dp[j] + a[i]);
+            ans = max(ans, dp[i]);
+        }
+        cout << ans << endl;
+    }
+    return 0;
+}
+```
+
+HDU 1114 Piggy-Bank
+
+```c++
+#include <iostream>
+#include <algorithm>
+#include <cstring>
+using namespace std;
+int t, e, f, n;
+struct str{int v, w;}a[510];
+int dp[10010];
+int main()
+{
+    for (cin >> t; t--; )
+    {
+        memset(dp, 0x3f, sizeof dp);
+        cin >> e >> f >> n;
+        for (int i = 1; i <= n; i++) cin >> a[i].v >> a[i].w;
+        dp[0] = 0;
+        for (int i = 1; i <= n; i++)
+            for (int j = a[i].w; j <= f - e; j++)
+                dp[j] = min(dp[j], dp[j - a[i].w] + a[i].v);
+        if (dp[f- e] == 0x3f3f3f3f) printf("This is impossible.\n");
+        else printf("The minimum amount of money in the piggy-bank is %d.\n", dp[f - e]);
+    }
+    return 0;
+}
+```
+
 
 
 ## 数论和线性代数

@@ -7380,6 +7380,95 @@ int main()
 }
 ```
 
+HDU 1176 免费馅饼
+
+此题实际上是数塔类型的dp, 把`t`秒落在`x`点上的馅饼数记录作为数塔值, 然后求总和最大的路径即可, 但是在这里巧妙使用逆推的思路最后输出`dp[0][5]`也是可行的, 注意防止数组越界
+
+```c++
+#include <iostream>
+#include <algorithm>
+#include <cstring>
+using namespace std;
+int n, maxn;
+int dp[100010][12];
+int main()
+{
+    while (cin >> n && n)
+    {
+        memset(dp, 0, sizeof dp); maxn = 0;
+        for (int i = 1; i <= n; i++)
+        {
+            int a, b; cin >> a >> b;
+            dp[b][a]++;
+            maxn = max(maxn, b);
+        }
+        for (int i = maxn - 1; i >= 0; i--)
+        {
+            dp[i][0] += max(dp[i + 1][0], dp[i + 1][1]);
+            for (int j = 1; j < 11; j++)
+                dp[i][j] += max(dp[i + 1][j], max(dp[i + 1][j - 1], dp[i + 1][j + 1]));
+        }
+        cout << dp[0][5] << endl;
+    }
+    return 0;
+}
+```
+
+HDU 1260 Tickets
+
+```c++
+#include <iostream>
+#include <algorithm>
+#include <cstring>
+using namespace std;
+int n, t, dp[2010];
+int a[2010], b[2010];
+int main()
+{
+    for (cin >> t; t--; )
+    {
+        memset(dp, 0, sizeof dp);
+        cin >> n;
+        for (int i = 1; i <= n; i++) cin >> a[i];
+        for (int i = 2; i <= n; i++) cin >> b[i];
+        dp[1] = a[1];
+        for (int i = 2; i <= n; i++)
+            dp[i] = min(dp[i - 1] + a[i], dp[i - 2] + b[i]);
+        int ans = dp[n];
+        int x = ans / 60, y = x / 60;
+        printf("%.2d:%.2d:%.2d", 8 + y, x % 60, ans % 60);
+        printf(y >= 4 ? " pm\n" : " am\n"); 
+    }
+    return 0;
+}
+```
+
+
+
+```
+struct {int w, s;}mou[1010];
+int cnt, ans, ed;
+int dp[1010], pre[1010];
+void print(int x)
+{
+    if (pre[x] != 0) print(pre[x]);
+    printf("%d\n", x);
+}
+int main()
+{
+    while (cin >> mou[++cnt].w >> mou[cnt].s);
+    for (int i = 1; i <= cnt; i++) dp[i] = 1;
+    for (int i = 1; i <= cnt; i++)
+        for (int j = 1; j < i; j++)
+            if (mou[i].s < mou[j].s && mou[i].w > mou[j].w)
+                if (dp[i] < dp[j] + 1) dp[i] = dp[j] + 1, pre[i] = j;
+    for (int i = 1; i <= cnt; i++) if (ans < dp[i]) ans = dp[i], ed = i;
+    cout << ans << endl;
+    print(ed);
+    return 0;
+}
+```
+
 
 
 ## 数论和线性代数
@@ -7934,7 +8023,7 @@ int main()
 }
 
 
-//无前驱的顶点优先拓扑排序
+//无前驱的顶点优先拓扑排序，BFS
 #include <algorithm>
 #include <iostream>
 #include <cstring>

@@ -7443,20 +7443,32 @@ int main()
 }
 ```
 
+HDU 1160 FatMouse's Speed
 
+此题的重点在于题目中"take the data on a **collection** of mice", **collection**是集合的意思, 集合是无序的, 所以可以对老鼠先进行排序再求子序列 
 
-```
-struct {int w, s;}mou[1010];
+```c++
+#include <iostream>
+#include <algorithm>
+using namespace std;
+const int N = 2e5 + 10;
+struct str{int w, s, num;}mou[1010];
 int cnt, ans, ed;
 int dp[1010], pre[1010];
+bool cmp(str a, str b)
+{
+    if (a.w != b.w) return a.w < b.w;
+    else return a.s > b.s;
+}
 void print(int x)
 {
     if (pre[x] != 0) print(pre[x]);
-    printf("%d\n", x);
+    printf("%d\n", mou[x].num);
 }
 int main()
 {
-    while (cin >> mou[++cnt].w >> mou[cnt].s);
+    while (cin >> mou[++cnt].w >> mou[cnt].s) mou[cnt].num = cnt;
+    sort(mou, mou + cnt, cmp);
     for (int i = 1; i <= cnt; i++) dp[i] = 1;
     for (int i = 1; i <= cnt; i++)
         for (int j = 1; j < i; j++)
@@ -7465,6 +7477,67 @@ int main()
     for (int i = 1; i <= cnt; i++) if (ans < dp[i]) ans = dp[i], ed = i;
     cout << ans << endl;
     print(ed);
+    return 0;
+}
+```
+
+POJ 1661 Help Jimmy
+
+该题本质是dp的记忆化搜索, 从上而下递归编码, 可以使得本题的思路十分清晰, 将每次的跳跃分为两个雷同的子问题, 即跳到左端点和跳到右端点, 将跳到左端点的时间加上该左端点到底层的最短时间, 跳到右端点的时间加上该右端点到底层的最短时间, 比较取最小值, 这就是每一个子问题的过程, 对于无法跳跃的, 赋予无穷大数即可.
+
+```c++
+#include <iostream>
+#include <algorithm>
+#include <cstring>
+using namespace std;
+const int INF = 0x3f3f3f3f;
+int t, n, x, y, maxn;
+int ltime[1010], rtime[1010];   //分别记录左右点到底层的最短时间
+struct str
+{
+    int lx, rx, high;
+    bool operator < (const str &a) const 
+    {return a.high < high;}     //对平台的高度排序
+}edge[1010];
+int dfs(int L, bool Isleft)     //分成两个子问题,从左点到右点, Isleft用于区分左右点
+{
+    int y = edge[L].high, x;
+    if (Isleft) x = edge[L].lx;
+    else x = edge[L].rx;
+    int i;
+    for (i = L + 1; i <= n; i++)  //找出下方有无平台可跳跃
+        if (edge[i].lx <= x && edge[i].rx >= x) break;
+    if (i <= n)   //若有还要判断是否安全
+    {
+        if (y - edge[i].high > maxn) return INF;
+    }
+    else       //若没有则判断是否可以直接跳到底层
+    {
+        if (y > maxn) return INF;
+        else return y;
+    }
+    int nltime = y - edge[i].high + x - edge[i].lx;   //到下一个平台左端点所需的时间
+    int nrtime = y - edge[i].high + edge[i].rx - x;   //到下一个平台右端点所需的时间
+    if (!ltime[i]) ltime[i] = dfs(i, true);          //记忆化搜索
+    if (!rtime[i]) rtime[i] = dfs(i, false);
+    nltime += ltime[i];       //加上到达的端点到底层的最短时间
+    nrtime += rtime[i];
+    if (nltime < nrtime) return nltime;  //判断最优
+    else return nrtime;
+}
+int main()
+{
+    for (cin >> t; t--; )
+    {
+        memset(ltime, 0, sizeof ltime);
+        memset(rtime, 0, sizeof rtime);
+        cin >> n >> x >> y >> maxn;
+        edge[0].lx = edge[0].rx = x; edge[0].high = y;
+        for (int i = 1; i <= n; i++)
+            cin >> edge[i].lx >> edge[i].rx >> edge[i].high;
+        sort(edge, edge + 1 + n);
+        cout << dfs(0, true) << endl;
+    }
     return 0;
 }
 ```

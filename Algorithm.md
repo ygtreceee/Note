@@ -7481,11 +7481,62 @@ int main()
 }
 ```
 
-POJ 1661 Help Jimmy
+[Jury Compromise - POJ 1015 ](https://vjudge.csgrandeur.cn/problem/POJ-1015#author=0)
 
-该题本质是dp的记忆化搜索, 从上而下递归编码, 可以使得本题的思路十分清晰, 将每次的跳跃分为两个雷同的子问题, 即跳到左端点和跳到右端点, 将跳到左端点的时间加上该左端点到底层的最短时间, 跳到右端点的时间加上该右端点到底层的最短时间, 比较取最小值, 这就是每一个子问题的过程, 对于无法跳跃的, 赋予无穷大数即可.
+此题用`dp[25][805]`来储存序列和, 第一个维度代表的是序列的人的个数, 第二个维度代表的是序列差的和, 因为有可能出现负数, 所以在这里使用修正值`fix = m * 20`, 然后再使用`vector<int> path[25][805]`来储存路径, 每个维度的意义与`dp[][]`相同, 循环部分按照"选哪个人" -> "选的第几人" -> "差值之和"遍历. 若是"选的第几人" -> "选哪个人"的顺序, 则为了避免选重复的人需要判断, 但是储存路径的方式会覆盖掉一些情况, 所以是错误的. 
 
 ```c++
+#include <iostream>
+#include <algorithm>
+#include <cstring>
+using namespace std;
+int n, m, cas = 1, fix, p, d, S, A, P, D;
+int dp[25][805], sub[205], add[205];
+vector<int> path[25][805];
+int main()
+{
+    while (cin >> n >> m && n)
+    {
+        memset(dp, -1, sizeof dp);
+        for (int i = 1; i <= m; i++)
+            for (int j = 0; j < 805; j++)
+                path[i][j].clear();
+        fix = 20 * m;     //修正值
+        dp[0][fix] = 0;   //起点
+        for (int i = 1; i <= n; i++)
+        {
+            cin >> p >> d;
+            sub[i] = p - d; add[i] = p + d;
+        }
+        for (int i = 1; i <= n; i++)
+            for (int j = m - 1; j >= 0; j--)   //倒序
+                for (int k = 0; k <= 2 * fix; k++)
+                    if (dp[j][k] >= 0 && dp[j][k] + add[i] > dp[j + 1][k + sub[i]])
+                        {
+                        dp[j + 1][k + sub[i]] = dp[j][k] + add[i];
+                        path[j + 1][k + sub[i]] = path[j][k];
+                        path[j + 1][k + sub[i]].push_back(i);
+                        }
+        int i;
+        for (i = 0; i <= fix; i++)
+            if (dp[m][fix + i] >= 0 || dp[m][fix - i] >= 0) break;
+        S = dp[m][fix + i] > dp[m][fix - i] ? fix + i : fix - i;
+        A = dp[m][S];
+        P = (A + (S - fix)) / 2; D = (A - (S - fix)) / 2;
+        printf("Jury #%d\n",cas++);
+        printf("Best jury has value %d for prosecution and value %d for defence:\n",P,D);
+        for (int i = 0; i < m; i++) cout << " " << path[m][S][i]; cout << endl << endl;
+    }
+    return 0;
+}
+```
+
+POJ 1661 Help Jimmy
+
+该题本质是dp的记忆化搜索, 从上而下递归编码, 可以使得本题的思路十分清晰, 将每次的跳跃分为两个雷同的子问题, 即跳到左端点和跳到右端点, 将跳到左端点的时间加上该左端点到底层的最短时间, 跳到右端点的时间加上该右端点到底层的最短时间, 比较取最小值, 这就是每一个子问题的过程, 对于无法跳跃的, 赋予无穷大数即可. 此题还有另一种思路, 就是从底层往上跳, 巧妙地将`dp[i][0]`当作左端点到底部的最短时间, `dp[i][1]`当作右端点到底部的最短时间, 然后正常`dp`加判断可行性即可
+
+```c++
+//自顶向下
 #include <iostream>
 #include <algorithm>
 #include <cstring>
@@ -7538,6 +7589,180 @@ int main()
         sort(edge, edge + 1 + n);
         cout << dfs(0, true) << endl;
     }
+    return 0;
+}
+
+
+//自底向上
+#include <iostream>
+#include <algorithm>
+#include <cstring>
+using namespace std;
+const int INF = 0x3f3f3f3f;
+int dp[1010][2];
+int t, n, x, y, maxn;
+struct edge
+{
+    int lx, rx, h;
+    bool operator < (const edge &a) const
+    {return h < a.h;}
+}e[1010];
+int main()
+{
+    for (cin >> t; t--; )
+    {
+        memset(dp, 0x3f, sizeof dp);  //去最小值, 初始值应设为无穷大
+        dp[0][0] = dp[0][1] = 0;   //底部时间默认为0, 也方便后续操作
+        cin >> n >> x >> y >> maxn;
+        e[0].lx = -INF; e[0].rx = INF; e[0].h = 0;
+        for (int i = 1; i <= n; i++)
+            cin >> e[i].lx >> e[i].rx >> e[i].h;
+        e[n + 1].lx = e[n + 1].rx = x; e[n + 1].h = y;    //注意加上底部与顶部"平台"
+        sort(e, e + n + 2);
+        for (int i = 1; i <= n + 1; i++)
+            for (int j = 0; j < 2; j++)
+                for (int k = i - 1; k >= 0; k--)    //注意此处必须从大到小, 否则会出现穿模的情况
+                {
+                    int flag = e[i].h - e[k].h - maxn;
+                    if (k == 0 && flag <= 0)
+                        dp[i][j] = e[i].h - e[k].h;
+                    else if (j == 0)
+                    {
+                        if (flag <= 0 && e[k].lx <= e[i].lx && e[k].rx >= e[i].lx)
+                            {
+                                int ret = min(e[i].h - e[k].h + e[i].lx - e[k].lx + dp[k][0], e[i].h - e[k].h + e[k].rx - e[i].lx + dp[k][1]);
+                                dp[i][j] = min(dp[i][j], ret);
+                                break;
+                            }
+                    }
+                    else if (j == 1)
+                    {
+                        if (flag <= 0 && e[k].rx >= e[i].rx && e[k].lx <= e[i].rx)
+                            {
+                                int ret = min(e[i].h - e[k].h + e[i].rx - e[k].lx + dp[k][0], e[i].h - e[k].h + e[k].rx - e[i].rx + dp[k][1]);
+                                dp[i][j] = min(dp[i][j], ret);
+                                break;
+                            }
+                    }
+        }
+        cout << dp[n + 1][0] << endl;
+    }
+    return 0;
+}
+```
+
+[FatMouse and Cheese - HDU 1078 ](https://vjudge.csgrandeur.cn/problem/HDU-1078#author=0)
+
+```c++
+#include <iostream>
+#include <algorithm>
+#include <cstring>
+using namespace std;
+int n, k;
+int a[105][105];
+int dp[105][105];
+int step[4][2] = {1, 0, 0, 1, -1, 0, 0, -1};
+int dfs(int x, int y)
+{
+    if (dp[x][y]) return dp[x][y];
+    dp[x][y] = a[x][y];
+    for (int i = 1; i <= k; i++)
+        for (int j = 0; j < 4; j++)
+        {
+            int nx = x + i * step[j][0];
+            int ny = y + i * step[j][1];
+            if (nx >= 0 && nx <= n && ny >= 0 && ny <= n && a[nx][ny] > a[x][y])
+                dp[x][y] = max(dp[x][y], a[x][y] + dfs(nx, ny));
+        }
+    return dp[x][y];
+}
+int main()
+{
+    while (cin >> n >> k)
+    {
+        memset(dp, 0, sizeof dp);
+        if(n == -1 && k == -1) break;
+        for (int i = 1; i <= n; i++)
+            for (int j = 1; j <= n; j++)
+                cin >> a[i][j];
+        cout << dfs(1, 1) << endl;
+    }
+    return 0;
+}
+```
+
+[Phalanx - HDU 2859](https://vjudge.csgrandeur.cn/problem/HDU-2859#author=0)
+
+```c++
+#include <iostream>
+#include <algorithm>
+#include <cstring>
+using namespace std;
+int n;
+char s[1010][1010];
+int dp[1010][1010]; 
+int main()
+{
+    while (cin >> n && n)
+    {
+        int ans = 0;
+        for (int i = 1; i <= n; i++)
+            for (int j = 1; j <= n; j++)
+                dp[i][j] = 1, cin >> s[i][j];
+        for (int i = 1; i <= n; i++)
+            for (int j = 1; j <= n; j++)
+            {
+                int tmp = dp[i - 1][j + 1], tx = i, ty = j;
+                while (tmp)
+                {
+                    tx--; ty++;
+                    if (s[tx][j] != s[i][ty]) break;
+                    tmp--;
+                }
+                dp[i][j] += dp[i - 1][j + 1] - tmp;
+                ans = max(ans, dp[i][j]);
+            }
+        cout << ans << endl;
+    }
+    return 0;
+}
+```
+
+[Milking Time - POJ 3616](https://vjudge.csgrandeur.cn/problem/POJ-3616)
+
+```c++
+#include <iostream>
+#include <algorithm>
+using namespace std;
+const int N = 1e6 + 10, M = 1010;
+int n, m, r, ans;
+int dp[N];
+struct str
+{
+    int s, e, w;
+    bool operator < (const str &a) const
+    {
+        if (e != a.e) return e < a.e;
+        else return s < a.s; 
+    }
+}a[M];
+int main()
+{
+    cin >> n >> m >> r;
+    for (int i = 1; i <= m; i++)
+    {
+        cin >> a[i].s >> a[i].e >> a[i].w;
+        a[i].e += r;
+    }
+    sort(a + 1, a + 1 + m);
+    for (int i = 1; i <= m; i++) dp[i] = a[i].w;
+    for (int i = 1; i <= m; i++)
+        for (int j = 1; j <= i; j++)
+            {
+                if (a[j].e <= a[i].s) dp[i] = max(dp[i], dp[j] + a[i].w);
+                ans = max(ans, dp[i]);
+            }
+    cout << ans;
     return 0;
 }
 ```

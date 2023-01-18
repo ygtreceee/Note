@@ -7049,7 +7049,7 @@ int main()
 
 luogu P1064 [NOIP2006 提高组] 金明的预算方案
 
-此题需要多个状态转移方程，对每种可能都设一个状态转移方程即可
+**有依赖性的背包问题**  此题需要多个状态转移方程，对每种可能都设一个状态转移方程即可
 
 ```c++
 #include <algorithm>
@@ -7763,6 +7763,429 @@ int main()
                 ans = max(ans, dp[i]);
             }
     cout << ans;
+    return 0;
+}
+```
+
+[Making the Grade - POJ 3666](https://vjudge.csgrandeur.cn/problem/POJ-3666#author=0258)
+
+本题需要使用离散化+dp的思想, `dp[i][j]`代表的是前`a[i]`个数按照前`b[j]`的有序集合的子集的顺序(必须包括`b[j]`)需要付出的代价, 需要注意的是此处用`minn`维护前`dp[i - 1][j]`的最小值, 可以减少一层循环, 减少时间复杂度, 状态转移方程为`dp[i][j] = minn + abs(a[i] - b[j])`
+
+```c++
+#include <iostream>
+#include <algorithm>
+#include <cstring>
+#include <cmath>
+using namespace std;
+const int INF = 0x3f3f3f3f;
+const int N = 2010;
+int n, m;
+int a[N], b[N];
+int dp[N][N];
+int nondown()  //变为不降序列
+{
+    memset(dp, 0, sizeof dp);
+    sort(b + 1, b + 1 + n);  //b数组排序
+    m = unique(b + 1, b + 1 + n) - (b + 1);   //去重函数
+    for (int i = 1; i <= n; i++)   //前i个数以b[j]结尾的最小花费
+    {
+        int minn = INF;  //Min优化:f[i-1][k](1<=k<=j)中的最小值
+        for (int j = 1; j <= m; j++)
+        {
+            minn = min(minn, dp[i - 1][j]);  //更新最小值
+            dp[i][j] = minn + abs(a[i] - b[j]);  //状态转移
+        }
+    }
+    int ans = INF;
+    for (int i = 1; i <= m; i++)
+        ans = min(ans, dp[n][i]);
+    return ans;
+}
+bool cmp(int x, int y) {return x > y;}
+int nonup()
+{
+    memset(dp, 0, sizeof dp);
+    sort(b + 1, b + 1 + m, cmp);    
+    for (int i = 1; i <= n; i++)   
+    {
+        int minn = INF;
+        for (int j = 1; j <= m; j++)
+        {
+            minn = min(minn, dp[i - 1][j]);
+            dp[i][j] = minn + abs(a[i] - b[j]);
+        }
+    }
+    int ans = INF;
+    for (int i = 1; i <= m; i++)
+        ans = min(ans, dp[n][i]);
+    return ans;
+}
+int main()
+{
+    cin >> n;
+    for (int i = 1; i <= n; i++) cin >> a[i], b[i] = a[i];
+    cout << min(nondown(), nonup()) << endl;
+    return 0;
+}
+```
+
+[724 · 最小划分 - LintCode](https://www.lintcode.com/problem/724/)
+
+转化为背包容量为`sum/2`, 把数组中每个数字看作物品的体积, 求出背包最多可以放`res`体积的物体, 返回结果`|res - (sum - res)|`
+
+```c++
+class Solution {
+public:
+    int findMin(vector<int> &nums)
+    {
+        int sum = 0, n = nums.size();
+        int dp[100010] = {0};
+        for (auto i: nums) sum += i;
+        int lim = sum / 2;
+        for (int i = 0; i < n; i++)
+        for (int j = lim; j >= nums[i]; j--)
+            dp[j] = max(dp[j], dp[j - nums[i]] + nums[i]);
+        return abs(dp[lim] - (sum - dp[lim]));
+    }
+};
+```
+
+**子集和问题**(Subset Sum Problem)
+
+```c++
+//简单判断
+#include <iostream>
+#include <algorithm>
+#include <vector>
+using namespace std;
+const int N = 1e5 + 10;
+vector<int> a;
+int dp[N];
+void Solve()
+{
+    int n, m, x;
+    cin >> n >> m;
+    for (int i = 1; i <= n; i++) cin >> x, a.push_back(x);
+    for (int i = 0; i < n; i++) 
+        for (int j = m; j >= 0; j--)
+        {
+            if (a[i] > j) break;
+            else if (a[i] == j) dp[j] = 1;
+            else dp[j] = dp[j] ? dp[j] : dp[j - a[i]];
+        }
+    cout << dp[m] << endl;
+}
+int main()
+{
+    Solve();
+    return 0;
+}
+
+//vector存储路径打印子集, 若是有多个答案
+#include <iostream>
+#include <algorithm>
+using namespace std;
+const int N = 1e3 + 10;
+vector<int> a;
+vector<int> sub[N];   //存路径
+int dp[N];
+void Solve()
+{
+    int n, m, x;
+    cin >> n >> m;
+    for (int i = 1; i <= n; i++) cin >> x, a.push_back(x);
+    for (int i = 0; i < n; i++) 
+        for (int j = m; j >= 0; j--)
+        {
+            if (a[i] > j) break;
+            else if (a[i] == j) dp[j] = 1, sub[j].push_back(j);
+            else
+            {
+                if (dp[j] == 1) continue;
+                else if (dp[j - a[i]] == 1)
+                {
+                    dp[j] = 1;
+                    sub[j] = sub[j - a[i]];
+                    sub[j].push_back(a[i]);
+                }
+            }
+        }
+    cout << dp[m] << endl;
+    for (auto i: sub[m]) cout << i << " ";
+    cout << endl;
+}
+int main()
+{
+    Solve();
+    return 0;
+}
+
+
+//逆状态转移方程回溯打印子集, 若是有多个答案只会打印从后往前得到的第一个答案, 失败
+#include <iostream>
+#include <algorithm>
+using namespace std;
+const int N = 1e3 + 10;
+int a[N];
+int dp[N][N];
+int n, m, x;
+void print(int x, int y)
+{
+    if (!y) return;
+    for (int i = x; i >= 1; i--)
+        for (int j = y; j >= 0; j--)
+        {
+            if (a[i] > y) break;
+            if (dp[i][j])
+            {
+                print(i - 1, j - a[i]);
+                cout << a[i] << " ";
+                return;
+            }
+        }
+}
+void Solve()
+{
+    cin >> n >> m;
+    for (int i = 1; i <= n; i++) cin >> a[i];
+    for (int i = 1; i <= n; i++) 
+        for (int j = 0; j <= m; j++)
+        {
+            if (a[i] > j) dp[i][j] = dp[i - 1][j];
+            else if (a[i] == j) dp[i][j] = 1;
+            else if (a[i] < j) dp[i][j] = dp[i - 1][j] ? dp[i - 1][j] : dp[i - 1][j - a[i]];
+        }
+    cout << dp[n][m] << endl;
+    print(n, m);
+}
+int main()
+{
+    Solve();
+    return 0;
+}
+```
+
+**最优游戏策略**(Optimal Strategy for a Game)
+
+```c++
+//状态转移方程
+dp[i][j] = max{V[i] + min(dp[i + 2][j], dp[i + 1][j - 1]), V[j] + min(dp[i + 1][j - 1], dp[i][j - 2])}
+dp[i][j] = V[i], j = i
+dp[i][j] = max(V[i], V[j]), j = i + 1
+    
+//zxr
+#include <bits/stdc++.h>
+using namespace std;
+const int N = 105, Min = -1e9;
+int a[N], n;
+int f[N][N];
+int dfs(int u, int i, int j)
+{
+    if (i == j)
+    {
+        if (u)
+            return f[i][j] = a[i];
+        else
+            return f[i][j] = -a[i];
+    }
+
+    if (f[i][j] != Min)
+        return f[i][j];
+
+    if (u)
+        f[i][j] = max(dfs(u ^ 1, i + 1, j) + a[i], dfs(u ^ 1, i, j - 1) + a[j]);
+    else
+        f[i][j] = min(dfs(u ^ 1, i + 1, j) - a[i], dfs(u ^ 1, i, j - 1) - a[j]);
+
+    return f[i][j];
+}
+
+int main()
+{
+    scanf("%d", &n);
+    int sum = 0;
+    for (int i = 1; i <= n; i++)
+    {
+        scanf("%d", &a[i]);
+        sum += a[i];
+    }
+    for (int j = 0; j <= n; j++)
+        for (int k = 0; k <= n; k++)
+            f[j][k] = Min;
+
+    dfs(1, 1, n);
+    int dif = f[1][n];
+    int rex = (sum + dif) / 2;
+    printf("%d %d\n", rex, sum - rex);
+    return 0;
+}
+```
+
+**最短公共超序列**(Shortest Common Supersequence)
+
+方法和求最长公共子序列相似
+
+```c++
+#include <iostream>
+#include <algorithm>
+#include <cstring>
+using namespace std;
+int dp[105][105];
+char a[105], b[105], c[105];
+int al, bl;
+int main()
+{
+    cin >> a + 1 >> b + 1;
+    al = strlen(a + 1);
+    bl = strlen(b + 1);
+    for (int i = 1; i <= max(al, bl); i++)
+        dp[0][i] = dp[i][0] = i;
+    for (int i = 1; i <= al; i++)
+        for (int j = 1; j <= bl; j++)
+        {
+            if (a[i] == b[j]) dp[i][j] = dp[i - 1][j - 1] + 1;
+            else dp[i][j] = min(dp[i][j - 1], dp[i - 1][j]) + 1;
+        }
+    cout << dp[al][bl] << endl;  //最短超序列长度
+    int i = al, j = bl, cnt = 0;    //逆状态方程记录最短超序列
+    while (i > 0 && j > 0)  
+    {
+        if (dp[i][j] == dp[i - 1][j - 1] + 1 && a[i] == b[j])
+        {c[cnt] = a[i]; cnt++; i--; j--;}
+        else if (dp[i][j] == dp[i - 1][j] + 1 && a[i] != b[j])
+        {c[cnt] = a[i]; cnt++; i--;}
+        else if (dp[i][j] == dp[i][j - 1] + 1 && a[i] != b[j])
+        {c[cnt] = b[j]; cnt++; j--;}
+    }
+    while (i > 0) {c[cnt] = a[i]; i--; cnt++;}
+    while (j > 0) {c[cnt] = b[j]; j--; cnt++;}
+    int cl = strlen(c);
+    for (int i = cl - 1; i >= 0; i--) cout << c[i];   //逆序输出, 得到最短超序列
+    cout << endl;
+    return 0;
+}
+```
+
+**输出方案**
+
+`01`背包问题，但是要求输出 **字典序最小的方案数** ; 一般而言，背包问题是要求一个最优值，如果要求输出这个最优值的方案，可以参照一般动态规划问题输出方案的方法: 记录下每个状态的最优质是由状态转移方程的哪一项推出来的。然后就可以根据这个状态继续往前推导。显然求字典序最小的时候，我们需要优先考虑编号小的物品，但是找方案的时候，又是从 `f[n][m]` 开始回推的，所以我们在求解 `01` 背包的时候，从后往前推，就可以从 `f[1][m]` 开始往前推了，这样的话，就和求字典序最小的顺序一致了。
+
+```c++
+//按字典序最小
+#include <bits/stdc++.h>
+using namespace std;
+const int N = 1e3 + 5;
+int f[N][N], n, m, w[N], v[N];
+int main()
+{
+    scanf("%d%d", &n, &m);
+    for (int i = 1; i <= n; i++)
+        scanf("%d%d", &v[i], &w[i]);
+
+    for (int i = n; i >= 1; i--)   //逆序储存
+        for (int j = 0; j <= m; j++)
+        {
+            f[i][j] = f[i + 1][j];
+            if (j >= v[i])
+                f[i][j] = max(f[i][j], f[i + 1][j - v[i]] + w[i]);
+        }
+
+    int j = m;
+    for (int i = 1; i <= n; i++)   //正序贪心, 对于出现的第一个物品若可选可不选则一定要选, 因此能按照字典序最小
+    {
+        if (j - v[i] >= 0 && f[i][j] == f[i + 1][j - v[i]] + w[i])
+        {
+            printf("%d ", i);
+            j -= v[i];
+        }
+    }
+    return 0;
+}
+
+//不能按照字典序最小
+const int maxn = 1010;
+int w[maxn], c[maxn];
+int dp[maxn][maxn];
+vector<int> path;
+int solve(int n, int C)
+{
+    for (int i = 1; i <= n; i++)
+        for (int j = 0; j <= C; j++)
+        {
+            if (c[i] > j) dp[i][j] = dp[i - 1][j];
+            else dp[i][j] = max(dp[i - 1][j], dp[i - 1][j - c[i]] + w[i]);
+        }
+    int i = n, j = C;
+    while (i > 0 && j > 0)
+    {
+        if (c[i] <= j && dp[i][j] == dp[i - 1][j - c[i]] + w[i])
+        {path.push_back(i); j -= c[i]; i--;}
+        else i--;
+    }
+    return dp[n][C];
+}
+int main()
+{
+    int t;
+    for (cin >> t; t--; )
+    {
+        int n, C;
+        cin >> n >> C;
+        for (int i = 1; i <= n; i++) cin >> w[i];
+        for (int i = 1; i <= n; i++) cin >> c[i];
+        memset(dp, 0, sizeof dp);
+        cout << solve(n, C) << endl;
+        for (auto i = path.end() - 1; i >= path.begin(); i--) cout << *i << " ";
+    }
+    return 0;
+}
+```
+
+
+
+#### 状态压缩DP
+
+```
+DP技巧之一, 一般应用在集合问题中, 当DP状态是集合时, 把集合的组合或排列用一个二进制数表示, 这个二进制数的0/1组合表示集合的一个子集, 从而把DP状态的处理转换成为二进制的位操作, 使得代码简洁, 提高算法效率, 从二进制简化集合处理的角度看也是一种DP优化方法.
+应用背景是以集合为状态, 且集合一般用二进制表示, 用二进制的位运算处理, 所以又可以称为"集合DP"
+集合问题一般是指数复杂度的(NP问题), 例如:
+1.子集问题, 设n个元素无先后关系, 那么共有2^n个子集;
+2.排列问题, 对所有n个元素进行全排列, 共有n!个全排列
+可以这样概括状压DP思想: 如果用二进制表示集合的状态(子集或排列), 并用二进制的位运算便利和操作, 又简单又快. 当然, 由于集合问题是NP问题, 所以状压DP的复杂度仍然是指数级的, 只能用于小规模问题的求解, 而且时间复杂度实际上取决于DP算法, 与状态压缩关系不大, 它只是处理集合的工具.
+```
+
+```c++
+用位运算对集合进行操作
+1 << (i - 1) & a         //判断a的第i位(从最低位开始数)是否等于1
+a | (1 << (i - 1))       //把a的第i位改为1
+a & ( ~ (1 << (i - 1))   //把a的第i位改为0
+a & (a - 1)              //把a的最后一个1去掉
+```
+
+[91. 最短Hamilton路径 - AcWing题库](https://www.acwing.com/problem/content/description/93/)
+
+```c++
+#include <iostream>
+#include <algorithm>
+#include <cstring>
+using namespace std;
+int n, dp[1 << 20][21];
+int dist[21][21];
+int main()
+{
+    memset(dp, 0x3f, sizeof dp);  //初始化最大值
+    cin >> n;
+    for (int i = 0; i < n; i++)   //输入图
+        for (int j = 0; j < n; j++)
+            cin >> dist[i][j];    //输入点之间的距离
+    dp[1][0] = 0;                 //开始时集合中只有点0, 起点和终点都是0
+    for (int S = 1; S < (1 << n); S++) //从小集合扩展到大集合, 集合用S的二进制表示
+        for (int j = 0; j < n; j++)   //枚举点j
+            if ((S >> j) & 1)      //判断当前集合中是否含有j点
+                for (int k = 0; k < n; k++)  //枚举到达j的点k, k属于集合S - j
+                    if ((S ^ (1 << j)) >> k & 1)  //判断k是否属于S - j
+                        dp[S][j] = min(dp[S][j], dp[S ^ (1 << j)][k] + dist[k][j]);  //状态转移
+    cout << dp[(1 << n) - 1][n - 1];   //输出: 路径包含了所有的点, 终点是n - 1
     return 0;
 }
 ```

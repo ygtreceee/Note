@@ -8297,10 +8297,81 @@ int main()
 }
 ```
 
-HDU 3001
+HDU 3001 
 
+**三进制状态压缩DP**, 此题和Hamilton路径问题很相似, 只是此题是需要给定任意起点, 找遍历城市的最小费用, 而Hamilton是从起点到终点, 也就是说已经给定了终点, 所以在dp意义的设计上有略微不同, 此题时间复杂度为$O(nM^3)$ , 对于**除二进制以外的N进制问题**的处理方式需要特别注意
+
+```c++
+#include <iostream>
+#include <algorithm>
+#include <cstring>
+using namespace std;
+const int INF = 0x3f3f3f3f;
+int n, m;
+int bit[12] = {0, 1, 3, 9, 27, 81, 243, 729, 2187, 6561, 19683, 59049};  //三进制每位的权值
+int tri[60000][11];
+int dp[11][60000];
+int graph[11][11];       //存图
+void make_trb()          //初始化, 存所有可能的路径
+{
+    for (int i = 0; i < 59050; i++)   //共59050种路径状态
+    {
+        int t = i;
+        for (int j = 1; j <= 10; j++)
+        {tri[i][j] = t % 3; t /= 3;}
+    }
+}
+int comp_dp()
+{
+    int ans = INF;
+    memset(dp, 0, sizeof dp);
+    for (int j = 0; j <= n; j++) dp[j][bit[j]] = 0;    //初始化, 从第j座城市出发, 只访问j, 费用为0
+    for (int i = 0; i < bit[n + 1]; i++)         //遍历所有路径, 每个i是一条路径
+    {
+        int flag = 1;             //所有城市都遍历一次以上
+        for (int j = 1; j <= n; j++)   //遍历城市, 以j为起点
+        {
+            if (tri[i][j] == 0)   //是否有一座城市访问次数为0
+            {
+                flag = 0;      //还没有经过所有点
+                continue;
+            }
+            for (int k = 1; k <= n; k++)    //遍历路径i - j的所有城市
+            {
+                int l = i - bit[j];  //从路径i中去掉第j座城市
+                dp[j][i] = min(dp[j][i], dp[k][l] + graph[k][j]);
+            }
+        }
+        if (flag)        //找最小费用
+            for (int j = 1; j <= n; j++)
+                ans = min(ans, dp[j][i]);   //路径i上最小的总费用
+    }
+    return ans;
+}
+int main()
+{
+    make_trb();
+    while (cin >> n >> m)
+    {
+        memset(graph, INF, sizeof graph);
+        while (m--)
+        {
+            int a, b, c; cin >> a >> b >> c;
+            if (c < graph[a][b]) graph[a][b] = graph[b][a] = c;
+        }
+        int ans = comp_dp();
+        if (ans == INF) cout << "-1" << endl;
+        else cout << ans << endl;
+    }
+    return 0;
+}
 ```
 
+#### 区间DP
+
+```
+区间DP也是线性DP, 它把区间当作DP的阶段, 用区间的两个端点描述状态和处理状态的转移, 主要思想就是现在小区间进行DP得到最优解, 然后在合并小区间的最优解求得大区间的最优解. 解题时先解决小区间问题, 然后合并小区间, 得到更大的区间, 直到解决最后的大区间问题. 合并的操作一般是把左右两个相邻的子区间合并.
+区间DP的复杂度大于O(n^2), 一般为O(n^3)
 ```
 
 

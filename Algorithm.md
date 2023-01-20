@@ -10016,7 +10016,7 @@ int main()
 
 POJ 3660 Cow Contest
 
-Floyd传递闭包
+**Floyd传递闭包**
 
 ```c++
 #include <iostream>

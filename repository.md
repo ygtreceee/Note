@@ -949,6 +949,147 @@ int main()
     }
     return 0;
 }
+
+
+//字符串逆序
+#include <stdio.h>
+#include <string.h>
+int main()
+{
+    char words[100];
+    gets(words);
+    for (int i = strlen(words) - 1; i >= 0; i--)
+        printf("%c", words[i]);
+    return 0;
+}
+
+
+//查找指定字符
+#include <stdio.h>
+#include <string.h>
+int main()
+{
+    char words[100], k;
+    scanf("%c", &k);
+    getchar();
+    gets(words);
+    for (int i = strlen(words) - 1; i >= 0; i--)
+    {
+        if (words[i] == k)
+        {
+            printf("index = %d", i);
+            break;
+        }
+        if (i == 0) printf("Not Found");
+    }
+    return 0;
+}
+
+
+//凯撒密码
+#include <stdio.h>
+#include <string.h>
+int main()
+{
+    char words[100];
+    gets(words);
+    int a;
+    scanf("%d", &a);
+    for (int i = 0; i < strlen(words); i++)
+    {
+        char ret = words[i];
+        if (ret >= 'A' && ret <= 'Z' && a >= 0) words[i] = 64 + (words[i] - 64 + a) % 26;
+        if (ret >= 'a' && ret <= 'z' && a >= 0) words[i] = 96 + (words[i] - 96 + a) % 26;
+        if (ret >= 'A' && ret <= 'Z' && a < 0)
+        {
+            if ((91 - words[i] - a) == 26) words[i] = 91 -26;
+            else words[i] = 91 - (91 - words[i] - a) % 26;
+        }
+        if (ret >= 'a' && ret <= 'z' && a < 0)
+        {
+            if((123 - words[i] - a) == 26) words[i] = 123 -26;
+            else words[i] = 123 - (123 - words[i] - a) % 26;
+        }
+        printf("%c", words[i]);
+    }
+    return 0;
+}
+
+
+//字符串转换成十进制整数
+#include <stdio.h>
+#include <string.h>
+#include <math.h>
+int main()
+{
+    char words[100], room[100] = {0};
+    int cnt = 0, flag = 1, ans = 0;
+    gets(words);
+    for (int i = 0; words[i] != '#'; i++)
+    {
+        if (words[i] == '-' && !cnt) flag = 0;
+        if ((words[i] >= '0' && words[i] <= '9'))  
+            room[cnt++] = words[i] - 48;
+        if (words[i] >= 'A' && words[i] <= 'F')
+            room[cnt++] = words[i] - 55;
+        if (words[i] >= 'a' && words[i] <= 'f')
+            room[cnt++] = words[i] - 87;
+    }
+    for (int i = 0; i < cnt; i++)
+        ans += room[i] * pow(16, (cnt - i - 1));
+    printf("-%d" + flag, ans);
+    return 0;
+}
+
+
+//输出大写英文字母
+#include <stdio.h>
+#include <string.h>
+#include <math.h>
+int main()
+{
+    char words[100];
+    gets(words);
+    char vis[100] = {0};
+    for (int i = 0; i < strlen(words); i++)
+    {
+        if (words[i] >= 'A' && words[i] <= 'Z' && !vis[words[i]])
+            vis[words[i]] = 1, printf("%c", words[i]);
+    }
+    for (int i = 0; i < 100; i++)
+    {
+        if (vis[i]) break;
+        if (i == 99) printf("Not Found");
+    }
+    return 0;
+}
+
+
+//删除重复字符
+#include <stdio.h>
+#include <string.h>
+#include <math.h>
+#include <stdlib.h>
+int cmp(const void *a, const void *b)
+{
+    return *(char *)a - *(char *)b;
+}
+int main()
+{
+    char words[100];
+    char room[100];
+    int cnt = 0;
+    gets(words);
+    char vis[200] = {0};
+    for (int i = 0; i < strlen(words); i++)
+    {
+        if (!vis[words[i]]) room[cnt++] = words[i];
+        vis[words[i]] = 1;
+    }
+    qsort(room, cnt, sizeof(char), cmp);
+    for (int i = 0; i < cnt; i++) printf("%c", room[i]);
+    return 0;
+}
 ```
 
 
@@ -2725,4 +2866,1851 @@ int main()
     return 0;
 }//
 ```
+
+#### luogu
+
+P7441「EZEC-7」Erinnerung
+
+```c++
+#include <iostream>
+#include <algorithm>
+using namespace std;
+long long t, x, y, k;
+int main()
+{
+    ios::sync_with_stdio(false);
+    cin.tie(0);
+    cout.tie(0);
+    for (cin >> t; t--; )
+    {
+        cin >> x >> y >> k;
+        if (x == 0 && y == 0) cout << 0 << endl;
+        else if (x == 0) cout << (k % y == 0 ? 1 : 0) << endl;
+        else if (y == 0) cout << (k % x == 0 ? 1 : 0) << endl;
+        else cout << min(k / x, k / y) << endl;
+    }
+    return 0;
+}
+```
+
+P7909 [CSP-J 2021] 分糖果
+
+```c++
+#include <iostream>
+using namespace std;
+int main()
+{
+    int n, l, r;
+    cin >> n >> l >> r;
+    if (l / n == r / n) cout << r % n;
+    else cout << n - 1;
+    return 0;
+}
+```
+
+P2637 第一次，第二次，成交！
+
+```c++
+#include <iostream>
+#include <algorithm>
+using namespace std;
+int m, n, prices[100], ma, ans, sum, ret;
+int main()
+{
+    ios::sync_with_stdio(false);
+    cin.tie(NULL);
+    cout.tie(NULL);
+    cin >> m >> n;
+    for (int i = 0; i < n; i++) cin >> prices[i];
+    sort(prices, prices + n);
+    for (int i = 0; i < n; i++)
+    {
+        ret = m < (n - i) ? m : (n - i);
+        if (prices[i] * ret > ma) ans = i, ma = prices[i] * ret;
+    }
+    cout << prices[ans] << ' ' << ma;
+    return 0;
+}
+```
+
+P1321 单词覆盖还原
+
+```c++
+#include <iostream>
+#include <stack>
+#include <queue>
+#include <algorithm>
+#include <cstring>
+using namespace std;
+int main()
+{
+    int boy = 0, girl = 0;
+    string str;
+    cin >> str;
+    for (int i = 0; i < str.size(); i++)
+    {
+        if (str[i] == 'b' || str[i + 1] == 'o' || str[i + 2] == 'y') boy++;
+        if (str[i] == 'g' || str[i + 1] == 'i' || str[i + 2] == 'r' || str[i + 3] == 'l') girl++;
+    }
+    cout << boy << endl << girl;
+    return 0;
+}
+```
+
+P1427 小鱼的数字游戏
+
+```c++
+#include <iostream>
+#include <stack>
+#include <queue>
+#include <algorithm>
+using namespace std;
+int main()
+{
+    int a;
+    stack<int> sta;
+    while (cin >> a && a) sta.push(a);
+    while (!sta.empty())
+    {
+        a = sta.top();
+        cout << a;
+        sta.pop();
+        if (!sta.empty()) cout << " ";
+    }
+    return 0;
+}
+```
+
+P1739 表达式括号匹配
+
+```c++
+#include <iostream>
+#include <stack>
+#include <queue>
+#include <algorithm>
+using namespace std;
+int main()
+{
+    char a;
+    stack<int> sta;
+    while (cin >> a && a != '@')
+    {
+        if (a == '(') sta.push(1);
+        if (a == ')')
+        {
+            if (!sta.empty()) sta.pop();
+            else
+            {
+                cout << "NO";
+                break;
+            }
+        }
+    }
+    if (sta.empty() && a != ')') cout << "YES";
+    else if(!sta.empty() && a != ')') cout << "NO";
+    return 0;
+}
+```
+
+#### 2022寒假训练赛
+
+*22/12/19第一场*
+
+**总结:**
+
+- 不要被英文吓到,题目内容多不代表题目难,保持耐心和细心才是最重要的
+- 仔细读题,把题读懂再写!
+
+[A - Count Distinct Integers](https://vjudge.net/problem/AtCoder-abc240_b)
+
+```c++
+#include <iostream>
+#include <algorithm>
+#include <set>
+using namespace std;
+int main()
+{
+    int n, a, cnt = 0;
+    cin >> n;
+    set<int> s;
+    for (int i = 1; i <= n; i++)
+    {
+        cin >> a;
+        if (!s.count(a)) cnt++, s.insert(a);
+    }
+    cout << cnt;
+    return 0;
+}
+```
+
+[B - Better Students Are Needed!](https://vjudge.net/problem/AtCoder-abc260_b)
+
+```c++
+#include <iostream>
+#include <algorithm>
+#include <string>
+#include <set>
+#include <map>
+using namespace std;
+struct str
+{
+    int x;
+    int y;
+    int t;
+    int f;
+    int w;
+}scores[1010];
+bool cmp1(str a, str b)
+{
+    if (a.x != b.x)
+        return a.x > b.x;
+    else return a.w < b.w;
+}
+bool cmp2(str a, str b)
+{
+    if (a.y != b.y) return a.y > b.y;
+    else return a.w < b.w;
+}
+bool cmp3(str a, str b)
+{
+    if (a.t != b.t) return a.t > b.t;
+    else return a.w < b.w;
+}
+bool cmp4(str a, str b)
+{
+    return a.w < b.w;
+}
+int n, x, y, z, cnt;
+int main()
+{
+    cin >> n >> x >> y >> z;
+    for (int i = 1; i <= n; i++) cin >> scores[i].x;
+    for (int i = 1; i <= n; i++)
+    {
+        cin >> scores[i].y;
+        scores[i].t = scores[i].x + scores[i].y;
+        scores[i].f = 0;
+        scores[i].w = i;
+    }
+    sort(scores + 1, scores + 1 + n, cmp1);
+    cnt = 0;
+    for (int i = 1; i <= x; i++)
+    {
+        scores[i].f = 1;
+    }
+    sort(scores + 1, scores + 1 + n, cmp2);
+    cnt = 0;
+    for (int i = 1; cnt != y; i++)
+    {
+        if (scores[i].f == 0)
+        {
+            scores[i].f = 1;
+            cnt++;
+        }
+    }
+    sort(scores + 1, scores + 1 + n, cmp3);
+    cnt = 0;
+    for (int i = 1; cnt != z; i++)
+    {
+        if (scores[i].f == 0)
+        {
+            scores[i].f = 1;
+            cnt++;
+        }
+    }
+    sort(scores + 1, scores + 1 + n, cmp4);
+    for (int i = 1; i <= n; i++)
+    {
+        if (scores[i].f) cout << scores[i].w << endl;
+    }
+    return 0;
+}
+//
+#include <stdio.h>
+#include <algorithm>
+#include <vector>
+using namespace std;
+const int N = 1005;
+int a[N], b[N];
+int id[N], vis[N];
+
+bool cmp1(int &t1, int &t2)
+{
+    if (a[t1] != a[t2])
+        return a[t1] > a[t2];
+    return t1 < t2;
+}
+
+bool cmp2(int &t1, int &t2)
+{
+    if (b[t1] != b[t2])
+        return b[t1] > b[t2];
+    return t1 < t2;
+}
+
+bool cmp3(int &t1, int &t2)
+{
+    if (b[t1] + a[t1] != a[t2] + b[t2])
+        return b[t1] + a[t1] > a[t2] + b[t2];
+    return t1 < t2;
+}
+
+int main()
+{
+    int n, x, y, z;
+    vector<int> ve;
+    scanf("%d%d%d%d", &n, &x, &y, &z);
+    for (int i = 1; i <= n; i++)
+        scanf("%d", &a[i]);
+    for (int i = 1; i <= n; i++)
+        scanf("%d", &b[i]);
+    for (int i = 1; i <= n; i++)
+        id[i] = i;
+
+    sort(id + 1, id + 1 + n, cmp1);
+
+    for (int i = 1; i <= n && x; i++)
+    {
+        if (!vis[id[i]])
+        {
+            ve.push_back(id[i]);
+            vis[id[i]] = 1;
+            x--;
+        }
+    }
+
+    sort(id + 1, id + 1 + n, cmp2);
+
+    for (int i = 1; i <= n && y; i++)
+    {
+        if (!vis[id[i]])
+        {
+            ve.push_back(id[i]);
+            vis[id[i]] = 1;
+            y--;
+        }
+    }
+
+    sort(id + 1, id + 1 + n, cmp3);
+
+    for (int i = 1; i <= n && z; i++)
+    {
+        if (!vis[id[i]])
+        {
+            ve.push_back(id[i]);
+            vis[id[i]] = 1;
+            z--;
+        }
+    }
+    sort(ve.begin(), ve.end());
+    for (int i = 0; i < ve.size(); i++)
+        printf("%d\n", ve[i]);
+
+    return 0;
+}
+```
+
+[C - ±1 Operation 2](https://vjudge.net/problem/AtCoder-abc255_d)
+
+前缀和加二分
+
+```c++
+
+#include <iostream>
+#include <algorithm>
+#include <cstring>
+using namespace std;
+#define LL long long
+const int N = 2e5 + 5;
+int n, q;
+LL a[N], b[N], num, sum;
+int main()
+{
+    cin >> n >> q;
+    for (int i = 1; i <= n; i++) cin >> a[i];
+    sort(a + 1, a + 1 + n);
+    for (int i = 1; i <= n; i++) b[i] = a[i] + b[i - 1];
+    for (int i = 1; i <= q; i++)
+    {   
+        sum = 0;
+        cin >> num;
+        LL x = lower_bound(a + 1, a + 1 + n, num) - a;
+        sum = (x - 1) * num - (b[x - 1]) + (b[n] - b[x - 1]) - (n - x + 1) * num;
+        cout << sum << endl;
+    }
+    return 0;
+}
+```
+
+[D - Submask](https://vjudge.net/problem/AtCoder-abc269_c)
+
+列子集
+
+```
+#include <iostream>
+#include <algorithm>
+#include <set>
+using namespace std;
+#define LL long long
+int vis[100], n;
+set<LL> s;
+void dfs(int u, LL x)
+{
+    if (u == n + 1)
+    {
+        s.insert(x);
+        return;
+    }
+    dfs(u + 1, x);  //当前位置不选
+    if (vis[u])     //若为1，则选
+    {
+        x += (1LL << u);
+        dfs(u + 1, x);
+    }
+}
+int main()
+{
+    LL x;
+    cin >> x;
+    int ed = 0;
+    while (x)
+    {
+        vis[ed] = x % 2;
+        x /= 2;
+        ed++;
+    }
+    n = ed - 1;
+    dfs(0, 0);
+    for (auto it = s.begin(); it != s.end(); it++)
+        cout << *it << endl;
+    return 0;
+}
+```
+
+[E - Equal Candies](https://vjudge.net/problem/CodeForces-1676B)
+
+```c++
+#include <iostream>
+#include <algorithm>
+#include <string>
+#include <set>
+#include <map>
+using namespace std;
+int main()
+{
+    int n, nums[1010], cnt, t;
+    for (cin >> t; t--;)
+    {
+        cin >> n;
+        cnt = 0;
+        for (int i = 1; i <= n; i++)
+            cin >> nums[i];
+        sort(nums + 1, nums + 1 + n);
+        if (nums[1] == nums[n])
+            cout << "0\n";
+        else
+        {
+            for (int i = 1; i <= n; i++)
+                cnt += nums[i] - nums[1];
+            cout << cnt << endl;
+        }
+    }
+    return 0;
+}
+```
+
+[F - Spell Check](https://vjudge.net/problem/CodeForces-1722A)
+
+```c++
+#include <iostream>
+#include <algorithm>
+#include <cstring>
+using namespace std;
+int main()
+{
+    int t; cin >> t;
+    while (t--)
+    {
+        int n; cin >> n;
+        string s;
+        cin >> s;
+        sort(s.begin(), s.end());
+        if (s == "Timru") cout << "YES\n";
+        else cout << "NO\n";
+    }
+    return 0;
+}
+```
+
+*22/12/21第二场*
+
+**总结:**
+
+第一还是要读懂题,至少要知道百分之八九十的思路才可以开始写,然后就是知识点的回顾,我似乎有点忘记`STL`的一些知识点了,事实证明不对知识点进行回顾是很难把知识点一直留在脑海的,更别说什么熟练运用,还有就是遇到什么细碎知识点就记起来吧
+
+[A - "atcoder".substr()](https://vjudge.csgrandeur.cn/problem/AtCoder-abc264_a)
+
+```c++
+#include <iostream>
+#include <string>
+using namespace std;
+int main()
+{
+    string s = "atcoder";
+    int l, r;
+    cin >> l >> r;
+    cout << s.substr(l - 1, r - l + 1);
+    return 0;
+}
+```
+
+ [B - NewFolder(1)](https://vjudge.csgrandeur.cn/problem/AtCoder-abc261_c)
+
+```c++
+#include <iostream>
+#include <string>
+#include <map>
+using namespace std;
+map<string, int> ma;
+int main()
+{
+    int n;
+    cin >> n;
+    for (int i = 0; i < n; i++)
+    {
+        string s;
+        cin >> s;
+        if (!ma[s])
+        {
+            cout << s << endl;
+            ma[s]++; 
+        }
+        else
+        {
+            cout << s << "(" << ma[s] << ")" << endl;
+            ma[s]++;
+        }
+    }
+    return 0;
+}
+```
+
+[C - Counting Arrays](https://vjudge.csgrandeur.cn/problem/AtCoder-abc226_b)
+
+getline  与 getchar
+
+不过也可以用 `set<vector<int>>` 直接判重
+
+```c++
+#include <iostream>
+#include <string>
+#include <map>
+using namespace std;
+map<string, int> m;
+int main()
+{
+    int n, cnt = 0;
+    cin >> n;
+    cin.get();
+    for (int i = 0; i < n; i++)
+    {
+        string s;
+        getline(cin, s);
+        if (!m[s]) m[s]++, cnt++;
+    }
+    cout << cnt;
+    return 0;
+}
+```
+
+[D - 激光炸弹](https://vjudge.csgrandeur.cn/problem/洛谷-P2280)
+
+题目中那句边长上的目标不会被摧毁完全是唬人.
+
+```c++
+#include <iostream>
+#include <string>
+#include <map>
+using namespace std;
+int nums[5005][5005];
+int n, m, x, y, s, ans;
+int main()
+{
+    cin >> n >> m;
+    for (int i = 1; i <= n; i++)
+    {
+        cin >> x >> y >> s;
+        nums[++x][++y] = s;
+    }
+    for (int i = 1; i <= 5001; i++)
+        for (int j = 1; j <= 5001; j++)
+            nums[i][j] += nums[i][j - 1] + nums[i - 1][j] - nums[i - 1][j - 1];
+    for (int i = 1; i <= 5001 - m + 1; i++)
+        for (int j = 1; j <= 5001 - m + 1; j++)
+            ans = max(ans, nums[i + m - 1][j + m - 1] - nums[i - 1][j + m - 1] - nums[i + m - 1][j - 1] + nums[i - 1][j - 1]);
+    cout << ans;
+    return 0;
+}
+```
+
+[E - Buy an Integer](https://vjudge.csgrandeur.cn/problem/AtCoder-abc146_c)
+
+二分
+
+```c++
+#include <iostream>
+#include <string>
+#include <map>
+using namespace std;
+#define LL long long 
+LL a, b, x;
+LL check(LL mid)
+{
+    LL ret = mid;
+    int cnt = 0;
+    while (ret)
+    {
+        cnt++;
+        ret /= 10;
+    }
+    if (a * mid + b * cnt > x) return true;
+    else return false;
+}
+int main()
+{
+    cin >> a >> b >> x;
+    LL l = 0, r = 1e9;
+    while (l < r)
+    {
+        LL mid = (l + r + 1) / 2;
+        if (check(mid)) r = mid - 1;
+        else l = mid;
+    }
+    cout << l;
+    return 0;
+}
+```
+
+[F - Full House](https://vjudge.csgrandeur.cn/problem/AtCoder-abc263_a)
+
+```c++
+#include <iostream>
+#include <string>
+#include <map>
+using namespace std;
+int main()
+{
+    map<int, int> m;
+    int a;
+    for (int i = 1; i <= 5; i++)
+    {
+        cin >> a;
+        m[a]++;  
+    }
+    if (m.size() == 2 && (m[a] == 2 || m[a] == 3))
+        cout << "Yes";
+    else cout << "No";
+    return 0;
+}
+```
+
+22/12/23第三场
+
+总结: 理清思路再写题!!! 不然都会是浪费时间!!! 写完每一小块代码最好能浏览检查一下, 特别是代码量多的时候.
+
+A - 语文成绩
+
+```c++
+#include <cstdio>
+#include <cstring>
+#include <iostream>
+#include <algorithm>
+using namespace std;
+int nums[5000010], scores[5000010];
+int n, t, a, b, s, ans = 0x3f3f3f3f;
+int main()
+{
+    cin >> n >> t;
+    for (int i = 1; i <= n; i++)
+        cin >> scores[i];
+    while (t--)
+    {
+        cin >> a >> b >> s;
+        nums[a] += s;
+        nums[b + 1] -= s;
+    }
+    for (int i = 1; i <= n; i++) nums[i] += nums[i - 1];
+    for (int i = 1; i <= n; i++)
+    {
+        scores[i] += nums[i];
+        ans = min(scores[i], ans);
+    }
+    cout << ans;
+    return 0;
+}
+```
+
+B - Do use hexagon grid
+
+```c++
+#include <cstdio>
+#include <cstring>
+#include <iostream>
+#include <algorithm>
+using namespace std;
+int room[2010][2010];
+int n, x, y, cnt;
+int step[6][2] = {{1, 1}, {1, 0}, {0, -1}, {-1, -1}, {-1, 0}, {0, 1}};
+bool check(int m, int n)
+{
+    if (room[m][n] && m >= 0 && m < 2001 && n >= 0 && n < 2001) return true;
+    else return false;
+}
+struct str
+{
+    int a;
+    int b;
+}node[1000];
+void dfs(int m, int n)
+{
+    for (int i = 0; i < 6; i++)
+    {
+        int nx = m + step[i][0];
+        int ny = n + step[i][1];
+        if (check(nx, ny))
+        {
+            room[nx][ny] = 0;
+            dfs(nx, ny);
+        }
+    }
+}
+int main()
+{
+    cin >> n;
+    memset(room, 0, sizeof room);
+    for (int i = 0; i < n; i++)
+    {
+        cin >> x >> y;
+        node[i].a = x + 1000;
+        node[i].b = y + 1000; 
+        room[x + 1000][y + 1000] = 1;
+    }
+    for (int i = 0; i < n; i++)
+    {
+        if (room[node[i].a][node[i].b])
+            cnt++, dfs(node[i].a , node[i].b);
+    }
+    cout << cnt;
+    return 0;
+}
+```
+
+C - Minimum Varied Number
+
+```c++
+#include <iostream>
+using namespace std;
+int num;
+long long ans;
+void solve(int num, int k)
+{
+
+    if (num >= (9 - k) && num)
+    {
+        ans += (9 - k) * pow(10, k);
+        solve(num - (9 - k), k + 1);
+    }
+    else
+    {
+        ans += num * pow(10, k);
+        return;
+    }
+}
+int main()
+{
+    int t;
+    for (scanf("%d", &t); t--; )
+    {
+        ans = 0;
+        cin >> num;
+        solve(num, 0);
+        cout << ans << endl;
+    }
+    return 0;
+}
+```
+
+D - EKO / 砍树
+
+```c++
+#include <cstdio>
+#include <cstring>
+#include <iostream>
+#include <algorithm>
+using namespace std;
+#define LL long long
+LL n, sum, h[1000010];
+bool check(LL x)
+{
+    LL ret = 0;
+    for (int i = 0; i < n; i++)
+        ret += (h[i] - x > 0 ? h[i] - x : 0);
+    if (ret >= sum) return true;
+    else return false;
+}
+int main()
+{
+    cin >> n >> sum;
+    for (int i = 0; i < n; i++) cin >> h[i];
+    LL l = 0, r = 2e9;
+    while (l < r)
+    {
+        LL mid = (r + l + 1) / 2;
+        if (check(mid)) l = mid;
+        else r = mid - 1;
+    }
+    cout << l << endl;
+    return 0;
+}
+```
+
+E - Atilla's Favorite Problem
+
+```c++
+#include <cstdio>
+#include <cstring>
+#include <iostream>
+#include <algorithm>
+using namespace std;
+int n, sz;
+string s;
+int main()
+{
+    cin >> n;
+    while (n--)
+    {
+        cin >> sz;
+        cin >> s;
+        sort(s.begin(), s.end());
+        cout << s[sz - 1] - 96 << endl;
+    }
+    return 0;
+}
+```
+
+F - Belt Conveyor
+
+```c++
+#include <cstdio>
+#include <cstring>
+#include <iostream>
+#include <algorithm>
+using namespace std;
+char room[510][510];
+int h, w, ax, ay;
+int vis[510][510];
+bool check(int x, int y)
+{
+    if (x < 1 || x > h || y > w || y < 1) return false;
+    else return true;
+}
+void move(int x, int y)
+{
+    if (vis[x][y])
+    {
+        ax = 0;
+        return;
+    }
+    vis[x][y] = 1;
+    if (room[x][y] == 'R' && check(x, y + 1))
+        move(x, y + 1);
+    else if (room[x][y] == 'L' && check(x, y - 1))
+        move(x, y - 1);
+    else if (room[x][y] == 'U' && check(x - 1, y))
+        move(x - 1, y);
+    else if (room[x][y] == 'D' && check(x + 1, y))
+        move(x + 1, y);
+    else
+    {
+        ax = x; ay = y;
+        return;
+    }
+}
+int main()
+{
+    cin >> h >> w;
+    for (int i = 1; i <= h; i++)
+        for (int j = 1; j <= w; j++)
+            cin >> room[i][j];
+    move(1, 1);
+    if (ax && ay) cout << ax  << ' ' << ay;
+    else cout << -1;
+    return 0;
+}
+```
+
+22/12/25第四场
+
+总结: 读题做的还行, 面对一些看似简单的题, 不妨多考虑一下反例; 还有就是能力欠缺
+
+[A - Misjudge the Time](https://vjudge.csgrandeur.cn/problem/AtCoder-abc278_b)
+
+```c++
+#include <iostream>
+#include <map>
+#include <algorithm>
+using namespace std;
+int h, m, k;
+bool Judge(int h, int m)
+{
+    int a = h % 10;
+    int b = m / 10;
+    h = h / 10 * 10 + b;
+    m = a * 10 + m % 10;
+    if (h >= 0 && h <= 23 && m >= 0 && m <= 59) return true;
+    else return false;
+}
+int main()
+{   
+    cin >> h >> m;
+    while (1)
+    {
+        if (Judge(h, m))
+        {
+            cout << h << " " << m;
+            break;
+        }
+        m++;
+        if (m == 60) h++, m = 0;
+        if (h == 24) h = 0;
+    }
+    return 0;
+}
+```
+
+[B - 铺设道路](https://vjudge.csgrandeur.cn/problem/洛谷-P5019)
+
+转化为高度，解决一个高度，可以顺带解决其后的单调递减连续子序列，倘若遇到后一个比前一个高的，只需补充高出的那一部分就好了，因为高出的那一部分需要它自己解决，本体的本质就是所有单调递减连续子序列可以看作一个整体解决。
+
+```c++
+#include <iostream>
+#include <cstring>
+#include <queue>
+using namespace std;
+int a[100010];
+int main()
+{
+    int n, ans = 0;
+    cin >> n;
+    for (int i = 1; i <= n; i++) cin >> a[i];
+    for (int i = 2; i <= n; i++) if (a[i] > a[i - 1]) ans += a[i] - a[i - 1];
+    cout << ans + a[1] << endl;
+    return 0;
+}
+```
+
+[C - Cypher](https://vjudge.csgrandeur.cn/problem/CodeForces-1703C)
+
+```c++
+#include <iostream>
+#include <map>
+#include <algorithm>
+using namespace std;
+int t, n, m, a[105], step, ans[105];
+char c;
+int main()
+{
+    for (cin >> t; t--; )
+    {
+        cin >> n;
+        for (int i = 0; i < n; i++) cin >> a[i];
+        for (int i = 0; i < n; i++)
+        {
+            cin >> m;
+            step = 0;
+            while (cin.get(c) && c != '\n')
+            {
+                if (c == 'U') step--;
+                else step++;
+            }
+            ans[i] = step + a[i] - 1 + 20;
+        }
+        for (int i = 0; i < n; i++)
+            printf(" %d" + !i, ans[i] % 10);
+        printf("\n");
+    }
+    return 0;
+}
+
+```
+
+[D - Prime Path](https://vjudge.csgrandeur.cn/problem/POJ-3126)
+
+```c++
+#include <cstdio>
+#include <cstring>
+#include <cstdlib>
+#include <algorithm>
+#include <queue>
+using namespace std;
+const int N = 1e5 + 10;
+int step[N], a, b, t, ans;
+bool IsPrime[N];
+void SetPrime()
+{
+    memset(IsPrime, 1, sizeof(IsPrime));
+    IsPrime[0] = IsPrime[1] = false;
+    for (int i = 2; i * i < N; i++)
+    {
+        if (!IsPrime[i])
+            continue;
+        for (int j = i * i; j < N; j += i)
+            IsPrime[j] = false;
+    }
+}
+int BFS()
+{
+    memset(step, 0, sizeof(step));
+    queue<int> q;
+    q.push(a);
+    step[a] = 1;
+    while (!q.empty())
+    {
+        int now = q.front();
+        q.pop();
+        if (now == b)
+            return step[now] - 1;
+        for (int i = 0; i < 4; i++)
+        {
+            for (int j = 0; j < 10; j++)
+            {
+                if (!j && i == 3)
+                    continue;
+                int nex = now, tmp = j;
+                for (int k = 0; k < i; k++)
+                    nex /= 10;
+                nex %= 10;
+                for (int k = 0; k < i; k++)
+                    nex *= 10, tmp *= 10;
+                nex = now - nex + tmp;
+                if (!step[nex] && IsPrime[nex])
+                {
+                    q.push(nex);
+                    step[nex] = step[now] + 1;
+                }
+            }
+        }
+    }
+    return -1;
+}
+int main()
+{
+    SetPrime();
+    for (scanf("%d", &t); t--;)
+    {
+        scanf("%d%d", &a, &b);
+        if ((ans = BFS()) == -1)
+            printf("Impossible\n");
+        else
+            printf("%d\n", ans);
+    }
+    return 0;
+}
+```
+
+[E - Ladder Takahashi](https://vjudge.csgrandeur.cn/problem/AtCoder-abc277_c)
+
+```
+
+```
+
+[F - Stripes](https://vjudge.csgrandeur.cn/problem/CodeForces-1742C)
+
+```c++
+#include <iostream>
+using namespace std;
+int n, a, b;
+char room[10][10], ans;
+int main()
+{
+    for (cin >> n; n--; )
+    {
+        // cin.get();
+        // cin.get();
+        for (int i = 0; i < 8; i++) cin >> room[i];
+        for (int i = 0; i < 8; i++)
+            {
+                char ret = room[i][0];
+                if (ret == '.') continue;
+                for (int j = 0; j < 8; j++)
+                {
+                    if (room[i][j] != ret) break;
+                    if (j == 7 && ret == 'R') ans = ret;
+                }
+            }
+        for (int i = 0; i < 8; i++)
+            {
+                char ret = room[0][i];
+                if (ret == '.') continue;
+                for (int j = 0; j < 8; j++)
+                {
+                    if (room[j][i] != ret) break;
+                    if (j == 7 && ret == 'B') ans = ret;
+                }
+            }
+        cout << ans << endl;
+    }
+    return 0;
+}
+```
+
+22/12/29 第五场
+
+总结：你缺乏对细节的关注，太过想当然；写题前养成先看一遍题单的习惯。
+
+[A - Function Run Fun](https://vjudge.csgrandeur.cn/problem/POJ-1579)
+
+```c++
+#include <algorithm>
+#include <iostream>
+using namespace std;
+int a, b, c;
+int room[30][30][30];
+int cal(int x, int y, int z)
+{
+    if (x <= 0 || y <= 0 || z <= 0) return 1;
+    else if (x > 20 || y > 20 || z > 20) return cal(20, 20, 20);
+    else if (room[x][y][z]) return room[x][y][z];
+    else if (a < b && b < c) return room[x][y][z] = cal(x, y, z - 1) + cal(x, y - 1, z - 1) - cal(x, y - 1, z);
+    else return room[x][y][z] = cal(x - 1, y, z) + cal(x - 1, y - 1, z) + cal(x - 1, y, z - 1) - cal(x - 1, y - 1, z - 1);
+}
+int main()
+{
+    ios::sync_with_stdio(false);
+    cin.tie(0);
+    while (cin >> a >> b >> c)
+    {
+        if (a == -1 && b == -1 && c == -1) break;
+        printf("w(%d, %d, %d) = %d\n", a, b, c, cal(a, b, c));
+    }
+    return 0;
+}
+```
+
+ [B - Inversion Graph](https://vjudge.csgrandeur.cn/problem/CodeForces-1638C)
+
+```c++
+#include <algorithm>
+#include <iostream>
+using namespace std;
+int t, n, a, ans, maxn;
+int main()
+{
+    cin >> t;
+    while (t--)
+    {
+        cin >> n;
+        maxn = 0, ans = 0;
+        for (int i = 1; i <= n; i++)
+        {
+            cin >> a;
+            maxn = max(maxn, a);
+            if (maxn == i) ans++;
+        }
+        cout << ans << endl;
+    }
+    return 0;
+}
+```
+
+[C - 村村通](https://vjudge.csgrandeur.cn/problem/洛谷-P1536)
+
+```c++
+#include <algorithm>
+#include <iostream>
+#include <set>
+using namespace std;
+int n, m, s[1010], x, y;
+void init_set()
+{
+    for (int i = 1; i <= 1010; i++) s[i] = i;
+}
+int find_set(int x)
+{
+    if (s[x] != x) s[x] = find_set(s[x]);
+    return s[x]; 
+}
+void merge_set(int x, int y)
+{
+    x = find_set(x); y = find_set(y);
+    if (x != y) s[x] = s[y];
+}
+int main()
+{
+    while (cin >> n)
+    {
+        int ans = 0;
+        set<int> se;
+        if (!n) break;
+        init_set();
+        cin >> m;
+        for (int i = 0; i < m; i++)
+        {
+            cin >> x >> y;
+            merge_set(x, y);
+        }
+        for (int i = 1; i <= n; i++)
+        {
+            find_set(i);
+            if (!se.count(s[i])) se.insert(s[i]);
+        }
+        ans = se.size() - 1;
+        cout << ans << endl;
+    }
+}
+```
+
+[D - Caesar's Legions](https://vjudge.csgrandeur.cn/problem/CodeForces-118D)
+
+dp ？
+
+```c++
+#include <cstdio>
+#include <cstring>
+#include <iostream>
+#include <algorithm>
+#define INF 0x3f3f3f3f
+#define MOD 100000000
+using namespace std;
+typedef long long LL;
+
+int N1, N2, K1, K2;
+const int maxn = 110;
+int dp[maxn][maxn][2];
+
+int main() {
+    scanf("%d%d%d%d", &N1, &N2, &K1, &K2);
+    for (int i = 0; i <= K1; i++) dp[i][0][0] = 1;
+    for (int i = 0; i <= K2; i++) dp[0][i][1] = 1;
+    for (int i = 1; i <= N1; i++) {
+        for (int j = 1; j <= N2; j++) {
+            for (int k = 1; k <= min(i, K1); k++) {
+                dp[i][j][0] = (dp[i][j][0] + dp[i - k][j][1]) % MOD;
+            }
+            for (int k = 1; k <= min(j, K2); k++) {
+                dp[i][j][1] = (dp[i][j][1] + dp[i][j - k][0]) % MOD;
+            }
+        }
+    }
+    int ans = (dp[N1][N2][0] + dp[N1][N2][1]) % MOD;
+    printf("%d\n", ans);
+
+    return 0;
+}
+
+//乱写？
+#include <algorithm>
+#include <iostream>
+#include <stack>
+#include <string>
+#include <set>
+#include <map>
+using namespace std;
+int n1, n2, k1, k2, ans;
+map<string, bool> m;
+string s, f1, f2, ret;
+void dfs(string str)
+{
+    if (str.find(f1) != str.npos || str.find(f2) != str.npos) return;
+    if (str.size() == n1 + n2)
+    {
+        cout << str << endl;
+        ans++;
+        return;
+    }
+    for (int i = 0; i < 2; i++)
+    {
+        str += ret[i];
+        dfs(str);
+    }
+}
+int main()
+{
+    cin >> n1 >> n2 >> k1 >> k2;
+    f1.append(k1 + 1, '1');
+    f2.append(k2 + 1, '2');
+    ret.append("12");
+    string tmp;
+    dfs(tmp);
+    cout << ans;
+    return 0;
+}
+```
+
+ [E - pb的游戏（1）](https://vjudge.csgrandeur.cn/problem/洛谷-P3150)
+
+```c++
+#include <algorithm>
+#include <iostream>
+using namespace std;
+int main()
+{
+    int t, a;
+    for (cin >> t; t--; )
+    {
+        cin >> a;
+        if (a % 2) cout << "zs wins" << endl;
+        else cout << "pb wins" << endl;
+    }
+    return 0;
+}
+```
+
+[F - 超级玛丽游戏](https://vjudge.csgrandeur.cn/problem/洛谷-P1000)
+
+```c++
+#include <algorithm>
+#include <iostream>
+using namespace std;
+int main()
+{
+    printf(
+    "                ********\n"
+    "               ************\n"
+    "               ####....#.\n"
+    "             #..###.....##....\n"
+    "             ###.......######              ###            ###\n"
+    "                ...........               #...#          #...#\n"
+    "               ##*#######                 #.#.#          #.#.#\n"
+    "            ####*******######             #.#.#          #.#.#\n"
+    "           ...#***.****.*###....          #...#          #...#\n"
+    "           ....**********##.....           ###            ###\n"
+    "           ....****    *****....\n"
+    "             ####        ####\n"
+    "           ######        ######\n"
+    "##############################################################\n"
+    "#...#......#.##...#......#.##...#......#.##------------------#\n"
+    "###########################################------------------#\n"
+    "#..#....#....##..#....#....##..#....#....#####################\n"
+    "##########################################    #----------#\n"
+    "#.....#......##.....#......##.....#......#    #----------#\n"
+    "##########################################    #----------#\n"
+    "#.#..#....#..##.#..#....#..##.#..#....#..#    #----------#\n"
+    "##########################################    ############"
+    );
+    return 0;
+}
+```
+
+23/1/2 第五场
+
+总结: 题目没有理解好, 递归细节也没有做好, 而且学过的东西都不能学会用
+
+A - At Most 3 (Judge ver.)
+
+```c++
+#include <algorithm>
+#include <iostream>
+using namespace std;
+int n, w, ans;
+int a[310];
+set<int> s;
+void dfs(int begin, int sum, int tot)
+{
+    if (tot > 4 || sum > w) return;
+    if (tot > 1)
+        if (!s.count(sum)) s.insert(sum), ans++;
+    for (int i = begin; i <= n; i++)
+        dfs(i + 1, sum + a[i], tot + 1);
+}
+int main()
+{
+    cin >> n >> w;
+    for (int i = 1; i <= n; i++) cin >> a[i];
+    dfs(1, 0, 1);
+    cout << ans;
+    return 0;
+}
+```
+
+B - Palindrome
+
+最长公共子序列
+
+```c++
+#include <algorithm>
+#include <iostream>
+using namespace std;
+int n;
+char a[5010], b[5010];
+int dp[2][5010];
+int main()
+{
+    cin >> n >> a;
+    for (int i = 0; i < n; i++) b[i] = a[n - 1 - i];
+    int now = 0, old = 1;
+    for (int i = 0; i < n; i++)
+    {
+        swap(now, old);
+        for (int j = 0; j < n; j++)
+            if (a[i] == b[j]) dp[now][j] = dp[old][j - 1] + 1;
+            else dp[now][j] = max(dp[old][j], dp[now][j - 1]);
+    }
+    cout << n - dp[now][n - 1] << endl;
+    return 0;
+}
+```
+
+C - Cow Bowling
+
+```c++
+#include <algorithm>
+#include <iostream>
+using namespace std;
+int nums[400][400];
+int ans, n;
+int dp[400];
+int main()
+{
+    cin >> n;
+    for (int i = 1; i <= n; i++)
+        for (int j = 1; j <= i; j++)
+            cin >> nums[i][j];
+    for (int i = 1; i <= n; i++)
+        for (int j = i; j >= 1; j--)
+            {
+                dp[j] = max(dp[j] + nums[i][j], dp[j - 1] + nums[i][j]);
+                ans = max(ans, dp[j]);
+            }
+    cout << ans << endl;
+    return 0;
+}
+```
+
+D - ASCII code
+
+```c++
+#include <algorithm>
+#include <iostream>
+using namespace std;
+int n;
+int main()
+{
+    cin >> n;
+    printf("%c", n);
+    return 0;
+}
+```
+
+E - Charm Bracelet
+
+```c++
+#include <algorithm>
+#include <iostream>
+using namespace std;
+int n, m;
+int dp[13000];
+int w[3500], c[3500];
+int main()
+{
+    cin >> n >> m;
+    for (int i = 1; i <= n; i++) cin >> c[i] >> w[i];
+    for (int i = 1; i <= n; i++) 
+        for (int j = m; j >= c[i]; j--)
+            dp[j] = max(dp[j], dp[j - c[i]] + w[i]);
+    cout << dp[m];
+    return 0;
+}
+```
+
+F - 小A点菜
+
+用暴搜直接超时, 必须使用dp
+
+```c++
+#include <algorithm>
+#include <iostream>
+using namespace std;
+int n, m;
+int a[105];
+int dp[10010];
+int main()
+{
+    ios::sync_with_stdio(false);
+    cin.tie(0);
+    cin >> n >> m;
+    dp[0] = 1;
+    for (int i = 1; i <= n; i++) cin >> a[i];
+    for (int i = 1; i <= n; i++)
+        for (int j = m; j >= a[i]; j--)
+            dp[j] += dp[j - a[i]];
+    cout << dp[m];
+    return 0;
+}
+```
+
+23/1/5 结训赛
+
+总结：失误太多，很多细节没处理好，比如说数组出界直接导致WA，函数名写错，思路没有想清楚，以及思考时不能很专注地一步到位，教训就是，出bug时，在检查时就认认真真地检查一次，争取一次找出问题，这比粗略的检查十次都有用，还有就是要顺正正确的思路去思考，保持头脑清晰。
+
+A ([1461](https://soj.csgrandeur.cn/csgoj/problemset/problem?pid=1461)) : 秘密关系
+
+```c++
+#include <iostream>
+#include <algorithm>
+#include <map>
+#include <set>
+using namespace std;
+int main()
+{
+    ios::sync_with_stdio(false);
+    cin.tie(0);
+    map<int, set<int>> gra;
+    int n;
+    cin >> n;
+    while (n--)
+    {
+        int a, b;
+        cin >> a >> b;
+        gra[a].insert(b);
+        gra[a].insert(a);
+    }
+    cin >> n;
+    while (n--)
+    {
+        int x;
+        cin >> x;
+        int ans = 0;
+        if (gra.find(x) != gra.end()) ans = gra[x].size();
+        cout << ans << endl;
+    }
+    return 0;
+}
+```
+
+D ([1464](https://soj.csgrandeur.cn/csgoj/problemset/problem?pid=1464)) : 小组作业
+
+数组越界直接导致wa，吸取教训！
+
+```c++
+#include <iostream>
+#include <algorithm>
+#include <vector>
+#include <cstring>
+#include <map>
+#include <set>
+using namespace std;
+const int maxn = 1e7 + 10;
+int n, m, a, b, cnt;
+int s[maxn];
+bool flag[maxn];
+int find_set(int x)
+{
+    if (x != s[x]) s[x] = find_set(s[x]);
+    return s[x];
+}
+void add_merge(int x, int y)
+{
+    int e1 = find_set(x);
+    int e2 = find_set(y);
+    if ((e1 != e2) && (!flag[x] || !flag[y]))
+    {
+        cnt--;
+        s[e1] = s[e2];
+        flag[x] = 1;
+        flag[y] = 1;
+    }
+}
+int main()
+{
+    cin >> n >> m;
+    cnt = n;
+    for (int i = 0; i < maxn; i++) s[i] = i;
+    for (int i = 1; i <= m; i++)
+    {
+        cin >> a >> b;
+        add_merge(a, b);
+    }
+    cout << cnt;
+    return 0;
+}
+```
+
+G ([1467](https://soj.csgrandeur.cn/csgoj/problemset/problem?pid=1467)) : 没有题面的神秘题目-2
+
+```c++
+#include <iostream>
+#include <algorithm>
+using namespace std;
+using LL = long long;
+int main()
+{
+    ios::sync_with_stdio(false);
+    cin.tie(0);
+    LL n; 
+    while (cin >> n)
+    {
+        LL ans = n;
+        n -= 1;
+        for (LL l = 1, r; l <= n; l = r + 1)
+        {
+            r = n / (n / l);
+            ans += (n / l) * (r - l + 1);
+        }
+        cout << ans << endl;
+    }
+    return 0;
+}
+```
+
+K ([1471](https://soj.csgrandeur.cn/csgoj/problemset/problem?pid=1471)) : Coupon Collector’s Problem
+
+**数学期望公式**  $\sum_{i=1}^{n}{\frac{n}{i}}$ 
+
+```c++
+#include <iostream>
+#include <algorithm>
+using namespace std;
+using LL = long long;
+int main()
+{
+    ios::sync_with_stdio(false);
+    cin.tie(0);
+    double n;
+    cin >> n;
+    double ans = 0;
+    for (double i = 1; i <= n; i++)
+        ans += 1.0 * n / i;
+    printf("%.6f\n", ans);
+    return 0;
+}
+```
+
+L ([1472](https://soj.csgrandeur.cn/csgoj/problemset/problem?pid=1472)) : Blover的花店
+
+```c++
+#include <iostream>
+#include <algorithm>
+#include <set>
+using namespace std;
+using LL = long long;
+const int maxn = 1e5 + 10;
+int a[maxn], n;
+int main()
+{
+    ios::sync_with_stdio(false);
+    cin.tie(0);
+    set<int> se;
+    cin >> n;
+    for (int i = 1; i <= n; i++) cin >> a[i];
+    int l = 1, r = 1, ans = 0;
+    while (r <= n)
+    {
+        if (se.find(a[r]) == se.end()) se.insert(a[r++]);
+        else se.erase(se.find(a[l++]));
+        ans = max(ans, r - l);
+    }
+    cout << ans;
+    return 0;
+}
+```
+
+2021GDCPC广东省大学生程序设计竞赛(重现赛)
+
+[A-An Easy Problem](https://ac.nowcoder.com/acm/contest/50921/A)
+
+特别注意类型转换
+
+```c++
+//
+#include <iostream>
+#include <algorithm>
+#include <queue>
+using namespace std;
+int n, m, k;
+int main()
+{
+    cin >> n >> m >> k;
+    priority_queue<pair<long long, int>> q;
+    for (int i = 1; i <= n; i++) q.push(pair(1LL * i * m, i));
+    while (--k)
+    {
+        pair<long long, int> tmp = q.top(); q.pop();
+        tmp.first -= 1LL * tmp.second;
+        q.push(tmp);
+    }
+    cout << q.top().first << endl;
+    return 0;
+}
+
+
+//二分法
+#include <iostream>
+#include <algorithm>
+using namespace std;
+int n, m;
+long long k;
+bool check(long long x)  //<= mid的有几个数
+{
+    long long ans = 0;
+    for (int i = 1; i <= n; i++)  //遍历每行
+    {
+        long long t = x / i;
+        if (t > m) ans += m;
+        else ans += t;
+    }
+    return ans >= k;
+}
+void find_bin()
+{
+    long long l = 1, r = 1LL * n * m;
+    k = 1LL * n * m - k + 1;  //第k大就是第n*m-k+1小
+    while (l < r)
+    {
+        long long mid = (l + r) / 2;
+        if (check(mid)) r = mid;
+        else l = mid + 1;
+    }
+    cout << l << endl;
+}
+int main()
+{
+    cin >> n >> m >> k;
+    find_bin();
+    return 0;
+}
+```
+
+[B-Byfibonacci](https://ac.nowcoder.com/acm/contest/50921/B)
+
+```c++
+//Failed Trying
+#include <iostream>
+#include <algorithm>
+#include <cstring>
+#include <cmath>
+#include <queue>
+#include <map>
+using namespace std;
+const int INF = 0x3f3f3f3f;
+const int N = 2e5 + 10;
+long long t, sum, ret;
+map<int, int> fibo;
+void set_fibo()
+{
+    fibo[1] = 1; fibo[2] = 1;
+    int a = 1, b = 2;
+    while (b <= 1e7)
+    {
+        int c = a + b;
+        fibo[c] = 1;
+        a = b; b = c;
+    }
+}
+void val()
+{
+    int n; cin >> n;
+    sum = 0; ret = n;
+    queue<int> q;
+    q.push(n);
+    while (q.size())
+    {
+        int tmp = q.front(); q.pop();
+        ret /= tmp;
+        if (tmp == 1) continue;
+        if (fibo[tmp]) fibo[tmp] = 1;
+        for (int i = 1; i <= tmp; i++)
+        {
+            if (fibo[i] == 1 && fibo[tmp - i] == 1)
+            {
+                q.push(i); q.push(tmp - i);
+                fibo[i] = fibo[tmp - i] = 2;
+                ret *= (1LL * i * (tmp - i));
+                sum += ret % 998244353;
+                break;             
+            }
+        }
+    }
+}
+int main()
+{
+    set_fibo();
+    for (cin >> t; t--; )
+    {
+        val();
+        cout << sum % 998244353 << endl;
+    }
+    return 0;
+}
+```
+
+[L-League of Legends](https://ac.nowcoder.com/acm/contest/50921/L)
+
+数学期望计算
+
+```c++
+#include <iostream>
+using namespace std;
+int main()
+{
+    cout << "3.5";
+    return 0;
+}
+```
+
+
+
+#### Atcoder
+
+23/1/7
+
+22/1/14
+
+[D - Change Usernames (atcoder.jp)](https://atcoder.jp/contests/abc285/tasks/abc285_d)
+
+```c++
+#include <iostream>
+#include <algorithm>
+#include <queue>
+#include <map>
+using namespace std;
+const int N = 2e5 + 10;
+int n, cnt;
+map<string, int> m;
+vector<int> e[N];
+int indegree[N];
+int main()
+{
+    cin >> n;
+    for (int i = 1; i <= n; i++)
+    {
+        string a, b;
+        cin >> a >> b;
+        int u, v;
+        if (m[a]) u = m[a];
+        else u = m[a] = ++cnt;
+        if (m[b]) u = m[b];
+        else v = m[b] = ++cnt;
+        e[u].push_back(v);
+        indegree[v]++
+    }
+    priority_queue<int, vector<int>, greater<int>> q;
+    int num = cnt;
+    for (int i = 1; i <= cnt; i++)
+        if (!indegree[i]) num--, q.push(i);
+    while (q.size())
+    {
+        int tmp = q.top(); q.pop();
+        for (int i: e[tmp])
+        {
+            indegree[i]--;
+            if (!indegree[i]) num--, q.push(i);
+        }
+    }
+    if (num) cout << "Yes";
+    else cout << "No";
+}
+```
+
+
 

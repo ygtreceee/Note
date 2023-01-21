@@ -4644,6 +4644,12 @@ int main()
 }
 ```
 
+[D-Double](https://ac.nowcoder.com/acm/contest/50921/D)
+
+```
+
+```
+
 [L-League of Legends](https://ac.nowcoder.com/acm/contest/50921/L)
 
 数学期望计算

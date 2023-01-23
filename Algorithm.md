@@ -8374,6 +8374,83 @@ int main()
 区间DP的复杂度大于O(n^2), 一般为O(n^3)
 ```
 
+石子合并
+
+
+```c++
+//定义dp[i][j]为合并第i堆到第j堆的最小花费
+//dp[i][j] = min(dp[i][j], dp[i][k] + dp[k + 1][j] + w[i][j]);
+//
+for (int i = 1; i <= n; i++) dp[i][i] = 0;   //n为石子堆数, 初始化
+for (int j = 2; j <= n; j++)
+    for (int i = j - 1; j >= 1; j--)
+    {
+        dp[i][j] = INF;
+        for (int k = i; k < j; k++)
+        	dp[i][j] = min(dp[i][j], dp[i][k] + dp[k + i] + w[i][j]);
+    }
+
+//
+
+for (int i = 1; i <= n; i++)
+for (int len = 2; len <= n; len++)
+	for (int i = 1; i <= n - len + 1; i++)
+    {
+        int j = i + len - 1;
+        dp[i][j] = INF;
+        for (int k = i; k < j; k++)
+            dp[i][j] = min(dp[i][j], dp[i][k] + dp[k + 1][j] + w[i][j]);
+	}
+```
+
+HDU 2476
+
+```c++
+#include <iostream>
+#include <algorithm>
+const int inf = 0x3f3f3f3f;
+using namespace std;
+char A[105], B[105];
+int dp[105][105];
+void Solve()
+{
+    while (~scanf("%s%s", A + 1, B + 1))
+    {
+        int n = strlen(A + 1);
+        for (int i = 1; i <= n; i++) dp[i][i] = 1;
+        for (int len = 2; len <= n; len++)
+            for (int i = 1; i <= n - len + 1; i++)
+            {
+                int j = i + len - 1;
+                dp[i][j] = inf;
+                if (B[i] = B[j]) dp[i][j] = dp[i - 1][j];
+                else
+                    for (int k = i; k < j; k++)
+                        dp[i][j] = min(dp[i][j], dp[i][k] + dp[k + 1][j]);
+            }
+        for (int j = 1; j <= n; j++)
+        {
+            if (A[j] == B[j]) dp[1][j] = dp[1][j - 1];
+            else
+            {
+                for (int k = 1; k < j; k++)
+                    dp[1][j] = min(dp[1][j], dp[1][k] + dp[k + 1][j]);
+            }
+        }
+        cout << dp[1][n] << endl;
+    }
+}
+int main()
+{
+    ios::sync_with_stdio(false);
+    cin.tie();
+        Solve();
+    return 0;
+}
+```
+
+
+
 
 
 ## 数论和线性代数
@@ -9407,6 +9484,75 @@ int main()
                 if (!d[i][j] && !d[j][i]) tot++;
         cout << tot << endl;
     }
+    return 0;
+}
+```
+
+[E - Souvenir (atcoder.jp)](https://atcoder.jp/contests/abc286/tasks/abc286_e)
+
+Floyd, 在中转最小的情况下再考虑最大值路径, 使用`pair<int, long long> dp[N][N]`
+
+```c++
+#include <iostream>
+#include <algorithm>
+#include <cstring>
+#include <cmath>
+#include <vector>
+#include <queue>
+#include <map>
+typedef long long LL;
+const int N = 55;
+const long long INF = 0x3f3f3f3f3f3f3f3fLL;
+const long long inf = 0x3f3f3f3f;
+using namespace std;
+
+int n;
+int a[310], graph[310][310];
+string s[310];
+pair<LL, LL> dp[310][310];
+void Floyd()
+{
+    for (int k = 1; k <= n; k++)
+        for (int i = 1; i <= n; i++)
+            for (int j = 1; j <= n; j++)
+            {
+                if (dp[i][j].first == dp[i][k].first + dp[k][j].first)
+                    dp[i][j].second = max(dp[i][j].second, dp[i][k].second + dp[k][j].second - a[k]);
+                else if (dp[i][j].first > dp[i][k].first + dp[k][j].first)
+                {
+                    dp[i][j].first = dp[i][k].first + dp[k][j].first;
+                    dp[i][j].second = dp[i][k].second + dp[k][j].second - a[k];
+                }
+            }
+}
+void Solve()
+{
+    cin >> n;
+    for (int i = 1; i <= n; i++) cin >> a[i];
+    for (int i = 1; i <= n; i++) cin >> s[i], s[i] = " " + s[i];
+    for (int i = 1; i <= n; i++) 
+        for (int j = 1; j <= n; j++)
+            {
+                if (i == j) dp[i][j].first = 0, dp[i][j].second = a[i];
+                else if (s[i][j] == 'Y') dp[i][j].first = 1, dp[i][j].second = a[i] + a[j];
+                else dp[i][j].first = inf, dp[i][j].second = 0;
+            }
+    Floyd();
+    cin >> n;
+    for (int i = 1; i <= n; i++)
+    {
+        int x, y; cin >> x >> y;
+        if (dp[x][y].first == inf) cout << "Impossible" << endl;
+        else cout << dp[x][y].first << " " << dp[x][y].second << endl;
+    }
+}
+int main()
+{
+    ios::sync_with_stdio(false);
+    cin.tie();
+    // int t;
+    // for (cin >> t; t--; )
+        Solve();
     return 0;
 }
 ```

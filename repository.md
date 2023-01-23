@@ -4668,10 +4668,6 @@ int main()
 
 #### Atcoder
 
-23/1/7
-
-22/1/14
-
 [D - Change Usernames (atcoder.jp)](https://atcoder.jp/contests/abc285/tasks/abc285_d)
 
 ```c++
@@ -4718,5 +4714,120 @@ int main()
 }
 ```
 
+[C - Rotate and Palindrome (atcoder.jp)](https://atcoder.jp/contests/abc286/tasks/abc286_c)
 
+只有调换和修改的操作, 调换直接双倍字符串遍历即可, 修改直接两边比较
 
+```c++
+#include <iostream>
+#include <algorithm>
+#include <cstring>
+#include <cmath>
+#include <vector>
+#include <queue>
+#include <map>
+typedef long long LL;
+const int N = 55;
+const long long INF = 0x3f3f3f3f3f3f3f3fLL;
+using namespace std;
+
+void Solve()
+{
+    int n; LL a, b;
+    cin >> n >> a >> b;
+    string s; cin >> s;
+    s = s + s;
+    LL ans = INF;
+    for (int i = 0; i < n; i++)
+    {
+        LL sum = a * i;
+        for (int j = 0; j < n / 2; j++)
+        {
+            int le = j + i; 
+            int ri = n - 1 - j + i;
+            if (s[le] != s[ri]) sum += b;
+        }
+        ans = ans > sum ? sum : ans;
+    }
+    cout << ans << endl;
+    return;
+}
+int main()
+{
+    ios::sync_with_stdio(false);
+    cin.tie();
+    // int t;
+    // for (cin >> t; t--; )
+        Solve();
+    return 0;
+}
+```
+
+[E - Souvenir (atcoder.jp)](https://atcoder.jp/contests/abc286/tasks/abc286_e)
+
+Floyd, 在中转最小的情况下再考虑最大值路径, 使用`pair<int, long long> dp[N][N]`
+
+```c++
+#include <iostream>
+#include <algorithm>
+#include <cstring>
+#include <cmath>
+#include <vector>
+#include <queue>
+#include <map>
+typedef long long LL;
+const int N = 55;
+const long long INF = 0x3f3f3f3f3f3f3f3fLL;
+const long long inf = 0x3f3f3f3f;
+using namespace std;
+
+int n;
+int a[310], graph[310][310];
+string s[310];
+pair<LL, LL> dp[310][310];
+void Floyd()
+{
+    for (int k = 1; k <= n; k++)
+        for (int i = 1; i <= n; i++)
+            for (int j = 1; j <= n; j++)
+            {
+                if (dp[i][j].first == dp[i][k].first + dp[k][j].first)
+                    dp[i][j].second = max(dp[i][j].second, dp[i][k].second + dp[k][j].second - a[k]);
+                else if (dp[i][j].first > dp[i][k].first + dp[k][j].first)
+                {
+                    dp[i][j].first = dp[i][k].first + dp[k][j].first;
+                    dp[i][j].second = dp[i][k].second + dp[k][j].second - a[k];
+                }
+            }
+}
+void Solve()
+{
+    cin >> n;
+    for (int i = 1; i <= n; i++) cin >> a[i];
+    for (int i = 1; i <= n; i++) cin >> s[i], s[i] = " " + s[i];
+    for (int i = 1; i <= n; i++) 
+        for (int j = 1; j <= n; j++)
+            {
+                if (i == j) dp[i][j].first = 0, dp[i][j].second = a[i];
+                else if (s[i][j] == 'Y') dp[i][j].first = 1, dp[i][j].second = a[i] + a[j];
+                else dp[i][j].first = inf, dp[i][j].second = 0;
+            }
+    Floyd();
+    cin >> n;
+    for (int i = 1; i <= n; i++)
+    {
+        int x, y; cin >> x >> y;
+        if (dp[x][y].first == inf) cout << "Impossible" << endl;
+        else cout << dp[x][y].first << " " << dp[x][y].second << endl;
+    }
+}
+int main()
+{
+    ios::sync_with_stdio(false);
+    cin.tie();
+    // int t;
+    // for (cin >> t; t--; )
+        Solve();
+    return 0;
+}
+```

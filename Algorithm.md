@@ -6314,6 +6314,160 @@ int main()
 }
 ```
 
+#### 树状数组
+
+```
+经典应用: 区间修改+单调查询, 区间修改+区间查询, 二维区间修改+区间查询, 区间最值
+树状数组(Binary Indexed Tree, BIT)是利用数的二进制特征进行检索的一种树状结构
+
+lowbit(x)
+lowbit(x) = x&(-x), 功能是找到x的二进制数的最后一个1, 其原理是利用了负数的补码表示, 补码是原码取反加1, 令m = lowbit(x), tree[x]的值是把ax和她前面的的m个数相加的结果, 如lowbit(6) = 2, 则tree[6] = a5 + a6
+
+tree[x]是通过lowbit()计算出的树状数组, 她能够以二分的复杂度存储一个数列的数据, 具体地, tree[x]中存储的是区间[x - lowbit(x) + 1, x]中每个数的和
+```
+
+```C++
+//简单应用"单点修改+区间查询"
+//复杂度都为O(logn)
+#include <bits/stdc++.h>
+using namespace std;
+const int N = 1000;
+#define lowbit(x) ((x)&-(x))
+int tree[N];
+void update(int x, int d)   //单点修改, 修改元素a[x]. a[x] = a[x] + d;
+{
+    while (x <= N)
+    {
+        tree[x] += d;
+        x += lowbit(x);
+    }
+} 
+int sum(int x)             //查询前缀和, 返回前缀和sum = a[1] + a[2] + ... + a[x]
+{
+    int ans = 0;
+    while (x > 0)
+    {
+        ans += tree[x];
+        x -= lowbie(x);
+	}
+    return ans;
+}
+int a[11] = {0, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13};   //注意a[0]不用
+int main()
+{
+    for (int i = 1; i <= 10; i++) update(i, a[i]);  //初始化计算tree[]数组
+    cout << "old: [5, 8] = " << sum(8) - sum(4) << endl;  //查询
+    update(5, 100);                                       //修改
+    cout << "now: [5, 8] = " << sum(8) - sum(4) << endl;
+    return 0;
+}
+```
+
+HDU 1556
+
+```c++
+#include <iostream>
+#include <algorithm>
+#include <cstring>
+using namespace std;
+#define lowbit(x) ((x) & -(x))
+const int N = 100010;
+int tree[N];
+void update(int x, int d)
+{
+    while (x <= N)
+    {
+        tree[x] += d;
+        x += lowbit(x);
+    }
+}
+int sum(int x)
+{
+    int ans = 0;
+    while (x > 0)
+    {
+        ans += tree[x];
+        x -= lowbit(x);
+    }
+    return ans;
+}
+int main()
+{
+    int n;
+    while (~scanf("%d", &n))
+    {
+        memset(tree, 0, sizeof tree);
+        for (int i = 1; i <= n; i++)
+        {
+            int L, R; cin >> L >> R;
+            update(L, 1);
+            update(R + 1, -1);
+        }
+        for (int i = 1; i <= n; i++)
+        {
+            if (i != n) cout << sum(i) << " ";
+            else cout << sum(i) << endl;
+        }
+    }
+    return 0;
+}
+```
+
+[P3372 【模板】线段树 1 - 洛谷](https://www.luogu.com.cn/problem/P3372)
+
+```c++
+#include <iostream>
+#include <algorithm>
+#include <cstring>
+#define lowbit(x) ((x) & -(x))
+typedef long long LL;
+const int N = 500010;
+using namespace std;
+
+LL tree1[N], tree2[N];
+void update1(LL x, LL d) {while (x <= N) {tree1[x] += d; x += lowbit(x);}}
+void update2(LL x, LL d) {while (x <= N) {tree2[x] += d; x += lowbit(x);}}
+LL sum1(LL x) {LL ans = 0; while (x > 0) {ans += tree1[x]; x -= lowbit(x);} return ans;}
+LL sum2(LL x) {LL ans = 0; while (x > 0) {ans += tree2[x]; x -= lowbit(x);} return ans;}
+void Solve()
+{
+    LL n, m; cin >> n >> m;
+    LL old = 0, a;
+    for (int i = 1; i <= n; i++)
+    {
+        cin >> a;
+        update1(i, a - old);
+        update2(i, (i - 1) * (a - old));
+        old = a;
+    }
+    while (m--)
+    {
+        LL q, L, R, d; cin >> q;
+        if (q == 1)
+        {
+            cin >> L >> d; R = L;
+            update1(L, d); update1(R + 1, -d);
+            update2(L, (L - 1) * d); update2(R + 1, R * (-d));
+        }
+        else
+        {
+            cin >> L >> R;
+            cout << R * sum1(R) - sum2(R) - (L - 1) * sum1(L - 1) + sum2(L - 1) << endl;
+        }
+    }
+    return;
+}
+int main()
+{
+    ios::sync_with_stdio(false);
+    cin.tie();
+        Solve();
+    return 0;
+}
+```
+
+
+
 #### 线段树
 
 ```c++

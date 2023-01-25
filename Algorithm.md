@@ -6415,6 +6415,12 @@ int main()
 
 [P3372 【模板】线段树 1 - 洛谷](https://www.luogu.com.cn/problem/P3372)
 
+$D[k]=a[k]-a[k-1]$
+
+$a[k]=D[1]+D[2]+...+D[k]$ 
+
+可推导得出公式 $a_1+a_2+...+a_k=k\sum_{i=1}^{k}{D_i}-\sum_{i=1}^{k}(i-1)D_i$ 
+
 ```c++
 #include <iostream>
 #include <algorithm>
@@ -6455,6 +6461,126 @@ void Solve()
             cout << R * sum1(R) - sum2(R) - (L - 1) * sum1(L - 1) + sum2(L - 1) << endl;
         }
     }
+    return;
+}
+int main()
+{
+    ios::sync_with_stdio(false);
+    cin.tie();
+        Solve();
+    return 0;
+}
+```
+
+[P4514 上帝造题的七分钟 - 洛谷](https://www.luogu.com.cn/problem/P4514)
+
+**二维区间修改+区间查询**   利用4个二维数组完成
+
+```c++
+#include <iostream>
+#include <algorithm>
+#include <cstring>
+#define lowbit(x) ((x) & -(x))
+const int N = 2050;
+using namespace std;
+int n, m;
+int t1[N][N], t2[N][N], t3[N][N], t4[N][N];
+void update(int x, int y, int d)
+{
+    for (int i = x; i <= n; i += lowbit(i))
+        for (int j = y; j <= m; j += lowbit(j))
+        {
+            t1[i][j] += d; t2[i][j] += x * d;
+            t3[i][j] += y * d; t4[i][j] += x * y * d;
+        }
+}
+int sum(int x, int y)
+{
+    int ans = 0;
+    for (int i = x; i > 0; i -= lowbit(i))
+        for (int j = y; j > 0; j -= lowbit(j))
+            ans += (x + 1) * (y + 1) * t1[i][j] - (y + 1) * t2[i][j] - (x + 1) * t3[i][j] + t4[i][j];
+    return ans;
+}
+void Solve()
+{
+    char ch[2]; cin >> ch;
+    cin >> n >> m;
+    while (cin >> ch)
+    {
+        int a, b, c, d, delta; cin >> a >> b >> c >> d;
+        if (ch[0] == 'L')
+        {
+            cin >> delta;
+            update(a, b, delta); update(c + 1, d + 1, delta);
+            update(a, d + 1, -delta); update(c + 1, b, -delta);
+        }
+        else cout << sum(c, d) + sum(a - 1, b - 1) - sum(a - 1, d) - sum(c, b - 1) << endl;
+    }
+    return;
+}
+int main()
+{
+    ios::sync_with_stdio(false);
+    cin.tie();
+        Solve();
+    return 0;
+}
+```
+
+[P1908 逆序对 - 洛谷](https://www.luogu.com.cn/problem/P1908)
+
+```c++
+#include <iostream>
+#include <algorithm>
+#include <cstring>
+#define lowbit(x) ((x) & -(x))
+typedef long long LL;
+const int N = 500010;
+using namespace std;
+int tree[N], rankk[N], n;  //注意rank是C++保留字, 如果加了using namespace std, 编译不能通过, 可以使用std::或修改变量名
+struct point{int num, val;}a[N];
+bool cmp(point x, point y)
+{
+    if (x.val == y.val) return x.num < y.num;  //如果相等, 则先出现的更小
+    return x.val < y.val;
+}
+void update(int x, int d)
+{
+    while (x <= N)
+    {
+        tree[x] += d;
+        x += lowbit(x);
+    }
+}
+LL sum(int x)
+{
+    LL ans = 0;
+    while (x > 0)
+    {
+        ans += tree[x];
+        x -= lowbit(x);
+    }
+    return ans;
+}
+void Solve()
+{
+    cin >> n;
+    for (int i = 1; i <= n; i++) {cin >> a[i].val; a[i].num = i;}  //记录顺序, 用于离散化
+    sort(a + 1, a + 1 + n, cmp);
+    for (int i = 1; i <= n; i++) rankk[a[i].num] = i;              //离散化, 得到新的数字序列rankk()
+    long long ans = 0;
+    /*for (int i = 1; i <= n; i++)   //正序处理
+    {
+    	update(rankk[i], 1);
+    	ans += i - sum(rankk[i]);
+	} */
+    for (int i = n; i > 0; i--)      //dao'xv
+    {
+        update(rankk[i], 1);
+        ans += sum(rankk[i] - 1);
+    }
+    cout << ans;
     return;
 }
 int main()
@@ -7217,7 +7343,7 @@ int sub_w[maxn][3], sub_c[maxn][3];
 int main()
 {
     cin >> n >> m;
-    for (int i = 1; i <= m; i++)
+    for (int i = 1; i <= m; i++)                                                   
     {
         cin >> v >> p >> q;
         if (!q)
@@ -7230,7 +7356,7 @@ int main()
             sub_c[q][0]++;
             sub_c[q][sub_c[q][0]] = v;
             sub_w[q][sub_c[q][0]] = v * p;
-        }
+        }                               
     }
     for (int i = 1; i <= m; i++)
         for (int j = n; main_c[i] && j >= main_c[i]; j--)

@@ -6530,6 +6530,8 @@ int main()
 
 [P1908 逆序对 - 洛谷](https://www.luogu.com.cn/problem/P1908)
 
+**偏序问题(逆序对+离散化)**
+
 ```c++
 #include <iostream>
 #include <algorithm>
@@ -6575,13 +6577,164 @@ void Solve()
     	update(rankk[i], 1);
     	ans += i - sum(rankk[i]);
 	} */
-    for (int i = n; i > 0; i--)      //dao'xv
+    for (int i = n; i > 0; i--)      //倒序处理
     {
         update(rankk[i], 1);
         ans += sum(rankk[i] - 1);
     }
     cout << ans;
     return;
+}
+int main()
+{
+    ios::sync_with_stdio(false);
+    cin.tie();
+        Solve();
+    return 0;
+}
+```
+
+HDU 1754
+
+**区间最值**
+
+```c++
+#include <iostream>
+#include <algorithm>
+#include <cstring>
+#define lowbit(x) ((x) & -(x))
+const int N = 2e5 + 10;
+using namespace std;
+int n, m, a[N], tree[N];
+void update(int x, int value)
+{
+    while (x <= n)
+    {
+        tree[x] = value;
+        for (int i = 1; i < lowbit(x); i <<= 1)  //用子节点更新自己
+            tree[x] = max(tree[x], tree[x - i]);
+        x += lowbit(x);  //父节点
+    }
+}
+int query(int L, int R)
+{
+    int ans = 0;
+    while (L <= R)
+    {
+        ans = max(ans, a[R]);
+        R--;
+        while (R - L >= lowbit(R))
+        {
+            ans = max(ans, tree[R]);
+            R -= lowbit(R);
+        }
+    }
+    return ans;
+}
+void Solve()
+{
+    while (cin >> n >> m)
+    {
+        memset(tree, 0, sizeof tree);
+        for (int i = 1; i <= n; i++) {cin >> a[i]; update(i, a[i]);}
+        while (m--)
+        {
+            char s[5]; int A, B; cin >> s >> A >> B;
+            if (s[0] == 'Q') cout << query(A, B) << endl;
+            else {a[A] = B; update(A, B);}
+        }
+    }
+    return;
+}
+int main()
+{
+    ios::sync_with_stdio(false);
+    cin.tie();
+        Solve();
+    return 0;
+}
+```
+
+HDU 4630 No pains no game
+
+**离线处理**
+
+```c++
+#include <iostream>
+#include <algorithm>
+#include <cstring>
+#include <string>
+#include <vector>
+#include <queue>
+#include <cmath>
+#include <set>
+#include <map>
+#define lowbit(x) ((x) & -(x))
+typedef long long LL;
+const int N = 5e4 + 10;//
+const long long INF = 0x3f3f3f3f3f3f3f3fLL;
+const int inf = 0x3f3f3f3f;
+using namespace std;
+
+int n;
+vector<int> v[N];
+int b[N], res[N], pos[N], maxx[N];
+struct node
+{
+    int l, r, id;
+    bool operator < (const node &a) const
+    {return r < a.id;}
+}a[N];
+void add(int x, int d)
+{
+    for (; x; x -= lowbit(x))
+        maxx[x] = max(maxx[x], d);   //传入的最大公因数不仅适用于该位置, 还适用于该位置前面所有的位置, 最大值要不断更新
+}
+int ask(int x)
+{
+    int res = 0;
+    for ( ; x <= n; x += lowbit(x))
+        res = max(res, maxx[x]);    //由于只操作了[1, r]位置的数的最大公约数, 所以取[l, r]的最大公约数直接取[l, n]即可
+    return res;
+}
+void Solve()
+{
+    for (int i = 1; i <= 50000; i++)
+        for (int j = i; j <= 50000; j += i)
+            v[j].push_back(i);            //存储每个数的因子
+    int t, q, x, y, val;
+    for (cin >> t; t--; )
+    {
+        memset(maxx, 0, sizeof maxx);
+        memset(res, 0, sizeof res);
+        memset(pos, 0, sizeof pos);
+        cin >> n;
+        for (int i = 1; i <= n; i++) cin >> b[i];
+        cin >> q;
+        for (int i = 1; i <= q; i++)    //离线处理, 先存储问题, 再按照排序后的顺序分别求的答案, 最后一起输出
+        {
+            cin >> a[i].l >> a[i].r;
+            a[i].id = i;
+        }
+        sort(a + 1, a + 1 + q);     //按r从小到大排列
+        for (int i = 1, j = 1; i <= n; i++)
+        {
+            for (int k = 0; k < v[b[i]].size(); k++)
+            {
+                if (pos[v[b[i]][k]])
+                    add(pos[v[b[i]][k]], v[b[i]][k]);
+                pos[v[b[i]][k]] = i;
+            }
+            while (j <= q && a[j].r == i)
+            {
+                if (a[j].l == a[j].r) res[a[j].id] = 0;
+                else res[a[j].id] = ask(a[j].l);
+                j++;
+            }
+        }
+        for (int i = 1; i <= q; i++)     //统一输出
+            cout << res[i] << endl;
+    }
 }
 int main()
 {
@@ -6649,7 +6802,7 @@ int query(int L, int R, int p, int pl, int pr)
 
 luogu P3372 【模板】线段树 1
 
-区间修改和查询区间和
+**区间修改和查询区间和**
 
 ```c++
 #include <iostream>
@@ -6740,7 +6893,7 @@ int main()
 
 luogu P1868 忠诚
 
-查询区间最小值
+**查询区间最小值**
 
 ```c++
 #include <iostream>

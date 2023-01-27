@@ -6941,6 +6941,80 @@ int main()
 }
 ```
 
+[P3870 TJOI2009 开关 - 洛谷](https://www.luogu.com.cn/problem/P3870)
+
+异或
+
+```c++
+#include <bits/stdc++.h>
+const int N = 1e5 + 10;
+using namespace std;
+int tree[N << 2], tag[N << 2];
+int ls(int p) {return p << 1;}
+int rs(int p) {return p << 1|1; } 
+int n, m, c, L, R;
+void addtag(int p, int pl, int pr)
+{
+    tag[p] ^= 1;
+    tree[p] = (pr - pl + 1) - tree[p];
+}
+void push_up(int p)
+{
+    tree[p] = tree[ls(p)] + tree[rs(p)];
+}
+void push_down(int p, int pl, int pr)
+{
+    if (tag[p])
+    {
+        int mid = (pl + pr) >> 1;
+        addtag(ls(p), pl, mid);
+        addtag(rs(p), mid + 1, pr);
+        tag[p] = 0;
+    }
+}
+void update(int L, int R, int p, int pl, int pr)
+{
+    if (L <= pl && pr <= R)
+    {
+        addtag(p, pl, pr);
+        return;
+    }
+    push_down(p, pl, pr);
+    int mid = (pl + pr) >> 1;
+    if (L <= mid) update(L, R, ls(p), pl, mid);
+    if (R > mid) update(L, R, rs(p), mid + 1, pr);
+    push_up(p);
+}
+int query(int L, int R, int p, int pl, int pr)
+{
+    if (L <= pl && pr <= R) return tree[p];
+    push_down(p, pl, pr);
+    int res = 0;
+    int mid = (pl + pr) >> 1;
+    if (L <= mid) res += query(L, R, ls(p), pl, mid);
+    if (R > mid) res += query(L, R, rs(p), mid + 1, pr);
+    return res;
+}
+void Solve()
+{
+    cin >> n >> m;
+    while (m--)
+    {
+        cin >> c >> L >> R;
+        if (c) cout << query(L, R, 1, 1, n) << endl;
+        else update(L, R, 1, 1, n);
+    }
+    return;
+}
+int main()
+{
+    ios::sync_with_stdio(false);
+    cin.tie();
+        Solve();
+    return 0;
+}
+```
+
 
 
 ## 动态规划

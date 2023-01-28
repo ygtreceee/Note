@@ -7015,6 +7015,130 @@ int main()
 }
 ```
 
+[P3373 【模板】线段树 2 - 洛谷](https://www.luogu.com.cn/problem/P3373)
+
+此题关键在于有两个修改操作, 而且两个操作是存在影响关系的, 因为乘法操作会使得所有数都被乘, 也就是说包括"增加"的部分, 所以在更新的时候, 修改乘法tag的时候也要同时修改已经存在的加法tag, 这是最容易忽略的地方, 此题一开始使用两个tag, 但是一直wa, 理论上不应该, 换用struct能ac
+
+```c++
+#include <bits/stdc++.h>
+const int N = 1e5 + 10;
+using LL = long long;
+using namespace std;
+LL n, m, mod;
+LL a[N];
+struct str
+{
+    LL val, add, mul;
+}tr[N << 2];
+LL ls(LL p) {return p << 1;}
+LL rs(LL p) {return p << 1|1;}
+void push_up(LL p)
+{
+    tr[p].val = (tr[ls(p)].val + tr[rs(p)].val) % mod;
+}
+void build(LL p, LL pl, LL pr)
+{
+    tr[p].mul = 1; tr[p].add = 0;
+    if (pl == pr) {tr[p].val = a[pl]; return;}
+    LL mid = (pl + pr) >> 1;
+    build(ls(p), pl, mid);
+    build(rs(p), mid + 1, pr);
+    push_up(p);
+}
+void addtag1(LL p, LL pl, LL pr, LL k)
+{
+    tr[p].mul = tr[p].mul * k % mod;
+    tr[p].val = k * tr[p].val % mod;
+    tr[p].add = tr[p].add * k % mod;   //关键
+}
+//核心代码push_down
+void push_down(LL p, LL pl, LL pr)
+{
+    LL mid = (pl + pr) >> 1;
+    tr[ls(p)].val = (tr[ls(p)].val * tr[p].mul + tr[p].add * (mid - pl + 1)) % mod;
+    tr[rs(p)].val = (tr[rs(p)].val * tr[p].mul + tr[p].add * (pr - mid)) % mod;
+    tr[ls(p)].mul = tr[ls(p)].mul * tr[p].mul % mod;
+    tr[rs(p)].mul = tr[rs(p)].mul * tr[p].mul % mod;
+    tr[ls(p)].add = (tr[ls(p)].add * tr[p].mul + tr[p].add) % mod;
+    tr[rs(p)].add = (tr[rs(p)].add * tr[p].mul + tr[p].add) % mod;
+    tr[p].mul = 1; tr[p].add = 0;
+    return;
+}
+
+void update1(LL L, LL R, LL p, LL pl, LL pr, LL k)
+{
+    if (L <= pl && pr <= R)
+    {
+        addtag1(p, pl, pr, k);
+        return;
+    }
+    push_down(p, pl, pr);
+    LL mid = (pl + pr) >> 1;
+    if (L <= mid) update1(L, R, ls(p), pl, mid, k);
+    if (R > mid) update1(L, R, rs(p), mid + 1, pr, k);
+    push_up(p);
+}
+void addtag2(LL p, LL pl, LL pr, LL k)
+{
+    (tr[p].add += k) % mod;
+    (tr[p].val += (pr - pl + 1) * k) % mod;
+}
+void update2(LL L, LL R, LL p, LL pl, LL pr, LL k)
+{
+    if (L <= pl && pr <= R)
+    {
+        addtag2(p, pl, pr, k);
+        return;
+    }
+    push_down(p, pl, pr);
+    LL mid = (pl + pr) >> 1;
+    if (L <= mid) update2(L, R, ls(p), pl, mid, k);
+    if (R > mid) update2(L, R, rs(p), mid + 1, pr, k);
+    push_up(p); 
+}
+LL query(LL L, LL R, LL p, LL pl, LL pr)
+{
+    if (L <= pl && pr <= R) return tr[p].val;
+    push_down(p, pl, pr);
+    LL mid = (pl + pr) >> 1, res = 0;
+    if (L <= mid) res += query(L, R, ls(p), pl, mid);
+    if (R > mid) res += query(L, R, rs(p), mid + 1, pr);
+    return res % mod;
+}
+void Solve()
+{
+    cin >> n >> m >> mod;
+    for (int i = 1; i <= n; i++) cin >> a[i];
+    build(1, 1, n);
+    while (m--)
+    {
+        LL num, x, y, k; cin >> num;
+        if (num == 1)
+        {
+            cin >> x >> y >> k;
+            update1(x, y, 1, 1, n, k);
+        }
+        else if (num == 2)
+        {
+            cin >> x >> y >> k;
+            update2(x, y, 1, 1, n, k);
+        }
+        else
+        {
+            cin >> x >> y;
+            cout << query(x, y, 1, 1, n) << endl;
+        }
+    }
+}
+int main()
+{
+    ios::sync_with_stdio(false);
+    cin.tie();
+        Solve();
+    return 0;
+}
+```
+
 
 
 ## 动态规划

@@ -7139,6 +7139,157 @@ int main()
 }
 ```
 
+[P1438 无聊的数列 - 洛谷](https://www.luogu.com.cn/problem/P1438)
+
+称差分序列首项为`s`，末项为`e`，公差为`d`，要将$[l-r]$这段区间加上等差序列, 如果要在差分序列上加一个等差序列，则要在$a_l$加上s, $[a_{l+1},a_r]$ 加上`d`, $a_{r+1}$ 加上`-e`, 注意根据l和r的关系判断一些特殊情况, 比如`l=r`, 或者`r=n`, 用线段树即可, 答案即为$\sum_{n}^{i=1}a[i]$
+
+```c++
+#include <bits/stdc++.h>
+const int N = 2e5 + 10;
+using LL = long long;
+using namespace std;
+
+LL tree[N << 2], tag[N << 2];
+int a[N], b[N];
+int n, m, opt, l, r, k, d, q;
+void push_up(int p)
+{
+    tree[p] = tree[p << 1] + tree[p << 1|1];
+}
+void build(int p, int pl, int pr)
+{
+    if (pl == pr) {tree[p] = b[pl]; return;}
+    int mid = (pl + pr) >> 1;
+    build(p << 1, pl, mid);
+    build(p << 1|1, mid + 1, pr);
+    push_up(p);
+}
+void addtag(int p, int pl, int pr, int d)
+{
+    tag[p] += d;
+    tree[p] += (pr - pl + 1) * d;
+}
+void push_down(int p, int pl, int pr)
+{
+    if (tag[p])
+    {
+        int mid = (pl + pr) >> 1;
+        addtag(p << 1, pl, mid, tag[p]);
+        addtag(p << 1|1, mid + 1, pr, tag[p]);
+        tag[p] = 0;
+    }
+}
+void update(int L, int R, int p, int pl, int pr, int d)
+{
+    if (L <= pl && R >= pr)
+    {addtag(p, pl, pr, d); return;}
+    push_down(p, pl, pr);
+    int mid = (pl + pr) >> 1;
+    if (L <= mid) update(L, R, p << 1, pl, mid, d);
+    if (R > mid) update(L, R, p << 1|1, mid + 1, pr, d);
+    push_up(p);
+}
+LL query(int L, int R, int p, int pl, int pr)
+{
+    if (L <= pl && R >= pr) {return tree[p];}
+    push_down(p, pl, pr);
+    int mid = (pl + pr) >> 1;
+    LL res = 0;
+    if (L <= mid) res += query(L, R, p << 1, pl, mid);
+    if (R > mid) res += query(L, R, p << 1|1, mid + 1, pr);
+    return res;
+}   
+void Solve()
+{
+    cin >> n >> m;
+    for (int i = 1; i <= n; i++) 
+        {cin >> a[i]; b[i] = a[i] - a[i - 1];}
+    build(1, 1, n);
+    while (m--)
+    {
+        cin >> opt;
+        if (opt == 1)
+        {
+            cin >> l >> r >> k >> d;
+            update(l, l, 1, 1, n, k);
+            if (l + 1 <= r) update(l + 1, r, 1, 1, n, d);
+            if (r + 1 <= n) update(r + 1, r + 1, 1, 1, n, -(k + (r - l) * d));
+        }
+        else
+        {
+            cin >> q;
+            cout << query(1, q, 1, 1, n) << endl;
+        }
+    }
+    return;
+}
+int main()
+{
+    ios::sync_with_stdio(false);
+    cin.tie();
+    // int t;
+    // for (cin >> t; t--; )
+        Solve();
+    return 0;
+}
+```
+
+[P4588 TJOI2018 数学计算 - 洛谷](https://www.luogu.com.cn/problem/P4588)
+
+区间乘
+
+```c++
+#include <bits/stdc++.h>
+const int N = 1e5 + 10;//
+using LL = long long;
+using namespace std;
+
+int n, m, op, M;
+int tree[N << 2];
+void push_up(int p)
+{
+    tree[p] = tree[p << 1] * tree[p << 1|1] % m;
+}
+void build(int p, int pl, int pr)
+{
+    if (pl == pr) {tree[p] = 1; return;}
+    int mid = pl + pr >> 1;
+    build(p << 1, pl, mid);
+    build(p << 1|1, mid + 1, pr);
+    push_up(p);
+}
+void update(int L, int R, int p, int pl, int pr, int d)
+{
+    if (L <= pl && R >= pr) {tree[p] = d; return;}
+    int mid = pl + pr >> 1;
+    if (L <= mid) update(L, R, p << 1, pl, mid, d);
+    if (R > mid) update(L, R, p << 1|1, mid + 1, pr, d);
+    push_up(p);
+}
+void Solve()
+{
+    cin >> n >> m;
+    build(1, 1, n);
+    for (int i = 1; i <= n; i++)
+    {
+        cin >> op >> M;
+        if (op == 1) update(i, i, 1, 1, n, M);
+        else update(M, M, 1, 1, n, 1);
+        cout << tree[1] % m << endl;
+    }
+    return;
+}
+int main()
+{
+    ios::sync_with_stdio(false);
+    cin.tie();
+    int t;
+    for (cin >> t; t--; )
+        Solve();
+    return 0;
+}
+```
+
 
 
 ## 动态规划

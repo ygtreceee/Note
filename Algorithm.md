@@ -7240,10 +7240,10 @@ int main()
 
 ```c++
 #include <bits/stdc++.h>
-const int N = 1e5 + 10;//
+const int N = 1e5 + 10;
 using LL = long long;
 using namespace std;
-
+#define int long long
 int n, m, op, M;
 int tree[N << 2];
 void push_up(int p)
@@ -7268,6 +7268,7 @@ void update(int L, int R, int p, int pl, int pr, int d)
 }
 void Solve()
 {
+    memset(tree, 0, sizeof tree);
     cin >> n >> m;
     build(1, 1, n);
     for (int i = 1; i <= n; i++)
@@ -7279,12 +7280,332 @@ void Solve()
     }
     return;
 }
-int main()
+signed main()
 {
     ios::sync_with_stdio(false);
     cin.tie();
     int t;
     for (cin >> t; t--; )
+        Solve();
+    // return 0;
+}
+```
+
+[P2184 贪婪大陆 - 洛谷](https://www.luogu.com.cn/problem/P2184)
+
+记录左端点和右端点个数即可, `[l, r]`区间内地雷种类数等于`[1, r]`区间内左端点个数减去`[1, L - 1]`区间内右端点个数
+
+```c++
+#include <bits/stdc++.h>
+const int N = 1e5 + 10;
+using LL = long long;
+using namespace std;
+
+int n, m, q, L, R;
+struct node
+{
+    int l, r;
+}tree[N << 2];
+void push_up(int p)
+{
+    tree[p].l = tree[p << 1].l + tree[p << 1|1].l;
+    tree[p].r = tree[p << 1].r + tree[p << 1|1].r;
+}
+void update(int opt, int L, int R, int p, int pl, int pr)
+{
+    if (L <= pl && R >= pr)
+    {
+        if (opt == 1) tree[p].l += 1;
+        else tree[p].r += 1;    
+        return;
+    }
+    int mid = pl + pr >> 1;
+    if (L <= mid) update(opt, L, R, p << 1, pl, mid);
+    if (R > mid) update(opt, L, R, p << 1|1, mid + 1, pr);
+    push_up(p);
+}
+int query(int opt, int L, int R, int p, int pl, int pr)
+{
+    if (L <= pl && R >= pr)
+    {
+        if (opt == 1) return tree[p].l;
+        else return tree[p].r;
+    }
+    int mid = pl + pr >> 1, res = 0;
+    if (L <= mid) res += query(opt, L, R, p << 1, pl, mid);
+    if (R > mid) res += query(opt, L, R, p << 1|1, mid + 1, pr);
+    return res;
+}
+void Solve()
+{
+    cin >> n >> m;
+    while (m--)
+    {
+        cin >> q >> L >> R;
+        if (q == 1)
+        {
+            update(1, L, L, 1, 1, n);
+            update(2, R, R, 1, 1, n);
+        }
+        else
+        {
+            int x = query(1, R, R, 1, 1, n);
+            int y = query(2, L - 1, L - 1, 1, 1, n);
+            cout << query(1, 1, R, 1, 1, n) - query(2, 1, L - 1, 1, 1, n) << endl;
+        }
+    }
+    return;
+}
+int main()
+{
+    ios::sync_with_stdio(false);
+    cin.tie();
+        Solve();
+    return 0;
+}
+```
+
+[P2572 SCOI2010 序列操作 - 洛谷](https://www.luogu.com.cn/problem/P2572)
+
+```
+//try
+int n, m;
+int a[N];
+struct node
+{
+    int cntl, cntr, cnta, cnt1;
+    int tag;
+}tr[N << 2];
+void push_up(int p, int pl, int pr)
+{
+    tr[p].cnt1 = tr[p << 1].cnt1 + tr[p << 1|1].cnt1;
+    int tmp = tr[p << 1].cntr + tr[p << 1|1].cntl;
+    tr[p].cnta = max(tr[p].cnta, tmp);
+    if (tmp == (pr - pl + 1)) tr[p].cntl = tr[p].cntr = tmp;
+}
+void build(int p, int pl, int pr)
+{
+    if (pl == pr)
+    {
+        tr[p].tag = 0;
+        if (a[pl] == 1) tr[p].cntl = tr[p].cntr = tr[p].cnta = tr[p].cnt1 = 1;
+    }
+    int mid = pl + pr >> 1;
+    build(p << 1, pl, mid);
+    build(p << 1|1, mid + 1, pr);
+    push_up(p, pl, pr);
+}
+void push_down(int p, int pl, int pr)
+{
+    int mid = (pl + pr) >> 1;
+    if (tr[p].cntl >= mid - pl + 1)
+    {
+        tr[p << 1].cntl = tr[p << 1].cntr = mid - pl + 1;
+        tr[p << 1|1].cnt1 = tr[p].cntl - (mid - pl + 1);
+    }
+    else
+    {
+        tr[p << 1].cntl = tr[p].cntl;
+    }
+    if (tr[p].cntr >= pr - mid + 1)
+    {
+        tr[p << 1].cntr = tr[p].cntr - (pr - mid + 1);
+        tr[p << 1|1].cntr = tr[p << 1|1].cntl = pr - mid + 1;
+    }
+    else
+    {
+        tr[p << 1|1].cntr = tr[p].cntr;
+    }
+}
+void addtag0(int p, int pl, int pr)
+{
+    tr[p].cnt1 = tr[p].cnta = tr[p].cntr = tr[p].cntl = 0;
+}
+void update0(int L, int R, int p, int pl, int pr)
+{
+    if (L <= pl && R >= pr) {addtag0(p, pl, pr); return;}
+    push_down(p, pl, pr);
+}
+void Solve()
+{
+    cin >> n >> m;
+    for (int i = 1; i <= n; i++) cin >> a[i];
+    build(1, 1, n);
+    while (m--)
+    {
+        int opt, l, r;
+        cin >> opt >> l >> r;
+        if (opt == 0) update0(l, r, 1, 1, n);
+        else if (opt == 1) update1(l, r, 1, 1, n);
+        else if (opt == 2) update2(l, r, 1, 1, n);
+        else if (opt == 3) cout << query1(l, r, 1, 1, n) << endl;
+        else if (opt == 4) cout << query2(l, r, 1, 1, n) << endl;
+    }
+    return;
+}
+int main()
+{
+    ios::sync_with_stdio(false);
+    cin.tie();
+    // int t;
+    // for (cin >> t; t--; )
+        Solve();
+    return 0;
+}
+```
+
+[P4215 踩气球 - 洛谷](https://www.luogu.com.cn/problem/P4215)
+
+此题若简单使用区间修改和查询区间和是否为`0`, 会导致`TLE`, 而且题目强制在线, 所以我们采用另一种方法, 对于每一个查询区间, 在其所有子区间记录下该区间的编号, 并且记录该查询区间的子区间数目. 后续每一次操作, 如果出现某一个`tree[p].val == 0`, 则将这个`tree[p]`上所有的区间编号的子区间数目减`1`, 直到子区间数目为`0`, 则说明该区间已经变为`0`, 符合题目要求, `ans += 1`即可.
+
+```c++
+#include <bits/stdc++.h>
+const int N = 1e5 + 10;
+using LL = long long;
+using namespace std;
+int n, m, q, ans;
+int a[N];
+struct str {int l, r, s;}itval[N];
+struct strr {int val; vector<int> v;}tree[N << 2];
+void push_up(int p)
+{
+    tree[p].val = tree[p << 1].val + tree[p << 1|1].val;
+}
+void build(int p, int pl, int pr)
+{
+    if (pl == pr) {tree[p].val = a[pl]; return;}
+    int mid = pl + pr >> 1;
+    build(p << 1, pl, mid);
+    build(p << 1|1, mid + 1, pr);
+    push_up(p);
+}
+void split(int L, int R, int p, int pl, int pr, int i)
+{
+    if (L <= pl && R >= pr)
+    {tree[p].v.push_back(i); itval[i].s++; return;}
+    int mid = pl + pr >> 1;
+    if (L <= mid) split(L, R, p << 1, pl, mid, i);
+    if (R > mid) split(L, R, p << 1|1, mid + 1, pr, i);
+}
+void update(int L, int R, int p, int pl, int pr, int d)
+{
+    if (L <= pl && R >= pr)
+    {
+        tree[p].val += d;
+        if (tree[p].val == 0)
+        {
+            for (auto i : tree[p].v)
+            {
+                itval[i].s--;
+                if (itval[i].s == 0) ans++;
+            }
+        }
+        return;
+    }
+    int mid = pl + pr >> 1;
+    if (L <= mid) update(L, R, p << 1, pl, mid, -1);
+    if (R > mid) update(L, R, p << 1|1, mid + 1, pr, -1);
+    push_up(p);
+    if (tree[p].val == 0)
+    {
+        for (auto i : tree[p].v)
+        {
+            itval[i].s--;
+            if (itval[i].s == 0) ans++;
+        }
+    }
+}
+void Solve()
+{
+    cin >> n >> m;
+    for (int i = 1; i <= n; i++) cin >> a[i];
+    for (int i = 1; i <= m; i++) cin >> itval[i].l >> itval[i].r;
+    build(1, 1, n);
+    for (int i = 1; i <= m; i++) split(itval[i].l, itval[i].r, 1, 1, n, i);
+    cin >> q;
+    for (int i = 1; i <= q; i++)
+    {
+        int x; cin >> x;
+        x = (x + ans - 1) % n + 1;
+        update(x, x, 1, 1, n, -1);
+        cout << ans << endl;
+    }
+    return;
+}
+int main()
+{
+    ios::sync_with_stdio(false);
+    cin.tie();
+    // int t;
+    // for (cin >> t; t--; )
+        Solve();
+    return 0;
+}
+
+
+
+//TLE and Wa try
+#include <bits/stdc++.h>
+const int N = 1e5 + 10;//
+using LL = long long;
+using namespace std;
+int n, m, q;
+int a[N], tree[N << 2];
+map<pair<int, int>, bool> ma;
+void push_up(int p)
+{tree[p] = tree[p << 1] + tree[p << 1|1];}
+void update(int L, int R, int p, int pl, int pr)
+{
+    if (L <= pl && R >= pr)
+    {tree[p] = 1; return;}
+    int mid = pl + pr >> 1;
+    if (L <= mid) update(L, R, p << 1, pl, mid);
+    if (R > mid) update(L, R, p << 1|1, mid + 1, pr);
+    push_up(p);
+}
+int query(int L, int R, int p, int pl,int pr)
+{
+    if (L <= pl && R >= pr) {return tree[p];}
+    int mid = pl + pr >> 1, res = 0;
+    if (L <= mid) res += query(L, R, p << 1, pl, mid);
+    if (R > mid) res += query(L, R, p << 1|1, mid + 1, pr);
+    return res;
+}
+void Solve()
+{
+    cin >> n >> m;
+    for (int i = 1; i <= n; i++) cin >> a[i];
+    for (int i = 1; i <= m; i++)
+    {
+        pair<int, int> p; cin >> p.first >> p.second;
+        ma[p] = true;
+    }
+    cin >> q;
+    int ret = 0;
+    while (q--)
+    {   
+        int x; cin >> x;
+        x = (x + ret - 1) % n + 1;
+        a[x]--;
+        if (a[x] == 0) update(x, x, 1, 1, n);
+        for (auto i : ma)
+        {
+            if (i.second)
+            {
+                int tmp = query(i.first.first, i.first.second, 1, 1, n);
+                if (tmp == i.first.second - i.first.first + 1) ma[i.first] = false, ret++;
+            }
+        }
+        cout << ret << endl;
+    }
+    return;
+}
+int main()
+{
+    ios::sync_with_stdio(false);
+    cin.tie();
+    // int t;
+    // for (cin >> t; t--; )
         Solve();
     return 0;
 }

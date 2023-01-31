@@ -7365,66 +7365,172 @@ int main()
 }
 ```
 
-[P2572 SCOI2010 序列操作 - 洛谷](https://www.luogu.com.cn/problem/P2572)
+[P2572 SCOI2010 序列操作 - 洛谷](https://www.luogu.com.cn/problem/P2572)   **%%%**
+
+出现区间取反操作, 不仅要记录1的信息, 也要记录0的信息, 对于一个点要维护8个信息, 1/0的个数, 左/右边起1/0的最长长度, 整段区间中1/0的连续最长长度, 使用结构体更加便利, 注意更新的时候细节的处理, 此题的操作方法值得学习
+
+```c++
+#include <bits/stdc++.h>
+const int N = 1e5 + 10;
+using LL = long long;
+using namespace std;
+
+int n, q, a[N];
+struct node  //构建结构体的同时, 写载入函数
+{
+    int w, b, lw, lb, rw, rb, mw, mb;
+    node(int a1 = 0, int a2 = 0, int a3 = 0, int a4 = 0, int a5 = 0, int a6 = 0, int a7 = 0, int a8 = 0)
+    {w = a1; b = a2; lw = a3; lb = a4; rw = a5; rb = a6; mw = a7; mb = a8;}
+};
+node push_up(node i, node j)  //不同以往的push_up函数, 返回的是tree[i]
+{
+    return node(
+        i.w + j.w, i.b + j.b,
+        (i.b ? i.lw : i.w + j.lw), (i.w ? i.lb : i.b + j.lb),
+        (j.b ? j.rw : j.w + i.rw), (j.w ? j.rb : j.b + i.rb),
+        max(max(i.mw, j.mw), i.rw + j.lw),
+        max(max(i.mb, j.mb), i.rb + j.lb));
+}
+node tree[N << 2];
+int len[N << 2], tag1[N << 2], tag2[N << 2];
+void P(int i, int typ)
+{
+    node &t = tree[i];   //细节取地址, 减少码量, 便于修改
+    if (typ == 0)
+        tag2[i] = 0, tag1[i] = 0, t = node(0, len[i], 0, len[i], 0, len[i], 0, len[i]);
+    if (typ == 1)
+        tag2[i] = 0, tag1[i] = 1, t = node(len[i], 0, len[i], 0, len[i], 0, len[i], 0);
+    if (typ == 2)
+        tag2[i] ^= 1, swap(t.w, t.b), swap(t.lw, t.lb), swap(t.rw, t.rb), swap(t.mw, t.mb);
+}
+void push_down(int i)
+{
+    if (~tag1[i])
+        P(i << 1, tag1[i]), P(i << 1 | 1, tag1[i]);
+    if (tag2[i])
+        P(i << 1, 2), P(i << 1 | 1, 2);
+    tag1[i] = -1, tag2[i] = 0;
+}
+void build(int i, int l, int r)
+{
+    len[i] = r - l + 1;
+    tag1[i] = -1;    //区间赋值,没有标记时为-1,有标记时为0或1
+    if (l == r)
+    {
+        int t = a[l];
+        tree[i] = node(t, t ^ 1, t, t ^ 1, t, t ^ 1, t, t ^ 1);
+        return;
+    }
+    build(i << 1, l, l + r >> 1);
+    build(i << 1 | 1, (l + r >> 1) + 1, r);
+    tree[i] = push_up(tree[i << 1], tree[i << 1 | 1]);
+}
+void update(int i, int l, int r, int a, int b, int t)
+{
+    if (b < l || r < a)
+        return;
+    if (a <= l && r <= b)
+    {
+        P(i, t);
+        return;
+    }
+    push_down(i);
+    update(i << 1, l, l + r >> 1, a, b, t), update(i << 1 | 1, (l + r >> 1) + 1, r, a, b, t);
+    tree[i] = push_up(tree[i << 1], tree[i << 1 | 1]);
+}
+node query(int i, int l, int r, int a, int b)  //不同以往的query()函数,
+{
+    if (b < l || r < a)
+        return node();  //如果不在此区间, 返回一个全为0的node()即可
+    if (a <= l && r <= b)
+        return tree[i];
+    push_down(i);
+    return push_up(query(i << 1, l, l + r >> 1, a, b), query(i << 1 | 1, (l + r >> 1) + 1, r, a, b));
+}
+int main()
+{
+    cin >> n >> q;
+    for (int i = 1; i <= n; ++i) cin >> a[i];
+    build(1, 1, n);
+    for (int i = 1; i <= q; ++i)
+    {
+        int opt, l, r;
+        cin >> opt >> l >> r;
+        l++; r++;
+        if (opt < 3) update(1, 1, n, l, r, opt);
+        else
+        {
+            node t = query(1, 1, n, l, r);
+            cout << (opt == 3 ? t.w : t.mw) << endl;
+        }
+    }
+    return 0;
+}
+```
 
 ```
-//try
+//failed try
 int n, m;
 int a[N];
 struct node
 {
-    int cntl, cntr, cnta, cnt1;
-    int tag;
-}tr[N << 2];
-void push_up(int p, int pl, int pr)
+    int l_0, r_0, l_1, r_1, a0, a1, cnt0, cnt1;
+    int tag1, tag2, len;
+    node(int l_0 = 0, int r_0 = 0, int l_1 = 0, int r_1 = 0, int a0 = 0, int a1 = 0, int cnt0 = 0, int cnt1 = 0, int tag1 = -1, int tag2 = 0, int len = 0):
+    l_0(l_0), r_0(r_0), l_1(l_0), r_1(r_1), a0(a0), a1(a1), cnt0(cnt0), cnt1(cnt1), tag1(tag1), tag2(tag2), len(len) {}
+};
+node tree[N << 2];
+node push_up(node i, node j)
 {
-    tr[p].cnt1 = tr[p << 1].cnt1 + tr[p << 1|1].cnt1;
-    int tmp = tr[p << 1].cntr + tr[p << 1|1].cntl;
-    tr[p].cnta = max(tr[p].cnta, tmp);
-    if (tmp == (pr - pl + 1)) tr[p].cntl = tr[p].cntr = tmp;
+    return node(
+        i.cnt1 ? i.l_0 : i.l_0 + j.l_0, j.cnt1 ? j.r_0 : j.r_0 + i.r_0,
+        i.cnt0 ? i.l_1 : i.l_1 + j.l_1, j.cnt0 ? j.r_1 : j.r_1 + i.r_1,
+        max(max(i.a0, j.a0), i.r_0 + j.l_0), max(max(i.a1, j.a1), i.r_1 + j.l_1),
+        i.cnt0 + j.cnt0, i.cnt1 + j.cnt1, -1, 0, i.len + j.len);
 }
 void build(int p, int pl, int pr)
 {
+    tree[p].len = pr - pl + 1;
+    tree[p].tag1 = -1; tree[p].tag2 = 0;
     if (pl == pr)
-    {
-        tr[p].tag = 0;
-        if (a[pl] == 1) tr[p].cntl = tr[p].cntr = tr[p].cnta = tr[p].cnt1 = 1;
-    }
+    {int t = a[pl]; tree[p] = node(t^1, t^1, t, t, t^1, t, t^1, t); return;}
     int mid = pl + pr >> 1;
     build(p << 1, pl, mid);
     build(p << 1|1, mid + 1, pr);
-    push_up(p, pl, pr);
+    tree[p] = push_up(tree[p << 1], tree[p << 1|1]);
 }
-void push_down(int p, int pl, int pr)
+void addtag(int p, int opt)
 {
-    int mid = (pl + pr) >> 1;
-    if (tr[p].cntl >= mid - pl + 1)
-    {
-        tr[p << 1].cntl = tr[p << 1].cntr = mid - pl + 1;
-        tr[p << 1|1].cnt1 = tr[p].cntl - (mid - pl + 1);
-    }
-    else
-    {
-        tr[p << 1].cntl = tr[p].cntl;
-    }
-    if (tr[p].cntr >= pr - mid + 1)
-    {
-        tr[p << 1].cntr = tr[p].cntr - (pr - mid + 1);
-        tr[p << 1|1].cntr = tr[p << 1|1].cntl = pr - mid + 1;
-    }
-    else
-    {
-        tr[p << 1|1].cntr = tr[p].cntr;
-    }
+    node&t = tree[p];
+    if (opt == 0) {t.tag2 = t.tag1 = 0; t = node(t.len, t.len, 0, 0, t.len, 0, t.len, 0);}
+    if (opt == 1) {t.tag2 = 0; t.tag1 = 1; t = node(0, 0, t.len, t.len, 0, t.len, 0, t.len);}
+    if (opt == 2) {t.tag2 ^= 1; swap(t.l_0, t.l_1); swap(t.r_0, t.r_1); swap(t.a0, t.a1); swap(t.cnt0, t.cnt1);}
 }
-void addtag0(int p, int pl, int pr)
+void push_down(int p)
 {
-    tr[p].cnt1 = tr[p].cnta = tr[p].cntr = tr[p].cntl = 0;
+    if (~tree[p].tag1) addtag(p << 1, tree[p].tag1), addtag(p << 1|1, tree[p].tag1);
+    if (tree[p].tag2) addtag(p << 1, 2), addtag(p << 1|1, 2);
+    tree[p].tag1 = -1; tree[p].tag2 = 0;
 }
-void update0(int L, int R, int p, int pl, int pr)
+void update(int L, int R, int p, int pl, int pr, int opt)
 {
-    if (L <= pl && R >= pr) {addtag0(p, pl, pr); return;}
-    push_down(p, pl, pr);
+    if (L <= pl && R >= pr) {addtag(p, opt); return;}
+    push_down(p);
+    int mid = pl + pr >> 1;
+    if (L <= mid) update(L, R, p << 1, pl, mid, opt);
+    if (R > mid) update(L, R, p << 1|1, mid + 1, pr, opt);
+    tree[p] = push_up(tree[p << 1], tree[p << 1|1]);
+}
+node query(int L, int R, int p, int pl, int pr)
+{
+    if (L > pr || R < pl) return node();
+    if (L <= pl && R >= pr) return tree[p];
+    push_down(p);
+    int mid = pl + pr >> 1;
+    return push_up(query(L, R, p << 1, pl, mid), query(L, R, p << 1|1, mid + 1, pr));
+    // if (L <= mid && R > mid) return push_up(query(L, mid, p << 1, pl, mid), query(mid + 1, R, p << 1|1, mid + 1, pr));
+    // else if (L <= mid) return query(L, R, p << 1, pl, pr);
+    // else if (R > mid) return query(L, R, p << 1|1, mid + 1, pr);
 }
 void Solve()
 {
@@ -7434,12 +7540,9 @@ void Solve()
     while (m--)
     {
         int opt, l, r;
-        cin >> opt >> l >> r;
-        if (opt == 0) update0(l, r, 1, 1, n);
-        else if (opt == 1) update1(l, r, 1, 1, n);
-        else if (opt == 2) update2(l, r, 1, 1, n);
-        else if (opt == 3) cout << query1(l, r, 1, 1, n) << endl;
-        else if (opt == 4) cout << query2(l, r, 1, 1, n) << endl;
+        cin >> opt >> l >> r; l++; r++;
+        if (opt < 3) update(l, r, 1, 1, n, opt);
+        else {node t = query(l, r, 1, 1, n); cout << (opt == 3 ? t.cnt1 : t.a1) << endl;}
     }
     return;
 }
@@ -7452,6 +7555,7 @@ int main()
         Solve();
     return 0;
 }
+
 ```
 
 [P4215 踩气球 - 洛谷](https://www.luogu.com.cn/problem/P4215)
@@ -11566,6 +11670,14 @@ int main()
     return 0;
 }
 ```
+
+
+
+```
+
+```
+
+
 
 #### 最小生成树
 

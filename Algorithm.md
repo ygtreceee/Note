@@ -10376,6 +10376,96 @@ int main()
 }
 ```
 
+[P1462 通往奥格瑞玛的道路 - 洛谷](https://www.luogu.com.cn/problem/P1462)
+
+此题的信息是损失的血量和过路费, 关键是明白要找的是血量最短路还是过路费最短路, 如果求过路费最短路, 我们需要从最短的开始求得符合血量要求的路径, 但是实现起来有难度, 所以不妨考虑求血量最短路, 同时**二分过路费用**, 令`l`等于起点和终点过路费的最大值, 令`r`等于所有过路费的最大值, 找尽量小的过路费, 对于大于`mid`的过路费则忽略, 倘若到达终点的血量符合要求则说明该`mid`是符合要求的, 二分思想是解决本题的关键
+
+```c++
+#include <bits/stdc++.h>
+const int N = 1e4 + 10, M = 5e5 + 10;  //注意存边的容量
+using LL = long long;
+using namespace std;
+
+int n, m, b, cnt;
+int f[N];
+int head[N];
+struct node
+{
+    int id; long long n_dis;
+    node(int a, long long b) {id = a; n_dis = b;}
+    bool operator < (const node &a) const
+    {return a.n_dis < n_dis;}
+};
+struct {int to, next; long long w;} edge[M];
+void addedge(int u, int v, int w)
+{
+    cnt++;
+    edge[cnt].to = v;
+    edge[cnt].w = w;
+    edge[cnt].next = head[u];
+    head[u] = cnt;
+}
+long long dis[N];
+bool vis[N];
+void Dijkstra(int x)
+{
+    memset(dis, 0x3f, sizeof dis);
+    memset(vis, 0, sizeof vis);
+    dis[1] = 0;   //注意此处不可以有vis[1] = 1
+    priority_queue<node> q;
+    q.push(node(1, dis[1]));
+    while (!q.empty())
+    {
+        node now = q.top(); q.pop();
+        int ret = now.id;
+        if (vis[ret]) continue; vis[ret] = 1;
+        for (int i = head[ret]; i; i = edge[i].next)
+        {
+            if (vis[edge[i].to] || f[edge[i].to] > x) continue;
+            if (dis[edge[i].to] > dis[ret] + edge[i].w)
+            {
+                dis[edge[i].to] = dis[ret] + edge[i].w;
+                q.push(node(edge[i].to, dis[edge[i].to]));
+            }
+        }
+    }
+    return;
+}
+void Solve()
+{
+    cin >> n >> m >> b;
+    int l = 0, r = 0;
+    for (int i = 1; i <= n; i++) cin >> f[i], r = max(r, f[i]);
+    l = max(f[1], f[n]);
+    for (int i = 1; i <= m; i++)
+    {
+        int u, v, w; cin >> u >> v >> w;
+        addedge(u, v, w);
+        addedge(v, u, w);
+    }
+    while (l < r)
+    {
+        int mid = l + r >> 1;
+        Dijkstra(mid);
+        if (dis[n] <= b) r = mid;
+        else l = mid + 1;
+    }
+    Dijkstra(l);  //注意这里需要处理一次, 因为可能一开始就有l = r
+    if (dis[n] > b) cout << "AFK" << endl;
+    else cout << l << endl;
+    return;
+}
+int main()
+{
+    ios::sync_with_stdio(false);
+    cin.tie(0);
+        Solve();
+    return 0;
+}
+```
+
+
+
 #### 最短路径
 
 | 问题                 | 边权                        | 算法 | 时间复杂度 |
@@ -12001,19 +12091,164 @@ int main()
 }
 ```
 
+[P2632 Explorer - 洛谷](https://www.luogu.com.cn/problem/P2632)
 
+分布处理, 首先处理点, 注意一条直线上同一个位置可能有多个相同点, 所以要判重; 然后建图, 如果把每个点和其他所有点连接起来显然是行不通的, 复杂度太高, 因此我们先将同一条直线上的每一个点连接起来, 然后对于一条直线上的点, **三分**出另一条直线上距离该点最近的两个点进行连边, 此处需要用到三分的原因是两边指针和该点的距离都是逐渐减少, 所以是一个先单调递减再单调递增的图, 用三分先确定两个点, 然后根据两个点的对应的距离大小调整左右指针即可, 同时为了防止特殊情况, 也把旁边`[l, r]`两个点连接起来, 
 
+```c++
+#include <bits/stdc++.h>
+const int N = 3e5 + 10, M = 2e6 + 10;
+using LL = long long;
+using namespace std;
 
+struct point
+{
+    double x, y;
+    int id;
+    point() {}
+    point(double a, double b, int c)
+    {
+        x = a;
+        y = b;
+        id = c;
+    }
+} p[N], q[N];
+void input(point *a)
+{
+    scanf("%lf%lf", &(a->x), &(a->y));
+}
+double getdis(point a, point b)
+{
+    return sqrt((a.x - b.x) * (a.x - b.x) + (a.y - b.y) * (a.y - b.y));
+}
 
+struct edge_table
+{
+    int from, to;
+    double value;
+    bool operator < (const edge_table &a) const
+    {
+        return a.value > value;
+    }
+} edge[M];
+int edge_cnt = 0;
+void add_edge(int u, int v, double w)
+{
+    edge[++edge_cnt].from = u;
+    edge[edge_cnt].to = v;
+    edge[edge_cnt].value = w;
+}
+int n, m;
+double t1[N], t2[N];
+void delete_same() // 判重函数
+{ 
+    sort(t1, t1 + n);
+    sort(t2, t2 + m);
+    int ptr = 0;
+    for (int i = 0; i < n; i++)
+    {
+        if (i == n - 1 || t1[i] != t1[i + 1])
+            t1[ptr++] = t1[i];
+    }
+    n = ptr; // 将n重置为判重后点的数目
+    ptr = 0;
+    for (int i = 0; i < m; i++)
+    {
+        if (i == m - 1 || t2[i] != t2[i + 1])
+            t2[ptr++] = t2[i];
+    }
+    m = ptr;
+}
 
+int father[N]; // 建立并查集
+int find(int x)
+{ // 并查集的查找函数
+    if (father[x] != x)
+        father[x] = find(father[x]); // 路径压缩
+    return father[x];
+}
+double kruskal()
+{
+    for (int i = 0; i <= n + m; i++)
+        father[i] = i; // 初始化并查集，让每一个点自成一个独立的连通分量
+    double sum = 0;
+    sort(edge + 1, edge + edge_cnt + 1); // 按边的长度从小到大排序
+    for (int i = 1; i <= edge_cnt; i++)
+    {
+        int tx = find(edge[i].from);
+        int ty = find(edge[i].to);
+        if (tx != ty)
+        {                         // 如果两个点在两个不同的连通分量
+            father[tx] = ty;      // 合并两个连通分量
+            sum += edge[i].value; // 将边加入最小生成树
+        }
+    }
+    return sum;
+}
+int main()
+{
+    point a, b, c, d;
+    cin >> n >> m;
+    input(&a);
+    input(&b);
+    input(&c);
+    input(&d);
+    for (int i = 0; i < n; i++)
+        cin >> t1[i];
+    for (int i = 0; i < m; i++)
+        cin >> t2[i];
+    delete_same();
+    for (int i = 0; i < n; i++)
+        p[i] = point(a.x * t1[i] + b.x * (1 - t1[i]), a.y * t1[i] + b.y * (1 - t1[i]), i + 1);
+    for (int i = 0; i < m; i++)
+        q[i] = point(c.x * t2[i] + d.x * (1 - t2[i]), c.y * t2[i] + d.y * (1 - t2[i]), i + n + 1);
 
-
-
-
-
-
-
-
+    edge_cnt = 0;
+    for (int i = 0; i < n - 1; i++)
+    {
+        double l = getdis(p[i], p[i + 1]);
+        add_edge(p[i].id, p[i + 1].id, l);
+        add_edge(p[i + 1].id, p[i].id, l);
+    }
+    for (int i = 0; i < m - 1; i++)
+    {
+        double l = getdis(q[i], q[i + 1]);
+        add_edge(q[i].id, q[i + 1].id, l);
+        add_edge(q[i + 1].id, q[i].id, l);
+    }
+    for (int i = 0; i < n; i++)
+    {
+        int l, r;
+        l = 0;
+        r = m - 1;
+        while (r - l > 1)   //三分, 注意循环条件和取点细节
+        {
+            int mid1 = (r + l) / 2;
+            int mid2 = (mid1 + r) / 2;
+            if (getdis(p[i], q[mid1]) > getdis(p[i], q[mid2]))
+                l = mid1;
+            else
+                r = mid2;
+        }
+        add_edge(p[i].id, q[l].id, getdis(p[i], q[l]));  //将距离最短的两条边加入邻接表
+        add_edge(q[l].id, p[i].id, getdis(p[i], q[l]));
+        add_edge(p[i].id, q[r].id, getdis(p[i], q[r]));
+        add_edge(q[r].id, p[i].id, getdis(p[i], q[r]));
+        if (l - 1 >= 0)  //将距离第二短的两条边加入邻接表
+        {
+            add_edge(p[i].id, q[l - 1].id, getdis(p[i], q[l - 1]));
+            add_edge(q[l - 1].id, p[i].id, getdis(p[i], q[l - 1]));
+        }
+        if (r + 1 <= m - 1)
+        {
+            add_edge(p[i].id, q[r + 1].id, getdis(p[i], q[r + 1]));
+            add_edge(q[r + 1].id, p[i].id, getdis(p[i], q[r + 1]));
+        }
+    }
+    printf("%.3f", kruskal());
+    return 0;
+}
+```
 
 
 

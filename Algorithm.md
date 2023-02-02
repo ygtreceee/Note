@@ -5146,9 +5146,52 @@ DFS剪枝技术较多
 5.记忆化搜索
 ```
 
+```c++
+记忆化搜索
+//核心代码
+返回类型 dfs(参数)
+{
+	if(边界条件)
+		return 结果;
+	if(当前状态已计算过)
+		return 记录的状态结果;
+	搜索
+	保存计算结果至数组
+	return 计算结果;
+}
+
+//对于一个状态由多个变量表示的数组，要保证参数与数组的维度相同，每对参数都代表一个唯一的状态
+int f[N][N][N];
+int dfs(int a, int b, int c)
+{
+	...
+	if(f[a][b][c] != 0)	return f[a][b][c];
+	...
+}
+
+//因为我们需要判断某个状态是否已经被计算过，我们需要对数组进行初始化，一般可以是0，但是当搜索结果可能为0的时候，要把数组初始化为 -1 或者其他特殊值
+int dfs(int x)
+{
+	...
+	if(f[x] != -1)	return f[x];
+	...
+}
+for(int i = 1; i <= n; i ++)
+	f[i] = -1;
+
+
+对于记忆化搜索时间复杂度的计算，可以直接计算所有状态被访问的总次数。
+
+求解动态规划时，记忆化搜索和递推其实是同一个问题，他们都保证了同一状态最多被计算一次，只是采用了不一样的实现方法：递推是通过指定的访问顺序避免重复访问；而记忆化搜索是通过对状态的标记避免重复访问。这两种实现方式各有千秋，递推的话，运行效率更高，可以用滚动数组优化空间；记忆化搜索往往在实现难度上更低，处理边界更为轻松。需要结合题目的实际情况来选择这两种写法。
+
+一般来说，递推和记忆化搜索是可以相互转换的，也就是一道题两种写法都可以解决。但是也有一些特例：
+1.当题目的状态转移存在复杂拓扑结构，或者需要依赖哈希来存储状态的时候，递推就难以实现；
+2.当题目需要用到DP优化，如前缀和优化，斜率优化时，记忆化搜索就无法实现。
+```
+
 lanqiao 642 跳蚂蚱
 
-化圆为线；巧妙转换
+**化圆为线**；巧妙转换
 
 ```c++
 #include <algorithm>
@@ -5650,6 +5693,254 @@ int main()
         if (flag) cout << "YES" << endl;
         else cout << "NO" << endl;
     }
+    return 0;
+}
+```
+
+[P1120 小木棍 - 洛谷](https://www.luogu.com.cn/problem/P1120)
+
+本题使用到多种剪枝技术, 首先是优化搜索顺序, 把小木棍按长度从大到小排序, 然后按照从大到小的顺序作拼接的尝试, 对于给定的可能长度D, 从最长的小木棍开始拼接, 在拼接时继续从下一个较长的小木棍开始, 继续这个操作, 直到所有的木棍都拼接成功或某个没有拼接成功为止, 一旦不能拼接, 这个D不用再尝试; 然后是排除等效冗余, 优化搜索顺序中是使用贪心策略进行的; 接着是对长度D的优化, 利用木棍长度必须被总长度整除来继续排除. 
+
+```c++
+#include <bits/stdc++.h>
+const int N = 3e5 + 10, M = 2e6 + 10;
+using namespace std;
+
+int n, sum;
+int max_len, min_len = 0x3f3f3f3f;
+int cnt[N];
+//num: 当前还剩几根木棒没有拼好, now: 现在正在拼的这根木棒的长度, len: 规定的木棒长度, last:上一次枚举到的位置
+bool dfs(int num, int now, int len, int last)
+{
+    if (num == 0) return true; //已经全部拼接完成
+    if (now == len) return dfs(num - 1, 0, len, max_len);  //当前木棍已经拼接完成
+    for (int i = last; i >= min_len; i--)    //必须从大到小枚举, 采用的是贪心策略, 找尽可能大的合适长度来拼接
+    {
+        if (cnt[i] && now + i <= len)   //可行
+        {
+            cnt[i]--;
+            if (dfs(num, now + i, len, i))  //使用该长度
+                return true;
+            cnt[i]++;   //回溯
+            //下面是最重要的两个剪枝, 首先now == 0意味着走到这个判断的时候, 正在拼的这根长度为0的木棒加上i之后无法拼接成功, 但是我们知道这个拼接是必不可少的, 而且每一根木棒也必须用到, 所以这种拼接无法成功的话, 那说明这个len无解; 其次是now+i==len, 同理, 这个拼接方案是最佳且必不可少的, 这种拼接都无法成功的话, 说明len无解
+            if (now == 0 || now + i == len)
+                return false;
+        }
+    }
+    return false; //无可行方案
+}
+void Solve()
+{
+    cin >> n;
+    for (int i = 1; i <= n; i++)
+    {
+        int x; cin >> x;
+        max_len = max(x, max_len);
+        min_len = min(x, min_len);
+        cnt[x]++; sum += x;
+    }
+    for (int len = max_len; len <= sum; len++)   //求最小可能长度, 所以需要从小到大枚举可能答案, len = sum则必定有解
+        if (sum % len == 0)   //木棍总长度必须能被木棍长度整除
+            if (dfs(sum / len, 0, len, max_len))
+                {cout << len << endl; break;}
+}
+int main()
+{
+    ios::sync_with_stdio(false);
+    cin.tie(0);
+        Solve();
+    return 0;
+}
+```
+
+[T1408 矩形嵌套 - 计蒜客](https://www.jisuanke.com/problem/T1408)
+
+本题可以使用dp, 也可以使用DAG的记忆化搜索, 记忆化搜索的思路就是对这个题目进行建图, 假设矩形A可以被矩形B嵌套, 那么就可以给连上一条A到B的有向边, 这样就可以建一张DAG(有向无环图), 建完图之后, 在DAG上做一个最长路的记忆化搜索即可.
+
+```c++
+//dp
+#include <bits/stdc++.h>
+const int N = 1e3 + 10;
+using namespace std;
+int n;
+struct tec
+{
+    int l, w;
+    bool operator < (const tec &a) const
+    {
+        if (a.l != l) return l < a.l;
+        else return w < a.w;
+    }
+}t[N];
+int dp[N]; 
+void Solve()
+{
+    int ans = 0;
+    cin >> n;
+    for (int i = 1; i <= n; i++)
+    {
+        int x, y; cin >> x >> y;
+        if (x > y) swap(x, y);
+        t[i].l = x; t[i].w = y;
+        dp[i] = 1;
+    }
+    sort(t + 1, t + 1 + n);
+    for (int i = 1; i <= n; i++)
+        for (int j = 1; j <= i; j++)
+        {
+            if (t[j].l < t[i].l && t[j].w < t[i].w)
+                dp[i] = max(dp[j] + 1, dp[i]);
+            ans = max(ans, dp[i]);
+        }
+    cout << ans << endl;
+}
+int main()
+{
+    ios::sync_with_stdio(false);
+    cin.tie(0);
+    int t;
+    for (cin >> t; t--; )
+        Solve();
+    return 0;
+}
+
+//DAG 记忆化搜索
+#include <bits/stdc++.h>
+const int N = 1e3 + 10;
+using namespace std;
+
+int n;
+int f[N], g[N][N];
+void init()
+{
+    for (int i = 0; i < n; i++) f[i] = -1; //注意初始化为-1, 方便区分是否已经走过
+    for (int i = 0; i < n; i++)
+        for (int j = 0; j < n; j++)
+            g[i][j] = 0;
+}
+int dfs(int u)
+{
+    if (f[u] != -1) return f[u];
+    f[u] = 1;
+    for (int i = 0; i < n; i++)
+        if (g[u][i] == 1) f[u] = max(f[u], dfs(i) + 1);
+    return f[u];
+}
+void Solve()
+{
+    cin >> n;
+    init();
+    vector<pair<int, int>> ve(n);
+    for (int i = 0; i < n; i++)
+        cin >> ve[i].first >> ve[i].second;
+    for (int i = 0; i < n; i++)
+        for (int j = 0; j < n; j++)
+        {
+            if (i == j) continue;
+            int a = ve[i].first, b = ve[i].second;
+            int c = ve[j].first, d = ve[j].second;
+            if ((a < c && b < d) || (a < d && b < c))
+                g[i][j] = 1;
+        }
+    int ret = 0;
+    for (int i = 0; i < n; i++)
+        f[i] = dfs(i), ret = max(ret, f[i]);
+    cout << ret << endl;
+    return;
+}
+int main()
+{
+    ios::sync_with_stdio(false);
+    cin.tie(0);
+    int t;
+    for (cin >> t; t--; )
+        Solve();
+    return 0;
+}
+```
+
+[P3183 HAOI2016 食物链 - 洛谷](https://www.luogu.com.cn/problem/P3183)
+
+```c++
+#include <bits/stdc++.h>
+const int N = 1e5 + 10;
+using namespace std;
+int n, m, ans;
+vector<int> ve[N];
+vector<pair<int, int>> cnt(N);
+int dp[N];
+int dfs(int x)
+{
+    if (dp[x]) return dp[x];
+    dp[x] = 0;
+    for (auto i : ve[x])
+    {
+        if (cnt[i].second != 0) dp[x] += dfs(i);
+        else dp[i] = 1, dp[x] += 1;
+    }
+    return dp[x];
+}
+void Solve()
+{
+    cin >> n >> m;
+    for (int i = 1; i <= m; i++)
+    {int u, v; cin >> u >> v; cnt[u].second++; cnt[v].first++; ve[u].push_back(v);}
+    for (int i = 1; i <= n; i++)
+        if (cnt[i].first == 0) ans += dfs(i);
+    cout << ans << endl;
+}
+int main()
+{
+    ios::sync_with_stdio(false);
+    cin.tie(0);
+        Solve();
+    return 0;
+}
+```
+
+[2287 -- Tian Ji -- The Horse Racing (poj.org)](http://poj.org/problem?id=2287)
+
+贪心思维, 如果当前一定会输, 则田忌要派出最小的马, 如果能赢, 派最大的去赢即可, 如果打平, 取派最小和最大的最优解; 此题的状态记录数组`f[i][j]`表示的是此时田忌手上还剩下第`i`匹到第`j`匹马, 使用闭区间, 用贪心策略转移即可
+
+```c++
+#include <iostream>
+#include <cstring>
+#include <algorithm>
+const int N = 1e3 + 10;
+using namespace std;
+int n;
+int a[N], b[N];
+int f[N][N];
+bool cmp(int x, int y) {return x > y;}
+int dfs(int l, int r, int cur)  //cur表示第几轮
+{
+    if (cur == n + 1) return 0;
+    if (f[l][r] != -1) return f[l][r];
+    if (a[l] > b[cur])
+        return f[l][r] = dfs(l + 1, r, cur + 1) + 1;
+    else if (a[l] < b[cur])
+        return f[l][r] = dfs(l, r - 1, cur + 1) - 1;
+    else if (a[l] == b[cur])
+        return f[l][r] = max(dfs(l + 1, r, cur + 1), dfs(l, r - 1, cur + 1) - 1);
+}
+void Solve()
+{
+    while (cin >> n && n)
+    {
+        memset(f, -1, sizeof f);
+        for (int i = 1; i <= n; i++) cin >> a[i];
+        for (int i = 1; i <= n; i++) cin >> b[i];
+        sort(a + 1, a + 1 + n, cmp);
+        sort(b + 1, b + 1 + n, cmp);
+        cout << 200 * dfs(1, n, 1) << endl;
+    }
+    return;
+}
+int main()
+{
+    ios::sync_with_stdio(false);
+    cin.tie(0);
+        Solve();
     return 0;
 }
 ```
@@ -7710,6 +8001,77 @@ int main()
     cin.tie();
     // int t;
     // for (cin >> t; t--; )
+        Solve();
+    return 0;
+}
+```
+
+HDU 4027 Can you answer these queries?
+
+区间开方, 利用的是一个数最多经过7次开就变为1(向下取整), 继续开方仍保持1不变, 对于`tree[p] != r - l + 1`,则需要对`[l, r]`内的每个数都进行开方, 若是`tree[p] == r - l + 1`则不必进行开方操作了
+
+```c++
+#include <cstdio>
+#include <cstring>
+#include <cmath>
+#include <algorithm>
+const int N = 1e5 + 10;
+using namespace std;
+
+int n, m, cas;
+long long a[N], tree[N << 2];
+void push_up(int p)
+{
+    tree[p] = tree[p << 1] + tree[p << 1 | 1];
+}
+void build(int p, int pl, int pr)
+{
+    if (pl == pr) {tree[p] = a[pl]; return;}
+    int mid = pl + pr >> 1;
+    build(p << 1, pl, mid);
+    build(p << 1 | 1, mid + 1, pr);
+    push_up(p);
+    return;
+}
+long long query(int L, int R, int p, int pl, int pr)
+{
+    if (L <= pl && R >= pr) return tree[p];
+    int mid = pl + pr >> 1; long long res = 0;
+    if (L <= mid) res += query(L, R, p << 1, pl, mid);
+    if (R > mid) res += query(L, R, p << 1 | 1, mid + 1, pr);
+    return res;
+}
+void update(int L, int R, int p, int pl, int pr)
+{
+    if (L <= pl && R >= pr && tree[p] == pr - pl + 1) return;
+    if (pl == pr) {tree[p] = floor(sqrt(tree[p])); return;}
+    int mid = pl + pr >> 1;
+    if (L <= mid) update(L, R, p << 1, pl, mid);
+    if (R > mid) update(L, R, p << 1 | 1, mid + 1, pr);
+    push_up(p);
+}
+void Solve()
+{
+    while (scanf("%d", &n) != EOF)
+    {
+        cas++;
+        printf("Case #%d:\n", cas);
+        for (int i = 1; i <= n; i++) scanf("%lld", &a[i]);
+        build(1, 1, n);
+        scanf("%d", &m);
+        for (int i = 1; i <= m; i++)
+        {
+            int t, x, y; scanf("%d%d%d", &t, &x, &y);
+            if (x > y) swap(x, y);  //必须保证x <= y
+            if(t == 0) update(x, y, 1, 1, n);
+            else printf("%lld\n", query(x, y, 1, 1, n));
+        }
+        printf("\n");
+    }
+    return;
+}
+int main()
+{
         Solve();
     return 0;
 }

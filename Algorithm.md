@@ -8006,7 +8006,7 @@ int main()
 }
 ```
 
-HDU 4027 Can you answer these queries?
+[Can you answer these queries? - HDU 4027 - Virtual Judge](https://vjudge.csgrandeur.cn/problem/HDU-4027)
 
 区间开方, 利用的是一个数最多经过7次开就变为1(向下取整), 继续开方仍保持1不变, 对于`tree[p] != r - l + 1`,则需要对`[l, r]`内的每个数都进行开方, 若是`tree[p] == r - l + 1`则不必进行开方操作了
 
@@ -8075,6 +8075,139 @@ int main()
         Solve();
     return 0;
 }
+```
+
+[Transformation - HDU 4578 - Virtual Judge](https://vjudge.csgrandeur.cn/problem/HDU-4578)
+
+此题的关键是3个标记的关系, 一个标记的产生, 必须考虑其是否对其他标记产生影响. (1)做`change`修改时, 原有的`add`和`multi`标记失效; (2)做`multi`修改时, 如果原有`add`标记, 需将`add`改为`add * multi`; (3) 做线段树的`pushdown`时, 必须考虑标记传递的顺序, 先传递`change`, 后传递`multi`, 最后传递`add`, 原因考虑三者关系即可明白. 还有一个关键的地方, 就是取模的时候必须在所有可以且可能需要取模的地方取模, 而且出现多个运算符号时, 需要为取模运算加上括号, 保证取模的先行性, 因为乘法`*`的操作符优先级是大于取模`%`的.
+
+```c++
+#include <bits/stdc++.h>
+const int N = 1e5 + 10;
+const int mod = 1e4 + 7;
+using namespace std;
+
+int n, m;
+struct node
+{
+    long long sum1, sum2, sum3;
+    int tag1, tag2, tag3;
+} tree[N << 2];
+void build(int p, int pl, int pr)
+{
+    int mid = pl + pr >> 1;
+    tree[p].tag1 = tree[p].tag3 = 0; tree[p].tag2 = 1;
+    tree[p].sum1 = tree[p].sum2 = tree[p].sum3 = 0;
+    if (pl == pr) return;
+    build(p << 1, pl, mid);
+    build(p << 1 | 1, mid + 1, pr);
+}
+void addtag(int p, int pl, int pr, int opt, int d)  //特别注意取模的位置和括号的使用
+{
+    int len = pr - pl + 1;
+    if (opt == 1)
+    {
+        tree[p].tag1 = (tree[p].tag1 + d) % mod;
+        tree[p].sum3 = (tree[p].sum3 + ((len * d % mod) * d % mod) * d % mod + (3 * d % mod) * (tree[p].sum2 + tree[p].sum1 * d % mod) % mod) % mod;
+        tree[p].sum2 = (tree[p].sum2 + (len * d % mod) * d % mod + 2 * tree[p].sum1 * d % mod) % mod;
+        tree[p].sum1 = (tree[p].sum1 + len * d % mod) % mod;
+    }
+    else if (opt == 2)
+    {
+        tree[p].tag1 = tree[p].tag1 * d % mod; tree[p].tag2 = tree[p].tag2 * d % mod;
+        tree[p].sum1 = (tree[p].sum1 * d % mod);
+        tree[p].sum2 = ((tree[p].sum2 * d % mod) * d % mod);
+        tree[p].sum3 = (((tree[p].sum3 * d % mod) * d % mod) * d % mod);
+    }
+    else if (opt == 3)
+    {
+        tree[p].tag1 = 0; tree[p].tag2 = 1; tree[p].tag3 = d;
+        tree[p].sum1 = (len * d % mod);
+        tree[p].sum2 = (len * d % mod) * d % mod;
+        tree[p].sum3 = ((len * d % mod) * d % mod) * d % mod;
+    }
+    return;
+}
+void push_up(int p)
+{
+    tree[p].sum1 = (tree[p << 1].sum1 + tree[p << 1 | 1].sum1) % mod;
+    tree[p].sum2 = (tree[p << 1].sum2 + tree[p << 1 | 1].sum2) % mod;
+    tree[p].sum3 = (tree[p << 1].sum3 + tree[p << 1 | 1].sum3) % mod;
+}
+void push_down(int p, int pl, int pr)
+{
+    int mid = pl + pr >> 1; 
+    if (tree[p].tag3)
+    {
+        addtag(p << 1, pl, mid, 3, tree[p].tag3);
+        addtag(p << 1 | 1, mid + 1, pr, 3, tree[p].tag3);
+    }
+    if (tree[p].tag2 != 1)
+    {
+        addtag(p << 1, pl, mid, 2, tree[p].tag2);
+        addtag(p << 1 | 1, mid + 1, pr, 2, tree[p].tag2);
+    }
+    if (tree[p].tag1)
+    {
+        addtag(p << 1, pl, mid, 1, tree[p].tag1);
+        addtag(p << 1 | 1, mid + 1, pr, 1, tree[p].tag1);
+    }   
+    tree[p].tag1 = 0; tree[p].tag2 = 1; tree[p].tag3 = 0;
+}
+void update(int L, int R, int p, int pl, int pr, int opt, int d)
+{
+    if (L <= pl && R >= pr) {addtag(p, pl, pr, opt, d); return;}
+    push_down(p, pl, pr);
+    int mid = pl + pr >> 1;
+    if (L <= mid) update(L, R, p << 1, pl, mid, opt, d);
+    if (R > mid) update(L, R, p << 1 | 1, mid + 1, pr, opt, d);
+    push_up(p); 
+}
+int query(int L, int R, int p, int pl, int pr, int opt)
+{
+    if (L <= pl && R >= pr)
+    {
+        if (opt == 1) return tree[p].sum1 % mod;
+        else if (opt == 2) return tree[p].sum2 % mod;
+        else if (opt == 3) return tree[p].sum3 % mod;
+    }
+    push_down(p, pl, pr);
+    int mid = pl + pr >> 1, res = 0;
+    if (L <= mid) res += query(L, R, p << 1, pl, mid, opt);
+    if (R > mid) res += query(L, R, p << 1 | 1, mid + 1, pr, opt);
+    return res % mod;
+}
+void Solve()
+{
+    while (scanf("%d%d", &n, &m) != EOF)
+    {
+        if (!n && !m) break;
+        build(1, 1, n);
+        while (m--)
+        {
+            int opt, x, y, d; scanf("%d%d%d%d", &opt, &x, &y, &d);
+            switch(opt)
+            {
+                case 1:
+                case 2:
+                case 3: update(x, y, 1, 1, n, opt, d); break;
+                case 4: printf("%d\n", query(x, y, 1, 1, n, d)); break;
+            }
+        }
+    }
+    return;
+}   
+int main()
+{
+        Solve();
+    return 0;
+}
+```
+
+[Vases and Flowers - HDU 4614 - Virtual Judge](https://vjudge.csgrandeur.cn/problem/HDU-4614)
+
+```
+
 ```
 
 

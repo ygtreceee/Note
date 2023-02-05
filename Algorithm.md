@@ -7091,6 +7091,8 @@ int query(int L, int R, int p, int pl, int pr)
 }   //调用方式：query(L, R, l, l, n);
 ```
 
+###### 基础应用
+
 luogu P3372 【模板】线段树 1
 
 **区间修改和查询区间和**
@@ -8205,6 +8207,312 @@ int main()
 ```
 
 [Vases and Flowers - HDU 4614 - Virtual Judge](https://vjudge.csgrandeur.cn/problem/HDU-4614)
+
+**线段树的二分操作**: 通过**二分法**巧妙找`0`的位置
+
+```c++
+#include <bits/stdc++.h>
+const int N = 5e4 + 10;
+using namespace std;
+
+int n, m;
+struct node
+{
+    int val, tag;
+}tree[N << 2];
+void build(int p, int pl, int pr)
+{
+    tree[p].val = 0; tree[p].tag = -1;
+    if (pl == pr) return;
+    int mid = pl + pr >> 1;
+    build(p << 1, pl, mid);
+    build(p << 1 | 1, mid + 1, pr);
+}
+void addtag(int p, int pl, int pr, int d)
+{
+    tree[p].val = (pr - pl + 1) * d;
+    tree[p].tag = d;
+}
+void push_up(int p)
+{
+    tree[p].val = tree[p << 1].val + tree[p << 1 | 1].val;
+}
+void push_down(int p, int pl, int pr)
+{
+    if (tree[p].tag != -1)
+    {
+        int mid = pr + pl >> 1;
+        addtag(p << 1, pl, mid, tree[p].tag);
+        addtag(p << 1 | 1, mid + 1, pr, tree[p].tag);
+        tree[p].tag = -1;
+    }
+}
+void update(int L, int R, int p, int pl, int pr, int d)
+{
+    if (L <= pl && R >= pr) {addtag(p, pl, pr, d); return;}
+    push_down(p, pl, pr);
+    int mid = pl + pr >> 1, res = 0;
+    if (L <= mid) update(L, R, p << 1, pl, mid, d);
+    if (R > mid) update(L, R, p << 1 | 1, mid + 1, pr, d);
+    push_up(p);
+}
+int query(int L, int R, int p, int pl, int pr)
+{
+    if (L <= pl && R >= pr) return tree[p].val;
+    push_down(p, pl, pr);
+    int mid = pl + pr >> 1, res = 0;
+    if (L <= mid) res += query(L, R, p << 1, pl, mid);
+    if (R > mid) res += query(L, R, p << 1 | 1, mid + 1, pr);
+    return res;
+}
+int binary(int s, int rank)
+{
+    int l = s, r = n;
+    while (l < r)
+    {
+        int mid = l + r >> 1;
+        int tmp = query(s, mid, 1, 1, n);
+        if (tmp + rank <= (mid - s + 1)) r = mid;
+        else l = mid + 1;
+    }
+    return l;
+}
+void Solve()
+{
+    scanf("%d%d", &n, &m);
+    build(1, 1, n);
+    while (m--)
+    {
+        int k, a, f; scanf("%d%d%d", &k, &a, &f);
+        if (k == 1)
+        {
+            int st, ed; a++;
+            st = binary(a, 1);
+            if (query(a, n, 1, 1, n) == n - a + 1)
+                printf("Can not put any one.\n");
+            else
+            {
+                int tmp = query(st, n, 1, 1, n);
+                tmp = n - st + 1 - tmp;
+                if (tmp <= f) f = tmp;
+                ed = binary(a, f);
+                printf("%d %d\n", st - 1, ed - 1);
+                update(st, ed, 1, 1, n, 1);
+            }
+        }
+        else
+        {
+            a++; f++;
+            printf("%d\n", query(a, f, 1, 1, n));
+            update(a, f, 1, 1, n, 0);
+        }
+    }
+    printf("\n");
+    return;
+}   
+int main()
+{
+    int t;
+    for (cin >> t; t--; )
+        Solve();
+    return 0;
+}
+```
+
+[Mayor's posters - POJ 2528 - Virtual Judge](https://vjudge.csgrandeur.cn/problem/POJ-2528)
+
+**离散化**, 本题用线段树求解是标准的区间修改和区间查询, 但是直接用题目给的`[L, R]`划分区间会超出内存, 所以我们采用的是离散化操作, 所谓的离散化, 就是将一个很大的区间映射为一个很小的区间, 且不改变原有的大小覆盖关系, 也就是不改变相对位置. 题目中最多只有`n = 10000`张海报, 只有`20000`个`L`和`R`, 但是此题用普通离散化会有错误, 例如先后覆盖`[1, 100000000], [1, 500], [7000, 100000000]`三个区间, 若使用普通离散化会是`[1, 4], [1, 2], [3, 4]`, 只存在两种海报, 事实上是三种, 所以如果相邻数字不是连续的, 那么这两个数离散化之后应该在它们之间插入一个数字, 体现出它们的非连续性. 另外, j记忆离散化基本操作
+
+```C++
+#include <bits/stdc++.h>
+const int N = 2e4 + 10;
+using namespace std;
+
+int tree[N << 4];
+int li[N], ri[N];
+int lisan[3 * N];
+bool vis[3 * N];
+int n, ans;
+void query(int p, int pl, int pr)  //线段树基础下区间查询有多少个不同的数
+{
+    if (tree[p] != -1)
+    {
+        if (!vis[tree[p]])
+        {ans++; vis[tree[p]] = true;}
+        return;
+    }
+    if (pr == pl) return;
+    int mid = pl + pr >> 1;
+    query(p << 1, pl, mid);
+    query(p << 1 | 1, mid + 1, pr);
+}
+void push_down(int p)
+{
+    if (tree[p] != -1)
+    {
+        tree[p << 1] = tree[p << 1 | 1] = tree[p];
+        tree[p] = -1;
+    }
+}
+void update(int L, int R, int p, int pl, int pr, int d)
+{
+    if (L <= pl && R >= pr)
+    {tree[p] = d; return;}
+    push_down(p);
+    int mid = pl + pr >> 1;
+    if (L <= mid) update(L, R, p << 1, pl, mid, d);
+    if (R > mid) update(L, R, p << 1 | 1, mid + 1, pr, d);
+}
+void Solve()
+{
+    scanf("%d", &n);
+    memset(tree, -1, sizeof tree);
+    memset(vis, false, sizeof vis);
+    int tot = 0;
+    //离散化操纵
+    for (int i = 0; i < n; i++)
+    {
+        scanf("%d%d", &li[i], &ri[i]);
+        lisan[tot++] = li[i];
+        lisan[tot++] = ri[i];
+    }
+    sort(lisan, lisan + tot);
+    int m = unique(lisan, lisan + tot) - lisan;  //去重函数
+    int t = m;
+    for (int i = 1; i < t; i++)
+    {
+        if (lisan[i] - lisan[i - 1] > 1)
+            lisan[m++] = lisan[i - 1] + 1;
+    }
+    sort(lisan, lisan + m);
+    for (int i = 0; i < n; i++)
+    {
+        int x = lower_bound(lisan, lisan + m, li[i]) - lisan;   //二分查找
+        int y = lower_bound(lisan, lisan + m, ri[i]) - lisan;
+        update(x, y, 1, 0, m - 1, i);
+    }
+    ans = 0;
+    query(1, 0, m - 1);
+    printf("%d\n", ans);
+}
+int main()
+{
+    int t;
+    for (cin >> t; t--; )
+        Solve();
+    return 0;
+}
+```
+
+###### 区间最值和区间历史最值
+
+吉如一论文《区间最值操作与历史最值问题》中详细讲解了区间最值的基本题以及扩展问题, 故也称为**吉司机线段树**, 此处有两处参考资料
+
+- [区间最值操作与区间历史最值详解 - 灵梦 的博客 - 洛谷博客 (luogu.com.cn)](https://www.luogu.com.cn/blog/Hakurei-Reimu/seg-beats)
+
+- [区间最值操作 & 区间历史最值 - OI Wiki (oi-wiki.com)](http://oi-wiki.com/ds/seg-beats/)
+
+[Gorgeous Sequence - HDU 5306 - Virtual Judge](https://vjudge.csgrandeur.cn/problem/HDU-5306)
+
+本题属于**修改区间最值**基本问题, 操作包括修改区间最值和查询区间和, 简单的区间最值`tag`和区间和`tag`都难以解决修改区间最值的操作, 所以再引入两个标记, 对于线段树的每个节点, 定义`4`个标记, 分别是区间和`sum`, 区间最大值`ma`, 严格次大值`se`(初始值为`-1`), 最大值个数`t`. 作区间最值的修改操作时, 即用$min(a_i,x)$替换区间$[L,R]$内的每个$a_i$, 根据$[L,R]$定位到线段树的节点, 对区间的每个节点进行暴力搜索, 搜到每个节点时, 分以下三种情况: $(1)$ 当 $ma\leq x$ 时, 这次的修改不影响节点, 退出; $(2)$ 当 $se\lt x \lt ma$ 时这次修改影响最大值, 更新`sum = sum - t * (ma - x)`, 以及`ma = x`, 然后打上标记后退出; $(3)$ 当$se \geq x$ 时, 无法直接更新这个节点, 递归到它的子树. 此类方法的复杂度为$O(mlog_2n)$ , 平均单次修改复杂度为$O(log_2n)$, 极端情况下单次修改会出现$O(1)$ 以及$O(nlog_2n)$ 的情况, 但不影响平均复杂度
+
+```c++
+#include <bits/stdc++.h>
+const int N = 1e6 + 10;
+#define LL long long
+using namespace std;
+LL sum[N << 2], ma[N << 2], se[N << 2], num[N << 2];  //num为区间最大值的个数
+LL ls(LL p) {return p << 1;}
+LL rs(LL p) {return p << 1 | 1;}
+
+void push_up(int p)
+{
+    sum[p] = sum[ls(p)] + sum[rs(p)];
+    ma[p] = max(ma[ls(p)], ma[rs(p)]);
+    if (ma[ls(p)] == ma[rs(p)])
+    {
+        se[p] = max(se[ls(p)], se[rs(p)]);
+        num[p] = num[ls(p)] + num[rs(p)];
+    }
+    else 
+    {
+        se[p] = max(se[ls(p)], se[rs(p)]);
+        se[p] = max(se[p], min(ma[ls(p)], ma[rs(p)]));
+        num[p] = ma[ls(p)] > ma[rs(p)] ? num[ls(p)] : num[rs(p)];
+    }
+}
+void build(int p, int pl, int pr)
+{
+    if (pl == pr)  //叶子节点, se[p]置为-1, 能解决叶子节点x<=se的情况
+    {
+        scanf("%lld", &sum[p]);
+        ma[p] = sum[p]; se[p] = -1; num[p] = 1;
+        return;
+    }
+    LL mid = pl + pr >> 1;
+    build(ls(p), pl, mid);
+    build(rs(p), mid + 1, pr);
+    push_up(p);
+}
+void addtag(int p, int x)
+{
+    if (x >= ma[p]) return;
+    sum[p] -= num[p] * (ma[p] - x);
+    ma[p] = x;
+}
+void push_down(int p)
+{
+    addtag(ls(p), ma[p]);
+    addtag(rs(p), ma[p]);
+}
+void update(int L, int R, int p, int pl, int pr, int x)   //分情况讨论
+{
+    if (x >= ma[p]) return;
+    if (L <= pl && R >= pr && se[p] < x) {addtag(p, x); return;}
+    push_down(p);
+    LL mid = pl + pr >> 1;
+    if (L <= mid) update(L, R, ls(p), pl, mid ,x);
+    if (R > mid) update(L, R, rs(p), mid + 1, pr, x);
+    push_up(p);
+}
+int queryMax(int L, int R, int p, int pl, int pr)
+{
+    if (L <= pl && R >= pr) return ma[p];
+    push_down(p);
+    int res = 0; LL mid = pl + pr >> 1;
+    if (L <= mid) res = queryMax(L, R, ls(p), pl, mid);
+    if (R > mid) res = max(res, queryMax(L, R, rs(p), mid + 1, pr));
+    return res;
+}
+LL querySum(int L, int R, int p, int pl, int pr)
+{
+    if (L <= pl && R >= pr) return sum[p];
+    push_down(p);
+    int res = 0; LL mid = pl + pr >> 1;
+    if (L <= mid) res += querySum(L, R, ls(p), pl, mid);
+    if (R > mid) res += querySum(L, R, rs(p), mid + 1, pr);
+    return res;
+}
+int main()
+{
+    int T; scanf("%d", &T);
+    while (T--)
+    {
+        int n, m; scanf("%d%d", &n, &m);
+        build(1, 1, n);
+        while (m--)
+        {
+            int q, L, R, x; scanf("%d%d%d", &q, &L, &R);
+            if (q == 0) {scanf("%d", &x); update(L, R, 1, 1, n, x);}
+            if (q == 1) printf("%d\n", queryMax(L, R, 1, 1, n));
+            if (q == 2) printf("%lld\n", querySum(L, R, 1, 1, n));
+        }
+    }
+    return 0;
+}
+```
+
+[P6242 【模板】线段树 3 - 洛谷](https://www.luogu.com.cn/problem/P6242)
 
 ```
 
@@ -10068,6 +10376,69 @@ int main()
     return 0;
 }
 ```
+
+[Doing Homework - HDU 1074 - Virtual Judge](https://vjudge.csgrandeur.cn/problem/HDU-1074)
+
+```c++
+#include <bits/stdc++.h>
+const int maxn = (1 << 15) + 10;
+const int inf = 0x3f3f3f3f;
+using namespace std;
+
+int n;
+int dp[maxn];
+int t[maxn], pre[maxn];
+struct node
+{
+    string s;
+    int a, b;
+}d[maxn];
+void print(int x)   //前向打印路径
+{
+    if (x == 0) return;
+    print(x - (1 << pre[x]));
+    cout << d[pre[x]].s << endl;
+}
+void Solve()
+{
+    memset(dp, 0, sizeof dp);
+    memset(t, 0, sizeof t);
+    memset(pre, 0, sizeof pre);
+    cin >> n;
+    for (int i = 0; i < n; i++)
+        cin >> d[i].s >> d[i].a >> d[i].b;
+    int tot = 1 << n;
+    for (int i = 1; i < tot; i++)    //遍历每一种状态
+    {
+        dp[i] = inf;
+        for (int j = n - 1; j >= 0; j--)   
+        {
+            if (!(i & (1 << j))) continue;  //保证该位置已经完成
+            int tmp = t[i - (1 << j)] + d[j].b - d[j].a;
+            tmp = tmp < 0 ? 0 : tmp;
+            if (dp[i] > dp[i - (1 << j)] + tmp)
+            {
+                dp[i] = dp[i - (1 << j)] + tmp;
+                t[i] = t[i - (1 << j)] + d[j].b;
+                pre[i] = j;
+            }
+        }
+    }
+    cout << dp[(1 << n) - 1] << endl;
+    print((1 << n) - 1);
+}
+int main()
+{
+    ios::sync_with_stdio(false);
+    cin.tie(0);
+    int t;
+    for (cin >> t; t--; )
+        Solve();
+    return 0;
+}
+```
+
+
 
 #### 区间DP
 

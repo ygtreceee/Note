@@ -8857,6 +8857,89 @@ int main()
 
 [Atlantis - HDU 1542 - Virtual Judge](https://vjudge.csgrandeur.cn/problem/HDU-1542)
 
+**矩形面积并**
+
+```c++
+#include <bits/stdc++.h>
+const int N = 2e4 + 5;
+#define lson (p << 1)
+#define rson (p << 1 | 1)
+using namespace std;
+
+int Tag[N];
+double length[N], xx[N];
+struct ScanLine
+{
+    double y;
+    double right_x, left_x;
+    int inout;
+    ScanLine() {};
+    ScanLine(double y, double x2, double x1, int io):
+        y(y), right_x(x2), left_x(x1), inout(io) {}
+}line[N];
+bool cmp(ScanLine &a, ScanLine &b) {return a.y < b.y;}
+void push_up(int p, int pl, int pr)
+{
+    if (Tag[p]) length[p] = xx[pr] - xx[pl];
+    else if (pl + 1 == pr) length[p] = 0;
+    else length[p] = length[lson] + length[rson];
+}
+void update(int L, int R, int io, int p, int pl, int pr)
+{
+    if (L <= pl && R >= pr)
+    {
+        Tag[p] += io;
+        push_up(p, pl, pr);
+        return;
+    }
+    if (pl + 1 == pr) return;
+    int mid = pl + pr >> 1;
+    if (L <= mid) update(L, R, io, lson, pl, mid);
+    if (R > mid) update(L, R, io, rson, mid, pr);
+    push_up(p, pl, pr);
+}
+int main()
+{
+    int n, t = 0;
+    while (scanf("%d", &n) && n)
+    {
+        int cnt = 0;
+        while (n--)
+        {
+            double x1, x2, y1, y2; scanf("%lf%lf%lf%lf", &x1, &y1, &x2, &y2);
+            line[++cnt] = ScanLine(y1, x2, x1, 1);
+            xx[cnt] = x1;
+            line[++cnt] = ScanLine(y2, x2, x1, -1);
+            xx[cnt] = x2;
+        }
+        sort(xx + 1, xx + cnt + 1);
+        sort(line + 1, line + cnt + 1, cmp);
+        int num = unique(xx + 1, xx + 1 + cnt) - (xx + 1);
+        memset(Tag, 0, sizeof Tag);
+        memset(length, 0, sizeof length);
+        double ans = 0;
+        for (int i = 1; i <= cnt; i++)
+        {
+            int L, R;
+            ans += length[1] * (line[i].y - line[i - 1].y);
+            L = lower_bound(xx + 1, xx + num + 1, line[i].left_x) - xx;
+            R = lower_bound(xx + 1, xx + num + 1, line[i].right_x) - xx;
+            update(L, R, line[i].inout, 1, 1, num);
+        }
+        printf("Test case #%d\nTotal explored area: %.2f\n\n", ++t, ans);
+    }
+    return 0;
+}
+```
+
+[Picture - HDU 1828 - Virtual Judge](https://vjudge.csgrandeur.cn/problem/HDU-1828)
+
+**矩形周长并**
+
+```
+
+```
+
 
 
 ## 动态规划

@@ -8866,36 +8866,37 @@ const int N = 2e4 + 5;
 #define rson (p << 1 | 1)
 using namespace std;
 
-int Tag[N];
-double length[N], xx[N];
-struct ScanLine
+int Tag[N];  //标志: 线段是否有效, 能否用于计算宽度
+double length[N]; //存放区间i的总宽度
+double xx[N];   //存放x的坐标值
+struct ScanLine  //定义扫描线
 {
-    double y;
-    double right_x, left_x;
-    int inout;
+    double y;    //边的y坐标
+    double right_x, left_x;  //边的x坐标:右, 左
+    int inout;   //入边为, 出边为-1
     ScanLine() {};
     ScanLine(double y, double x2, double x1, int io):
         y(y), right_x(x2), left_x(x1), inout(io) {}
 }line[N];
 bool cmp(ScanLine &a, ScanLine &b) {return a.y < b.y;}
-void push_up(int p, int pl, int pr)
+void push_up(int p, int pl, int pr)   //从下往上传递区间值
 {
-    if (Tag[p]) length[p] = xx[pr] - xx[pl];
-    else if (pl + 1 == pr) length[p] = 0;
+    if (Tag[p]) length[p] = xx[pr] - xx[pl];  //节点的标志为正, 这个线段对计算宽度有效, 计算宽度
+    else if (pl + 1 == pr) length[p] = 0;   //叶子节点没有宽度
     else length[p] = length[lson] + length[rson];
 }
 void update(int L, int R, int io, int p, int pl, int pr)
 {
-    if (L <= pl && R >= pr)
+    if (L <= pl && R >= pr)  //完全覆盖
     {
-        Tag[p] += io;
+        Tag[p] += io;         //节点标志, 判断能否用于计算宽度
         push_up(p, pl, pr);
         return;
     }
-    if (pl + 1 == pr) return;
-    int mid = pl + pr >> 1;
+    if (pl + 1 == pr) return;  //叶子节点
+    int mid = pl + pr >> 1; 
     if (L <= mid) update(L, R, io, lson, pl, mid);
-    if (R > mid) update(L, R, io, rson, mid, pr);
+    if (R > mid) update(L, R, io, rson, mid, pr); //注意不是mid+1
     push_up(p, pl, pr);
 }
 int main()
@@ -8903,7 +8904,7 @@ int main()
     int n, t = 0;
     while (scanf("%d", &n) && n)
     {
-        int cnt = 0;
+        int cnt = 0;  //边的数量, 包括入边和出边
         while (n--)
         {
             double x1, x2, y1, y2; scanf("%lf%lf%lf%lf", &x1, &y1, &x2, &y2);
@@ -8912,17 +8913,17 @@ int main()
             line[++cnt] = ScanLine(y2, x2, x1, -1);
             xx[cnt] = x2;
         }
-        sort(xx + 1, xx + cnt + 1);
-        sort(line + 1, line + cnt + 1, cmp);
-        int num = unique(xx + 1, xx + 1 + cnt) - (xx + 1);
+        sort(xx + 1, xx + cnt + 1);  //对所有边的x坐标排序
+        sort(line + 1, line + cnt + 1, cmp);  //对扫描线按y轴方向从低到高排序
+        int num = unique(xx + 1, xx + 1 + cnt) - (xx + 1);  //离散化: 用unique()函数去重, 返回个数
         memset(Tag, 0, sizeof Tag);
         memset(length, 0, sizeof length);
         double ans = 0;
-        for (int i = 1; i <= cnt; i++)
+        for (int i = 1; i <= cnt; i++)  //扫描所有入边和出边
         {
             int L, R;
-            ans += length[1] * (line[i].y - line[i - 1].y);
-            L = lower_bound(xx + 1, xx + num + 1, line[i].left_x) - xx;
+            ans += length[1] * (line[i].y - line[i - 1].y);  //累加当前扫描线面积
+            L = lower_bound(xx + 1, xx + num + 1, line[i].left_x) - xx;  //x坐标离散化, 用相对位置替代坐标值
             R = lower_bound(xx + 1, xx + num + 1, line[i].right_x) - xx;
             update(L, R, line[i].inout, 1, 1, num);
         }
@@ -8934,7 +8935,91 @@ int main()
 
 [Picture - HDU 1828 - Virtual Judge](https://vjudge.csgrandeur.cn/problem/HDU-1828)
 
-**矩形周长并**
+**矩形周长并**, 本题由于数据较小, 所以不用离散化, 区别就是直接根据最大最小值进行建树即可, 不用取相对位置, 计算周长并, 需要计算横线和竖线, 竖线的计算需要根据此时有多少条独立的横线来判断其数量, 并加入左右端点的记录来判断有多少条独立的边, 
+
+```c++
+#include <bits/stdc++.h>
+const int N = 2e5 + 5;
+#define lson (p << 1)
+#define rson (p << 1 | 1)
+using namespace std;
+
+struct ScanLine
+{
+    int l, r, h, inout;
+    ScanLine() {};
+    ScanLine(int a, int b, int c, int d): l(a), r(b), h(c), inout(d) {}
+}line[N];
+bool cmp(ScanLine &a, ScanLine &b) {return a.h < b.h;}  //y坐标排序
+bool lbd[N << 2], rbd[N << 2];   //记录这个节点左右端点是否被覆盖(0表示没有, 1表示有)
+int num[N << 2];  //这个区间有多少条独立的边
+int Tag[N << 2];  //标记这个节点是否有效
+int length[N << 2];  //这个区间的有效长度
+void push_up(int p, int pl, int pr)
+{
+    if (Tag[p])    //节点标志为正, 这个线段对计算宽度有效
+    {
+        lbd[p] = rbd[p] = 1;
+        length[p] = pr - pl + 1;
+        num[p] = 1; //每条边有两个端点
+    }
+    else if (pl == pr) length[p] = num[p] = lbd[p] = rbd[p] = 0;  //叶子节点
+    else
+    {
+        lbd[p] = lbd[lson]; //和左儿子共左端点
+        rbd[p] = rbd[rson]; //和右儿子共右端点
+        length[p] = length[lson] + length[rson];
+        num[p] = num[lson] + num[rson];
+        if (lbd[rson] && rbd[lson]) num[p] -= 1;   //合并边
+    }
+}
+void update(int L, int R, int io, int p, int pl, int pr)
+{
+    if (L <= pl && R >= pr)  //完全覆盖
+    {
+        Tag[p] += io;
+        push_up(p, pl, pr);
+        return;
+    }
+    int mid = pl + pr >> 1;
+    if (L <= mid) update(L, R, io, lson, pl, mid);
+    if (R > mid) update(L, R, io, rson, mid + 1, pr);
+    push_up(p, pl, pr);
+}
+int main()
+{
+    int n;
+    while (~scanf("%d", &n))
+    {
+        int cnt = 0;
+        int lbd = 10000, rbd = -10000;
+        for (int i = 0; i < n; i++)
+        {
+            int x1, x2, y1, y2; scanf("%d%d%d%d", &x1, &y1, &x2, &y2);
+            lbd = min(lbd, x1);  //横线最小x坐标
+            rbd = max(rbd, x2);  //横线最大x坐标
+            line[++cnt] = ScanLine(x1, x2, y1, 1);
+            line[++cnt] = ScanLine(x1, x2, y2, -1);
+        }
+        sort(line + 1, line + cnt + 1, cmp);  //排序, 数据小, 不用离散化
+        int ans =  0, last = 0;    //last为上一次总区间被覆盖的长度
+        for (int i = 1; i <= cnt; i++)
+        {
+            if (line[i].l < line[i].r)
+                update(line[i].l, line[i].r - 1, line[i].inout, 1, lbd, rbd - 1);
+                ans += num[1] * 2 * (line[i + 1].h - line[i].h); //竖线
+                ans += abs(length[1] - last);      //横线
+                last = length[1];
+        }
+        printf("%d\n", ans);
+    }
+    return 0;
+}
+```
+
+###### 二维线段树(树套树)
+
+[Luck and Love - HDU 1823 - Virtual Judge](https://vjudge.csgrandeur.cn/problem/HDU-1823)
 
 ```
 

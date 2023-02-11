@@ -8211,6 +8211,69 @@ int main()
 }
 ```
 
+[敌兵布阵 - HDU 1166 - Virtual Judge](https://vjudge.csgrandeur.cn/problem/HDU-1166)
+
+```c++
+#include <bits/stdc++.h>
+const int N = 5e4 + 5;
+#define lson (p << 1)
+#define rson (p << 1 | 1)
+using namespace std;
+
+int n;
+int tree[N << 2];
+void push_up(int p)
+{tree[p] = tree[lson] + tree[rson];}
+void build(int p, int pl, int pr)
+{
+    if (pl == pr) {cin >> tree[p]; return;}
+    int mid = pl + pr >> 1;
+    build(lson, pl, mid);
+    build(rson, mid + 1, pr);
+    push_up(p);
+}
+void update(int L, int R, int p, int pl, int pr, int d)
+{
+    if (L <= pl && R >= pr) {tree[p] += d; return;}
+    int mid = pl + pr >> 1;
+    if (L <= mid) update(L, R, lson, pl, mid, d);
+    else update(L, R, rson, mid + 1, pr, d);
+    push_up(p);
+}
+int query(int L, int R, int p, int pl, int pr)
+{
+    if (L <= pl && R >= pr) return tree[p];
+    int mid = pl + pr >> 1, res = 0;
+    if (L <= mid) res += query(L, R, lson, pl, mid);
+    if (R > mid) res += query(L, R, rson, mid + 1, pr);
+    return res;
+}
+int main()
+{
+    ios::sync_with_stdio(false);
+    cin.tie(0);
+    int t; cin >> t;
+    for (int k = 1; k <= t; k++)
+    {
+        memset(tree, 0, sizeof tree);
+        cout << "Case " << k << ":\n"; 
+        cin >> n;
+        build(1, 1, n);
+        string s;
+        while (cin >> s, s != "End")
+        {
+            int i, j; cin >> i >> j;
+            if (s == "Add") update(i, i, 1, 1, n, j);
+            else if (s == "Sub") update(i, i, 1, 1, n, -j);
+            else cout << query(i, j, 1, 1, n) << endl;
+        }
+    }
+    return 0;
+}
+```
+
+
+
 ###### 区间最值和区间历史最值
 
 吉如一论文《区间最值操作与历史最值问题》中详细讲解了区间最值的基本题以及扩展问题, 故也称为**吉司机线段树**, 此处有两处参考资料
@@ -8853,6 +8916,77 @@ int main()
 //16[1,1] 17[2,2]                           24[6,6]  25[7,7]
 ```
 
+[Count the Colors - ZOJ 1610 - Virtual Judge](https://vjudge.csgrandeur.cn/problem/ZOJ-1610)
+
+```c++
+#include <bits/stdc++.h>
+const int N = 8e3 + 5;
+#define lson (p << 1)
+#define rson (p << 1 | 1)
+using namespace std;
+
+int n, ans;
+struct node
+{
+    int lc, rc, col;
+}tag[N << 2];
+map<int, int> ma;
+void push_up(int p)
+{
+    tag[p].lc = tag[lson].lc;
+    tag[p].rc = tag[rson].rc;
+}
+void push_down(int p, int pl, int pr)
+{
+    if (tag[p].col != -1)
+    {
+        tag[lson].col = tag[lson].lc = tag[lson].rc = tag[rson].rc = tag[rson].lc = tag[rson].col = tag[p].col;
+        tag[p].col = tag[p].lc = tag[p].rc = -1;
+    }
+}
+void update(int L, int R, int p, int pl, int pr, int d)
+{
+    if (L <= pl && R >= pr) {tag[p].col = tag[p].lc = tag[p].rc = d; return;}
+    push_down(p, pl, pr);
+    int mid = pl + pr >> 1;
+    if (L <= mid) update(L, R, lson, pl, mid, d);
+    if (R > mid) update(L, R, rson, mid + 1, pr, d);
+    push_up(p);
+}
+void query(int L, int R, int p, int pl, int pr)
+{
+    if (tag[p].col != -1)
+    {ma[tag[p].col]++; return;}    
+    if (pl == pr) return;
+    int mid = pl + pr >> 1;
+    query(L, R, lson, pl, mid);
+    query(L, R, rson, mid + 1, pr);
+    if (tag[lson].rc == tag[rson].lc) ma[tag[lson].rc]--;
+}
+int main()
+{
+    ios::sync_with_stdio(false);
+    cin.tie(0);
+    while (cin >> n)
+    {
+        memset(tag, -1, sizeof tag);
+        ma.clear();
+        int m = n;
+        while (m--)
+        {
+            int a, b, c; cin >> a >> b >> c;
+            update(a, b - 1, 1, 0, 8000, c);
+        }
+        query(0, 8000, 1, 0, 8000);
+        for (auto i: ma) if (i.first != -1) cout << i.first << ' ' << i.second << endl;
+        cout << endl;
+    }
+    return 0;
+}
+```
+
+
+
 ###### 扫描线
 
 [Atlantis - HDU 1542 - Virtual Judge](https://vjudge.csgrandeur.cn/problem/HDU-1542)
@@ -9021,7 +9155,107 @@ int main()
 
 [Luck and Love - HDU 1823 - Virtual Judge](https://vjudge.csgrandeur.cn/problem/HDU-1823)
 
-```
+`s[i][j]`记录最大缘分, 第一维线段树是身高, 第二维线段树是活泼度
+
+```c++
+#include <bits/stdc++.h>
+const int N = 2e5 + 5;
+#define lson (p << 1)
+#define rson (p << 1 | 1)
+using namespace std;
+
+int n = 1000, s[1005][4005]; //s[i][j]为身高区间i, 活泼区间j的最大缘分
+
+void subBuild(int xp, int p, int pl, int pr) //建立第2维线段树：活泼度线段树
+{
+    s[xp][p] = -1;
+    if (pl == pr) return;
+    int mid = pl + pr >> 1;
+    subBuild(xp, lson, pl, mid);
+    subBuild(xp, rson, mid + 1, pr);
+}
+void build(int p, int pl, int pr) //建立第1维线段树：身高线段树
+{
+    subBuild(p, 1, 0, n);
+    if (pl == pr) return;
+    int mid = pl + pr >> 1;
+    build(lson, pl, mid);
+    build(rson, mid + 1, pr);
+}
+void subUpdate(int xp, int y, int c, int p, int pl, int pr) //更新第二维线段树
+{
+    if (pl == pr && pl == y) s[xp][p] = max(s[xp][p], c);
+    else
+    {
+        int mid = pl + pr >> 1;
+        if (y <= mid) subUpdate(xp, y, c, lson, pl, mid);
+        else subUpdate(xp, y, c, rson, mid + 1, pr);
+        s[xp][p] = max(s[xp][lson], s[xp][rson]);
+    }
+}
+void update(int x, int y, int c, int p, int pl, int pr) //更新第一维线段树
+{
+    subUpdate(p, y, c, 1, 0, n); //更新第二维
+    if (pl != pr)
+    {
+        int mid = pl + pr >> 1;
+        if (x <= mid) update(x, y, c, lson, pl, mid);
+        else update(x, y, c, rson, mid + 1, pr);
+    }
+}
+int subQuery(int xp, int yL, int yR, int p, int pl, int pr //查询第二维线段树
+{
+    if (yL <= pl && pr <= yR) return s[xp][p];
+    else
+    {
+        int mid = pl + pr >> 1;
+        int res = -1;
+        if (yL <= mid) res = subQuery(xp, yL, yR, lson, pl, mid);
+        if (yR > mid) res = max(res, subQuery(xp, yL, yR, rson, mid + 1, pr));
+        return res;
+    }
+}
+int query(int xL, int xR, int yL, int yR, int p, int pl, int pr)  //查询第一维线段树
+{
+    if (xL <= pl && pr <= xR) return subQuery(p, yL, yR, 1, 0, n); //满足身高区间时，查询活泼度区间
+    else //当前节点不满足身高区间
+    {
+        int mid = pl + pr >> 1;
+        int res = -1;
+        if (xL <= mid) res = query(xL, xR, yL, yR, lson, pl, mid);
+        if (xR > mid) res = max(res, query(xL, xR, yL, yR, rson, mid + 1, pr));
+        return res;
+    }  
+}
+int main()
+{
+    int t;
+    while (scanf("%d", &t) && t)
+    {
+        build(1, 100, 200);
+        while (t--)
+        {
+            char ch[2]; scanf("%s", ch);
+            if (ch[0] == 'I')
+            {
+                int h; double c, d; scanf("%d%lf%lf", &h, &c, &d);
+                update(h, c * 10, d * 10, 1, 100, 200);
+            }
+            else
+            {
+                int xL, xR, yL, yR; double c, d;
+                scanf("%d%d%lf%lf", &xL, &xR, &c, &d);
+                yL = c * 10; yR = d * 10; //转换为整数
+                if (xL > xR) swap(xL, xR);
+                if (yL > yR) swap(yL, yR);
+                int ans = query(xL, xR, yL, yR, 1, 100, 200);
+                if (ans == -1) printf("-1\n");
+                else printf("%.1f\n", ans / 10.0);
+            }
+        }
+    }
+    return 0;
+}
 
 ```
 

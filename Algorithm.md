@@ -8272,6 +8272,98 @@ int main()
 }
 ```
 
+[Assign the task - HDU 3974 - Virtual Judge](https://vjudge.csgrandeur.cn/problem/HDU-3974)
+
+**线段树维护dfs序**. 所谓dfs序, 就是对一棵树进行dfs时的入栈和出栈序列, 对题中样例进行dfs序得到的就是`2 3 4 4 1 1 3 5 5 2`, 很容易发现**一个节点的子孙节点一定在它的入栈和出栈的时间序列之内**, 因此我们就把一棵**非线性的树状结构转换成了线性结构**, 并记录下每个节点入栈和出栈的时间序列即可. 而题中的`T`操作就是把对应节点的时间序列区间进行修改, `C`操作就是查询该节点的值.
+
+```c++
+#include <bits/stdc++.h>
+const int N = 1e5 + 5;
+#define lson (p << 1)
+#define rson (p << 1 | 1)
+using namespace std;
+
+int n, m, ind;
+int tree[N << 2];
+int vis[N], ll[N], rr[N]; //ll和rr分别记录节点的出入栈时间戳
+vector<int> G[N];
+void build(int p, int pl, int pr)
+{
+    tree[p] = -1;
+    if (pl == pr) return;
+    int mid = pl + pr >> 1;
+    build(lson, pl, mid);
+    build(rson, mid + 1, pr);
+}
+void push_down(int p, int pl, int pr)
+{
+    if (tree[p] != -1)
+    {
+        tree[lson] = tree[rson] = tree[p];
+        tree[p] = -1;
+    }
+}
+void update(int L, int R, int p, int pl, int pr, int d)
+{
+    if (L <= pl && R >= pr) {tree[p] = d; return;}
+    push_down(p, pl, pr);
+    int mid = pl + pr >> 1;
+    if (L <= mid) update(L, R, lson, pl, mid, d);
+    if (R > mid) update(L, R, rson, mid + 1, pr, d);
+}
+int query(int L, int p, int pl, int pr)
+{
+    if (pl == pr) return tree[p];
+    push_down(p, pl, pr);
+    int mid = pl + pr >> 1;
+    if (L <= mid) return query(L, lson, pl, mid);
+    else return query(L, rson, mid + 1, pr);
+}
+void dfs(int x) //dfs序的实现
+{
+    ll[x] = ind++;
+    for (int i = 0; i < G[x].size(); i++) dfs(G[x][i]);
+    rr[x] = ind++;
+}
+int main()
+{
+    int t, cas = 1; scanf("%d", &t);
+    while (t--)
+    {
+        printf("Case #%d:\n", cas++);
+        scanf("%d", &n);
+        build(1, 1, 2 * n);
+        memset(ll, -1, sizeof ll);
+        memset(rr, -1, sizeof rr);
+        for (int j = 1; j <= n; j++) vis[j] = 0, G[j].clear();
+        for (int j = 1; j <= n - 1; j++)
+        {
+            int x, y; scanf("%d%d", &x, &y);
+            G[y].push_back(x); vis[x] = 1;
+        }
+        ind = 1;
+        for (int j = 1; j <= n; j++) if (!vis[j]) dfs(j);
+        scanf("%d", &m);
+        while (m--)
+        {
+            char opt[10]; scanf("%s", opt);
+            if (opt[0] == 'T')
+            {
+                int x, y; scanf("%d%d", &x, &y);
+                update(ll[x], rr[x], 1, 1, n * 2, y);
+            }
+            else
+            {
+                int x; scanf("%d", &x);
+                printf("%d\n", query(ll[x], 1, 1, 2 * n));
+            }
+        }
+    }
+    return 0;
+}
+// 2 3 4 4 1 1 3 5 5 2
+```
+
 
 
 ###### 区间最值和区间历史最值
@@ -8980,6 +9072,145 @@ int main()
         query(0, 8000, 1, 0, 8000);
         for (auto i: ma) if (i.first != -1) cout << i.first << ' ' << i.second << endl;
         cout << endl;
+    }
+    return 0;
+}
+```
+
+[约会安排 - HDU 4553 - Virtual Judge](https://vjudge.csgrandeur.cn/problem/HDU-4553#author=cy41)
+
+```c++
+#include<bits/stdc++.h>
+#define mem(x) (memset(x,0,sizeof(x)))
+using namespace std;
+const int maxn = 1e5+10;
+int n,q;
+struct SegTree
+{
+    int lsum[2][maxn<<2],rsum[2][maxn<<2],sum[2][maxn<<2];
+    int cnt[maxn<<2],lz[2][maxn<<2];
+    void init() {
+        mem(lsum);mem(rsum);mem(sum);
+        mem(cnt);
+        memset(lz,-1,sizeof(lz));
+    }
+    void push_up(int id,int rt) {
+        cnt[rt] = cnt[rt<<1] + cnt[rt<<1|1];
+        lsum[id][rt] = lsum[id][rt<<1];
+        rsum[id][rt] = rsum[id][rt<<1|1];
+        if(lsum[id][rt] == cnt[rt<<1]) lsum[id][rt] += lsum[id][rt<<1|1];
+        if(rsum[id][rt] == cnt[rt<<1|1]) rsum[id][rt] += rsum[id][rt<<1];
+        sum[id][rt] = max(max(sum[id][rt<<1],sum[id][rt<<1|1]),rsum[id][rt<<1]+lsum[id][rt<<1|1]);
+    }
+    void push_down(int id,int rt) {
+        if(lz[id][rt] == -1) return ;
+        lz[id][rt<<1] = lz[id][rt<<1|1] = lz[id][rt];
+        if(lz[id][rt]) { /// 置满
+            lsum[id][rt<<1] = rsum[id][rt<<1] = sum[id][rt<<1] = 0;
+            lsum[id][rt<<1|1] = rsum[id][rt<<1|1] = sum[id][rt<<1|1] = 0;
+        }
+        else {
+            lsum[id][rt<<1] = rsum[id][rt<<1] = sum[id][rt<<1] = cnt[rt<<1];
+            lsum[id][rt<<1|1] = rsum[id][rt<<1|1] = sum[id][rt<<1|1] = cnt[rt<<1|1];
+        }
+        lz[id][rt] = -1;
+    }
+    void build(int l,int r,int rt) {
+        if(l == r) {
+            for(int i=0;i<2;i++) {
+                lsum[i][rt] = rsum[i][rt] = sum[i][rt] = 1;
+                lz[i][rt] = -1;
+            }
+            cnt[rt] = 1;
+            return ;
+        }
+        push_down(0,rt);push_down(1,rt);
+        int mid = (l+r)>>1;
+        build(l,mid,rt<<1);
+        build(mid+1,r,rt<<1|1);
+        push_up(0,rt);push_up(1,rt);
+    }
+    void update(int id,int ql,int qr,int val,int l,int r,int rt) { /// 区间覆盖 1:置满0:置空
+        if(ql == l && qr == r) {
+            if(val == 1) {
+                lsum[id][rt] = rsum[id][rt] = sum[id][rt] = 0;
+                lz[id][rt] = 1;
+            }
+            else {
+                lsum[id][rt] = rsum[id][rt] = sum[id][rt] = cnt[rt];
+                lz[id][rt] = 0;
+            }
+            return;
+        }
+        push_down(id,rt);
+        int mid = (l+r)>>1;
+        if(qr <= mid) update(id,ql,qr,val,l,mid,rt<<1);
+        else if(ql > mid) update(id,ql,qr,val,mid+1,r,rt<<1|1);
+        else {
+            update(id,ql,mid,val,l,mid,rt<<1);
+            update(id,mid+1,qr,val,mid+1,r,rt<<1|1);
+        }
+        push_up(id,rt);
+    }
+    int query(int id,int val,int l,int r,int rt) {
+        if(l == r) return l;
+        push_down(id,rt);
+        int mid = (l+r)>>1;
+        if(sum[id][rt<<1] >= val) return query(id,val,l,mid,rt<<1);
+        if(rsum[id][rt<<1] + lsum[id][rt<<1|1] >= val) return mid - rsum[id][rt<<1] + 1;
+        return query(id,val,mid+1,r,rt<<1|1);
+    }
+}seg;
+int main()
+{
+    char op[20];int len;
+    int le,ri;
+    int caset,cas = 0;scanf("%d",&caset);
+    while(caset--)
+    {
+        scanf("%d%d",&n,&q);
+        seg.init();
+        seg.build(1,n,1);
+        printf("Case %d:\n",++cas);
+        while(q--)
+        {
+            scanf("%s",op);
+            if(op[0] == 'D') {
+                scanf("%d",&len);
+                if(seg.sum[0][1] < len) {
+                    printf("fly with yourself\n");
+                    continue;
+                }
+                int pos = seg.query(0,len,1,n,1);
+                printf("%d,let's fly\n",pos);
+                seg.update(0,pos,pos+len-1,1,1,n,1);
+            }
+            else if(op[0] == 'N') {
+                scanf("%d",&len);
+                if(seg.sum[1][1] < len) {
+                    printf("wait for me\n");
+                    continue;
+                }
+                if(seg.sum[0][1] < len) {
+                    int sta = seg.query(1,len,1,n,1);
+                    printf("%d,don't put my gezi\n",sta); /// 单引号!
+                    seg.update(0,sta,sta+len-1,1,1,n,1);
+                    seg.update(1,sta,sta+len-1,1,1,n,1);
+                }
+                else {
+                    int pos = seg.query(0,len,1,n,1);
+                    printf("%d,don't put my gezi\n",pos);
+                    seg.update(0,pos,pos+len-1,1,1,n,1);
+                    seg.update(1,pos,pos+len-1,1,1,n,1);
+                }
+            }
+            else {
+                scanf("%d%d",&le,&ri);
+                printf("I am the hope of chinese chengxuyuan!!\n");
+                seg.update(0,le,ri,0,1,n,1);
+                seg.update(1,le,ri,0,1,n,1);
+            }
+        }
     }
     return 0;
 }

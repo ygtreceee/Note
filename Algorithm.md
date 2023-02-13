@@ -9079,136 +9079,155 @@ int main()
 
 [约会安排 - HDU 4553 - Virtual Judge](https://vjudge.csgrandeur.cn/problem/HDU-4553#author=cy41)
 
+值得注意的是, 可以将函数封装进类中, 看起来更加模块化, 同时注意当需要建造多棵树的时候, 可以在结构体中使用多维数组, 也可以使得代码更加简洁 
+
 ```c++
-#include<bits/stdc++.h>
-#define mem(x) (memset(x,0,sizeof(x)))
+#include <bits/stdc++.h>
+const int N = 1e2 + 5;
+#define lson (p << 1)
+#define rson (p << 1 | 1)
 using namespace std;
-const int maxn = 1e5+10;
-int n,q;
+
+int n, q;
 struct SegTree
 {
-    int lsum[2][maxn<<2],rsum[2][maxn<<2],sum[2][maxn<<2];
-    int cnt[maxn<<2],lz[2][maxn<<2];
-    void init() {
-        mem(lsum);mem(rsum);mem(sum);
-        mem(cnt);
-        memset(lz,-1,sizeof(lz));
+    int lsum[2][N << 2], rsum[2][N << 2], sum[2][N << 2];
+    int cnt[N << 2], lz[2][N << 2];
+    void init()
+    {
+        memset(lsum, 0, sizeof lsum); memset(rsum, 0, sizeof rsum);
+        memset(sum, 0, sizeof sum); memset(cnt, 0, sizeof cnt);
+        memset(lz, -1, sizeof lz);
     }
-    void push_up(int id,int rt) {
-        cnt[rt] = cnt[rt<<1] + cnt[rt<<1|1];
-        lsum[id][rt] = lsum[id][rt<<1];
-        rsum[id][rt] = rsum[id][rt<<1|1];
-        if(lsum[id][rt] == cnt[rt<<1]) lsum[id][rt] += lsum[id][rt<<1|1];
-        if(rsum[id][rt] == cnt[rt<<1|1]) rsum[id][rt] += rsum[id][rt<<1];
-        sum[id][rt] = max(max(sum[id][rt<<1],sum[id][rt<<1|1]),rsum[id][rt<<1]+lsum[id][rt<<1|1]);
+    void push_up(int id, int p)
+    {
+        cnt[p] = cnt[lson] + cnt[rson];
+        lsum[id][p] = lsum[id][lson];
+        rsum[id][p] = rsum[id][rson];
+        if (lsum[id][p] == cnt[lson]) lsum[id][p] += lsum[id][rson];
+        if (rsum[id][p] == cnt[rson]) rsum[id][p] += rsum[id][lson];
+        sum[id][p] = max(max(sum[id][lson], sum[id][rson]), rsum[id][lson] + lsum[id][rson]);
     }
-    void push_down(int id,int rt) {
-        if(lz[id][rt] == -1) return ;
-        lz[id][rt<<1] = lz[id][rt<<1|1] = lz[id][rt];
-        if(lz[id][rt]) { /// 置满
-            lsum[id][rt<<1] = rsum[id][rt<<1] = sum[id][rt<<1] = 0;
-            lsum[id][rt<<1|1] = rsum[id][rt<<1|1] = sum[id][rt<<1|1] = 0;
+    void push_down(int id, int p)
+    {
+        if (lz[id][p] == -1) return;
+        lz[id][lson] = lz[id][rson] = lz[id][p];
+        if (lz[id][p])
+        {
+            lsum[id][lson] = rsum[id][lson] = sum[id][lson] = 0;
+            lsum[id][rson] = rsum[id][rson] = sum[id][rson] = 0;
         }
-        else {
-            lsum[id][rt<<1] = rsum[id][rt<<1] = sum[id][rt<<1] = cnt[rt<<1];
-            lsum[id][rt<<1|1] = rsum[id][rt<<1|1] = sum[id][rt<<1|1] = cnt[rt<<1|1];
+        else
+        {
+            lsum[id][lson] = rsum[id][lson] = sum[id][lson] = cnt[lson];
+            lsum[id][rson] = rsum[id][rson] = sum[id][rson] = cnt[rson];
         }
-        lz[id][rt] = -1;
+        lz[id][p] = -1;
     }
-    void build(int l,int r,int rt) {
-        if(l == r) {
-            for(int i=0;i<2;i++) {
-                lsum[i][rt] = rsum[i][rt] = sum[i][rt] = 1;
-                lz[i][rt] = -1;
+    void build(int p, int pl, int pr)
+    {
+        if (pl == pr)
+        {
+            for (int i = 0; i < 2; i++)
+            {
+                lsum[i][p] = rsum[i][p] = sum[i][p] = 1;
+                lz[i][p] = -1;
             }
-            cnt[rt] = 1;
-            return ;
+            cnt[p] = 1;
+            return;
         }
-        push_down(0,rt);push_down(1,rt);
-        int mid = (l+r)>>1;
-        build(l,mid,rt<<1);
-        build(mid+1,r,rt<<1|1);
-        push_up(0,rt);push_up(1,rt);
+        int mid = pl + pr >> 1;
+        build(lson, pl, mid);
+        build(rson, mid + 1, pr);
+        push_up(0, p); push_up(1, p);
     }
-    void update(int id,int ql,int qr,int val,int l,int r,int rt) { /// 区间覆盖 1:置满0:置空
-        if(ql == l && qr == r) {
-            if(val == 1) {
-                lsum[id][rt] = rsum[id][rt] = sum[id][rt] = 0;
-                lz[id][rt] = 1;
+    void update(int L, int R, int p, int pl, int pr, int id, int val)
+    {
+        if (L <= pl && R >= pr)
+        {
+            if (val == 1)
+            {
+                lsum[id][p] = rsum[id][p] = sum[id][p] = 0;
+                lz[id][p] = 1;
             }
-            else {
-                lsum[id][rt] = rsum[id][rt] = sum[id][rt] = cnt[rt];
-                lz[id][rt] = 0;
+            else
+            {
+                lsum[id][p] = rsum[id][p] = sum[id][p] = cnt[p];
+                lz[id][p] = 0;
             }
             return;
         }
-        push_down(id,rt);
-        int mid = (l+r)>>1;
-        if(qr <= mid) update(id,ql,qr,val,l,mid,rt<<1);
-        else if(ql > mid) update(id,ql,qr,val,mid+1,r,rt<<1|1);
-        else {
-            update(id,ql,mid,val,l,mid,rt<<1);
-            update(id,mid+1,qr,val,mid+1,r,rt<<1|1);
-        }
-        push_up(id,rt);
+        push_down(id, p);
+        int mid = pl + pr >> 1;
+        if (L <= mid) update(L, R, lson, pl, mid, id, val);
+        if (R > mid) update(L, R, rson, mid + 1, pr, id, val);
+        push_up(id, p);
     }
-    int query(int id,int val,int l,int r,int rt) {
-        if(l == r) return l;
-        push_down(id,rt);
-        int mid = (l+r)>>1;
-        if(sum[id][rt<<1] >= val) return query(id,val,l,mid,rt<<1);
-        if(rsum[id][rt<<1] + lsum[id][rt<<1|1] >= val) return mid - rsum[id][rt<<1] + 1;
-        return query(id,val,mid+1,r,rt<<1|1);
+    int query(int id, int val, int p, int pl, int pr)
+    {
+        if (pl == pr) return pl;
+        push_down(id, p);
+        int mid = pl + pr >> 1;
+        if (sum[id][lson] >= val) return query(id, val, lson, pl, mid);
+        if (rsum[id][lson] + lsum[id][rson] >= val) return mid + 1 - rsum[id][lson];
+        return query(id, val, rson, mid + 1, pr);
     }
 }seg;
 int main()
 {
-    char op[20];int len;
-    int le,ri;
-    int caset,cas = 0;scanf("%d",&caset);
-    while(caset--)
+    char op[20]; int len;
+    int le, ri;
+    int caset, cas = 0; scanf("%d", &caset);
+    while (caset--)
     {
-        scanf("%d%d",&n,&q);
+        scanf("%d%d", &n, &q);
         seg.init();
-        seg.build(1,n,1);
-        printf("Case %d:\n",++cas);
-        while(q--)
+        seg.build(1, 1, n);
+        printf("Case %d:\n", ++cas);
+        while (q--)
         {
-            scanf("%s",op);
-            if(op[0] == 'D') {
-                scanf("%d",&len);
-                if(seg.sum[0][1] < len) {
+            scanf("%s", op);
+            if (op[0] == 'D')
+            {
+                scanf("%d", &len);
+                if (seg.sum[0][1] < len)
+                {
                     printf("fly with yourself\n");
                     continue;
                 }
-                int pos = seg.query(0,len,1,n,1);
-                printf("%d,let's fly\n",pos);
-                seg.update(0,pos,pos+len-1,1,1,n,1);
+                int pos = seg.query(0, len, 1, 1, n);
+                printf("%d,let's fly\n", pos);
+                seg.update(pos, pos + len - 1, 1, 1, n, 0, 1);
             }
-            else if(op[0] == 'N') {
-                scanf("%d",&len);
-                if(seg.sum[1][1] < len) {
+            else if (op[0] == 'N')
+            {
+                scanf("%d", &len);
+                if (seg.sum[1][1] < len)
+                {
                     printf("wait for me\n");
                     continue;
                 }
-                if(seg.sum[0][1] < len) {
-                    int sta = seg.query(1,len,1,n,1);
-                    printf("%d,don't put my gezi\n",sta); /// 单引号!
-                    seg.update(0,sta,sta+len-1,1,1,n,1);
-                    seg.update(1,sta,sta+len-1,1,1,n,1);
+                if (seg.sum[0][1] < len)
+                {
+                    int sta = seg.query(1, len, 1, 1, n);
+                    printf("%d,don't put my gezi\n", sta);
+                    seg.update(sta, sta + len - 1, 1, 1, n, 0, 1);
+                    seg.update(sta, sta + len - 1, 1, 1, n, 1, 1);
                 }
-                else {
-                    int pos = seg.query(0,len,1,n,1);
+                else
+                {
+                    int pos = seg.query(0, len, 1, 1, n);
                     printf("%d,don't put my gezi\n",pos);
-                    seg.update(0,pos,pos+len-1,1,1,n,1);
-                    seg.update(1,pos,pos+len-1,1,1,n,1);
+                    seg.update(pos, pos + len - 1, 1, 1, n, 0, 1);
+                    seg.update(pos, pos + len - 1, 1, 1, n, 1, 1);
                 }
             }
-            else {
-                scanf("%d%d",&le,&ri);
+            else
+            {
+                scanf("%d%d", &le, &ri);
                 printf("I am the hope of chinese chengxuyuan!!\n");
-                seg.update(0,le,ri,0,1,n,1);
-                seg.update(1,le,ri,0,1,n,1);
+                seg.update(le, ri, 1, 1, n, 0, 0);
+                seg.update(le, ri, 1, 1, n, 1, 0);
             }
         }
     }
@@ -9300,7 +9319,7 @@ int main()
 
 [Picture - HDU 1828 - Virtual Judge](https://vjudge.csgrandeur.cn/problem/HDU-1828)
 
-**矩形周长并**, 本题由于数据较小, 所以不用离散化, 区别就是直接根据最大最小值进行建树即可, 不用取相对位置, 计算周长并, 需要计算横线和竖线, 竖线的计算需要根据此时有多少条独立的横线来判断其数量, 并加入左右端点的记录来判断有多少条独立的边, 
+**矩形周长并**, 本题由于数据较小, 所以不用离散化, 区别就是直接根据最大最小值进行建树即可, 不用取相对位置, 计算周长并, 需要计算横线和竖线, 竖线的计算需要根据此时有多少条独立的横线来判断其数量, 并加入左右端点的记录来判断有多少条独立的边, 需要注意的是, 在`update`和`push_up`上与一般线段树操作有所不同, 因为图形是矩形, 所以在出现一条新的入边时, 也必然会有一条对应的出边在后面出现, 所以不必`push_down`, 将对应节点更新即可
 
 ```c++
 #include <bits/stdc++.h>
@@ -9381,6 +9400,92 @@ int main()
     return 0;
 }
 ```
+
+[Picture - POJ 1177 - Virtual Judge](https://vjudge.csgrandeur.cn/problem/POJ-1177)
+
+```c++
+#include <iostream>
+#include <algorithm>
+const int N = 1e5 + 5;
+#define lson (p << 1)
+#define rson (p << 1 | 1)
+using namespace std;
+
+struct ScanLine
+{
+    int l, r, h, inout;
+    ScanLine() {};
+    ScanLine(int a, int b, int c, int d): l(a), r(b), h(c), inout(d) {}
+    bool operator < (const ScanLine &a) const {return h < a.h;}
+}line[N];
+struct SegTree
+{
+    bool lbd[N << 2], rbd[N << 2];
+    int num[N << 2], tag[N << 2], length[N << 2];
+    void push_up(int p, int pl, int pr)
+    {
+        if (tag[p])
+        {
+            lbd[p] = rbd[p] = 1;
+            length[p] = pr - pl + 1;
+            num[p] = 1;
+        }
+        else if (pl == pr) length[p] = num[p] = lbd[p] = rbd[p] = 0;
+        else
+        {
+            lbd[p] = lbd[lson];
+            rbd[p] = rbd[rson];
+            length[p] = length[lson] + length[rson];
+            num[p] = num[lson] + num[rson];
+            if (lbd[rson] && rbd[lson]) num[p] -= 1;
+        }
+
+    }
+    void update(int L, int R, int io, int p, int pl, int pr)
+    {
+        if (L <= pl && R >= pr)
+        {
+            tag[p] += io;
+            push_up(p, pl, pr);
+            return;
+        }
+        int mid = pl + pr >> 1;
+        if (L <= mid) update(L, R, io, lson, pl, mid);
+        if (R > mid) update(L, R, io, rson, mid + 1, pr);
+        push_up(p, pl, pr);
+    }
+}seg;
+int main()
+{
+    int n; scanf("%d", &n);
+    int cnt = 0;
+    int lbd = 10000, rbd = -10000;
+    for (int i = 0; i < n; i++)
+    {
+        int x1, x2, y1, y2; scanf("%d%d%d%d", &x1, &y1, &x2, &y2);
+        lbd = min(lbd, x1);
+        rbd = max(rbd, x2);
+        line[++cnt] = ScanLine(x1, x2, y1, 1);
+        line[++cnt] = ScanLine(x1, x2, y2, -1);
+    }
+    sort(line + 1, line + 1 + cnt);
+    int ans = 0, last = 0;
+    for (int i = 1; i <= cnt; i++)
+    {
+        if (line[i].l < line[i].r)
+        {
+            seg.update(line[i].l, line[i].r - 1, line[i].inout, 1, lbd, rbd - 1);
+            ans += seg.num[1] * 2 * (line[i + 1].h - line[i].h);
+            ans += abs(seg.length[1] - last);
+            last = seg.length[1];
+        }
+    }
+    printf("%d\n", ans);
+    return 0;
+}
+```
+
+
 
 ###### 二维线段树(树套树)
 

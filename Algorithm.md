@@ -9485,6 +9485,92 @@ int main()
 }
 ```
 
+[覆盖的面积 - HDU 1255 - Virtual Judge](https://vjudge.csgrandeur.cn/problem/HDU-1255)
+
+求被覆盖两次以上的有效长度, 维护两个有效长度, 一个是被覆盖一次, 一个是被覆盖两次或以上
+
+```c++
+#include <bits/stdc++.h>
+const int N = 1e5 + 5;
+#define lson (p << 1)
+#define rson (p << 1 | 1)
+using namespace std;
+
+struct ScanLine
+{
+    double l, r, h; int io;
+    ScanLine() {};
+    ScanLine(double a, double b, double c, int d): l(a), r(b), h(c), io(d) {}
+    bool operator < (const ScanLine &a) const
+    {return h < a.h;}
+}Line[N];
+double xx[N];
+struct SegTree
+{
+    int tag[N << 2]; double len[N << 2]; double len2[N << 2];
+    void init()
+    {
+        memset(tag, 0, sizeof tag);
+        memset(len, 0, sizeof len);
+        memset(len2, 0, sizeof len2);
+    }
+    void push_up(int p, int pl, int pr)
+    {
+        if (tag[p]) len[p] = xx[pr + 1] - xx[pl];
+        else if (pl == pr) len[p] = 0;
+        else len[p] = len[lson] + len[rson];
+        if (tag[p] > 1) len2[p] = xx[pr + 1] - xx[pl];
+        else if (pl == pr) len2[p] = 0;
+        else if (tag[p] == 1) len2[p] = len[lson] + len[rson];
+        else len2[p] = len2[lson] + len2[rson]; 
+    }
+    void update(int L, int R, int val, int p, int pl, int pr)
+    {
+        if (L <= pl && R >= pr)
+        {
+            tag[p] += val;
+            push_up(p, pl, pr);
+            return;
+        }
+        int mid = pl + pr >> 1;
+        if (L <= mid) update(L, R, val, lson, pl, mid);
+        if (R > mid) update(L, R, val, rson, mid + 1, pr);
+        push_up(p, pl, pr);
+    }
+}seg;
+int main()
+{
+    int t; scanf("%d", &t);
+    while (t--)
+    {
+        seg.init();
+        int cnt = 0;
+        int n; scanf("%d", &n);
+        for (int i = 0; i < n; i++)
+        {
+            double x1, x2, y1, y2; scanf("%lf%lf%lf%lf", &x1, &y1, &x2, &y2);
+            Line[++cnt] = ScanLine(x1, x2, y1, 1);
+            xx[cnt] = x2;
+            Line[++cnt] = ScanLine(x1, x2, y2, -1);
+            xx[cnt] = x1;
+        }
+        sort(xx + 1, xx + 1 + cnt);
+        sort(Line + 1, Line + 1 + cnt);
+        int num = unique(xx + 1, xx + 1 + cnt) - (xx + 1);
+        double ans = 0;
+        for (int i = 1; i <= cnt; i++)
+        {
+            int L = lower_bound(xx + 1, xx + 1 + num, Line[i].l) - xx; 
+            int R = lower_bound(xx + 1, xx + 1 + num, Line[i].r) - xx;
+            seg.update(L, R - 1, Line[i].io, 1, 1, num);
+            ans += seg.len2[1] * (Line[i + 1].h - Line[i].h);
+        }
+        printf("%.2f\n", ans);
+    }
+    return 0;
+}
+```
+
 
 
 ###### 二维线段树(树套树)

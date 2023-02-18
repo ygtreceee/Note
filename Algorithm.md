@@ -9571,6 +9571,123 @@ int main()
 }
 ```
 
+[Get The Treasury - HDU 3642 - Virtual Judge](https://vjudge.csgrandeur.cn/problem/HDU-3642)
+
+立方体体积并, 题意是求n个立方体中重叠了3次以上的体积和, 类比于矩形面积并, 由于题中出现了`x, y, z`轴, 多个维度, 需要分别处理, 由于n的范围不大, 所以可以先暴力找出包含了当前扫描高度以及下一次扫描高度之间的立方体, 即`[Z[i], Z[i + 1]]`, 然后再对当前扫描面即`x, y`轴面, 跑一次线段树, 注意计算重叠三次有效长度的方法
+
+```c++
+#include <bits/stdc++.h>
+const int N = 1e5 + 5;
+#define lson (p << 1)
+#define rson (p << 1 | 1)
+#define LL long long
+using namespace std;
+
+int n, len;
+struct node
+{
+    int l, r, w, h1, h2, op;
+    bool operator < (const node &a) const
+    {return w < a.w;}
+};
+struct segtree
+{
+    int X[N], Z[N], tr[N << 2][4], tag[N << 2];
+    vector<node> ve, we;
+    void init()
+    {
+        len = 0; ve.clear();
+    }
+    void push_up(int p, int pl, int pr)
+    {
+        if (tag[p] >= 3)
+        {
+            tr[p][3] = X[pr + 1] - X[pl];
+            tr[p][2] = tr[p][1] = 0;
+        }
+        else if (tag[p] == 2)
+        {
+            tr[p][1] = 0;
+            tr[p][3] = tr[lson][2] + tr[rson][2] + tr[lson][3] + tr[rson][3] + tr[lson][1] + tr[rson][1];
+            tr[p][2] = X[pr + 1] - X[pl] - tr[p][3];
+        }
+        else if (tag[p] == 1)
+        {
+            tr[p][3] = tr[lson][2] + tr[rson][2] + tr[lson][3] + tr[rson][3];
+            tr[p][2] = tr[lson][1] + tr[rson][1];
+            tr[p][1] = X[pr + 1] - X[pl] - tr[p][3] - tr[p][2];
+        }
+        else
+        {
+            tr[p][1] = tr[lson][1] + tr[rson][1];
+            tr[p][2] = tr[lson][2] + tr[rson][2];
+            tr[p][3] = tr[lson][3] + tr[rson][3];
+        }
+    }
+    void update(int L, int R, int p, int pl, int pr, int d)
+    {
+        if (L <= pl && R >= pr)
+        {
+            tag[p] += d;
+            push_up(p, pl, pr);
+            return;
+        }
+        int mid = pl + pr >> 1;
+        if (L <= mid) update(L, R, lson, pl, mid, d);
+        if (R > mid) update(L, R, rson, mid + 1, pr, d);
+        push_up(p, pl, pr);
+    }
+    LL cal()
+    {
+        sort(we.begin(), we.end());
+        LL res = 0;
+        for (int i = 0; i < (int)we.size(); i++)
+        {
+            int L = lower_bound(X, X + len, we[i].l) - X;
+            int R = lower_bound(X, X + len, we[i].r) - X;
+            update(L, R - 1, 1, 0, len, we[i].op);
+            if (i < (int)we.size() - 1) res += 1LL * tr[1][3] * (we[i + 1].w - we[i].w);
+        }
+        return res;
+    }
+    LL Solve()
+    {
+        sort(X, X + len); sort(Z, Z + len);
+        int lenz = unique(Z, Z + len) - Z;
+        len = unique(X, X + len) - X;
+        LL res = 0;
+        for (int i = 0; i < lenz - 1; i++)
+        {
+            we.clear();
+            for (int j = 0; j < (int)ve.size(); j++)
+                if (ve[j].h1 <= Z[i] && ve[j].h2 >= Z[i + 1]) we.push_back(ve[j]);
+            res += cal() * (Z[i + 1] - Z[i]);
+        }
+        return res;
+    }
+
+}seg;
+int main()
+{
+    int T; cin >> T;
+    for (int Case = 1; Case <= T; Case++)
+    {
+        cin >> n; seg.init();
+        while (n--)
+        {
+            int x, y, z, xx, yy, zz; cin >> x >> y >> z >> xx >> yy >> zz;
+            seg.X[len] = x, seg.X[len + 1] = xx;
+            seg.Z[len] = z, seg.Z[len + 1] = zz;
+            len += 2;
+            seg.ve.push_back(node{x, xx, y, z, zz, 1});
+            seg.ve.push_back(node{x, xx, yy, z, zz, -1});
+        }
+        printf("Case %d: %lld\n", Case, seg.Solve());
+    }
+    return 0;
+}
+```
+
 
 
 ###### 二维线段树(树套树)

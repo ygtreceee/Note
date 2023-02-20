@@ -103,6 +103,146 @@ int main()
 }
 ```
 
+[合并果子 / USACO06NOV Fence Repair G](https://vjudge.csgrandeur.cn/contest/535520#problem/G)
+
+注意要将新生成的元素继续push进去
+
+```c++
+#include <iostream>
+#include <cstring>
+#include <queue>
+#include <map>
+#include <algorithm>
+using namespace std;
+int main()
+{
+    int n, a, sum = 0;
+    priority_queue<int, vector<int>, greater<int>> q;
+    for (cin >> n; n--; ) cin >> a, q.push(a);
+    while (q.size() > 1)
+    {
+        int x = q.top(); q.pop();
+        int y = q.top(); q.pop();
+        sum += x + y;
+        q.push(x + y);
+    }
+    cout << sum;
+    return 0;
+}
+```
+
+[世界杯](https://vjudge.csgrandeur.cn/contest/535520#problem/H)
+
+```c++
+#include <iostream>
+#include <cstring>
+#include <queue>
+#include <map>
+#include <algorithm>
+using namespace std;
+int a, b, c, d, s;
+int main()
+{
+    cin >> a >> b >> c >> d;
+    priority_queue<int, vector<int>, less<int>> as;
+    priority_queue<int, vector<int>, less<int>> bs;
+    priority_queue<int, vector<int>, less<int>> cs;
+    priority_queue<int, vector<int>, less<int>> ds;
+    for (int i = 0; i < a; i++) cin >> s, as.push(s);
+    for (int i = 0; i < b; i++) cin >> s, bs.push(s);
+    for (int i = 0; i < c; i++) cin >> s, cs.push(s);
+    for (int i = 0; i < d; i++) cin >> s, ds.push(s);
+    for (cin >> a; a--; )
+    {
+        int sum = as.top();
+        as.pop();
+        cin >> b >> c >> d;
+        while (b--) sum += bs.top(), bs.pop();
+        while (c--) sum += cs.top(), cs.pop();
+        while (d--) sum += ds.top(), ds.pop();
+        printf("%.2f\n", sum / 11.0);
+    }
+    return 0;
+}
+```
+
+[序列合并](https://vjudge.csgrandeur.cn/contest/535520#problem/I)
+
+`n`达到$10^5$, 使用枚举会超时. 先把A序列第一个和B序列所有数相加加入优先队列, 此时第一个数必定是对最小的, 因为它由A和B序列各自第一个元素组成, 后面的`n-1`的元素是第几小暂时不确定, 所以此题需要动态维护最小值, 每次操作, 都加进去上一个已知最小值的下一个可能的最小值, 注意优先队列的`pair`第一个元素储存和, 第二个元素储存的是该和对应的B序列的位置, 而`step[]`表示b序列位置对应上方走了多少步, 都是为了避免重复.
+
+```c++
+#include <algorithm>
+#include <iostream>
+#include <cstring>
+#include <queue>
+#include <map>
+using namespace std;
+const int maxn = 1e5 + 10;
+int a[maxn], b[maxn], step[maxn], n, ret;
+priority_queue<pair<int, int>, vector<pair<int, int>>, greater<pair<int, int>>> q;
+int main()
+{
+    scanf("%d", &n);
+    for (int i = 1; i <= n; i++) scanf("%d", &a[i]);
+    for (int i = 1; i <= n; i++)
+    {
+        scanf("%d", &b[i]);
+        step[i] = 1;
+        q.push(pair<int, int>(a[1] + b[i], i));
+    }
+    while (n--)
+    {
+        printf("%d ", q.top().first);
+        ret = q.top().second;
+        q.pop();
+        q.push(pair<int, int>(a[++step[ret]] + b[ret], ret));
+    }
+    return 0;
+}
+```
+
+J - Cow Dance Show S
+
+"求表演时间不大于$T_{max}$ 时的K的最小可能值" 纯纯二分味道, 但是理解题意时需要特别注意，此题奶牛的出场顺序已经被固定了, 所以不用考虑什么最优组合方案, 直接加入优先队列, 按表演时间长短排序, 下一只母牛接上最先结束的母牛即可.
+
+```c++
+#include <algorithm>
+#include <iostream>
+#include <cstring>
+#include <queue>
+#include <map>
+using namespace std;
+int k, t, ret, a[10010];
+priority_queue<int, vector<int>, greater<int>> q;
+bool check(int x)
+{
+    for (int i = 1; i <= x; i++) q.push(a[i]);
+    int sum;
+    for (int i = x + 1; i <= k; i++)
+    {
+        int tmp = q.top() + a[i];
+        q.pop(); q.push(tmp);
+    }   
+    while (!q.empty())
+        sum = q.top(), q.pop();
+    return sum <= t;
+}
+int main()
+{
+    scanf("%d%d", &k, &t);
+    for (int i = 1; i <= k; i++) scanf("%d", &a[i]);
+    int l = 1, r = 10000;
+    while (l < r)
+    {
+        int mid = l + r >> 1;
+        if (check(mid)) r = mid;
+        else l = mid + 1;
+    }
+    printf("%d", l);
+    return 0;
+}
+```
+
 ###### 单调队列
 
 ACWing 154. 滑动窗口
@@ -1497,98 +1637,6 @@ int main()
 }
 ```
 
-voj Freefall
-
-此题之所以前面不过，是因为在最后没有考虑取整，因为用的是double算，而能过掉一些案例，是因为可能取的小数算的答案和正确结果相差不大，但是事实上我们是需要对它作向下取整和向上取整的判断的，因为你算的小数，两侧附近的整数点都可能是答案
-
-```c++
-//三分
-//?
-#include <iostream>
-#include <algorithm>
-#include <cmath>
-using namespace std;
-double a, b;
-#define eps 1e-10
-bool check(double lmid, double rmid)
-{
-	if ((lmid * b + a / sqrt(lmid + 1)) - (rmid * b + a / sqrt(rmid + 1)) > eps)
-		return true;
-	else return false;
-}
-int main()
-{
-	scanf("%lf%lf", &a, &b);
-	double l = 0, r = a, lmid, rmid; //!
-	while (l <= r)
-	{
-		lmid = l + (r - l) / 3;
-		rmid = r - (r - l) / 3;
-		if (check(lmid, rmid)) l = lmid + 1;
-		else r = rmid - 1;
-	}
-	printf("%.10lf", l * b + a / sqrt(l + 1));
-	return 0;
-}
-//AC
-#include <iostream>
-#include <algorithm>
-#include <cmath>
-using namespace std;
-double a, b;
-#define eps 1e-10
-double f(double x)
-{
-    return x * b + a / sqrt(x + 1);
-}
-int main()
-{
-	scanf("%lf%lf", &a, &b);
-	double l = 0, r = a, lmid, rmid; //!
-	while (r - l > eps)
-	{
-		lmid = l + (r - l) / 3;
-		rmid = r - (r - l) / 3;
-		if (f(lmid) - f(rmid) > eps) l = lmid + 1;
-		else r = rmid - 1;
-	}
-	printf("%.10f", min(f(ceil(l)), f(floor(l))));
-	return 0;
-}
-//参考代码
-#include <iostream>
-#include <iomanip>
-#include <cmath>
-using namespace std;
-using LL = long long;
-int main()
-{
-    LL a, b;
-    cin >> a >> b;
-    auto f = [&](LL n) -> double 
-    { 
-        return (double) a / sqrt(n + 1) + (double) b * n;
-    };
-    LL l = 0, r = a / b;
-    while (r - l > 2)
-    {
-        LL m1 = (l * 2 + r) / 3;
-        LL m2 = (l + r * 2) / 3;
-        //LL m1 = l + (r - l) / 3;  //这种分发也可以,有些小误差,但也能ac
-        //LL m2 = r - (r - l) / 3;
-        if (f(m1) > f(m2)) l = m1;
-        else r = m2;
-    }
-    double ans = a;
-    for (LL i = l; i <= r; i++)
-    {
-        ans = min(ans, f(i));
-    }
-    cout << fixed << setprecision(10) << ans << endl;
-    return 0;
-}
-
-```
 
 voj Last Rook
 
@@ -1725,8 +1773,9 @@ int main()
 
 voj Yukari's Birthday
 
+此题二分的对象不是简单的一个数, 而是两个数相乘的结果, 考虑到`r`的值较小, 所以对`r`进行遍历, 首先`r = 1`时已经可以确定, 所以从`r = 2`开始, 然后二分找到能符合要求的`k`值, 如果存在则维护`r * k`即可
+
 ```c++
-//？？？
 #include <iostream>
 #include <algorithm>
 #include <cmath>
@@ -1878,6 +1927,99 @@ int main()
 	printf("%.5f", l);
     return 0;
 }
+```
+
+[Freefall Virtual Judge](https://vjudge.csgrandeur.cn/contest/533271#problem/J)
+
+此题之所以前面不过，是因为在最后没有考虑取整，因为用的是double算，而能过掉一些案例，是因为可能取的小数算的答案和正确结果相差不大，但是事实上我们是需要对它作向下取整和向上取整的判断的，因为你算的小数，两侧附近的整数点都可能是答案
+
+```c++
+//三分
+//?
+#include <iostream>
+#include <algorithm>
+#include <cmath>
+using namespace std;
+double a, b;
+#define eps 1e-10
+bool check(double lmid, double rmid)
+{
+	if ((lmid * b + a / sqrt(lmid + 1)) - (rmid * b + a / sqrt(rmid + 1)) > eps)
+		return true;
+	else return false;
+}
+int main()
+{
+	scanf("%lf%lf", &a, &b);
+	double l = 0, r = a, lmid, rmid; //!
+	while (l <= r)
+	{
+		lmid = l + (r - l) / 3;
+		rmid = r - (r - l) / 3;
+		if (check(lmid, rmid)) l = lmid + 1;
+		else r = rmid - 1;
+	}
+	printf("%.10lf", l * b + a / sqrt(l + 1));
+	return 0;
+}
+//AC
+#include <iostream>
+#include <algorithm>
+#include <cmath>
+using namespace std;
+double a, b;
+#define eps 1e-10
+double f(double x)
+{
+    return x * b + a / sqrt(x + 1);
+}
+int main()
+{
+	scanf("%lf%lf", &a, &b);
+	double l = 0, r = a, lmid, rmid; //!
+	while (r - l > eps)
+	{
+		lmid = l + (r - l) / 3;
+		rmid = r - (r - l) / 3;
+		if (f(lmid) - f(rmid) > eps) l = lmid + 1;  //浮点数的比较需要借助精确度
+		else r = rmid - 1;
+	}
+	printf("%.10f", min(f(ceil(l)), f(floor(l))));
+	return 0;
+}
+//参考代码
+#include <iostream>
+#include <iomanip>
+#include <cmath>
+using namespace std;
+using LL = long long;
+int main()
+{
+    LL a, b;
+    cin >> a >> b;
+    auto f = [&](LL n) -> double 
+    { 
+        return (double) a / sqrt(n + 1) + (double) b * n;
+    };
+    LL l = 0, r = a / b;
+    while (r - l > 2)
+    {
+        LL m1 = (l * 2 + r) / 3;
+        LL m2 = (l + r * 2) / 3;
+        //LL m1 = l + (r - l) / 3;  //这种分发也可以,有些小误差,但也能ac
+        //LL m2 = r - (r - l) / 3;
+        if (f(m1) > f(m2)) l = m1;
+        else r = m2;
+    }
+    double ans = a;
+    for (LL i = l; i <= r; i++)
+    {
+        ans = min(ans, f(i));
+    }
+    cout << fixed << setprecision(10) << ans << endl;
+    return 0;
+}
+
 ```
 
 #### 前缀和与差分
@@ -2603,7 +2745,7 @@ int main()
 
 F - 很大的数组的第k小
 
-**快速排序: 用于寻找第k大(第k小)的数, 时间复杂度为O(n)**
+**快速排序: 用于寻找第k大(第k小)的数, 时间复杂度为`O(n)`**
 
 这道题可作为**快速排序**的模板题, 需要记忆. 快速排序的核心思想是在要排序的数组中选择一个数, 然后将数组中比这个数小的放在这个数的左边, 比这个数大的放在他的右边, 现在我们要找第k小的数, 那么如果在数组中选了一个数, 用快排的方法, 将比这个数小的数都放在它的左边, 而左边的数(加标签个数), 若小于k个, 说明这个数应该在标签的右边,  若大于k个, 说明在标签左边, 若刚好等于k, 说明这个标签正是我们要找的数. 
 
@@ -2680,7 +2822,7 @@ int main() {
     return 0;
 }
 
-//
+//ygtrece
 #include <algorithm>
 #include <iostream>
 #include <cstring>
@@ -2878,7 +3020,7 @@ int main()
 
 J - Fibonacci
 
-计算**斐波那契数列**的重要方法: 矩阵快速幂
+计算**斐波那契数列**的重要方法: 矩阵快速幂, 设计一个`2 x 2`矩阵, 利用矩阵乘法, 可以将斐波那契的计算转化为矩阵快速幂计算, 
 
 ```c++
 //ygtrece
@@ -6463,147 +6605,7 @@ int main()
 }
 ```
 
-G - 合并果子 / [USACO06NOV] Fence Repair G
 
-注意要将新生成的元素继续push进去
-
-```c++
-#include <iostream>
-#include <cstring>
-#include <queue>
-#include <map>
-#include <algorithm>
-using namespace std;
-int main()
-{
-    int n, a, sum = 0;
-    priority_queue<int, vector<int>, greater<int>> q;
-    for (cin >> n; n--; ) cin >> a, q.push(a);
-    while (q.size() > 1)
-    {
-        int x = q.top(); q.pop();
-        int y = q.top(); q.pop();
-        sum += x + y;
-        q.push(x + y);
-    }
-    cout << sum;
-    return 0;
-}
-```
-
-H - 世界杯
-
-```c++
-#include <iostream>
-#include <cstring>
-#include <queue>
-#include <map>
-#include <algorithm>
-using namespace std;
-int a, b, c, d, s;
-int main()
-{
-    cin >> a >> b >> c >> d;
-    priority_queue<int, vector<int>, less<int>> as;
-    priority_queue<int, vector<int>, less<int>> bs;
-    priority_queue<int, vector<int>, less<int>> cs;
-    priority_queue<int, vector<int>, less<int>> ds;
-    for (int i = 0; i < a; i++) cin >> s, as.push(s);
-    for (int i = 0; i < b; i++) cin >> s, bs.push(s);
-    for (int i = 0; i < c; i++) cin >> s, cs.push(s);
-    for (int i = 0; i < d; i++) cin >> s, ds.push(s);
-    for (cin >> a; a--; )
-    {
-        int sum = as.top();
-        as.pop();
-        cin >> b >> c >> d;
-        while (b--) sum += bs.top(), bs.pop();
-        while (c--) sum += cs.top(), cs.pop();
-        while (d--) sum += ds.top(), ds.pop();
-        printf("%.2f\n", sum / 11.0);
-    }
-    return 0;
-}
-```
-
-I - 序列合并
-
-`n`达到$10^5$, 使用枚举会超时. 先把A序列第一个和B序列所有数相加加入优先队列, 此时第一个数必定是对最小的, 因为它由A和B序列各自第一个元素组成, 后面的`n-1`的元素是第几小暂时不确定, 所以此题需要动态维护最小值, 每次操作, 都加进去上一个已知最小值的下一个可能的最小值, 注意优先队列的`pair`第一个元素储存和, 第二个元素储存的是该和对应的B序列的位置, 而`step[]`表示b序列位置对应上方走了多少步, 都是为了避免重复.
-
-```c++
-#include <algorithm>
-#include <iostream>
-#include <cstring>
-#include <queue>
-#include <map>
-using namespace std;
-const int maxn = 1e5 + 10;
-int a[maxn], b[maxn], step[maxn], n, ret;
-priority_queue<pair<int, int>, vector<pair<int, int>>, greater<pair<int, int>>> q;
-int main()
-{
-    scanf("%d", &n);
-    for (int i = 1; i <= n; i++) scanf("%d", &a[i]);
-    for (int i = 1; i <= n; i++)
-    {
-        scanf("%d", &b[i]);
-        step[i] = 1;
-        q.push(pair<int, int>(a[1] + b[i], i));
-    }
-    while (n--)
-    {
-        printf("%d ", q.top().first);
-        ret = q.top().second;
-        q.pop();
-        q.push(pair<int, int>(a[++step[ret]] + b[ret], ret));
-    }
-    return 0;
-}
-```
-
-
-
-J - Cow Dance Show S
-
-"求表演时间不大于$T_{max}$ 时的K的最小可能值" 纯纯二分味道, 但是理解题意时需要特别注意，此题奶牛的出场顺序已经被固定了, 所以不用考虑什么最优组合方案, 直接加入优先队列, 按表演时间长短排序, 下一只母牛接上最先结束的母牛即可.
-
-```c++
-#include <algorithm>
-#include <iostream>
-#include <cstring>
-#include <queue>
-#include <map>
-using namespace std;
-int k, t, ret, a[10010];
-priority_queue<int, vector<int>, greater<int>> q;
-bool check(int x)
-{
-    for (int i = 1; i <= x; i++) q.push(a[i]);
-    int sum;
-    for (int i = x + 1; i <= k; i++)
-    {
-        int tmp = q.top() + a[i];
-        q.pop(); q.push(tmp);
-    }   
-    while (!q.empty())
-        sum = q.top(), q.pop();
-    return sum <= t;
-}
-int main()
-{
-    scanf("%d%d", &k, &t);
-    for (int i = 1; i <= k; i++) scanf("%d", &a[i]);
-    int l = 1, r = 10000;
-    while (l < r)
-    {
-        int mid = l + r >> 1;
-        if (check(mid)) r = mid;
-        else l = mid + 1;
-    }
-    printf("%d", l);
-    return 0;
-}
-```
 
 #### 树状数组
 
@@ -11428,6 +11430,37 @@ int main()
         for (auto i = path.end() - 1; i >= path.begin(); i--) cout << *i << " ";
     }
     return 0;
+}
+```
+
+[Computers - HDU 1913 - Virtual Judge](https://vjudge.csgrandeur.cn/problem/HDU-1913)
+
+```c++
+#include<iostream>
+#include<stdio.h>
+#include <algorithm>
+using namespace std;
+int map[1005][1005];
+int dp[1005];
+int main()
+{
+	int c,n,start,end,i,j;
+	while(scanf("%d",&c)!=EOF)
+	{
+		scanf("%d",&n);
+		for(start=1;start<=n;start++)
+			for(end=start;end<=n;end++)
+				scanf("%d",&map[start][end]);
+		dp[0]=0;
+		for(i=1;i<=n;i++)
+		{
+			dp[i]=0x3f3f3f3f;
+			for(j=0;j<i;j++)
+				dp[i]=min(dp[i], dp[j]+c+map[j+1][i]);
+		}
+		cout<<dp[n]<<endl;
+	}
+	return 0;
 }
 ```
 

@@ -7437,7 +7437,7 @@ int main()
 
 [P1438 无聊的数列 - 洛谷](https://www.luogu.com.cn/problem/P1438)
 
-称差分序列首项为`s`，末项为`e`，公差为`d`，要将$[l-r]$这段区间加上等差序列, 如果要在差分序列上加一个等差序列，则要在$a_l$加上s, $[a_{l+1},a_r]$ 加上`d`, $a_{r+1}$ 加上`-e`, 注意根据l和r的关系判断一些特殊情况, 比如`l=r`, 或者`r=n`, 用线段树即可, 答案即为$\sum_{n}^{i=1}a[i]$
+称差分序列首项为`s`，末项为`e`，公差为`d`，要将$[l-r]$这段区间加上等差序列, 如果要在差分序列上加一个等差序列，则要在$a_l$加上`s`, $[a_{l+1},a_r]$ 加上`d`, $a_{r+1}$ 加上`-e`, 注意根据l和r的关系判断一些特殊情况, 比如`l=r`, 或者`r=n`, 用线段树即可, 答案即为$\sum_{n}^{i=1}a[i]$
 
 ```c++
 #include <bits/stdc++.h>
@@ -11466,6 +11466,131 @@ int main()
 }
 ```
 
+[Bridge over a rough river - POJ 3404 - Virtual Judge](https://vjudge.csgrandeur.cn/problem/POJ-3404)
+
+**过桥问题**, 主要视为四种情况, 分别是`n == 1, n == 2, n == 3, n == 4`时, 注意`n == 4`时需要分类讨论, 得出不等式, 根据不等式结果进行不同的选择
+
+```c++
+#include <bits/stdc++.h>
+const int N = 1e4 + 5;
+using namespace std;
+
+int main()
+{
+    int t, n, a[N];
+    cin >> t;
+    while (t--)
+    {
+        cin >> n;
+        for (int i = 1; i <= n; i++) cin >> a[i];
+        sort(a + 1, a + 1 + n);
+        int sum = 0;
+        while (n)
+        {
+            if (n <= 3) break;
+            if (2 * a[2] < a[1] + a[n - 1])
+            {
+                sum += (a[1] + 2 * a[2] + a[n]);
+                n -= 2;
+            }
+            else
+            {
+                sum += (2 * a[1] + a[n - 1] + a[n]);
+                n -= 2;
+            }
+        }
+        if (n == 1) sum += a[1];
+        else if (n == 2) sum += a[2];
+        else if (n == 3) sum += (a[1] + a[2] + a[3]);
+        cout << sum << endl;
+    }
+    return 0;
+}
+```
+
+[Sumsets - POJ 2229 - Virtual Judge](https://vjudge.csgrandeur.cn/problem/POJ-2229)
+
+两种方法, 第一种是划分`dp`, 定义`dp[i]`是构造出和`i`的方案数, 通过二进制性质, 构造出特殊的状态转移方程, `i % 2 == 1, dp[i] = dp[i - 1]`, 代表此时`i`只能从`i - 1`加`1`得到; `i % 2 == 0, dp[i] = dp[i - 1] + dp[i >> 1]`, 代表此时`i`可以从`i - 1`加`1`得到, 以及从`i >> 1`中的$2^j$变为$2^{j+1}$, 这样能保证将所有组合划分为有`1`和无`1`的情况; 第二种则是当作完全背包, 同样`dp[i]`是构造出和`i`的方案数.
+
+```c++
+//划分dp
+#include <bits/stdc++.h>
+const int mod = 1e9;
+const int maxn = 1e6 + 10;
+using namespace std;
+int n;
+int dp[maxn];
+int main()
+{
+    cin >> n; 
+    dp[1] = 1;
+    for (int i = 2; i <= n; i++)
+        dp[i] = (i % 2 ? dp[i - 1] : (dp[i - 1] + dp[i >> 1])) % mod;
+    cout << dp[n] << endl;
+    return 0;
+}
+
+
+//完全背包dp
+#include <bits/stdc++.h>
+const int mod = 1e9;
+const int maxn = 1e6 + 10;
+using namespace std;
+
+int n;
+int binn[21];
+int dp[maxn];
+int main()
+{
+    cin >> n;
+    binn[0] = dp[0] = 1;
+    for (int i = 1; i <= 20; i++) binn[i] = binn[i - 1] * 2;
+    for (int i = 0; i < 21; i++)
+        for (int j = binn[i]; j <= n; j++)
+            dp[j] = (dp[j] + dp[j - binn[i]]) % mod;
+    cout << dp[n] << endl;
+    return 0;
+}
+```
+
+[Apple Catching - POJ 2385 - Virtual Judge](https://vjudge.csgrandeur.cn/problem/POJ-2385)
+
+定义`dp[i][j]`, 表示在`i`时间内转移`j`次得到的最大苹果数
+
+```C++
+#include <bits/stdc++.h>
+const int mod = 1e9;
+const int maxn = 1e3 + 10;
+using namespace std;
+
+int a[maxn];
+int dp[1010][35];
+int main()
+{
+    int t, w; cin >> t >> w;
+    for (int i = 1; i <= t; i++) cin >> a[i];
+    for (int i = 1; i <= t; i++)
+        for (int j = 0; j <= w; j++)
+            if (j <= i)
+            {
+                if (j == 0)
+                {
+                    if (a[i] == 1) dp[i][j] = dp[i - 1][j] + 1;
+                    else dp[i][j] = dp[i - 1][j];
+                }
+                else
+                {
+                    if (a[i] == (j & 1) + 1) dp[i][j] = max(dp[i - 1][j], dp[i - 1][j - 1]) + 1;
+                    else dp[i][j] = max(dp[i - 1][j - 1], dp[i - 1][j]);
+                }
+            }
+    int ans = 0;
+    for (int i = 1; i <= t; i++) ans = max(ans, dp[t][i]);
+    cout << ans << endl;
+    return 0;
+}
+```
+
 
 
 #### 状态压缩DP
@@ -11930,6 +12055,43 @@ int main()
     cout << dp[1][n] << endl;
     return 0;
 }
+```
+
+[Cheapest Palindrome - POJ 3280 - Virtual Judge](https://vjudge.csgrandeur.cn/problem/POJ-3280)
+
+```c++
+#include <iostream>
+#include <map>
+#include <string>
+#include <algorithm>
+const int mod = 1e9;
+const int maxn = 1e3 + 10;
+using namespace std;
+int n, m;
+string s;
+int dp[2010][2010];
+int main()
+{
+        cin >> n >> m >> s;
+        memset(dp, 0, sizeof dp);
+        map<char, int> ma;
+        for (int i = 1; i <= n; i++)
+        {
+            char ch; int x, y;
+            cin >> ch >> x >> y;
+            ma[ch] = min(x, y);
+        }
+        for (int i = 2; i <= m; i++)
+            for (int j = 0; j <= (m - i); j++)
+            {
+                if (s[j] == s[j + i - 1] && i == 2) dp[i][j + i - 1] = 0;
+                else if (s[j] == s[j + i - 1] && i != 2) dp[j][j + i - 1] = dp[j + 1][j + i - 2];
+                else dp[j][j + i - 1] = min(dp[j][j + i - 2] + ma[s[j + i - 1]], dp[j + 1][j + i - 1] + ma[s[j]]);
+            }
+        cout << dp[0][m - 1] << endl;
+    return 0;
+}
+
 ```
 
 
@@ -12650,93 +12812,6 @@ int main()
 }
 ```
 
-[P1462 通往奥格瑞玛的道路 - 洛谷](https://www.luogu.com.cn/problem/P1462)
-
-此题的信息是损失的血量和过路费, 关键是明白要找的是血量最短路还是过路费最短路, 如果求过路费最短路, 我们需要从最短的开始求得符合血量要求的路径, 但是实现起来有难度, 所以不妨考虑求血量最短路, 同时**二分过路费用**, 令`l`等于起点和终点过路费的最大值, 令`r`等于所有过路费的最大值, 找尽量小的过路费, 对于大于`mid`的过路费则忽略, 倘若到达终点的血量符合要求则说明该`mid`是符合要求的, 二分思想是解决本题的关键
-
-```c++
-#include <bits/stdc++.h>
-const int N = 1e4 + 10, M = 5e5 + 10;  //注意存边的容量
-using LL = long long;
-using namespace std;
-
-int n, m, b, cnt;
-int f[N];
-int head[N];
-struct node
-{
-    int id; long long n_dis;
-    node(int a, long long b) {id = a; n_dis = b;}
-    bool operator < (const node &a) const
-    {return a.n_dis < n_dis;}
-};
-struct {int to, next; long long w;} edge[M];
-void addedge(int u, int v, int w)
-{
-    cnt++;
-    edge[cnt].to = v;
-    edge[cnt].w = w;
-    edge[cnt].next = head[u];
-    head[u] = cnt;
-}
-long long dis[N];
-bool vis[N];
-void Dijkstra(int x)
-{
-    memset(dis, 0x3f, sizeof dis);
-    memset(vis, 0, sizeof vis);
-    dis[1] = 0;   //注意此处不可以有vis[1] = 1
-    priority_queue<node> q;
-    q.push(node(1, dis[1]));
-    while (!q.empty())
-    {
-        node now = q.top(); q.pop();
-        int ret = now.id;
-        if (vis[ret]) continue; vis[ret] = 1;
-        for (int i = head[ret]; i; i = edge[i].next)
-        {
-            if (vis[edge[i].to] || f[edge[i].to] > x) continue;
-            if (dis[edge[i].to] > dis[ret] + edge[i].w)
-            {
-                dis[edge[i].to] = dis[ret] + edge[i].w;
-                q.push(node(edge[i].to, dis[edge[i].to]));
-            }
-        }
-    }
-    return;
-}
-void Solve()
-{
-    cin >> n >> m >> b;
-    int l = 0, r = 0;
-    for (int i = 1; i <= n; i++) cin >> f[i], r = max(r, f[i]);
-    l = max(f[1], f[n]);
-    for (int i = 1; i <= m; i++)
-    {
-        int u, v, w; cin >> u >> v >> w;
-        addedge(u, v, w);
-        addedge(v, u, w);
-    }
-    while (l < r)
-    {
-        int mid = l + r >> 1;
-        Dijkstra(mid);
-        if (dis[n] <= b) r = mid;
-        else l = mid + 1;
-    }
-    Dijkstra(l);  //注意这里需要处理一次, 因为可能一开始就有l = r
-    if (dis[n] > b) cout << "AFK" << endl;
-    else cout << l << endl;
-    return;
-}
-int main()
-{
-    ios::sync_with_stdio(false);
-    cin.tie(0);
-        Solve();
-    return 0;
-}
-```
 
 
 
@@ -13661,7 +13736,7 @@ int main()
 
 POJ 1797 Heavy Transportation
 
-此题是**Dijkstra变式**，与先前不同的是，它的松弛是`dis[y.to] < min(dis[u.id], y.w)`,如果成立就进行更新，原因是此题是想寻找`1`到`n`的**所有路径的最小权值的最大值**，以前的dis[N]是用来存放当前节点到起点的最短距离，现在的`dis[N]`是用来存放当前节点到起点的路径的最小权值，而且我们始终要保持这个权值取最大，使用的方法就是上面的松弛公式，如果从另一路径过来能使得某个节点的最小权值能更大，那我们就需要更新，否则就不必更新，视作抛弃该路径；如此一直操作至`dis[n]`，则`dis[n]`就是答案；值得特别注意的是，本题的优先队列采用的是大根堆，即从大到小排序，因为我们如果先操作`n_dis`较小的节点，就默认该节点已经找到最大的权值，这可能会导致有另一条能使权值更大的路径因为我们还没走，所以该节点的最大权值并不是真正的最大，而即使存在一条权值更大的，也是从权值大的边走过来的，所以我们优先操作权值大的边能避免这种情况
+此题是**Dijkstra变式**，与先前不同的是，它的松弛是`dis[y.to] < min(dis[u.id], y.w)`,如果成立就进行更新，原因是此题是想寻找`1`到`n`的**所有路径的最小权值的最大值**，以前的dis[N]是用来存放当前节点到起点的最短距离，现在的`dis[N]`是用来存放当前节点到起点的路径的最小权值，而且我们始终要保持这个权值取最大，使用的方法就是上面的松弛公式，如果从另一路径过来能使得某个节点的最小权值能更大，那我们就需要更新，否则就不必更新，视作抛弃该路径；如此一直操作至`dis[n]`，则`dis[n]`就是答案；值得特别注意的是，本题的优先队列采用的是大根堆，即从大到小排序，因为我们如果先操作`n_dis`较小的节点，就默认该节点已经找到最大的权值，这可能会导致有另一条能使权值更大的路径因为我们还没走，所以该节点的最大权值并不是真正的最大，而即使存在一条权值更大的，也是从权值大的边走过来的，所以我们优先操作权值大的边能避免这种情况, 当然使用最大生成树也是可以过的
 
 ```c++
 #include <iostream>
@@ -13748,7 +13823,7 @@ void Floyd()
 {
     for (int k = 1; k <= n; k++)
         for (int i = 1; i <= n; i++)
-            if (d[i][k]) d[i] |= d[k];
+            if (d[i][k]) d[i] |= d[k];  //简化版
 }
 int main()
 {
@@ -13868,7 +13943,7 @@ int dijkstra(int l, int r)
             }
         }
     }
-    int tmp = mon[1];  //为什么设为INF，从i = 1开始不行？
+    int tmp = mon[1];
     for (int i = 2; i <= n; i++)
     {
         if (lev[i] > r || lev[i] < l) continue;
@@ -13901,8 +13976,9 @@ int main()
 
 POJ 2253 Frogger
 
+要求点`1`到点`2`所有可能路径最大权值的最小值, 可直接求出点`1`到所有点所有可能路径最大权值的最小值, 从距离最近的点开始, 逐渐遍历和更新, 而遍历时, 每一个点就已经算是找到了所有可能路径最大权值的最小值, 因为后面遍历到的都是和`1`距离更远的点, 即使能通过它们回到以前的点, 也没有必要了, 因为不可能再改变最大权值的最小值 
+
 ```c++
-//Dijkstra
 #include<iostream>
 #include<cstdio>
 #include<cmath>
@@ -13927,7 +14003,7 @@ void init()
 	for (int i = 1; i <= n; i++)
 		visit[i] = 0;
 	for (int i = 2; i <= n; i++)	//初始化各个石头到1号石头的青蛙距离
-			dis[i] = getLength(point[1].first, point[1].second, point[i].first, point[i].second);
+		dis[i] = getLength(point[1].first, point[1].second, point[i].first, point[i].second);
 }
 void dijkstra()
 {
@@ -13947,7 +14023,7 @@ void dijkstra()
 		{
 			if (!visit[j]) {
 				double len = getLength(point[t].first, point[t].second, point[j].first, point[j].second);
-				if (dis[j] > max(len, dis[t]))dis[j] = max(len, dis[t]);
+				if (dis[j] > max(len, dis[t])) dis[j] = max(len, dis[t]);
 				//松驰操作，dis[j]表示1到j的青蛙距离，max(len, dis[t])表示1通过t到达j的青蛙距离，两者取最小值
 			}
 		}
@@ -13976,6 +14052,8 @@ int main()
 ```
 
 luogu P1144 最短路计数
+
+先操作`dijkstra`, 然后对每一个点进行`dfs`, 注意`dfs`时进去的判断条件, 需要是邻居节点而且与点`1`的距离应该逐渐减`1`
 
 ```c++
 #include <iostream>
@@ -14035,11 +14113,95 @@ int main()
 }
 ```
 
+[P1462 通往奥格瑞玛的道路 - 洛谷](https://www.luogu.com.cn/problem/P1462)
 
+此题的信息是损失的血量和过路费, 关键是明白要找的是血量最短路还是过路费最短路, 如果求过路费最短路, 我们需要从最短的开始求得符合血量要求的路径, 但是实现起来有难度, 所以不妨考虑求血量最短路, 同时**二分过路费用**, 令`l`等于起点和终点过路费的最大值, 令`r`等于所有过路费的最大值, 找尽量小的过路费, 对于大于`mid`的过路费则忽略, 倘若到达终点的血量符合要求则说明该`mid`是符合要求的, 二分思想是解决本题的关键
 
+```c++
+#include <bits/stdc++.h>
+const int N = 1e4 + 10, M = 5e5 + 10;  //注意存边的容量
+using LL = long long;
+using namespace std;
+
+int n, m, b, cnt;
+int f[N];
+int head[N];
+struct node
+{
+    int id; long long n_dis;
+    node(int a, long long b) {id = a; n_dis = b;}
+    bool operator < (const node &a) const
+    {return a.n_dis < n_dis;}
+};
+struct {int to, next; long long w;} edge[M];
+void addedge(int u, int v, int w)
+{
+    cnt++;
+    edge[cnt].to = v;
+    edge[cnt].w = w;
+    edge[cnt].next = head[u];
+    head[u] = cnt;
+}
+long long dis[N];
+bool vis[N];
+void Dijkstra(int x)
+{
+    memset(dis, 0x3f, sizeof dis);
+    memset(vis, 0, sizeof vis);
+    dis[1] = 0;   //注意此处不可以有vis[1] = 1
+    priority_queue<node> q;
+    q.push(node(1, dis[1]));
+    while (!q.empty())
+    {
+        node now = q.top(); q.pop();
+        int ret = now.id;
+        if (vis[ret]) continue; vis[ret] = 1;
+        for (int i = head[ret]; i; i = edge[i].next)
+        {
+            if (vis[edge[i].to] || f[edge[i].to] > x) continue;
+            if (dis[edge[i].to] > dis[ret] + edge[i].w)
+            {
+                dis[edge[i].to] = dis[ret] + edge[i].w;
+                q.push(node(edge[i].to, dis[edge[i].to]));
+            }
+        }
+    }
+    return;
+}
+void Solve()
+{
+    cin >> n >> m >> b;
+    int l = 0, r = 0;
+    for (int i = 1; i <= n; i++) cin >> f[i], r = max(r, f[i]);
+    l = max(f[1], f[n]);
+    for (int i = 1; i <= m; i++)
+    {
+        int u, v, w; cin >> u >> v >> w;
+        addedge(u, v, w);
+        addedge(v, u, w);
+    }
+    while (l < r)
+    {
+        int mid = l + r >> 1;
+        Dijkstra(mid);
+        if (dis[n] <= b) r = mid;
+        else l = mid + 1;
+    }
+    Dijkstra(l);  //注意这里需要处理一次, 因为可能一开始就有l = r
+    if (dis[n] > b) cout << "AFK" << endl;
+    else cout << l << endl;
+    return;
+}
+int main()
+{
+    ios::sync_with_stdio(false);
+    cin.tie(0);
+        Solve();
+    return 0;
+}
 ```
 
-```
+
 
 
 

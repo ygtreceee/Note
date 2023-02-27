@@ -11591,6 +11591,109 @@ int main()
 }
 ```
 
+[Coins - POJ 1742 - Virtual Judge](https://vjudge.csgrandeur.cn/problem/POJ-1742)
+
+多重背包问题, 但是此题即便用了二进制优化也是会`TLE`, 所以在这里进行一个可行性剪枝优化, 开一个数组记录用过的数量
+
+```c++
+#include<cstdio>
+#include<cstring>
+using namespace std;
+typedef long long ll;
+int a[102],c[102],used[100002];
+bool f[100005];
+int main(){
+	int n,m;
+	while(scanf("%d%d",&n,&m),n||m){
+		memset(f,false,sizeof(f));
+		for(int i = 1; i <= n; i++) scanf("%d",&a[i]);
+		for(int i = 1; i <= n; i++) scanf("%d",&c[i]);
+		f[0]=1;
+		for(int i = 1; i <= n; i++){
+			for(int j = 0; j <= m; j++) used[j]=0;
+			for(int j = a[i]; j <= m; j++){
+				if(!f[j]&&f[j-a[i]]&&used[j-a[i]]<c[i]) 
+				f[j]=true,used[j]=used[j-a[i]]+1;
+			}
+		}
+		int ans = 0;
+		for(int i = 1; i <= m; i++) ans+=f[i];
+		printf("%d\n",ans);
+	}
+	return 0;
+} 
+```
+
+[Ant Counting - POJ 3046 - Virtual Judge](https://vjudge.csgrandeur.cn/problem/POJ-3046#author=0)
+
+多重集组合问题, `n`种蚂蚁, 第`i`种有$a_i$个, 即`num[i]` 不同类别的蚂蚁可以相互区分, 但是同类别不行, 从这些蚂蚁中分别取出`S, s + 1, s + 2, ..., B`个, 问一共有多少种取法. 在考虑`dp`解法时, 要考虑的是`dp`数组的意义该如何设置, 以及状态如何转移, 题目中的关键因素是蚂蚁的种数以及取出的个数, 所以状态转移的时候要抓住这两点, 我们定义`dp[i + 1][j]`是从前`i`种中取出`j`个组合数, 那转移的时候应该是$dp[i + 1][j] = \sum_{k = 0}^{min(j,num[i])}dp[i][j - k]$ , 但是强行转换会导致超时, 所以考虑优化. 考虑两种情况`j > num[i]`和`j <= num[i]`, 第一种情况时, 将求和公式展开会发现`dp[i + 1][j] = dp[i + 1][j - 1] + dp[i][j]`, 第二种情况也是展开求和公式可得`dp[i + 1][j] = dp[i + 1][j - 1] + dp[i][j] - dp[i][j - num[i] - 1]`, 同时注意初始量的设置`dp[i][0] = 1`, 若要在空间上优化, 可以使用滚动数组
+
+```c++
+#include <bits/stdc++.h>
+const int maxn = 1e4 + 10;
+const int mod = 1e6;
+using namespace std;
+
+int dp[1010][100010];
+int num[1010];
+int main()
+{
+    int T, A, S, B;
+    while (~scanf("%d%d%d%d", &T, &A, &S, &B))
+    {
+        memset(num, 0, sizeof num);
+        for (int i = 1; i <= A; i++)
+        {
+            int x; scanf("%d", &x);
+            num[x - 1]++;
+        }
+        for (int i = 0; i <= T; i++)
+            dp[i][0] = 1;
+        for (int i = 0; i < T; i++)
+            for (int j = 1; j <= B; j++)
+            {
+                if (j > num[i]) dp[i + 1][j] = (dp[i + 1][j - 1] + dp[i][j] - dp[i][j - 1 - num[i]] + mod) % mod;
+                else dp[i + 1][j] = (dp[i + 1][j - 1] + dp[i][j]) % mod;
+            }
+        int ans = 0;
+        for (int i = S; i <= B; i++) ans = (ans + dp[T][i]) % mod;
+        printf("%d\n", ans);
+    }
+    return 0;
+}
+```
+
+[Dollar Dayz - POJ 3181 - Virtual Judge](https://vjudge.csgrandeur.cn/problem/POJ-3181#author=0)
+
+完全背包+大数(高精度), 因为数据范围会超`long long`, 所以开二维`dp`, `dp[i][0]`存放大数的前半段, `dp[i][1]`存放大数的后半段, 处理手法值得借鉴
+
+```c++
+#include <iostream>
+#define LIMIT_ULL 100000000000000000
+const int maxn = 1e4 + 10;
+using namespace std;
+long long dp[1010][2];
+int main()
+{
+    int n, k; cin >> n >> k;
+    dp[0][1] = 1;
+    for (int i = 1; i <= k; i++)
+        for (int j = i; j <= n; j++)
+        {
+            if (dp[j - i][1])
+            {
+                dp[j][0] += dp[j - i][0];
+                dp[j][1] += dp[j - i][1];
+                dp[j][0] += dp[j][1] / LIMIT_ULL;
+                dp[j][1] = dp[j][1] % LIMIT_ULL;
+            }
+        }
+    if (dp[n][0]) cout << dp[n][0];
+    cout << dp[n][1] << endl;
+    return 0;
+}
+```
+
 
 
 #### 状态压缩DP
@@ -12091,7 +12194,6 @@ int main()
         cout << dp[0][m - 1] << endl;
     return 0;
 }
-
 ```
 
 

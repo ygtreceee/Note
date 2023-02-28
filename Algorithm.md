@@ -11694,6 +11694,111 @@ int main()
 }
 ```
 
+[Wooden Sticks - POJ 1065 - Virtual Judge](https://vjudge.csgrandeur.cn/problem/POJ-1065)
+
+```c++
+#include <iostream>
+#include <algorithm>
+const int maxn = 1e4 + 10;
+using namespace std;
+struct str
+{
+    int l, w;
+    bool operator < (const str &a) const
+    {if (a.l != l) return l < a.l; else return w < a.w;}
+}sti[5050];
+int dp[5050];
+int main()
+{
+    int t; cin >> t;
+    while (t--)
+    {
+        int ans = 0;
+        memset(dp, 0, sizeof dp);
+        int n; cin >> n;
+        for (int i = 1; i <= n; i++)
+        {
+            cin >> sti[i].l >> sti[i].w;
+            dp[i] = 1;
+        }
+        sort(sti + 1, sti + 1 + n);
+        for (int i = n; i >= 1; i--)
+            for (int j = n; j >= i; j--)
+            {
+                if (sti[i].w > sti[j].w) dp[i] = max(dp[i], dp[j] + 1);
+                ans = max(ans, dp[i]);
+            }
+        cout << ans << endl;
+    }
+    return 0;
+}
+```
+
+[Bridging signals - POJ 1631 - Virtual Judge (csgrandeur.cn)](https://vjudge.csgrandeur.cn/problem/POJ-1631)
+
+求最长上升子序列, 若使用`dp`思路, 在$O^2$级别的复杂度下会导致`TLE`, 所以使用单调栈优化, 此算法似乎已经不算`dp`了, 更像是贪心, 复杂度为$nlogn$, 以求最长上升子序列为例, 则维护的是单调递增栈, 每次取栈顶元素`top`和读到的元素`temp`比较, 如果`temp > top`, 则入栈, 否则使用二分查找到第一个第一个比`temp`大的数, 然后替换即可, 可以理解为使得该上升子序列"潜力"增大, 但是有时候会得不到真实最长上升子序列, 例如`1, 5, 8, 2`, 维护单调递增栈最后会得到`1, 2, 8`, 实际上并不是真正的最长上升子序列, 但是个数是正确的, 这是很好理解的, 也就是说, 如果仅仅求个数, 则可以使用单调栈, 但是如果需要我们打印最长上升子序列, 则只能用`dp`
+
+```c++
+//Accepted
+#include <iostream>
+#include <cstring>
+#include <algorithm>
+const int maxn = 1e4 + 10;
+const int inf = 0x3f3f3f3f;
+using namespace std;
+int dp[40010];
+int a[40010];
+int main()
+{
+    int t; cin >> t;
+    while (t--)
+    {
+        int n; cin >> n;
+        for (int i = 1; i <= n; i++) cin >> a[i];
+        memset(dp, 0x3f, sizeof dp);
+        for (int i = 1; i <= n; i++)
+            *lower_bound(dp, dp + n, a[i]) = a[i];
+        cout << (lower_bound(dp, dp + n, inf) - dp) << endl;
+    }
+    return 0;
+}
+
+//TLE
+#include <iostream>
+#include <algorithm>
+#include <vector>
+#include <cstring>
+const int maxn = 1e4 + 10;
+using namespace std;
+int main()
+{
+    ios::sync_with_stdio(false);
+    cin.tie(0);
+    int t; cin >> t;
+    while (t--)
+    {
+        int n; cin >> n;
+        vector<pair<int, int>> ve;
+        int dp[40010], ans = 0;
+        memset(dp, 0, sizeof dp);
+        for (int i = 1; i <= n; i++)
+        {
+            int x; cin >> x;
+            ve.push_back(pair<int, int>(i, x));
+            dp[i] = 1;
+        }
+        for (int i = 1; i <= n; i++)
+            for (int j = 1; j <= i; j++)
+            {
+                if (ve[i].first > ve[j].first && ve[i].second > ve[j].second) dp[i] = max(dp[j] + 1, dp[i]);
+                ans = max(ans, dp[i]);
+            }
+        cout << ans << endl;
+    }
+    return 0;
+}
+```
+
 
 
 #### 状态压缩DP

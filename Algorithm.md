@@ -11799,6 +11799,80 @@ int main()
 }
 ```
 
+[Space Elevator - POJ 2392 - Virtual Judge (csgrandeur.cn)](https://vjudge.csgrandeur.cn/problem/POJ-2392)
+
+多重背包, 但是有高度限制, 注意状态转移的时候, 对类型进行遍历时, 要对限制高度较低的先处理, 才能保证`dp`转移顺利进行
+
+```c++
+#include <iostream>
+#include <algorithm>
+using namespace std;
+int dp[40010];
+struct str
+{
+    int w, c, lm;
+    bool operator < (const str &a) const 
+    {return lm < a.lm;}
+}bl[410];
+int main()
+{
+    int n; cin >> n;
+    for (int i = 1; i <= n; i++)
+        cin >> bl[i].w >> bl[i].lm >> bl[i].c;
+    sort(bl + 1, bl + 1 + n);
+    dp[0] = 1;
+    int ans = 0;
+    for (int i = 1; i <= n; i++)
+        for (int k = 1; k <= bl[i].c; k++)
+            for (int j = bl[i].lm; j >= bl[i].w; j--)
+            {
+                dp[j] |= dp[j - bl[i].w];
+                if (dp[j]) ans = max(ans ,j);
+            }
+    cout << ans << endl;
+    return 0;
+}
+```
+
+[Cow Exhibition - POJ 2184 - Virtual Judge (csgrandeur.cn)](https://vjudge.csgrandeur.cn/problem/POJ-2184)
+
+看作`01`背包问题, 本题有两个信息, `ts[i], tf[i]`, 而且都有可能是负数, 所以要进行位移处理, 将`dp[100000]`作为基准, 左端为负, 右端为正, 定义`dp`时, 视作花费`ts[i]`元获得`tf[i]`的价值, 维护价值最大, 最后再对大于`0`的进行遍历即可
+
+```c++
+#include <iostream>
+#include <algorithm>
+#include <cstring>
+const int maxn = 1e4 + 10;
+const int inf = 0x3f3f3f3f;
+using namespace std;
+int dp[200001], ts[200001],tf[200001];
+int main()
+{
+    int n, ans = 0;
+    memset(dp, -0x3f, sizeof dp);
+    cin >> n;
+    dp[100000] = 0;
+    for (int i = 1; i <= n; i++) cin >> ts[i] >> tf[i];
+    for (int i = 1; i <= n; i++)
+    {
+        if (ts[i] >= 0)
+        {
+            for (int j = 200000; j >= ts[i]; j--)
+                dp[j] = max(dp[j], dp[j - ts[i]] + tf[i]);
+        }
+        else
+        {
+            for (int j = 0; j - ts[i] <= 200000; j++)
+                dp[j] = max(dp[j], dp[j - ts[i]] + tf[i]);
+        }
+    }
+    for (int i = 100000; i <= 200000; i++)
+        if (dp[i] >= 0) ans = max(ans, i - 100000 + dp[i]);
+    cout << ans << endl;
+    return 0;
+}
+```
+
 
 
 #### 状态压缩DP

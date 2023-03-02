@@ -11836,7 +11836,7 @@ int main()
 
 [Cow Exhibition - POJ 2184 - Virtual Judge (csgrandeur.cn)](https://vjudge.csgrandeur.cn/problem/POJ-2184)
 
-看作`01`背包问题, 本题有两个信息, `ts[i], tf[i]`, 而且都有可能是负数, 所以要进行位移处理, 将`dp[100000]`作为基准, 左端为负, 右端为正, 定义`dp`时, 视作花费`ts[i]`元获得`tf[i]`的价值, 维护价值最大, 最后再对大于`0`的进行遍历即可
+看作`01`背包问题, 本题有两个信息, `ts[i], tf[i]`, 而且都有可能是负数, 所以要进行位移处理, 将`dp[100000]`作为基准, 左端为负, 右端为正, 定义`dp`时, 视作花费`ts[i]`元获得`tf[i]`的价值, 维护价值最大, 最后再对大于`0`的进行遍历即可. 本题最巧妙的就是把两个值转换为花费和价值, 使之能够进行`dp`操作
 
 ```c++
 #include <iostream>
@@ -11869,6 +11869,63 @@ int main()
     for (int i = 100000; i <= 200000; i++)
         if (dp[i] >= 0) ans = max(ans, i - 100000 + dp[i]);
     cout << ans << endl;
+    return 0;
+}
+```
+
+#### 数位统计DP
+
+```
+用于数字的数位统计. 一个数字的数位有个位、十位、百位等等，如果题目和数位统计有关，那么可以用DP思想，把低位的统计结果记录下来，在高位计算时直接使用低位的结果，从而提高效率
+数位统计有关的题目，基本内容是处理“前导0”和“数位限制”
+```
+
+[P2602 ZJOI2010 数字计数 - 洛谷](https://www.luogu.com.cn/problem/P2602)
+
+定义`dp[i]`为`i`位数的每种数字有多少个
+
+```c++
+#include <bits/stdc++.h>
+const int maxn = 20;
+typedef long long LL;
+using namespace std;
+
+LL ten[maxn], dp[maxn];
+LL cnta[maxn], cntb[maxn];  //cnt[i]统计数字i出现了几次
+int num[maxn];
+void init()  //预计算dp[]
+{
+    ten[0] = 1; //ten[i] 10的i次方
+    for (int i = 1; i <= 15; i++)
+    {
+        dp[i] = i * ten[i - 1];
+        ten[i] = 10 * ten[i - 1];
+    }
+}
+void solve(LL x, LL *cnt)
+{
+    int len = 0;
+    while (x)  //数字x有多少位
+    {
+        num[++len] = x % 10; //分解x, num[i]为x的第i位数字
+        x /= 10;
+    }
+    for (int i = len; i >= 1; i--)   //从高到低处理x的每位
+    {
+        for (int j = 0; j <= 9; j++) cnt[j] += dp[i - 1] * num[i];
+        for (int j = 0; j < num[i]; j++) cnt[j] += ten[i - 1];  //特判最高位比num[i]小的数字
+        LL num2 = 0;
+        for (int j = i - 1; j >= 1; j--) num2 = num2 * 10 + num[j];
+        cnt[num[i]] += num2 + 1;  //特判最高位的数字num[i]
+        cnt[0] -= ten[i - 1];   //特判前导0
+    }
+}
+int main()
+{
+    init();
+    LL a, b; cin >> a >> b;
+    solve(a - 1, cnta), solve(b, cntb);
+    for (int i = 0; i <= 9; i++) cout << cntb[i] - cnta[i] << " ";
     return 0;
 }
 ```

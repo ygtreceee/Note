@@ -11885,6 +11885,7 @@ int main()
 定义`dp[i]`为`i`位数的每种数字有多少个
 
 ```c++
+//递推实现
 #include <bits/stdc++.h>
 const int maxn = 20;
 typedef long long LL;
@@ -11928,6 +11929,10 @@ int main()
     for (int i = 0; i <= 9; i++) cout << cntb[i] - cnta[i] << " ";
     return 0;
 }
+
+
+//记忆化搜索实现
+
 ```
 
 

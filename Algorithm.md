@@ -11882,7 +11882,11 @@ int main()
 
 [P2602 ZJOI2010 数字计数 - 洛谷](https://www.luogu.com.cn/problem/P2602)
 
-定义`dp[i]`为`i`位数的每种数字有多少个
+递推实现: 定义`dp[i]`为`i`位数的每种数字有多少个
+
+记忆化搜索实现: 定义`dp[pos][sum]` 分别表示最后`pos`位范围, 前面`now`的个数, 为了简便也可以定义为`dp[pos][sum][limit][lead]`, 后面表示有无数位限制和前导`0`, 下面是`dfs`思路
+
+<img src="C:\Users\ygtrece\AppData\Local\Temp\WeChat Files\68cde5d334df78e9e23d48164beb6c3.jpg" alt="68cde5d334df78e9e23d48164beb6c3" style="zoom:33%;" />
 
 ```c++
 //递推实现
@@ -11931,8 +11935,158 @@ int main()
 }
 
 
-//记忆化搜索实现
 
+//记忆化搜索实现
+#include <bits/stdc++.h>
+const int N = 20;
+typedef long long LL;
+using namespace std;
+
+LL dp[N][N];
+int num[N], now;
+LL dfs(int pos, int sum, bool lead, bool limit)
+{
+    LL ans = 0;
+    if (pos == 0) return sum;
+    if (!lead && !limit && dp[pos][sum] != -1) return dp[pos][sum];
+    int up = (limit ? num[pos] : 9);
+    for (int i = 0; i <= up; i++)
+    {
+        if (i == 0 && lead) ans += dfs(pos - 1, sum, true, limit && i == up);
+        else if (i == now) ans += dfs(pos - 1, sum + 1, false, limit && i == up);
+        else if (i != now) ans += dfs(pos - 1, sum, false, limit && i == up);
+    }
+    if (!lead && !limit) dp[pos][sum] = ans;
+    return ans;
+}
+LL solve(LL x)
+{
+    int len = 0;
+    while (x)
+    {
+        num[++len] = x % 10;
+        x /= 10;
+    }
+    memset(dp, -1, sizeof dp);
+    return dfs(len, 0, true, true);
+}
+int main()
+{
+    LL a, b; cin >> a >> b;
+    for (int i = 0; i < 10; i++) now = i, cout << solve(b)  - solve(a - 1) << " ";
+    return 0;
+}
+
+//记忆化搜素优化写法, 把limit和lead也放入dp记录下来
+LL dp[N][N][2][2];
+LL dfs(int pos, int sum, bool lead, bool limit)  
+{
+    LL ans = 0;
+    if (pos == 0) return sum;
+    if (dp[pos][sum][limit][lead] != -1) return dp[pos][sum][limit][lead];
+    int up = (limit ? num[pos] : 9);
+    for (int i = 0; i <= up; i++)
+    {
+        if (i == 0 && lead) ans += dfs(pos - 1, sum, true, limit && i == up);
+        else if (i == now) ans += dfs(pos - 1, sum + 1, false, limit && i == up);
+        else if (i != now) ans += dfs(pos - 1, sum, false, limit && i == up);
+    }
+    dp[pos][sum][limit][lead] = ans;
+    return ans;
+}
+```
+
+[P2657 SCOI2009 windy 数 - 洛谷](https://www.luogu.com.cn/problem/P2657)
+
+定义`dp[pos][last]`, 代表数字长度为`pos`位, 前一位是`last`的无数位限制的`Windy`数总数
+
+```c++
+#include <bits/stdc++.h>
+const int N = 20;
+typedef long long LL;
+using namespace std;
+
+int dp[N][N][2];
+int num[N];
+int dfs(int pos, int last, bool lead, bool limit)
+{
+    int ans = 0;
+    if (pos == 0) return 1;
+    if (dp[pos][last][limit] != -1) return dp[pos][last][limit];
+    int up = (limit ? num[pos] : 9);
+    for (int i = 0; i <= up; i++)
+    {
+        if (abs(i - last) < 2) continue; 
+        if (i == 0 && lead) ans += dfs(pos - 1, -2, true, limit && i == up);
+        else ans += dfs(pos - 1, i, false, limit && i == up);
+    }
+    dp[pos][last][limit] = ans;
+    return ans;
+}
+int solve(int x)
+{
+    int len = 0;
+    while (x)
+    {
+        num[++len] = x % 10;
+        x /= 10;
+    }
+    memset(dp, -1, sizeof dp);
+    return dfs(len, -2, true, true);
+}
+int main()
+{
+    int a, b; cin >> a >> b;
+    cout << solve(b) - solve(a - 1) << endl;
+    return 0;
+}
+```
+
+[P4124 CQOI2016\手机号码 - 洛谷](https://www.luogu.com.cn/problem/P4124)
+
+注意定义`dp`状态时不要遗漏每个信息
+
+```c++
+#include <bits/stdc++.h>
+const int N = 20;
+typedef long long LL;
+using namespace std;
+
+int num[N];
+int dp[15][11][11][2][2][2];
+LL dfs(int pos, int u, int v, bool state, bool n8, bool n4, bool limit)
+{
+    LL ans = 0;
+    if (n8 && n4) return 0;
+    if (!pos) return state;
+    if (!limit && dp[pos][u][v][state][n8][n4] != -1) return dp[pos][u][v][state][n8][n4];
+    int up = (limit ? num[pos] : 9);
+    for (int i = 0; i <= up; i++)
+        ans += dfs(pos - 1, i, u, state || (i == u && u == v), n8 || (i == 8), n4 || (i == 4), limit && i == up);
+    if (!limit) dp[pos][u][v][state][n8][n4] = ans;
+    return ans;
+}
+LL solve(LL x)
+{
+    int len = 0;
+    while (x)
+    {
+        num[++len] = x % 10;
+        x /= 10;
+    }
+    if (len != 11) return 0;
+    memset(dp, -1, sizeof dp);
+    LL ans = 0;
+    for (int i = 1; i <= num[len]; i++)
+        ans += dfs(len - 1, i, 0, 0, i == 8, i == 4, i == num[len]);
+    return ans;
+}
+int main()
+{
+    LL a, b; cin >> a >> b;
+    cout << solve(b) - solve(a - 1) << endl;
+    return 0;
+}
 ```
 
 

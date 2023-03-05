@@ -7437,7 +7437,7 @@ int main()
 
 [P1438 无聊的数列 - 洛谷](https://www.luogu.com.cn/problem/P1438)
 
-称差分序列首项为`s`，末项为`e`，公差为`d`，要将$[l-r]$这段区间加上等差序列, 如果要在差分序列上加一个等差序列，则要在$a_l$加上`s`, $[a_{l+1},a_r]$ 加上`d`, $a_{r+1}$ 加上`-e`, 注意根据l和r的关系判断一些特殊情况, 比如`l=r`, 或者`r=n`, 用线段树即可, 答案即为$\sum_{n}^{i=1}a[i]$
+称差分序列首项为`s`，末项为`e`，公差为`d`，要将$[l, r]$这段区间加上等差序列, 如果要在差分序列上加一个等差序列，则要在$a_l$加上`s`, $[a_{l+1},a_r]$ 加上`d`, $a_{r+1}$ 加上`-e`, 注意根据l和r的关系判断一些特殊情况, 比如`l=r`, 或者`r=n`, 用线段树即可, 答案即为$\sum_{n}^{i=1}a[i]$
 
 ```c++
 #include <bits/stdc++.h>
@@ -11886,7 +11886,7 @@ int main()
 
 记忆化搜索实现: 定义`dp[pos][sum]` 分别表示最后`pos`位范围, 前面`now`的个数, 为了简便也可以定义为`dp[pos][sum][limit][lead]`, 后面表示有无数位限制和前导`0`, 下面是`dfs`思路
 
-<img src="C:\Users\ygtrece\AppData\Local\Temp\WeChat Files\68cde5d334df78e9e23d48164beb6c3.jpg" alt="68cde5d334df78e9e23d48164beb6c3" style="zoom:33%;" />
+<img src="C:\Users\ygtrece\AppData\Roaming\Typora\typora-user-images\68cde5d334df78e9e23d48164beb6c3.jpg" alt="68cde5d334df78e9e23d48164beb6c3" style="zoom:33%;" />
 
 ```c++
 //递推实现
@@ -12084,6 +12084,122 @@ LL solve(LL x)
 int main()
 {
     LL a, b; cin >> a >> b;
+    cout << solve(b) - solve(a - 1) << endl;
+    return 0;
+}
+```
+
+[Problem - 55D - Codeforces](https://codeforces.com/problemset/problem/55/D)
+
+本题思路十分巧妙, 值得反复学习. 符合要求的数就是可以被它的每一位的数字整除的数, 给定一个区间, 求符合要求的数的个数; 分析: 一个数能被它的所有非零数位整除, 则能被它们的最小公倍数`lcm`整除, 而`1`到`9`的最小公倍数是`2520`, 数位`dp`时我们需要保存前面那些位的最小公倍数然后进行状态转移, 到边界时就把所有位的`lcm`求出了, 为了判断这个数能否被它的所有数位整除, 还需要存这个数的值, 但是直接存是不可能的, 因为数字太大了, 其实只需要记录它对`2520`的模即可, 这样就可以设计出数位`dp`: `dfs(pos, preSum, preLcm, limit)`, `pos`为当前数位, `preSum`为前面那些位数对2520的模, `preLcm`为前面那些数位的最小公倍数, `limit`为高位限制, 但是这样的话`dp`数组要开到`[19][2520][2520]`, 会超内存, 考虑到最小公倍数是离散的, $1-2520$中可能的最小公倍数其实只有`48`个, 离散化处理之后, `dp`数组的最后一维可以降到`48`, 实现最大优化
+
+注意本题处理时还有一些数论知识, 涉及**求最大公倍数和最小公倍数**, 具体参见代码
+
+```c++
+#include <bits/stdc++.h>
+using namespace std;
+
+typedef long long LL;
+const int maxn = 25;
+const int mod = 2520;
+LL dp[maxn][mod][48];
+int index[mod + 10];
+int num[maxn];
+
+void init()
+{
+    memset(dp, -1, sizeof dp);
+    int num = 0;
+    for (int i = 1; i <= mod; i++)  //离散化处理
+        if (mod % i == 0) index[i] = num++;
+}
+int gcd(int a, int b)  //求最大公约数
+{
+    if (b == 0) return a;
+    else return gcd(b, a % b);
+}
+int lcm(int a, int b)  //求最小公倍数
+{
+    return a / gcd(a, b) * b;
+}
+LL dfs(int pos, int preSum, int preLcm, bool limit)
+{
+    if (pos == 0) return preSum % preLcm == 0;
+    if (!limit && dp[pos][preSum][index[preLcm]] != -1)
+        return dp[pos][preSum][index[preLcm]];
+    LL ans = 0;
+    int up = limit ? num[pos] : 9;
+    for (int i = 0; i <= up; i++)
+    {
+        int nowSum = (preSum * 10 + i) % mod;
+        int nowLcm = preLcm;
+        if (i) nowLcm = lcm(nowLcm, i);
+        ans += dfs(pos - 1, nowSum, nowLcm, limit && i == up);
+    }
+    if (!limit) dp[pos][preSum][index[preLcm]] = ans;
+    return ans;
+}
+LL solve(LL x)
+{
+    int len = 0;
+    while (x)
+    {
+        num[++len] = x % 10;
+        x /= 10;
+    }
+    return dfs(len, 0, 1, 1);
+}
+int main()
+{
+    int t; cin >> t;
+    init();
+    LL l, r;
+    while (t--)
+    {
+        cin >> l >> r;
+        cout << solve(r) - solve(l - 1) << endl;
+    }
+    return 0;
+}
+```
+
+[3252 -- Round Numbers (poj.org)](http://poj.org/problem?id=3252)
+
+```c++
+#include <iostream>
+#include <cstring>
+using namespace std;
+
+int num[30];
+int dp[70][35];
+int dfs(int pos, int pre, bool lead, bool limit)
+{
+    if (pos == 0) return pre <= 32;
+    if (dp[pre][pos] != -1 && !lead && !limit) return dp[pre][pos];
+    int ans = 0;
+    int up = limit ? num[pos] : 1;
+    for (int i = 0; i <= up; i++)
+    {
+        if (i == 0 && lead) ans += dfs(pos - 1, pre, 1, limit && i == up);
+        else ans += dfs(pos - 1, pre + (i == 0 ? -1 : 1), 0, limit && i == up);
+    }
+    if (!limit && !lead) dp[pre][pos] = ans;
+    return ans;
+}
+int solve(int x)
+{
+    int len = 0;
+    memset(dp, -1, sizeof dp);
+    while (x)
+    {
+        num[++len] = x % 2;
+        x /= 2;
+    }
+    return dfs(len, 32, 1, 1);
+}
+int main()
+{
+    int a, b; cin >> a >> b;
     cout << solve(b) - solve(a - 1) << endl;
     return 0;
 }
@@ -14698,7 +14814,73 @@ int main()
 }
 ```
 
+[E - Transitivity (atcoder.jp)](https://atcoder.jp/contests/abc292/tasks/abc292_e)
 
+```c++
+//Floyd TLE
+#include <bits/stdc++.h>
+const int N = 200010;
+using namespace std;
+bool graph[2010][2010];
+int main()
+{
+    int n, m, ans = 0;
+    cin >> n >> m;
+    for (int i = 0; i < m; i++)
+    {
+        int u, v; cin >> u >> v;
+        graph[u][v] = 1;
+    }
+    for (int k = 1; k <= n; k++)
+        for (int i = 1; i <= n; i++)
+            if (graph[i][k])
+                for (int j = 1; j <= n; j++)
+                    if (i != j && graph[k][j] && !graph[i][j]) graph[i][j] = 1, ans++;
+    cout << ans;
+    return 0;
+}
+
+//BFS
+#include <bits/stdc++.h>
+const int N = 200010;
+using namespace std;
+
+bool graph[2010][2010];
+int main()
+{
+    int n, m; cin >> n >> m;
+    vector<vector<int>> E(n);
+    for (int i = 0; i < m; i++)
+    {
+        int u, v; cin >> u >> v;
+        E[u - 1].push_back(v - 1);
+    }
+    int ans = 0;
+    for (int i = 0; i < n; i++)
+    {
+        vector<bool> f(n, false);
+        f[i] = true;
+        queue<int> Q;
+        Q.push(i);
+        while (Q.size() > 0)
+        {
+            int x = Q.front();
+            Q.pop();
+            for (int j = 0; j < E[x].size(); j++)
+            {
+                int y = E[x][j];
+                if (f[y]) continue;
+                f[y] = true;
+                Q.push(y);
+                ans++;
+            }
+        }
+    }
+    ans -= m;
+    cout << ans;
+    return 0;
+}
+```
 
 
 

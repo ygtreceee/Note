@@ -3619,6 +3619,34 @@ int main()
 }
 ```
 
+[P1095 NOIP2007 普及组 守望者的逃离 - 洛谷](https://www.luogu.com.cn/problem/P1095)
+
+```c++
+#include <bits/stdc++.h>
+const int maxn = 100010;
+const int inf = 0x3f3f3f3f;
+using namespace std;
+
+int dp[1010];
+int main()
+{
+    int m, s ,t; cin >> m >> s >> t;
+    int s1 = 0, s2 = 0;
+    for (int i = 1; i <= t; i++)
+    {
+        s1 += 17;
+        if (m >= 10) s2 += 60, m -= 10;
+        else m += 4;
+        if (s2 > s1) s1 = s2;
+        if (s1 >= s) {cout << "Yes" << endl << i; break;}
+        if (i == t) cout << "No" << endl << s1;
+    }
+    return 0;
+}
+```
+
+
+
 ## 搜索
 
 #### BFS和DFS基础
@@ -11799,6 +11827,34 @@ int main()
 }
 ```
 
+[P1020 NOIP1999 普及组 导弹拦截 - 洛谷](https://www.luogu.com.cn/problem/P1020)
+
+此题跟前一题思路一致, 但是有些细节需要注意, 在求最长不降子序列的时候, 不能使用`lower_bound()`, 要使用`upper_bound()`, 只有求最长上升子序列才是使用`lower_bound`
+
+```c++
+#include <bits/stdc++.h>
+const int maxn = 100010;
+const int inf = 0x3f3f3f3f;
+using namespace std;
+
+int x, num[maxn];
+int dp[maxn];
+int main()
+{
+    int cnt = 0;
+    while (cin >> x) num[++cnt] = x;
+    memset(dp, 0x3f, sizeof dp);
+    for (int i = cnt; i >= 1; i--)
+        *upper_bound(dp, dp + cnt, num[i]) = num[i];
+    cout << (lower_bound(dp, dp + cnt, inf) - dp) << endl;
+    memset(dp, 0x3f, sizeof dp);
+    for (int i = 1; i <= cnt; i++)
+        *lower_bound(dp, dp + cnt, num[i]) = num[i];
+    cout << (lower_bound(dp, dp + cnt, inf) - dp) << endl;
+    return 0;
+}
+```
+
 [Space Elevator - POJ 2392 - Virtual Judge (csgrandeur.cn)](https://vjudge.csgrandeur.cn/problem/POJ-2392)
 
 多重背包, 但是有高度限制, 注意状态转移的时候, 对类型进行遍历时, 要对限制高度较低的先处理, 才能保证`dp`转移顺利进行
@@ -11872,6 +11928,42 @@ int main()
     return 0;
 }
 ```
+
+[P1216 USACO1.5IOI1994数字三角形 Number Triangles - 洛谷](https://www.luogu.com.cn/problem/P1216)
+
+```c++
+#include <bits/stdc++.h>
+const int mod = 1000007;
+using namespace std;
+
+int dp[1010][1010];
+int num[1010][1010];
+int main()
+{
+    int r; cin >> r;
+    for (int i = 1; i <= r; i++)
+        for (int j = 1; j <= i; j++)
+            cin >> num[i][j];
+    for (int i = 1; i <= r; i++)
+        for (int j = 1; j <= i; j++)
+        {
+            dp[i][j] = max(dp[i][j], dp[i - 1][j] + num[i][j]);
+            if (j != 1) dp[i][j] = max(dp[i][j], dp[i - 1][j - 1] + num[i][j]);
+        }
+    int ans = 0;
+    for (int i = 1; i <= r; i++) ans = max(ans, dp[r][i]);
+    cout << ans; 
+    return 0;
+}
+```
+
+
+
+```
+
+```
+
+
 
 #### 数位统计DP
 
@@ -12201,6 +12293,37 @@ int main()
 {
     int a, b; cin >> a >> b;
     cout << solve(b) - solve(a - 1) << endl;
+    return 0;
+}
+```
+
+[P4798 CEOI2015 Day1 卡尔文球锦标赛 - 洛谷](https://www.luogu.com.cn/problem/P4798)
+
+```c++
+//TLE 66/100points
+#include <bits/stdc++.h>
+const int mod = 1000007;
+using namespace std;
+
+int num[10010];
+int dp[10010][10010];
+int n;
+int dfs(int pos, int premax, bool limit)
+{
+    if (pos == n + 1) return 1;
+    if (dp[pos][premax] && !limit) return dp[pos][premax];
+    int ans = 0;
+    int up = limit ? num[pos] : (premax + 1);
+    for (int i = 1; i <= up; i++)
+        ans = (ans + dfs(pos + 1, max(i, premax), limit && i == up)) % mod;
+    if (!limit) dp[pos][premax] = ans % mod;
+    return ans;
+}
+int main()
+{
+    cin >> n;
+    for (int i = 1; i <= n; i++) cin >> num[i];
+    cout << dfs(2, 1, 1);
     return 0;
 }
 ```

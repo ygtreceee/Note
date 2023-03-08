@@ -11957,10 +11957,39 @@ int main()
 }
 ```
 
+[P1541 NOIP2010 提高组 乌龟棋 - 洛谷](https://www.luogu.com.cn/problem/P1541)
 
+关键在于使用了所有的牌就一定到达终点, 定义`dp[a][b][c][d]`表示每种牌用了几张, 而且也可以推出此时到了哪一个位置, 但是从哪一个状态转移过来的, 需要进行讨论, 由于从底层递推, 所以能保证前一个状态已经是最佳状态, 直接进行递推即可, 此题若使用`dfs`会`TLE`, 因为`dfs`思路是遍历每一种走的情况, 但明显走的情况有非常多种, 逐一遍历的话效率太低, 所以用状态转移实际上利用记录状态来实现记忆化, 提高效率的目的
 
-```
+```c++
+#include <bits/stdc++.h>
+const int maxn = 100010;
+const int inf = 0x3f3f3f3f;
+using namespace std;
 
+int num[400];
+int cnt[5];
+int dp[45][45][45][45];
+int main()
+{
+    int n, m; cin >> n >> m;
+    for (int i = 1; i <= n; i++) cin >> num[i];
+    for (int i = 1; i <= m; i++) {int x; cin >> x; cnt[x]++;}
+    dp[0][0][0][0] = num[1];
+    for (int a = 0; a <= cnt[1]; a++)
+        for (int b = 0; b <= cnt[2]; b++)
+            for (int c = 0; c <= cnt[3]; c++)
+                for (int d = 0; d <= cnt[4]; d++)
+                {
+                    int r = 1 + a + 2 * b + 3 * c + 4 * d;
+                    if (a) dp[a][b][c][d] = max(dp[a][b][c][d], dp[a - 1][b][c][d] + num[r]);
+                    if (b) dp[a][b][c][d] = max(dp[a][b][c][d], dp[a][b - 1][c][d] + num[r]);
+                    if (c) dp[a][b][c][d] = max(dp[a][b][c][d], dp[a][b][c - 1][d] + num[r]);
+                    if (d) dp[a][b][c][d] = max(dp[a][b][c][d], dp[a][b][c][d - 1] + num[r]);
+                }
+    cout << dp[cnt[1]][cnt[2]][cnt[3]][cnt[4]] << endl;
+    return 0;
+}
 ```
 
 

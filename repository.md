@@ -4831,3 +4831,71 @@ int main()
     return 0;
 }
 ```
+
+[A - CAPS LOCK (atcoder.jp)](https://atcoder.jp/contests/abc292/tasks/abc292_a)
+
+学习`toupper()`函数, 接受一个字符, 并返回其大写; 同理还有`tolower`
+
+```c++
+// Let C be uppercased c
+//char C = toupper(c);
+
+#include <bits/stdc++.h>
+using namespace std;
+LL ans;
+int n;
+int main()
+{
+    string s; cin >> s;
+    string T;
+    for (int i = 0; i < s.size(); i++)
+        s[i] = toupper(s[i]);
+        // T += toupper(s[i]);
+    cout << s;
+    // cout << T;
+    return 0;
+}
+```
+
+
+
+#### Codeforces
+
+[Problem - C - Codeforces](https://codeforces.com/contest/1792/problem/C)
+
+```c++
+#include <iostream>
+#include <algorithm>
+#include <vector>
+using namespace std;
+void Solve()
+{
+    int n;
+    cin >> n;
+    vector<int> p(n);
+    for (int i = 0; i < n; i++)
+    {
+        int x;
+        cin >> x;
+        x--;
+        p[x] = i;
+    }
+    
+    int l = n / 2, r = n - l;
+    while (l > 0 && p[l - 1] < p[l] && p[r] > p[r - 1])
+    {
+        l--, r++;
+    }
+    cout << l << "\n";
+}
+int main()
+{
+    ios::sync_with_stdio(false);
+    cin.tie();
+    int t;
+    for (cin >> t; t--; )
+        Solve();
+    return 0;
+}
+```
+

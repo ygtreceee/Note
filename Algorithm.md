@@ -1894,6 +1894,59 @@ int main()
 }
 ```
 
+[P8749 蓝桥杯 2021 省 B 杨辉三角形 - 洛谷](https://www.luogu.com.cn/problem/P8749)
+
+考察的是对杨辉三角性质的认识以及对二分法的使用，首先应该知道杨辉三角的一个性质，按照对角线顺序分析，在原图第 $n$ 行，且位于第 $m$ 条对角线上的数，为 $C_n^m$，如图（图中的 $n$ 指的是层数减一）, 按对角线顺序遍历，可以利用单调性进行二分。然后就是确定一个范围，应该从哪条对角线进行遍历呢？观察这些对角线方向的数，其起始元素为 $C_{2k}^{k}$，只需找到最小的 $k$ 使得 $C_{2(k+1)}^{k+1} \gt n_{max} = 1e9$ 即可, 计算可知 $k=16$ , 因此从第 $16$ 条对角线开始遍历即可
+
+![img](https://cdn.luogu.com.cn/upload/image_hosting/prigvmw9.png)
+
+```c++
+#include <bits/stdc++.h>
+using namespace std;
+typedef long long LL;
+const int inf = 1e9;
+int n;
+LL C(LL a, LL b)
+{
+    LL ret = 1;
+    for (LL i = a, j = 1; j <= b; i--, j++)
+    {
+        ret = ret * i / j;
+        if (ret > n) return ret;
+    }
+    return ret;
+}
+int main()
+{
+    cin >> n;
+    if (n == 1) cout << '1';
+    else
+    {
+        for (int i = 16; i > 0; i--)
+        {
+            LL l = i * 2, r = inf, mid, lim;
+            while (l < r)
+            {
+                mid = l + r >> 1;
+                lim = C(mid, i);
+                if (lim == n)
+                {
+                    cout << (mid + 1) * mid / 2 + i + 1;
+                    i = 0; break;
+                }
+                else if (lim < n)
+                    l = mid + 1;
+                else if (lim > n)
+                    r = mid;
+            }
+        }
+    }
+    return 0;    
+}
+```
+
+
+
 #### 三分法
 
 P3382 【模板】三分法
@@ -9518,7 +9571,7 @@ int main()
 
 [覆盖的面积 - HDU 1255 - Virtual Judge](https://vjudge.csgrandeur.cn/problem/HDU-1255)
 
-求被覆盖两次以上的有效长度, 维护两个有效长度, 一个是被覆盖一次, 一个是被覆盖两次或以上
+求被覆盖两次以上的有效长度, 维护两个有效长度, 一个是被覆盖一次, 一个是被覆盖两次或以上, 关于`push_up`函数, 是分两步处理, 首先是处理`len` , 如果`tag`不为`0`, 那`len`自然就是该区间长度, 如果`len == 0`, 那就考虑是不是叶子节点, 如果是叶子节点, 则`len == 0`, 如果不是叶子节点, 那就说明存在子节点, 此时应该向子节点索取`len`; 第二步是处理`len2`, `len2`首先当然是考虑此时的`tag`是否大于`1`, 如果是, 那`len2`自然等于该区间长度, 同样, 如果`tag2`没有大于`1`, 也就是说自身无法满足, 那就只能向子节点索取`len2`, 先判断有无子节点, 然后便可以向子节点索取了, 这里我们应当再考虑一种情况, 那就是`tag == 1`时, 思考一下, `tag == 1`, 说明该区间已经被加了一个标记, 那如果原先它的某一个子节点本身就是有一个标记了, 也就是有`len`, 那叠加起来`1 + 1 = 2`, 自然就能产生`len2`了, 最后就是`tag == 0`的情况了, 前面的情况都不满足, 此时只剩下一个方法, 那就是直接向子节点索取`len2`.
 
 ```c++
 #include <bits/stdc++.h>

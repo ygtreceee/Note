@@ -841,6 +841,78 @@ int main()
 }
 ```
 
+#### HASH
+
+
+
+[137. 雪花雪花雪花 - AcWing](https://www.acwing.com/problem/content/139/)
+
+定义Hash函数，函数值等于每片雪花六个角的长度和和长度积之和，同时要取一个 `P = mod`， `P`是我们选取的一个较大的质数。对于随机数据，期望的时间复杂度为 $O(N^2/P)$ ，取`P`为最接近`N`的质数，期望的时间复杂度为 $O(N)$ 
+
+```c++
+#include <bits/stdc++.h>
+using namespace std;
+const int SIZE = 100010;
+int n, tot, P = 99991, snow[SIZE][6], _head[SIZE], _next[SIZE];
+int H(int *a)
+{
+    int sum = 0, mul = 1;
+    for (int i = 0; i < 6; i++)
+    {
+        sum = (sum + a[i]) % P;
+        mul = (long long)mul * a[i] % P;
+    }
+    return (sum + mul) % P;
+}
+bool equal(int *a, int *b)
+{
+    for (int i = 0; i < 6; i++)
+        for (int j = 0; j < 6; j++)
+        {
+            bool eq = 1;
+            for (int k = 0; k < 6; k++)
+                if (a[(i + k) % 6] != b[(j + k) % 6]) eq = 0;
+            if (eq) return 1;
+            eq = 1;
+            for (int k = 0; k < 6; k++)
+                if (a[(i + k) % 6] != b[(j - k + 6) % 6]) eq = 0;
+            if (eq) return 1;
+        }
+    return 0;
+}
+bool insert(int *a)
+{
+    int val = H(a);
+    for (int i = _head[val]; i; i = _next[i])
+        if (equal(snow[i], a)) return 1;
+    ++tot;
+    memcpy(snow[tot], a, 6 * sizeof(int));
+    _next[tot] = _head[val];
+    _head[val] = tot;
+    return 0;
+}
+int main()
+{
+    cin >> n;
+    for (int i = 1; i <= n; i++)
+    {
+        int a[10];
+        for (int j = 0; j < 6; j++) cin >> a[j];
+        if (insert(a))
+        {
+            cout << "Twin snowflakes found.";
+            return 0;
+        }
+    }
+    cout << "No two snowflakes are alike.";
+    return 0;
+}
+```
+
+
+
+
+
 ## 基本算法
 
 #### 尺取法
@@ -13145,6 +13217,124 @@ int main()
         }
         cout << ans << endl;
     }
+    return 0;
+}
+```
+
+
+
+## 字符串
+
+#### 进制哈希
+
+[P3370 【模板】字符串哈希 - 洛谷](https://www.luogu.com.cn/problem/P3370)
+
+**BKDRHash哈希函数**
+
+```c++
+#include <bits/stdc++.h>
+using namespace std;
+#define ull unsigned long long
+ull a[10010];
+char s[10010];
+ull BKDRHash(char *s)
+{
+    ull P = 131, H = 0； //P是进制，H是哈希值
+    int n = strlen(s);
+    for (int i = 0; i < n; i++)
+        H = H * P  + s[i] - 'a' + 1;
+        //H = H * P + s[i];
+
+    // while (*s) H = H * P + (*s++);  //简化版
+    return H;
+}
+int main()
+{
+    int n; cin >> n;
+    for (int i = 0; i < n; i++)
+    {
+        cin >> s;
+        a[i] = BKDRHash(s);
+    }
+    int ans = 0;
+    sort(a, a + n);
+    for (int i = 0; i < n; i++)
+        if (a[i] != a[i + 1]) ans++;
+    cout << ans;
+    return 0;
+}
+```
+
+[P3501 POI2010ANT-Antisymmetry - 洛谷](https://www.luogu.com.cn/problem/P3501)
+
+```c++
+#include <bits/stdc++.h>
+using namespace std;
+#define ull unsigned long long
+const int N = 5e5 + 10;
+char s[N], t[N];
+int n, PP = 131;
+long long ans;
+ull P[N], f[N], g[N];
+
+void bin_search(int x)
+{
+    int L = 0, R = min(x, n - x);
+    while (L < R)
+    {
+        int mid = (L + R + 1) >> 1;
+        if ((ull)(f[x] - f[x - mid] * P[mid]) == (ull)(g[x + 1] - g[x + 1 + mid] * P[mid])) L = mid;
+        else R = mid - 1;
+    }
+    ans += L;
+}
+int main()
+{
+    cin >> n; cin >> s + 1;
+    P[0] = 1;
+    for (int i = 1; i <= n; i++) s[i] == '1' ? t[i] = '0' : t[i] = '1';
+    for (int i = 1; i <= n; i++) P[i] = P[i - 1] * PP;
+    for (int i = 1; i <= n; i++) f[i] = f[i - 1] * PP + s[i];
+    for (int i = n; i >= 1; i--) g[i] = g[i + 1] * PP + t[i];
+    for (int i = 1; i < n; i++) bin_search(i);
+    cout << ans;
+    return 0;
+}
+
+//11001011
+//00110100
+//00101100
+```
+
+[1200 -- Crazy Search (poj.org)](http://poj.org/problem?id=1200)
+
+考虑到在此题中，所检索的字符串都是相同位数，且题目所说最大不同数不会超过 `16 million` ，所以不会产生哈希冲突，这是本题最关键的地方，如果不会产生哈希冲突，那直接存每个进制哈希值，然后进行 `unique` 操作即可
+
+```c++
+#include <cstdio>
+#include <algorithm>
+#include <vector>
+using namespace std;
+typedef unsigned long long ull;
+const int maxn = 1e6 + 10;
+int n, m;
+char s[maxn];
+ull a[maxn];
+vector<ull> v;
+int main()
+{
+    scanf("%d%d", &n, &m);
+    scanf("%s", s);
+    ull p = 131, r = 1, h = 0;
+    int len = strlen(s);
+    for (int i = 0; i < n && i < len; i++)
+        h = h * p + s[i], r *= p;
+    if (len >= n) v.push_back(h);
+    for (int i = n; i < len; i++)
+        h = h * p + s[i] - s[i - n] * r, v.push_back(h);
+    sort(v.begin(), v.end());
+    int ans = unique(v.begin(), v.end()) - v.begin();
+    printf("%d", ans);
     return 0;
 }
 ```

@@ -909,7 +909,96 @@ int main()
 }
 ```
 
+[航空公司VIP客户查询](https://github.com/CSGrandeur/s-1problem1day1ac/discussions/40)
 
+**链表哈希**实现模板
+
+```C++
+#include <bits/stdc++.h>
+using namespace std;
+#define MAX 200000   //取一个值大于预估哈希值
+typedef struct Node * Hash;
+struct Node   
+{
+    char arr[20];  //身份证号
+    int fen;    //积分
+    Hash next;  //指针，指向下一个单元，没有的话则是NULL
+};
+int deal(char *arr)  //处理身份证号
+{
+    int idex;
+    idex = (arr[5] - '0') * 10000 + (arr[9] - '0') * 1000 + (arr[13] - '0') * 100 + (arr[15] - '0') * 10 + (arr[16] - '0');
+    if (arr[17] == 'x') idex = idex * 10 + 10;
+    else idex = idex * 10 + (arr[17] - '0');
+    return idex;
+}
+int nextprime(int N) //需要一个大于总数N又是最小的素数，为的是以此为大小建立哈希链表后，链表不一定塞满但是查找的效率会提高不少
+{
+    int i, p = (N % 2) ? N + 2 : N + 1;
+    while (p < MAX)
+    {
+        for (i = (int)sqrt(N); i >= 2; i--)
+            if (!(p % i)) break;
+        if (i < 2) break;  //是素数，返回
+        else p += 2;  //不是素数，找下一个奇数
+    }
+    return p;
+}
+Hash insert(Hash h, int x, char *s)  //哈希链表的插入
+{
+    Hash p = h;
+    while (p) //若数组中该位置已经有人了
+    {
+        if (!strcmp(p -> arr, s))  //若身份证号已经存在
+        {
+            p -> fen += x;
+            return h;
+        }
+        else p = p -> next;  //找到下一个单元，如果最后没有了，会是NULL，循环会结束
+    }
+    接下来分为两种情况：指针为空，或者此指针指向的小链表中没有此身份证号
+    p = (Hash)malloc(sizeof (struct Node));
+    strcpy(p -> arr, s);
+    p -> fen = x;
+    p -> next = h;  //链表头插法
+    return p;   //返回新建的节点给h，此节点的next已经指向了原h所知的东西
+}
+void display(Hash h, char *s)   //寻找符合条件的身份证号
+{
+    while (h)
+    {
+        if (!strcmp(h -> arr, s))
+        {cout << h -> fen << endl; return;}
+        else h = h -> next;
+    }
+    cout << "No Info" << endl; 
+}
+int main()
+{
+    int n, k;
+    cin >> n >> k;
+    int p = nextprime(n);
+    Hash *h = (Hash*)malloc(p * sizeof (Hash)); //此处是不占内存，又可以超级多的指针数组，此处h是指针的指针，其实可以当指针数组的名字
+    for (int i = 0; i < p; i++) h[i] = NULL;  //初始化指针数组
+    int x, idex;  //x为输入的飞行里程，idex为数组下标
+    char arr[20];  //身份证号数组
+    while (n--)
+    {
+        cin >> arr >> x;
+        if (x < k) x = k;
+        idex = deal(arr) % p;  //计算下标
+        h[idex] = insert(h[idex], x, arr);  //进行元素插入
+    }
+    int m; cin >> m;
+    while (m--)
+    {
+        cin >> arr;
+        idex = deal(arr) % p;
+        display(h[idex], arr);
+    }
+    return 0;
+}
+```
 
 
 
@@ -13226,6 +13315,15 @@ int main()
 ## 字符串
 
 #### 进制哈希
+
+```
+哈希的过程可以看作对一个串的单向加密过程，并且需要保证低碰撞性，再字符串操作中，基本思路是通过一个固不同的串尽量不同，在一定的错误率的基础上达到省时的目的。最常见的一种哈希：进制哈希，其核心便是给出给出一个固定进制base，将一个串的每一个元素看做一个进制位上的数，那么这个数就是这个串的哈希值，通过对比每个串的哈希值，即可判断两个串是否相同。
+
+mod的选择
+绝大多数情况下不要选择一个10^9级别的数，因为这样随机数据都会有Hash冲突，根据生日悖论，随便找sqrt(10^9)个串就有大概率出现至少一对Hash值相等的串，如果能背过或在考场上找出一个10^18级别的质数（用Miller-Rabin），也相对靠谱。偷懒的写法是直接使用unsigned long long，它溢出时自动对2^64进行取模，如果出题人比较良心，这种做法不会被卡。当然最稳妥的办法是选择两个10^9级别的质数，只有模这两个数都相等才判断相等，即使用双哈希。
+
+进制P常用的值有31、131、1313、13131、131313等，用这些数值都能有效避免碰撞
+```
 
 [P3370 【模板】字符串哈希 - 洛谷](https://www.luogu.com.cn/problem/P3370)
 

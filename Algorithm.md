@@ -9328,7 +9328,7 @@ int main()
 
 ```c++
 #include <bits/stdc++.h>
-const int N = 1e2 + 5;
+const int N = 1e5 + 5;
 #define lson (p << 1)
 #define rson (p << 1 | 1)
 using namespace std;
@@ -13433,6 +13433,145 @@ int main()
     sort(v.begin(), v.end());
     int ans = unique(v.begin(), v.end()) - v.begin();
     printf("%d", ans);
+    return 0;
+}
+```
+
+[2774 -- Long Long Message (poj.org)](http://poj.org/problem?id=2774)
+
+```c++
+#include <iostream>
+#include <cstdio>
+#include <cstring>
+#include <algorithm>
+using namespace std;
+typedef unsigned long long ull;
+const int maxn = 1e5 + 7;
+const ull Hash = 131;
+char s1[maxn], s2[maxn];
+int len1, len2;
+ull hash_1[maxn], hash_2[maxn], P[maxn], cnt, num_hash[maxn];
+int main()
+{
+    P[0] = 1;
+    for (int i = 1; i < maxn; i++)
+        P[i] = P[i - 1] * Hash;
+    scanf("%s%s", s1 + 1, s2 + 1);
+    hash_1[0] = hash_2[0] = 0;
+    len1 = strlen(s1 + 1);
+    len2 = strlen(s2 + 1);
+    for (int i = 1; i <= len1; i++)
+        hash_1[i] = hash_1[i - 1] * Hash + s1[i];
+    for (int i = 1; i <= len2; i++)
+        hash_2[i] = hash_2[i - 1] * Hash + s2[i];
+    int l = 0, r = min(len1, len2);
+    while (l < r)
+    {
+        int mid = (l + r + 1) >> 1;
+        cnt = 0;
+        for (int i = mid; i <= len1; i++)
+            num_hash[++cnt] = (hash_1[i] - hash_1[i - mid] * P[mid]);
+        bool flag = false;
+        sort(num_hash + 1, num_hash + 1 + cnt);
+        for (int i = mid; i <= len2; i++)
+        {
+            ull x = (hash_2[i] - hash_2[i - mid] * P[mid]);
+            if (*lower_bound(num_hash + 1, num_hash + 1 + cnt, x) == x)
+            {flag = true; break;}
+        }
+        if (flag) l = mid;
+        else r = mid - 1;
+    }
+    printf("%d\n", l);
+    return 0;
+}
+```
+
+[P2957 USACO09OCTBarn Echoes G - 洛谷 ](https://www.luogu.com.cn/problem/P2957)
+
+```c++
+#include <bits/stdc++.h>
+using namespace std;
+typedef unsigned long long ull;
+char a[100], b[100];
+ull ha[100], hb[100];
+ull P[100];
+int main()
+{
+    cin >> a + 1 >> b + 1;
+    int p = 131;
+    int lena = strlen(a + 1), lenb = strlen(b + 1);
+    P[0] = 1;
+    for (int i = 1; i <= 99; i++) P[i] = P[i - 1] * p;
+    for (int i = 1; i <= lena; i++) ha[i] = ha[i - 1] * p + a[i];
+    for (int i = 1; i <= lenb; i++) hb[i] = hb[i - 1] * p + b[i];
+    int m = min(lena, lenb);
+    int ans = 0;
+    for (int i = 1; i <= m; i++)
+    {
+        if (ha[i] == hb[lenb] - hb[lenb - i] * P[i]) ans = max(ans, i);
+        if (hb[i] == ha[lena] - ha[lena - i] * P[i]) ans = max(ans, i);
+    }
+    cout << ans << endl;
+    return 0;
+}
+```
+
+[Problem - E - Codeforces](https://codeforces.com/contest/1200/problem/E)
+
+此题数据卡了`unsigned long long`的单哈希，所以需要使用`1^9` 次方级别的质数进行多次哈希，特别注意的是，在取模时，一定要特别注意随时取模防止数据溢出，并且保证数据准确性；同时出现减法的取模，在取模前一定要先加上模数，防止出现负数，对负数取模仍然会是负数
+
+```c++
+#include <bits/stdc++.h>
+using namespace std;
+typedef unsigned long long ull;
+const int maxn = 1e6 + 10;
+ull ha[3][maxn], hb[3][maxn], P[3][maxn];
+char ans[maxn];
+char a[maxn], b[maxn];
+ull mod[3] = {100000007, 100000009, 998244353}; //1^9级别的质数
+int cal(int l, int r, int i)
+{
+    return (ha[i][r] - ha[i][l] * P[i][r - l] % mod[i] + mod[i]) % mod[i]; //取模时特别注意
+}
+int main()
+{
+    int n; cin >> n;
+    char ch;
+    getchar();
+    int p = 131, cnt = 0, lena = 0, lenb = 0;
+    P[0][0] = P[1][0] = P[2][0] = 1;
+    for (int i = 0; i <= 2; i++)
+        for (int j = 1; j <= maxn - 10; j++)
+            P[i][j] = (P[i][j - 1] * p) % mod[i];
+    while (cin.get(ch) && ch != ' ') a[++lena] = ch;
+    for (int i = 0; i <= 2; i++)
+        for (int j = 1; j <= lena; j++)
+            ha[i][j] = (ha[i][j - 1] * p + a[j]) % mod[i];
+    for (int t = 2; t <= n; t++)
+    {
+        lenb = 0;
+        while (cin.get(ch) && ch != '\n' && ch != ' ') b[++lenb] = ch;
+        for (int i = 0; i <= 2; i++) hb[i][0] = 0;
+        for (int i = 0; i <= 2; i++)
+            for (int j = 1; j <= lenb; j++)
+                hb[i][j] = (hb[i][j - 1] * p + b[j]) % mod[i];
+        int m = min(lena, lenb), ret = 0;
+        for (int i = 1; i <= m; i++)
+        {
+            if (cal(lena - i, lena, 0) == hb[0][i])
+                if (cal(lena - i, lena, 1) == hb[1][i])
+                    if (cal(lena - i, lena, 2) == hb[2][i])
+                        ret = i;
+        }
+        for (int i = ret + 1; i <= lenb; i++)
+        {
+            a[++lena] = b[i];
+            for (int j = 0; j <= 2; j++)
+                ha[j][lena] = (ha[j][lena - 1] * p + b[i]) % mod[j];
+        }
+    }
+    cout << a + 1 << endl;
     return 0;
 }
 ```

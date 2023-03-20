@@ -924,7 +924,7 @@ int main()
 
 **链表哈希**实现模板
 
-```C++
+```/
 #include <bits/stdc++.h>
 using namespace std;
 #define MAX 200000   //取一个值大于预估哈希值
@@ -12255,10 +12255,36 @@ int main()
 }
 ```
 
+[P1441 砝码称重 - 洛谷](https://www.luogu.com.cn/problem/P1441)
 
+```c++
+#include <bits/stdc++.h>
+using namespace std;
 
-```
-
+bool dp[200010];
+vector<int> ve;
+int main()
+{
+    int n; cin >> n;
+    int sum = 0, cnt = 0;
+    for (int i = 1; i <= n; i++)
+    {
+        int x; cin >> x;
+        ve.push_back(x); sum += x;
+    }
+    dp[sum] = 1;
+    for (int k = 0; k < n; k++)
+    {
+        for (int j = 2 * sum; j >= ve[k]; j--)
+            dp[j] |= dp[j - ve[k]];
+        for (int j = 0; j <= 2 * sum - ve[k]; j++)
+            dp[j] |= dp[j + ve[k]];
+    }
+    int ans = 0;
+    for (int i = sum + 1; i <= 2 * sum; i++) if (dp[i]) ans++;
+    cout << ans;
+    return 0;
+}
 ```
 
 

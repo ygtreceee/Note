@@ -1,26 +1,6 @@
 ## Note
 
-#### 第一章 预备知识
-
-简介
-
-C++融合了3重不同的编程方式: C语言代表的过程性语言, C++在C语言基础上添加的类代表的面向对象(Object Oriented Programming，OOP)语言, C++模板支持的泛型编程.
-
-C语言: 结构化编程和过程性编程
-
-面向对象编程
-
-C++中, 类是一种规范, 它描述了这种新型数据格式,对象是根据这种规范构造的特定数据结构. 
-
-C++和泛型编程
-
-[Bjarne Stroustrup 的主页](http://www.research.att.com/-bs/)
-
-#### 第二章 开始学习C++
-
-#### 第三章 处理数据
-
-使用头文件climits查看类型限制信息
+#### climits
 
 ```c++
 #include <iostream>
@@ -189,9 +169,9 @@ using namespace std;
 
 int main()
 {
-    priority_queue<int, vector<int>, greater<int>> que;
-    //priority_queue<int, vector<int>, less<int>> que;
-    //priority_queue<int> que;
+    priority_queue<int, vector<int>, greater<int>> que;   //1 2 3
+    //priority_queue<int, vector<int>, less<int>> que;    //3 2 1
+    //priority_queue<int> que;                            //3 2 1
     int a = 2, b = 1, c = 3;
     que.push(a);
     que.push(b);
@@ -211,7 +191,7 @@ int main()
     priority_queue<pair<int, int>, vector<pair<int, int>>, greater<pair<int, int>>> que;
     //priority_queue<pair<int, int>> que;
     pair<int, int> b(1, 2);
-    pair<int, int> c(1, 2);
+    pair<int, int> c(1, 3);
     pair<int, int> d(2, 5);
     que.push(b);
     que.push(c);
@@ -223,16 +203,18 @@ int main()
     }
     return 0;
 }
+//1 2
+//1 3
+//2 5
 
 //对于自定义类型
 struct tmp1 //运算符重载
 {
     int x;
     tmp1(int a) {x = a;}
-    bool operator<(const tmp1& a) const
+    bool operator<(const tmp1 &a) const
     {
         return x < a.x;//大顶堆
-
     }
 };
 
@@ -252,7 +234,7 @@ int main()
     que.push(a);
     que.push(b);
     que.push(c);
-    while (!que.empty())
+    while (!que.empty())       //3 2 1
     {
         cout << que.top().x << endl;
         que.pop();
@@ -262,7 +244,7 @@ int main()
     quee.push(a);
     quee.push(b);
     quee.push(c);
-    while (!quee.empty())
+    while (!quee.empty())    //3 2 1
     {
         cout << quee.top().x << endl;
         quee.pop();
@@ -592,6 +574,23 @@ void test()
 }
 ```
 
+```c++
+//常用
+//find可以查找字符串，并返回第一个下标，而如果查找不到，string::find会返回string::npos，所以可以用!= 来判断能否找到
+if (ret.find(name) != ret.npos) 
+    action；
+
+//
+#include <iostream>
+#include <string>
+int main()
+{
+    string str("hello");
+    if (str.find("he") != str.npos)
+        cout << "hh"; //hh
+}
+```
+
 string的排序 sort()
 
 ```c++
@@ -642,5 +641,501 @@ void test11()
     string s2 = s1.substr(2, 5); // 结果：23456-----参数5表示：截取的字符串的长度
     cout << s2 << endl;
 }
+```
+
+#### set
+
+```
+关于set，必须说明的是set关联式容器。set作为一个容器也是用来存储同一数据类型的数据类型，并且能从一个数据集合中取出数据，在set中每个元素的值都唯一，而且系统能根据元素的值自动进行排序。应该注意的是set中数元素的值不能直接被改变。C++ STL中标准关联容器set, multiset, map, multimap内部采用的就是一种非常高效的平衡检索二叉树：红黑树，也成为RB树(Red-Black Tree)。RB树的统计性能要好于一般平衡二叉树，所以被STL选择作为了关联容器的内部结构
+注意：
+1. set中的元素都是排好序的
+2. set集合中没有重复的元素
+3. map和set的插入删除效率比用其他序列容器高
+4. 每次insert之后，以前保存的iterator不会失效
+5. 当数据元素增多时，set的插入和搜索速度仍为log2数量级，速度极快，搜索耗时短
+```
+
+基础关键字
+
+```
+begin()       返回set容器第一个元素的迭代器
+end() 　      返回一个指向当前set末尾元素的下一位置的迭代器.
+clear()       删除set容器中的所有的元素
+empty() 　    判断set容器是否为空
+max_size() 　 返回set容器可能包含的元素最大个数
+size() 　　　 返回当前set容器中的元素个数
+rbegin()　　  返回的值和end()相同
+rend()　　　　返回的值和begin()相同
+```
+
+```c++
+#include <iostream>
+#include <algorithm>
+#include <set>
+using namespace std;
+int main()
+{
+	set<int> s;
+	s.insert(1);
+	s.insert(2);
+	s.insert(3);
+	s.insert(4);
+	cout << "size = " << s.size() << endl;
+	cout << "maxsize = " << s.max_size() << endl;
+	cout << "begin = " << *s.begin() << endl; //注意需要对迭代器解引用才能得到对应值
+	cout << "end = " << *s.end() << endl;
+	s.clear();
+	if (s.empty()) cout << "set is empty!" << endl;
+	cout << "size = " << s.size() << endl;
+	return 0;
+}
+```
+
+迭代遍历
+
+```
+注意begin() 和 end()函数是不检查set是否为空的，使用前最好使用empty()检验一下set是否为空
+同时注意，set会自动排序
+```
+
+```c++
+#include <iostream>
+#include <algorithm>
+#include <set>
+using namespace std;
+int main()
+{
+	set<int> s;
+	s.insert(3);
+	s.insert(1);
+	s.insert(2);
+	s.insert(4);
+	for (set<int>::iterator it = s.begin(); it != s.end(); it++)
+		cout << *it << endl;
+	return 0;
+}
+```
+
+**count()**
+
+```
+count() 用来查找set中某个某个键值出现的次数。这个函数在set并不是很实用，因为一个键值在set只可能出现0或1次，这样就变成了判断某一键值是否在set出现过了
+```
+
+```c++
+#include <iostream>
+#include <algorithm>
+#include <set>
+using namespace std;
+int main()
+{
+	set<int> s;
+	s.insert(1);
+	if (s.count(1)) cout << "1 is being";
+	else cout << "1 is not in this set";
+	cout << endl;
+	if (s.count(2)) cout << "2 is being";
+	else cout << "2 is not in this set";
+	return 0;
+}
+
+```
+
+**equal_range()** 
+
+```
+返回一对定位器，分别表示第一个大于或等于给定关键值的元素和 第一个大于给定关键值的元素，这个返回值是一个pair类型，如果这一对定位器中哪个返回失败，就会等于end()的值
+```
+
+```c++
+#include <iostream>
+#include <set>
+using namespace std;
+int main(){
+     set<int> s;
+     set<int>::iterator iter;
+     for(int i = 1 ; i <= 5; ++i)
+         s.insert(i);
+     for(iter = s.begin() ; iter != s.end() ; ++iter)
+         cout<<*iter<<" ";
+     cout<<endl;
+     pair<set<int>::const_iterator,set<int>::const_iterator> pr;
+     pr = s.equal_range(3);
+     cout<<"第一个大于等于 3 的数是 ："<<*pr.first<<endl;
+     cout<<"第一个大于 3的数是 ： "<<*pr.second<<endl;
+     return 0;
+}
+```
+
+**erase(iterator)**
+
+**erase(first,second)**
+
+**erase(key_value)**
+
+```
+set中的删除操作是不进行任何的错误检查的，比如定位器的是否合法等等，所以用的时候自己一定要注意
+```
+
+```
+erase(iterator)      删除定位器iterator指向的值
+
+erase(first,second)  删除定位器first和second之间的值
+
+erase(key_value)     删除键值key_value的值
+```
+
+```c++
+#include <iostream>
+#include <set>
+using namespace std;
+int main(){
+     set<int> s;
+     set<int>::const_iterator iter;
+     set<int>::iterator first;
+     set<int>::iterator second;
+     for(int i = 1 ; i <= 10 ; ++i) s.insert(i);
+    
+     //第一种删除
+     s.erase(s.begin());       //2 3 4 5 6 7 8 9 10
+    
+     //第二种删除
+     first = s.begin();
+     second = s.begin();
+     second++;
+     second++;
+    
+     s.erase(first,second);    //4 5 6 7 8 9 10
+    
+     //第三种删除
+     s.erase(8);               //4 5 6 7 9 10
+    
+     for(iter = s.begin() ; iter != s.end() ; ++iter) cout<<*iter<<" ";
+     cout<<endl;
+     return 0;
+}
+```
+
+**find()** 
+
+```
+返回给定值值得定位器，如果没找到则返回end()
+```
+
+```c++
+#include <iostream>
+#include <set>
+using namespace std;
+int main()
+{
+     int a[] = {1,2,3};
+     set<int> s(a,a+3);
+     set<int>::iterator iter;
+     if((iter = s.find(2)) != s.end())
+         cout<<*iter<<endl;    //2
+     return 0;
+}
+```
+
+**insert(key_value)**
+
+**inset(first,second)**
+
+```
+insert(key_value)  将key_value插入到set中 ，返回值是pair<set<int>::iterator,bool>，bool标志着插入是否成功，而iterator代表插入的位置，若key_value已经在set中，则iterator表示的key_value在set中的位置。
+
+inset(first,second)  将定位器first到second之间的元素插入到set中，返回值是void.
+```
+
+```c++
+#include <iostream>
+#include <set>
+using namespace std;
+int main()
+{
+     int a[] = {1,2,3};
+     set<int> s;
+     set<int>::iterator iter;
+     s.insert(a,a+3);
+     for(iter = s.begin() ; iter != s.end() ; ++iter) cout<<*iter<<" ";
+     cout<<endl;
+     pair<set<int>::iterator,bool> pr;
+     pr = s.insert(5);
+     if(pr.second)
+         cout<<*pr.first<<endl;
+     return 0;
+}
+
+//1 2 3 
+//5
+```
+
+#### lower_bound(key_value)
+
+**upper_bound(key_value)**
+
+```
+lower_bound(key_value)  返回第一个大于等于key_value的定位器
+
+upper_bound(key_value)  返回最后一个大于等于key_value的定位器
+```
+
+```c++
+#include <iostream>
+#include <set>
+using namespace std;
+int main()
+{
+     set<int> s;
+     s.insert(1);
+     s.insert(3);
+     s.insert(4);
+     cout<<*s.lower_bound(2)<<endl;
+     cout<<*s.lower_bound(3)<<endl;
+     cout<<*s.upper_bound(3)<<endl;
+     return 0;
+}
+
+//3
+//3
+//4
+```
+
+自定义比较函数
+
+```c++
+//元素不是结构体：自定义比较函数myComp,重载“（）”操作符
+
+struct myComp  
+{  
+    bool operator()(const your_type &a, const your_type &b)  
+        return a.data - b.data > 0;  
+}  
+set<int, myComp> s;  
+......  
+set<int, myComp>::iterator it;  
+
+
+//如果元素是结构体，可以直接将比较函数写在结构体内
+
+struct Info
+{  
+    string name;  
+    float score;  
+    //重载“<”操作符，自定义排序规则  
+    bool operator<(const Info &a) const
+        return a.score < score;  //按score从大到小排列
+}  
+set<Info> s;  
+......  
+set<Info>::iterator it;  
+```
+
+
+
+lower_bound()    upper_bound()
+
+```
+lower_bound(查找的起始位置，查找的终止为止，需要查找的数)是返回第一个大于等于需要查找的数的数的地址
+比如，要a[]数组中，从[1,n]中第一个大于s的数的下标
+pos = lower_bound(a+1,a+n+1,s)-a;
+upper_bound(查找的起始位置，查找的终止为止，需要查找的数 )是返回第一个大于需要查找的数的数的地址
+注意上面的两种用法都需要原数组是小到大排列的有序数组(但是貌似无序也可)
+
+可以通过修改比较器，查找第一个小于或小于等于某个数的地址
+数组需要从大到小排列
+首先需要比较函数
+bool cmp(const int &a,const int &b){return a>b;}
+比如，要a[]数组中，从[1,n]中第一个小于s的数的下标
+pos = lower_bound(a+1,a+n+1,s，cmp)-a;
+也可以不写cmp函数，将所有cmp的位置换成greater<int>()
+
+这两种函数如果差找不到目标，就返回查找的最后一个元素的地址
+```
+
+```c++
+//函数采用二分查找
+//所需头文件为<algorithm>
+#include <iostream>
+#include <algorithm>
+using namespace std;
+bool cmp(const int a, const int b)
+{
+    return a > b;
+}
+int main()
+{
+    int a[] = {1, 5, 9, 11, 45, 69, 101};
+    cout << "a[] = ";
+    for (int i = 0; i < 7; i++) cout << a[i] << ' ';
+    cout << endl;
+    int p1 = lower_bound(a, a + 7, 9) - a;
+    cout << "数组中第一个大于等于9的数的下标为 " << p1 << endl;
+    int p2 = upper_bound(a, a + 7, 9) - a;
+    cout << "数组中第一个大于9的数的下标为 " << p2 << endl;
+    sort(a, a + 7, cmp);
+    cout << "数组为 ";
+    for (int i = 0; i < 7; i++) cout << a[i] << ' ';
+    cout << endl;
+    int p3 = lower_bound(a, a + 7, 9, cmp) - a;
+    cout << "数组中第一个小于等于9的数的下标为 " << p3 << endl;
+    int p4 = upper_bound(a, a + 7, 9, greater<int>()) - a;
+    cout << "数组中第一个小于9的数的下标为 " << p4 << endl;
+
+    return 0;
+}
+```
+
+#### unique
+
+```
+1.unique函数的去重过程实际上就是不停的把后面不重复的元素移到前面来，也可以说是用不重复的元素占领重复元素的位置
+2.unique函数通常和erase函数一起使用，来达到删除重复元素的目的。(注：此处的删除是真正的删除，即从容器中去除重复的元素，容器的长度也发生了变换；而单纯的使用unique函数的话，容器的长度并没有发生变化，只是元素的位置发生了变化)
+```
+
+```c++
+//彻底去重
+#include<iostream>
+#include<algorithm>
+#include<cassert>
+using namespace std;
+ 
+int main()
+{
+ 
+    vector<int> a ={1,3,3,4,5,6,6,7};
+    vector<int>::iterator it_1 = a.begin();
+    vector<int>::iterator it_2 = a.end();
+    vector<int>::iterator new_end;
+ 
+    new_end = unique(it_1,it_2); //注意unique的返回值
+    a.erase(new_end,it_2);
+    cout<<"删除重复元素后的 a : ";
+    for(int i = 0 ; i < a.size(); i++)
+        cout<<a[i];
+    cout<<endl;
+ 
+}
+```
+
+#### lcm()  gcd()
+
+```c++
+//lcm  返回两个数字的最小公倍数
+template<class _Mn, class _Nn> constexpr std::common_type<_Mn, _Nn>::type std::lcm(_Mn __m, _Nn __n)
+Least common multiple
+    
+//gcd 返回两个数字的最大公约数
+template<class _Mn, class _Nn> constexpr std::common_type<_Mn, _Nn>::type std::gcd(_Mn __m, _Nn __n)
+Greatest common divisor
+```
+
+#### c_str
+
+```
+可以将 const string* 类型 转化为 cons char* 类型
+c_str()就是将C++的string转化为C的字符串数组，c_str()生成一个const char *指针，指向字符串的首地址
+因为在c语言中没有string类型，必须通过string类对象的成员函数 c_str() 把 string 转换成c中的字符串样式
+```
+
+```c++
+注意: c_str() 这个函数转换后返回的是一个临时指针，不能对其进行操作
+所以因为这个数据是临时的，所以当有一个改变这些数据的成员函数被调用后，该数据就会改变失效
+
+#include <iostream>
+#include <cstring>
+using namespace std;
+int main()
+{
+    const char *ptr;
+    string s = "12345";
+    ptr = s.c_str();
+    cout << "s改变前ptr为: " << ptr << endl;
+    s = "66666";
+    cout << "s改变后ptr为: " << ptr << endl;
+    return 0;
+}
+
+//s改变前ptr为: 12345
+//s改变后ptr为: 66666
+
+
+要么直接将这个数据应用或输出，要么把它的数据用 strcpy() 函数复制到自己可以管理的内存中；
+#include <iostream>
+#include <cstring>
+using namespace std;
+int main()
+{
+    char ptr[5];
+    string s = "12345";
+    strcpy(ptr, s.c_str());
+    cout << "s改变前ptr为: " << ptr << endl;
+    s = "66666";
+    cout << "s改变后ptr为: " << ptr << endl;
+    return 0;
+}
+
+//s改变前ptr为: 12345
+//s改变后ptr为: 12345
+```
+
+#### atoi atol atoll atoq
+
+```c++
+//头文件
+#include <stdlib.h>
+
+//函数声明
+int atoi(const char *nptr);
+long atol(const char *nptr);
+long long atoll(const char *nptr);
+long long atoq(const char *nptr);
+
+//功能说明
+atoi: 把字符串nptr转换为int
+atol: 把字符串nptr转换为long int
+atoll: 把字符串nptr转换为long long int
+atoq: atoq() is an obsolete name for atoll()
+    
+//示例
+int main()
+{
+    int ii = 0;
+    ii = atoi("123");
+    cout << ii;    //123
+    
+    ii = atoi("123abc");
+    cout << ii;    //123, 合法数字后面的字母被忽略
+    
+    ii = atoi("abc123");
+    cout << ii;    //0 数字前有字符为非法
+    
+    ii = atoi("+123");
+    cout << ii;     //123 '+'是合法字符
+    
+    ii = atoi("-123");
+    cout << ii;    //-123 '-'是合法字符
+}
+```
+
+#### to_string
+
+```c++
+//将数字常量转换为字符串
+inline std::__cxx11::string std::__cxx11::to_string(int __val)
+    
+//返回值是转换完成的string
+    
+//示例
+#include <string>
+using namespace std;
+int main()
+{
+    string pi = "pi is " + to_string(3.1415926);
+    cout << pi;
+    return 0;
+}
+
+//pi is 3.1415926
 ```
 

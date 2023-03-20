@@ -4857,6 +4857,97 @@ int main()
 }
 ```
 
+[D - Tying Rope (atcoder.jp)](https://atcoder.jp/contests/abc293/tasks/abc293_d)
+
+```c++
+#include <bits/stdc++.h>
+const int N = 4010;
+using namespace std;
+
+int s[N];
+int f[N];
+int find_set(int x)
+{
+    if (x != s[x]) s[x] = find_set(s[x]);
+    return s[x];
+}
+void merge_set(int x, int y)
+{
+    int nx = find_set(x);
+    int ny = find_set(y);
+    if (nx != ny)
+    {
+        f[nx] += f[ny];
+        s[ny] = nx;
+    }
+}
+int main()
+{
+    int aa = 0, ab = 0;
+    int n, m;
+    cin >> n >> m;
+    for (int i = 1; i <= 2 * n; i++)  s[i] = i, f[i] = -1;
+    for (int i = 1; i <= n; i++)  merge_set(i, i + n);
+    for (int i = 1; i <= m; i++)
+    {
+        int a, b; char c, d;
+        cin >> a >> c >> b >> d;
+        if (c == 'B') a += n; if (d == 'B') b += n; 
+        merge_set(a, b);
+        f[find_set(a)] += 2;
+    }
+    for (int i = 1; i <= 2 * n; i++) if (find_set(i) == i) {if (f[i] == 0) aa++; else ab++;}
+    cout << aa << ' ' << ab;
+    return 0;
+}   
+```
+
+[E - 2xN Grid (atcoder.jp)](https://atcoder.jp/contests/abc294/tasks/abc294_e)
+
+类似于指针，根据上下长度的大小关系移动指针即可
+
+```c++
+#include <bits/stdc++.h>
+using namespace std;
+typedef long long LL;
+const int maxn = 2e5 + 10;
+int v[3][maxn];
+LL l[3][maxn];
+int main()
+{
+    LL a; cin >> a;
+    int n1, n2; cin >> n1 >> n2;
+    for (int i = 1; i <= n1; i++)
+        cin >> v[1][i] >> l[1][i];
+    for (int i = 1; i <= n2; i++)
+        cin >> v[2][i] >> l[2][i];
+    int x = 1, y = 1, v1 = 0, v2 = 0;
+    LL t, ans = 0, tot1 = 0, tot2 = 0;
+    while (x <= n1 || y <= n2)
+    {
+        while (x <= n1 && tot1 <= tot2)
+        {
+            t = tot1;
+            tot1 += l[1][x];
+            v1 = v[1][x];
+            if (v1 == v2) ans += min(tot1 - t, tot2 - t);
+            x++;
+        }
+        while (y <= n2 && tot2 <= tot1)
+        {
+            t = tot2;
+            tot2 += l[2][y];
+            v2 = v[2][y];
+            if (v1 == v2) ans += min(tot1 - t, tot2 - t);
+            y++;
+        }
+    }
+    cout << ans << endl;
+    return 0;
+    
+}
+```
+
 
 
 #### Codeforces
@@ -4896,6 +4987,208 @@ int main()
     for (cin >> t; t--; )
         Solve();
     return 0;
+}
+```
+
+[Problem - G2 -Subsequence Addition (Hard Version) Codeforces](https://codeforces.com/contest/1807/problem/G2)
+
+很有意思的数学结论, 例如 $1, 1, 2, 3, 5$ , 往后取的每一个数, 只要不大于前面的数的总和, 就一定能被前面若干数取和而得到. 也就是说, 从数字 $1$ 开始, 往后取的每一个数范围在 $[1, sum]$ 之间, 则该数一定可以被前面数的子集求和得到, `sum`是从1开始到该数前一个数的所有数的总和. 每次都取最小值, 数列将是 $1, 1, 1, 1, 1, 1...$ , 每次都取最大值, 数列将是 $1, 1, 2, 4, 8, 16, 32, 64...$ , 这两个数列最容易理解, 而取中间的数也是同样适用的
+
+```c++
+#include <bits/stdc++.h>
+using namespace std;
+ 
+vector<int> num;
+int main()
+{
+	int t; cin >> t;
+	while (t--)
+	{
+		int n; cin >> n;
+		num.clear();
+		for (int i = 1; i <= n; i++)
+		{
+			int x; cin >> x; 
+			num.push_back(x);
+		}
+		sort(num.begin(), num.end(), less<int> ());
+		long long sum = 1;
+		int flag = 0;
+		if (n == 1 && num[0] != 1) 
+			{cout << "NO" << endl; continue;}
+		for (int i = 1; i < n; i++)
+		{
+			if (num[i] > sum) {flag = 1; break;}
+			else sum += num[i];
+		}
+		if (flag) cout << "NO"; else cout << "YES";
+		cout << endl;
+	}
+	return 0;
+}
+```
+
+
+
+####  lanqiao
+
+[P8748 蓝桥杯 2021 省 B 时间显示 - 洛谷](https://www.luogu.com.cn/problem/P8748)
+
+```++
+#include <bits/stdc++.h>
+using namespace std;
+typedef long long LL;
+
+LL n;
+int main()
+{
+    cin >> n;
+    int a, b, c, d;
+    n /= 1000;
+    a = n / 60 / 60 % 24;
+    b = n / 60 % 60;
+    c = n % 60;
+    printf("%0.2d:%0.2d:%0.2d", a, b, c);
+    return 0;
+}
+```
+
+[P8684 蓝桥杯 2019 省 B 灵能传输 - 洛谷](https://www.luogu.com.cn/problem/P8684)
+
+转换为前缀和，对前缀和进行操作使得每个项之间的差的绝对值的最大值最小，显然对其排序，使得前缀和序列成为单调序列时，各项之间差的绝对值的最大值最小，但是由于`s0` 和 `sn` 项是无法移动的，因为可以操作的只能是 $[2, n - 1]$ ，所以要记录排序之后`s0` 和 `s1` 的位置，然后 `s0` 先向左遍历至最小值，再遍历至最右端即最大值处，最后再遍历至 `sn`， 还需要注意的是，为了避免遍历时重复遍历某一个数，在有重复的部分要隔两个进行遍历，即先后的遍历分别错位。
+
+```c++
+#include <bits/stdc++.h>
+using namespace std;
+
+typedef long long LL;
+const int N = 300010;
+int n;
+LL sum[N], a[N], s0, sn;
+bool st[N];
+int main()
+{
+    int t; cin >> t; 
+    while (t--)
+    {
+        cin >> n;
+        sum[0] = 0;
+        for (int i = 1; i <= n; i++)
+        {
+            cin >> sum[i];
+            sum[i] += sum[i - 1];
+        }
+        s0 = sum[0]; sn = sum[n];
+        if (s0 > sn) swap(s0, sn);
+        sort(sum, sum + n + 1);
+        for (int i = 0; i <= n; i++)
+            if (s0 == sum[i])
+            {
+                s0 = i;
+                break;
+            }
+        for (int i = n; i >= 0; i--)
+            if (sn == sum[i])
+            {
+                sn = i; 
+                break;
+            }
+        memset(st, 0, sizeof st);
+        int l = 0, r = n;
+        for (int i = s0; i >= 0; i -= 2)
+        {
+            a[l++] = sum[i];
+            st[i] = true;
+        }
+        for (int i = sn; i <= n; i += 2)
+        {
+            a[r--] = sum[i];
+            st[i] = true;
+        }
+        for (int i = 0; i <= n; i++)
+            if (!st[i]) a[l++] = sum[i];
+        LL res = 0;
+        for (int i = 1; i <= n; i++)
+            res = max(res, abs(a[i] - a[i - 1]));
+        cout << res << endl;
+    }
+    return 0;
+}
+```
+
+[P8720 蓝桥杯 2020 省 B2 平面切分 - 洛谷](https://www.luogu.com.cn/problem/P8720)
+
+分两种情况讨论：1. 若新加入的直线不与平面中任何一条直线重合，设该直线与平面中已经存在的直线的不同的交点数为`s`，那么部分数加`s+1`；2. 否则，部分数不变。注意可以使用`set`来维护交点的不同
+
+```c++
+#include <bits/stdc++.h>
+using namespace std;
+
+typedef pair<double, double> pdd;
+const int N = 1e3 + 5;
+int n, ans;
+double a[N], b[N];
+bool vis[N];
+int main()
+{
+    cin >> n;
+    for (int i = 1; i <= n; i++)
+    {
+        cin >> a[i] >> b[i];
+        set<pdd> se;
+        se.clear();
+        for (int j = 1; j < i; j++)
+        {
+            if (vis[j]) continue;
+            if (a[i] == a[j] && b[i] == b[j])
+            {
+                vis[i] = 1; break;
+            }
+            if (a[i] == a[j]) continue;
+            se.insert(pdd((b[i] - b[j])/(a[j] - a[i]), (a[j] * b[i] - a[i] * b[j])/(a[j] - a[i])));
+
+        }
+        if (vis[i] == 0) ans += se.size() + 1;
+    }
+    cout << ans + 1 << endl;
+    return 0;
+}
+```
+
+[P8715 蓝桥杯 2020 省 AB2 子串分值 - 洛谷](https://www.luogu.com.cn/problem/P8715)
+
+本题一开始的思路是遍历窗口大小, 从[2, n], 维护每个时刻内窗口内部仅出现一次的字母的数量, 然后将值全部加起来, 但是这样的话, 总的时间复杂度会到达 $O()$ , 在此题的数据量下会导致TLE, 所以采用的是另一种巧妙的方法, 由于题目中要求的是每个子区间内仅出现一次的字符的个数, 所以转换思维, 遍历该字符串, 记录遍历到的每个字母它上一次出现的位置和下一次出现的位置, 那在这段区间内该字母就只出现一次, 符合题目的要求, 所以给答案加上 `(i - pre[i]) * (-i + nex[i])` , 这是仅包含一个该字母的子区间个数, 也是这些区间内该仅出现一次的字母的出现次数, 两者是等值的.
+
+```c++
+#include <bits/stdc++.h>
+using namespace std;
+const int N = 100010;
+string s;
+int pre[N], nex[N], idx[200];
+int main()
+{
+	cin >> s;
+	int n = s.size();
+	s = ' ' + s;
+	for (int i = 1; i <= n; i++)
+	{
+		pre[i] = idx[s[i]];
+		idx[s[i]] = i; 
+	}
+	for (int i = 97; i <= 122; i++)
+	{
+		idx[i] = n + 1;
+	}
+	for (int i = n; i >= 1; i--)
+	{
+		nex[i] = idx[s[i]];
+		idx[s[i]] = i;
+	}
+	long long ans = 0;
+	for (int i = 1; i <= n; i++)
+		ans += 1LL * (i - pre[i]) * (-i + nex[i]);
+	cout << ans;
+	return 0;
 }
 ```
 

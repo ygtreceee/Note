@@ -13621,6 +13621,155 @@ int main()
 
 
 
+#### 字典树
+
+```
+
+```
+
+[P2580 于是他错误的点名开始了 - 洛谷](https://www.luogu.com.cn/problem/P2580)
+
+```c++
+//字典树
+#include <bits/stdc++.h>
+using namespace std;
+const int N = 800000;
+struct node
+{
+    bool repeat;  //这个前缀是否重复
+    int son[26];  //26个字母
+    int num;      //此前缀出现的次数
+}t[N];            //字典树
+int cnt = 1;      //当前新分配的储存位置，把cnt[0]留给根节点
+void Insert(char *s)
+{
+    int now = 0;
+    for (int i = 0; s[i]; i++)
+    {
+        int ch = s[i] - 'a';
+        if (t[now].son[ch] == 0)     //如果这个字符还没有储存过
+            t[now].son[ch] = cnt++;  //把cnt位置分配给这个字符
+        now = t[now].son[ch];        //沿着字典树走下去
+        t[now].num++;                //统计这个前缀出现了几次
+    }
+}
+int Find(char *s)
+{
+    int now = 0, ret = 0;
+    for (int i = 0; s[i]; i++)
+    {
+        int ch = s[i] - 'a';
+        if (t[now].son[ch] == 0) return 3; //此时的字符找不到
+        now = t[now].son[ch];
+    }
+    for (int i = 0; i < 26; i++)
+        ret += t[t[now].son[i]].num;
+    if (ret == t[now].num) return 3;
+    if (t[now].repeat == false)
+        return t[now].repeat = true;
+    return 2;
+}
+int main()
+{
+    char s[51];
+    int n; cin >> n;
+    while (n--) {scanf("%s", s); Insert(s);}
+    int m; cin >> m;
+    while (m--)
+    {
+        scanf("%s", s);
+        int r = Find(s);
+        if (r == 1) cout << "OK";
+        else if (r == 2) cout << "REPEAT";
+        else if (r == 3) cout << "WRONG";
+        cout << endl;
+    }
+    return 0;
+}
+
+
+//STL map
+#include <bits/stdc++.h>
+using namespace std;
+int main()
+{
+    map<string, int> ma;
+    int n; cin >> n;
+    for (int i = 1; i <= n; i++)
+    {
+        string s; cin >> s;
+        ma[s]++;
+    }
+    int m; cin >> m;
+    for (int i = 1; i <= m; i++)
+    {
+        string s; cin >> s;
+        if (ma[s] == 1) cout << "OK", ma[s] = 2;
+        else if (ma[s] == 2) cout << "REPEAT";
+        else if (ma[s] == 0) cout << "WRONG";
+        cout << endl;
+    }
+    return 0;
+}
+```
+
+[2001 -- Shortest Prefixes (poj.org)](http://poj.org/problem?id=2001)
+
+```c++
+#include <bits/stdc++.h>
+using namespace std;
+
+const int N = 8000;
+struct node
+{
+    int son[26];
+    int num;
+}t[N];
+char s[1010][30];
+int id = 0;
+void Insert(int cnt)
+{
+    int now = 0;
+    for (int i = 0; s[cnt][i]; i++)
+    {
+        int ch = s[cnt][i] - 'a';
+        if (!t[now].son[ch])
+            t[now].son[ch] = ++id;
+        now = t[now].son[ch];
+        t[now].num++;
+    }
+}
+void Find(int cnt)
+{
+    int now = 0;
+    for (int i = 0; s[cnt][i]; i++)
+    {
+        int ch = s[cnt][i] - 'a';
+        cout << s[cnt][i];
+        now = t[now].son[ch];
+        if (t[now].num == 1) break;
+    }
+}
+int main()
+{
+    int cnt = 0;
+    while (cin >> s[cnt])
+    {
+        Insert(cnt);
+        cnt++;
+    }
+    for (int i = 0; i < cnt; i++)
+    {
+        cout << s[i] << ' ';
+        Find(i);
+        cout << endl;
+    }
+    return 0;
+}
+```
+
+
+
 ## 图论
 
 #### 图的存储

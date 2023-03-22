@@ -13768,6 +13768,118 @@ int main()
 }
 ```
 
+[3630 -- Phone List (poj.org)](http://poj.org/problem?id=3630)
+
+此题需要进行先按字符串长度由大到小排序, 再进行字典树存储, 就可以实现边存边判断, 减少时间
+
+```c++
+#include <iostream>
+#include <algorithm>
+#include <cstring>
+#include <string>
+
+using namespace std;
+const int N = 800000;
+struct node
+{
+    int son[10];
+    int num;
+}t[N];
+bool cmp(string a, string b)
+{
+    return a.size() > b.size();
+}
+string num[100010];
+int id = 0;
+int flag = 0;
+void Insert(string s)
+{
+    int now = 0;
+    for (int i = 0; s[i]; i++)
+    {
+        int ch = s[i] - '0';
+        if (t[now].son[ch] == 0)
+            t[now].son[ch] = ++id;
+        now = t[now].son[ch];
+        t[now].num++;
+    }
+    if (t[now].num > 1) flag = 1;
+}
+int main()
+{
+    cin.tie(0) -> sync_with_stdio(false);
+    cout.tie(0) -> sync_with_stdio(false);
+    int cas; cin >> cas;
+    while (cas--)
+    {
+        id = flag = 0;
+        memset(t, 0, sizeof t);
+        int n; cin >> n;
+        for (int i = 0; i < n; i++)
+            cin >> num[i];
+        sort(num, num + n, cmp);
+        for (int i = 0; i < n; i++)
+        {
+            Insert(num[i]);
+            if (flag) break;
+        }
+        cout << (flag ? "NO" : "YES") << endl;
+    }
+    return 0;
+}
+```
+
+[P2922 USACO08DEC Secret Message G - 洛谷 ](https://www.luogu.com.cn/problem/P2922)
+
+```c++
+#include <bits/stdc++.h>
+using namespace std;
+struct node
+{
+    int num;
+    int end;
+    int son[2];
+}t[500010]; // ?
+int id = 0;
+int main()
+{
+    int m, n;
+    cin >> m >> n;
+    for (int i = 1; i <= m; i++)
+    {
+        int now = 0;
+        int b; cin >> b;
+        for (int j = 0; j < b; j++)
+        {
+            int x; cin >> x;
+            if (t[now].son[x] == 0)
+                t[now].son[x] = ++id;
+            now = t[now].son[x];
+            t[now].num++;
+        }
+        t[now].end++;
+    }
+    for (int i = 1; i <= n; i++)
+    {
+        int flag = 0;
+        int ans = 0;
+        int now = 0;
+        int b; cin >> b;
+        for (int j = 0; j < b; j++)
+        {
+            int x; cin >> x;
+            if (flag) continue;
+            now = t[now].son[x];
+            if (now == 0) flag = 1;
+            if (t[now].end && j != b - 1) ans += t[now].end;
+        }
+        ans += t[now].num;
+        cout << ans << endl;
+    }
+    return 0;
+}
+```
+
 
 
 ## 图论

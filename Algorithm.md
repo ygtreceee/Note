@@ -13880,6 +13880,422 @@ int main()
 }
 ```
 
+[Problem - 1277 全文检索 (hdu.edu.cn)](https://acm.hdu.edu.cn/showproblem.php?pid=1277)
+
+此题中的读取输入, 方式需要学习, 采用的方式是`scanf("%*s%*s%d%*c%s", &j, str)` , 详见笔记
+
+```c++
+#include <bits/stdc++.h>
+using namespace std;
+
+struct node
+{
+    int son[10];
+    int num;
+}t[600010];
+char txt[60010], str[70];
+int a[10010];
+int id = 0;
+void Insert(char *s, int num)
+{
+    int now = 0, len = strlen(s);
+    for (int i = 0; i < len; i++)
+    {
+        int ch = s[i] - '0';
+        if (t[now].son[ch] == 0)
+            t[now].son[ch] = ++id;
+        now = t[now].son[ch];
+    }
+    t[now].num = num;
+}
+int Find(char *s)
+{
+    int now = 0, len = strlen(s);
+    for (int i = 0; i < len; i++)
+    {
+        int ch = s[i] - '0';
+        if (t[now].son[ch] == 0) break; 
+        now = t[now].son[ch];
+    }
+    return t[now].num;
+}
+int main()
+{
+    int m, n; cin >> m >> n;
+    int len = 0, j;
+    for (int i = 0; i < m; i++)
+    {
+        scanf("%s", txt + len);
+        len = strlen(txt);
+    }
+    for (int i = 0; i < n; i++)
+    {
+        scanf("%*s%*s%d%*c%s", &j, str);
+        Insert(str, j);
+    }
+    int k = 0;
+    for (int i = 0; i < len; i++)
+    {
+        int ret = Find(txt + i);
+        if (ret) a[k++] = ret;
+    }
+    if (k == 0)
+    printf("No key can be found !\n");
+    else
+    {
+        printf("Found key:");
+        for (int i = 0; i < k; i++)
+			printf(" [Key No. %d]",a[i]);
+        printf("\n");
+    }
+    return 0;
+}
+```
+
+[P3879 TJOI2010 阅读理解 - 洛谷](https://www.luogu.com.cn/problem/P3879)
+
+```c++
+#include <bits/stdc++.h>
+using namespace std;
+const int N = 5010;
+struct node
+{
+    int son[26];
+    int cnt;
+}t[1010][N];
+int id[1010];
+void Insert(string s, int num)
+{
+    int now = 0;
+    for (int i = 0; s[i]; i++)
+    {
+        int ch = s[i] - 'a';
+        if (t[num][now].son[ch] == 0)
+            t[num][now].son[ch] = ++id[num];
+        now = t[num][now].son[ch];
+    }
+    t[num][now].cnt++;
+}
+bool Find(string s, int num)
+{
+    int now = 0; 
+    for (int i = 0; s[i]; i++)
+    {
+        int ch = s[i] - 'a';
+        now = t[num][now].son[ch];
+        if (now == 0) return 0;
+    }
+    return !!t[num][now].cnt;
+}
+int main()
+{
+    int n; cin >> n;
+    for (int k = 1; k <= n; k++)
+    {
+        int m; cin >> m;
+        for (int i = 1; i <= m; i++)
+        {
+            string s; cin >> s;
+            Insert(s, k);
+        }
+    }
+    int q; cin >> q;
+    for (int i = 0; i < q; i++)
+    {
+        string s; cin >> s;
+        for (int i = 1; i <= n; i++)
+        if (Find(s, i)) cout << i << ' ';
+        cout << endl;
+    }  
+    return 0;
+}
+```
+
+
+
+```c++
+#include <bits/stdc++.h>
+using namespace std;
+const int N = 5e4 + 10;
+struct node
+{
+    int son[26];
+    int cnt;
+}t[N];
+int id = 0;
+string s[N];
+int size_;
+void Insert(string str)
+{
+    int now = 0;
+    for (int i = 0; str[i]; i++)
+    {
+        int ch = str[i] - 'a';
+        if (t[now].son[ch] == 0)
+            t[now].son[ch] = ++id;
+        now = t[now].son[ch];
+    }
+    t[now].cnt++;
+}
+int Find(string str)
+{
+    int now = 0;
+    for (int i = 0; str[i]; i++)
+    {
+        int ch = str[i] - 'a';
+        now = t[now].son[ch];
+        if (now == 0) return 0;
+    }
+    return !!t[now].cnt;
+}
+int main()
+{
+    for (size_ = 1; getline(cin, s[size_]); size_++)
+        Insert(s[size_]);
+    for (int i = 1; i <= size_; i++)
+        for (int j = 1; j < s[i].size(); j++)
+            if (Find(s[i].substr(j)) && Find(s[i].substr(0, j)))
+            {cout << s[i] << endl; break;}
+    return 0;
+}
+```
+
+[Problem - 633C - Spy Syndrome 2 - Codeforces](https://codeforces.com/problemset/problem/633/C)
+
+简单dfs搜索, 搜索时注意判断`now == 0`的情况, 一旦遇到合适的直接`return true`即可结束`dfs`
+
+```c++
+#include <bits/stdc++.h>
+using namespace std;
+const int N = 1.5e6;
+int n, m;
+string s;
+string str[N];
+struct node
+{
+    int son[26];
+    int num;
+}t[N];
+int id = 0;
+vector<int> ans;
+void Insert(string ss, int x)
+{
+    int now = 0, len = ss.size();
+    for (int i = ss.size() - 1; i >= 0; i--)
+    {
+        int ch = (ss[i] <= 'Z') ? (ss[i] - 'A') : (ss[i] - 'a');
+        if (t[now].son[ch] == 0)
+            t[now].son[ch] = ++id;
+        now = t[now].son[ch];
+    }
+    t[now].num = x;
+}
+bool dfs(int x)
+{
+    if (x == n)
+    {
+        for (auto v : ans)
+            cout << str[v] << ' ';
+        return true;
+    }
+    int now = 0;
+    for (int i = x; i < s.size(); i++)
+    {
+        int ch = s[i] - 'a';
+        now = t[now].son[ch];
+        if (now == 0) break;
+        if (t[now].num)
+        {
+            ans.push_back(t[now].num);
+            if (dfs(i + 1)) return true;
+            ans.pop_back();
+        }
+    }
+    return false;
+}
+int main()
+{
+    cin >> n;
+    cin >> s;
+    cin >> m;
+    for (int i = 1; i <= m; i++)
+    {
+        cin >> str[i];
+        Insert(str[i], i);
+    }
+
+    dfs(0);
+    return 0;
+}
+```
+
+[The XOR-longest Path (nowcoder.com)](https://ac.nowcoder.com/acm/problem/50349)
+
+首先要了解一个异或的规则, 如下图所示, 如何求6 - 7之间边的全部权值的异或值呢, 我们可以知道1 − 7异或和就是5 ^ 3 ^ 11 ^ 8。1 − 6 的异或和就是5 ^ 7 ^ 1，那这两个数异或起来就是5 ^ 3 ^ 11 ^ 8 ^ 5 ^7 ^ 1=3 ^ 11 ^ 8 ^ 7 ^ 1, 可以发现一个规律, 我们A − B 的异或和就等于A − 1 的异或和再异或上B − 1 的异或和, 所以我们可以先bfs或者dfs求出所有1 - A 的值, 然后题目就变成了从N个数中求出两个数求最大的异或值. 我们在存储所有的异或值也就是 1 - i 的时候, 是选择将每个数看成一个二进制数字串, 然后将该二进制数的每一位都存进字典树, 这与存字符串是一样的道理, 然后如何找能组成最大异或值的两个数呢, 由于字典树搜索效率很高, 所以我们可以遍历每一个数, 然后再从高到低遍历该数的每一个二进制位, 根据异或规则, 选择目前能选的最合适的数位的数, 在贪心思想和字典树体系下, 能找到遍历到的那个数的能异或出最大数的另一个数. 
+
+
+
+<img src="https://img-blog.csdnimg.cn/20201031111424574.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3N4aGxyTFg=,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述" style="zoom:50%;" />
+
+```c++
+#include <bits/stdc++.h>
+using namespace std;
+
+const int maxn = 8e6 + 10;
+int n;
+struct edge
+{
+    int to, nxt, w;
+} d[maxn];
+int head[maxn], cnt = 0;
+void add(int u, int v, int w)
+{
+    d[++cnt].to = v;
+    d[cnt].w = w;
+    d[cnt].nxt = head[u];
+    head[u] = cnt;
+}
+int dis[maxn];
+void dfs(int u, int fa)
+{
+    for (int i = head[u]; i; i = d[i].nxt)
+    {
+        int v = d[i].to;
+        if (v == fa)
+            continue;
+        dis[v] = dis[u] ^ d[i].w;
+        dfs(v, u);
+    }
+}
+int zi[maxn][3], tot;
+void insert(int x)
+{
+    int now = 0;
+    for (int i = 30; i >= 0; i--)
+    {
+        int k = 0;
+        if (x & (1 << i))
+            k = 1;
+        if (!zi[now][k])
+            zi[now][k] = ++tot;
+        now = zi[now][k];
+    }
+}
+int ask(int x)
+{
+    int ans = 0, now = 0;
+    for (int i = 30; i >= 0; i--)
+    {
+        int k = 1;
+        if (x & (1 << i))
+            k = 0;
+        if (zi[now][k])
+            ans += (1 << i), now = zi[now][k];
+        else
+            now = zi[now][k ^ 1];
+    }
+    return ans;
+}
+int main()
+{
+    cin >> n;
+    for (int i = 1; i < n; i++)
+    {
+        int l, r, w;
+        cin >> l >> r >> w;
+        add(l, r, w);
+        add(r, l, w);
+    }
+    dfs(1, 0);
+    int ans = 0;
+    for (int i = 1; i <= n; i++)
+        insert(dis[i]);
+    for (int i = 1; i <= n; i++)
+        ans = max(ans, ask(dis[i]));
+    cout << ans;
+}
+```
+
+[Consecutive Sum | LightOJ](https://lightoj.com/problem/consecutive-sum)
+
+给定一个序列, 求最大异或和和最小异或和, 原理和上一题一样, 都是先存储前缀异或和, 然后再找任意两个值的最大最小异或值, 值得注意的是, 在求解最小异或值的时候, 如果按照先全部存入再进行遍历的方法, 会导致直接求到该数本身, 所以在这里我们应该换一种搜索方法, 在求前缀异或和的过程中, 同时进行搜索求最大最小异或和, 然后搜索完之后再进行插入该前缀异或和, 这样就不会导致搜索到该数本身, 同时也不会漏过所有可能的情况, 因为可以从排列组合的角度来看, 每加入一个新的数, 就会出现之前每个数与该数的新的组合, 所以所有组合都能考虑到. 还有的细节就是一开始要插入`0`, 而且查找的过程中不需要判断 `now == 0` , 因为在插入第一个前缀和之前, 如果提前插入一个`0`, 能巧妙地使第一个前缀异或和插入前`min`和`max`返回`0`, 然后异或上`sum`直接就是`sum`本身, 那之所以不需要加入`now == 0`的判断, 是因为我们使用的是贪心思想, 能满足条件就进入下一个我们想要的数位, 但是即便是不满足, 也必定存在另一条路, 因为子树只有`1`和`0`, 而且我们存的是`32`位, 所以每一位都是必定有数的, 这和我们构造的实际上是一棵二叉树密切相关.
+
+```c++
+#include <bits/stdc++.h>
+using namespace std;
+const int N = 500010;
+const int M = 32;
+struct Node
+{
+    int son[2];
+};
+struct Trie
+{
+    Node t[M * N];
+    int id;
+    void init() 
+    {
+        id = 0;
+        memset(t, 0, sizeof t);
+    }
+    void inse0(int x)
+    {
+        int now = 0;
+        for (int i = 31; i >= 0; i--)
+        {
+            int ch = 1 & (x >> i);
+            if (t[now].son[ch] == 0) t[now].son[ch] = ++id;
+            now = t[now].son[ch];
+        }
+    }
+    int min(int x)
+    {
+        int now = 0, ret = 0;
+        for (int i = 31; i >= 0; i--)
+        {
+            int ch = 1 & (x >> i);
+            if (t[now].son[ch]) now = t[now].son[ch], ret <<= 1, ret |= ch;
+            else now = t[now].son[!ch], ret <<= 1, ret |= !ch;
+        }
+        return ret;
+    }
+    int max(int x)
+    {
+        int now = 0, ret = 0;
+        for (int i = 31; i >= 0; i--)
+        {
+            int ch = 1 & (x >> i);
+            if (t[now].son[ch ^ 1]) now = t[now].son[ch ^ 1], ret <<= 1, ret |= !ch;
+            else now = t[now].son[ch], ret <<= 1, ret |= ch;
+        }
+        return ret;
+    }
+}trie;
+int main()
+{
+    int t, n, x;
+    scanf("%d", &t);
+    for (int cas = 1; cas <= t; cas++)
+    {
+        scanf("%d", &n);
+        int ans1 = 0, ans2 = 0x3f3f3f3f;
+        int sum = 0;
+        trie.init();
+        trie.inse0(0);
+        for (int i = 0; i < n; i++)
+        {
+            scanf("%d", &x);
+            sum ^= x;
+            ans1 = max(ans1, trie.max(sum) ^ sum);
+            ans2 = min(ans2, trie.min(sum) ^ sum);
+            trie.inse0(sum);
+        }
+        printf("Case %d: %d %d\n", cas, ans1, ans2);
+    }
+    return 0;
+}
+```
+
 
 
 ## 图论

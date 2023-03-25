@@ -14296,6 +14296,229 @@ int main()
 }
 ```
 
+[Problem - 5687 (hdu.edu.cn)](http://acm.hdu.edu.cn/showproblem.php?pid=5687)
+
+主要是一个`delete`操作需要注意, 在最后只需要切断该前缀最后一个字符和其所拥有子字符的链接即可
+
+```c++
+#include <bits/stdc++.h>
+using namespace std;
+const int N = 3e6 + 10;
+struct node
+{
+    int son[26];
+    int num;
+}t[N];
+int id = 0;
+void Insert(string s)
+{
+    int now = 0;
+    for (int i = 0; s[i]; i++)
+    {
+        int ch = s[i] - 'a';
+        if (t[now].son[ch] == 0) t[now].son[ch] = ++id;
+        now = t[now].son[ch];
+        t[now].num++;
+    }
+}
+int Find(string s)
+{
+    int now = 0;
+    for (int i = 0; s[i]; i++)
+    {
+        int ch = s[i] - 'a';
+        now = t[now].son[ch];
+        if (now == 0) return 0;
+    }
+    return t[now].num;
+}
+void Delete(string s, int len)
+{
+    if (len <= 0) return;
+    int now = 0;
+    for (int i = 0; s[i]; i++)
+    {
+        int ch = s[i] - 'a';
+        now = t[now].son[ch];
+        t[now].num -= len;
+    }
+    memset(t[now].son, 0, sizeof t[now].son);
+    return;
+}
+int main()
+{
+    int n; cin >> n;
+    for (int i = 0; i < n; i++)
+    {
+        string s; cin >> s;
+        string ret; cin >> ret;
+        if (s == "insert") Insert(ret);
+        else if (s == "delete") Delete(ret, Find(ret));
+        else cout << (Find(ret) ? "Yes" : "No") << endl;
+    }
+    return 0;
+}
+```
+
+[Problem - 817E - Choosing The Commander - Codeforces](https://codeforces.com/problemset/problem/817/E)
+
+题意有三个操作, 在一个集合中, 加入或删去`1`个数, 询问 `p, l` 这个集合中有多少个数满足 `x ^ p < l` , 仍然是关于异或的操作, 要操作的是每一个数的二进制位, 加入和删除操作比较基础, 关键是询问满足条件的操作, 对于给定的 `l` , 我们考虑的是 `l` 二进制下的每一位, 从高位到低位进行判断, 如果是 `1`, 那么 `x ^ p` 就有希望直接比这一位小, 那么直接加上小的这部分的数量, 如果是 `0` , 那只能是相等方向去探索, 因为至少在这一位上不会出现比它小的情况. 本题有个小细节, 就是在查找异或值的时候, 如果设置根节点 `id = 0` , 则必须要设置一个判断条件, 就是 `if (now == 0) break;` , 因为我们在查找的过程中, 有一个直接进入 `son[temp ^ 1]`和 `son[temp]` 的 `now` , 注意, 我们是直接进入, 如果它本来就不存在的话, 那会导致 `now = 0` , 会回到根节点, 导致错误, 所以需要先判断一下, 如果不存在, 那我们得到的结果 `res` 其实已经是正确答案, 直接 `break` 即可.
+
+```c++
+#include <bits/stdc++.h>
+using namespace std;
+const int N = 6e6 + 10;
+struct node
+{
+    int son[2];
+    int num;
+}t[N];
+//int id = 1;
+int id = 0;
+void Insert(int x)
+{
+    //int now = 1;
+    int now = 0;
+    for (int i = 30; i >= 0; i--)
+    {
+        int ch = 1 & (x >> i);
+        if (t[now].son[ch] == 0)
+            t[now].son[ch] = ++id;
+        now = t[now].son[ch];
+        t[now].num++;
+    }
+}
+void Delete(int x)
+{
+    //int now = 1;
+    int now = 0;
+    for (int i = 30; i >= 0; i--)
+    {
+        int ch = 1 & (x >> i);
+        now = t[now].son[ch];
+        t[now].num--;
+    }
+}
+int Find(int p, int l)
+{
+    //int now = 1, res = 0;
+    int now = 0, res = 0;
+    for (int i = 30; i >= 0; i--)
+    {
+        int tem = 1 & (l >> i);
+        int temp = 1 & (p >> i);
+        if (tem)
+        {
+            res += t[t[now].son[temp]].num;
+            now = t[now].son[temp ^ 1];
+        }
+        else 
+            now = t[now].son[temp];
+        if (now == 0) break;
+    }
+    return res;
+}
+int main()
+{
+    int q; cin >> q;
+    for (int i = 0; i < q; i++)
+    {
+        int op; cin >> op;
+        if (op == 1)
+        {
+            int x; cin >> x; Insert(x);
+        }
+        else if (op == 2)
+        {
+            int x; cin >> x; Delete(x);
+        }
+        else 
+        {
+            int p, l; cin >> p >> l;
+            cout << Find(p, l) << endl;
+        }
+    }
+    return 0;
+}
+```
+
+[Problem - 5536 (hdu.edu.cn)](https://acm.hdu.edu.cn/showproblem.php?pid=5536)
+
+此题无法像上一道题一样插入前先搜索, 考虑到`n`不大, 所以只能遍历所有情况, 再更新最大值, 此题需要用到`delete`操作, 注意`delete`完之后, 那块空间还是存在的, 只是`val`变成了`0`, 所以在`match`的时候, 一定还要加入`t[w[now].son[ch ^ 1]].num != 0` 的判断
+
+```c++
+#include <bits/stdc++.h>
+using namespace std;
+const int maxnode = 1e6 + 10;
+int s[1010];
+struct node
+{
+    int son[2];
+    int val;
+}t[maxnode];
+int id;
+void init()
+{
+    id = 0;
+    memset(t, 0, sizeof t);
+}
+void update(int v, int d)
+{
+    int u = 0;
+    for(int i = 31; i >= 0; i--)
+    {
+        int c = (v >> i) & 1;
+        if (t[u].son[c] == 0)
+        t[u].son[c] = ++id;
+        u = t[u].son[c];
+        t[u].val += d;
+    }
+}
+int match(int v)
+{
+    int ans = 0, u = 0;
+    for(int i = 31; i >= 0; i--) {
+        int c = (v >> i) & 1;
+        if (t[u].son[c ^ 1] && t[t[u].son[c ^ 1]].val)
+        {
+            ans |= (1 << i);
+            u = t[u].son[c ^ 1];
+        }
+        else u = t[u].son[c]; 
+    }
+    return ans;
+}
+ 
+int main()
+{
+    int T; scanf("%d", &T);
+    while(T--)
+    {
+        init();
+        int n; scanf("%d", &n);
+        for (int i = 0; i < n; i++)
+        {
+            scanf("%d", s + i);
+            update(s[i], 1);
+        }
+        int ans = 0;
+        for (int i = 0; i < n - 1; i++)
+        {
+            update(s[i], -1);
+            for (int j = i + 1; j < n; j++)
+            {
+                update(s[j], -1);
+                ans = max(ans, match(s[i] + s[j]));
+                update(s[j], 1);
+            }
+            update(s[i], 1);
+        }
+        printf("%d\n", ans);
+    }
+    return 0;
+}
+```
+
 
 
 ## 图论

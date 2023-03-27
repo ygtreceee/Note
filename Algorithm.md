@@ -12394,7 +12394,7 @@ using namespace std;
 
 LL dp[N][N];
 int num[N], now;
-LL dfs(int pos, int sum, bool lead, bool limit)
+LL dfs(int pos, int sum, bool lead, bool limit)  //pos:第几位, sum:前面有几个now, lead:有无前导0, limit:高位限制
 {
     LL ans = 0;
     if (pos == 0) return sum;

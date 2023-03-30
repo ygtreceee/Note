@@ -14551,6 +14551,189 @@ int main()
 
 
 
+#### KMP
+
+```
+
+```
+
+[Problem - 2087 剪花布条 (hdu.edu.cn)](https://acm.hdu.edu.cn/showproblem.php?pid=2087)
+
+```c++
+#include <iostream>
+#include <cstring>
+using namespace std;
+const int N = 1005;
+char str[N], pattern[N];
+int Next[N];
+int cnt;
+void getNext(char *p, int plen)  //计算 Next[1]~Next[plen]
+{
+    Next[0] = Next[1] = 0;
+    for (int i = 1; i < plen; i++)  //把i的增加看作后缀的逐步扩展
+    {
+        int j = Next[i];            //j的后移: j指向前缀阴影w的后一个字符
+        while (j && p[i] != p[j])   //阴影的后一个字符不相同
+            j = Next[j];            //更新j
+        if (p[i] == p[j]) Next[i + 1] = j + 1;
+        else Next[i] = 0;
+    }
+}
+void kmp(char *s, char *p)  //在s中找p
+{
+    int last = -1;
+    int slen = strlen(s), plen = strlen(p);
+    getNext(p, plen);     //预计算Next[]数组
+    int j = 0;
+    for (int i = 0; i < slen; i++)  //匹配s和p的每个字符
+    {
+        while (j && s[i] != p[j])  //失配
+            j = Next[j];           //j滑动到Next[j]位置
+        if (s[i] == p[j]) j++;     //当前位置的字符匹配, 继续
+        if (j == plen)             //j到了p的末尾, 找到了一个匹配, 如有需要还可以打印出来
+        {
+            if (i - last >= plen)  //判断新的匹配能否和上一个匹配分开
+            {
+                cnt++;
+                last = i;          //last指向上一次匹配的末尾位置
+            }
+        }
+    }
+}
+int main()
+{
+    while (~scanf("%s", str))      //读串
+    {
+        if (str[0] == '#') break;
+        scanf("%s", pattern);      //读模式串
+        cnt = 0;
+        kmp(str, pattern);
+        printf("%d\n", cnt);
+    }
+    return 0;   
+}
+```
+
+[P3375 【模板】KMP字符串匹配 - 洛谷](https://www.luogu.com.cn/problem/P3375)
+
+```c++
+#include <bits/stdc++.h>
+using namespace std;
+const int N = 1e6 + 10;
+int Next[N];
+char str[N], pattern[N];
+vector<int> ans;
+void getNext(char *p, int plen)
+{
+    Next[0] = Next[1] = 0;
+    for (int i = 1; i < plen; i++)
+    {
+        int j = Next[i];
+        while (j && p[i] != p[j])
+            j = Next[j];
+        if (p[i] == p[j]) Next[i + 1] = j + 1;
+        else Next[i + 1] = 0;
+    }
+}
+void kmp(char *s, char *p)
+{
+    int slen = strlen(s), plen = strlen(p);
+    getNext(p, plen);
+    int j = 0;
+    for (int i = 0; i < slen; i++)
+    {
+        while (j && s[i] != p[j])
+            j = Next[j];
+        if (s[i] == p[j]) j++;
+        if (j == plen) ans.push_back(i + 2 - plen);
+    }
+}
+int main()
+{
+    scanf("%s%s", str, pattern);
+    kmp(str, pattern);
+    for (auto v : ans) cout << v << endl;
+    for (int i = 1; i <= strlen(pattern); i++) printf(" %d" + !(i - 1), Next[i]);
+    return 0;
+}
+```
+
+[P4391 BOI2009 Radio Transmission 无线传输 - 洛谷](https://www.luogu.com.cn/problem/P4391)
+
+```c++
+#include <bits/stdc++.h>
+using namespace std;
+const int N = 1e6 + 10;
+char p[N];
+int n;
+int Next[N];
+void kmp()
+{
+    for (int i = 1; i < n; i++)
+    {
+        int j = Next[i];
+        while (j && p[i] != p[j])
+            j = Next[j];
+        if (p[i] == p[j]) Next[i + 1] = j + 1;	
+        else Next[i + 1] = 0;
+    }
+
+}
+int main()
+{
+    cin >> n >> p;
+    kmp();
+    cout << n - Next[n];
+    return 0;   
+}
+```
+
+[P1470 USACO2.3 最长前缀 Longest Prefix - 洛谷](https://www.luogu.com.cn/problem/P1470)
+
+直接 `dp` 即可, 要求符合要求的最长前缀, 类似于背包问题, 但是此题处理的是字符串, 所以用 `set` 存 `string` 类, 然后直接进行比较即可, 注意按照长度存储能加快查找效率; 如果非要使用 `KMP` , 那思路就是对每一个词都进行 `KMP` , 查找在整个句子中该词出现的所有位置, 然后记录下来, 最后遍历整个句子, 进行一次 `dp` , 
+
+```c++
+#include <bits/stdc++.h>
+using namespace std;
+const int N = 2e5 + 10;
+set<string> se[20];
+int dp[N];
+int m;
+int main()
+{
+    string tp;
+    while (cin >> tp)
+    {
+        if (tp == ".") break;	
+        se[tp.size()].insert(tp);
+        m = max(m, (int)tp.size());
+    }
+    dp[0] = 1;
+    int ans = 0;
+    string n;
+    n = " ";
+    while (cin >> tp)
+        n += tp;
+    for (int i = 1; i < n.size(); i++)
+    {
+        for (int j = min(i, m); j > 0; j--)
+        {
+            string ret = n.substr(i - j + 1, j);
+            if (se[ret.size()].count(ret) == 1 && dp[i - ret.size()])
+            {
+                dp[i] = 1;
+                ans = i;
+                break;
+            }
+        }
+    }
+    cout << ans;
+    return 0;
+}
+```
+
+
+
 ## 图论
 
 #### 图的存储

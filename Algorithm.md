@@ -14660,6 +14660,8 @@ int main()
 
 [P4391 BOI2009 Radio Transmission 无线传输 - 洛谷](https://www.luogu.com.cn/problem/P4391)
 
+**最短循环节问题**, 一开始很难想到与最长公共前后缀, `KMP` 的 `Next[]` 数组有关, 此题能帮助深入理解最长公共前后缀和 `Next[]` 数组. 讨论两种情况, (1) `P` 由完整的 `k` 个 `S` 连接而成, 而 `Next[n]` 等于 `k - 1` 个 `S` 的长度, 那么剩下的 `n - Next[n]` 等于一个 `S` 的长度; (2) `P` 由 `k` 个完整的 `S` 和一个不完整的 `S` 连接而成, 设 `S` 的长度为 `L` , 不完整的部分长度为 `Z` , 则 `Next[n] = (k - 1)L + Z, n - Next[n] = kL + Z - (k - 1) L - Z = L` 就是答案. 综上所述, 答案即为 `n - Next[n]`
+
 ```c++
 #include <bits/stdc++.h>
 using namespace std;
@@ -14685,6 +14687,48 @@ int main()
     kmp();
     cout << n - Next[n];
     return 0;   
+}
+```
+
+[Problem - 1358 Period (hdu.edu.cn)](https://acm.hdu.edu.cn/showproblem.php?pid=1358)
+
+**最短循环节问题**
+
+```c++
+#include <bits/stdc++.h>
+using namespace std;
+const int N = 1e6 + 10;
+int Next[N];
+char p[N];
+int n, cas;
+void getNext(char *p)
+{
+    memset(Next, 0, sizeof Next);
+    int len = strlen(p);
+    for (int i = 1; i < len; i++)
+    {
+        int j = Next[i];
+        while (j && p[i] != p[j])
+            j = Next[j];
+        if (p[i] == p[j]) Next[i + 1] = j + 1;
+        else Next[i + 1] = 0;
+    }
+}
+int main()
+{
+    while (scanf("%d", &n) && n)
+    {
+        scanf("%s", p);
+        getNext(p);
+        printf("Test case #%d\n", ++cas);
+        for (int i = 2; i <= n; i++)
+        {
+            if (i % (i - Next[i]) == 0 && i / (i - Next[i]) > 1)
+            printf("%d %d\n", i, i / (i - Next[i]));
+        }
+        printf("\n");
+    }
+    return 0;
 }
 ```
 
@@ -14728,6 +14772,110 @@ int main()
         }
     }
     cout << ans;
+    return 0;
+}
+```
+
+[Problem - 4763 Theme Section (hdu.edu.cn)](https://acm.hdu.edu.cn/showproblem.php?pid=4763)
+
+```c++
+#include <stdio.h>
+#include <string.h>
+const int N = 1e6 + 10;
+char str[N];
+int next[N];
+int n;
+void getnext()
+{
+    memset(next, 0, sizeof next);
+    int len = strlen(str);
+    for (int i = 1; i < len; i++)
+    {
+        int j = next[i];
+        while (j && str[i] != str[j])
+            j = next[j];
+        if (str[i] == str[j]) next[i + 1] = j + 1;
+        else next[i + 1] = 0;
+    }
+}
+int kmp()
+{
+    for (int i = next[n]; i; i = next[i])
+    {
+        for (int j = 2 * i; j <= n - i; j++)
+        {
+            if (next[j] == i)
+                return i;
+        }
+    }
+    return 0;
+}
+int main(void)
+{
+    int t;
+    scanf("%d", &t);
+    while (t--)
+    {
+        scanf("%s", str);
+        n = strlen(str);
+        getnext();
+        printf("%d\n", kmp());
+    }
+    return 0;
+}
+```
+
+[3450 -- Corporate Identity (poj.org)](http://poj.org/problem?id=3450)
+
+找若干字符串中最长公共子串
+
+```c++
+//利用string函数, 较为简单
+#include <iostream>
+#include <string>
+using namespace std;
+string t;
+string s[4040];
+int main()
+{
+    int n;
+    while (scanf("%d", &n) && n)
+    {
+        int cnt;
+        int sum = 0;
+        for (int i = 1; i <= n; i++) cin >> s[i];
+        int len = s[1].size();
+        for (int i = 0; i < len; i++)
+        {
+            for (int j = 1; j <= len - i; j++)
+            {
+                if (j < sum) continue;
+                cnt = 0;
+                for (int k = 2; k <= n; k++)
+                {
+                    if (s[k].find(s[1].substr(i, j)) == s[k].npos)
+                        break;
+                    else
+                        cnt++;
+                }
+                if (cnt == n - 1)
+                {
+                    if (j > sum)
+                    {
+                        sum = j;
+                        t = s[1].substr(i, j);
+                    }
+                    else if (j == sum)
+                    {
+                        if (t > s[1].substr(i, j))
+                            t = s[1].substr(i, j);
+                    }
+                }
+            }
+        }
+        if (sum == 0) printf("IDENTITY LOST\n");
+        else cout << t << endl;
+    }
     return 0;
 }
 ```

@@ -15045,8 +15045,48 @@ int main()
 }
 
 
-//倍增法
-
+//倍增法, 注意jp二维数组令较小维在前能优化运行时间
+#include <bits/stdc++.h>
+using namespace std;
+#define MOD 1000000007
+char s[1200000];
+int nt[1200000];
+int jp[21][1200000];
+int main()
+{
+    int T;
+    scanf("%d",&T);
+    while(T--)
+    {
+        scanf("%s",s+1);
+        nt[1]=0;
+        int l=strlen(s+1);
+        for(int i=2;i<=l;++i)
+        {
+            int j=nt[i-1];
+            while(j&&s[i]!=s[j+1])j=nt[j];
+            if(s[i]==s[j+1])nt[i]=j+1;
+            else nt[i]=0;
+            jp[0][i]=nt[i];
+        }
+        for(int j=1;j<20;++j)
+            for(int i=1;i<=l;++i)
+                jp[j][i]=jp[j-1][jp[j-1][i]];
+        int ans=1;
+        for(int i=2;i<=l;++i)
+        {
+            int tt=i;
+            for(int j=19;j>=0;--j)
+                if(jp[j][tt]*2>i)tt=jp[j][tt];
+            int gg=0;
+            for(int j=19;j>=0;--j)
+                if(jp[j][tt])gg+=1<<j,tt=jp[j][tt];
+            ans=1ll*ans*(gg+1)%MOD;
+        }
+        printf("%d\n",ans);
+    }
+    return 0;
+}
 ```
 
 

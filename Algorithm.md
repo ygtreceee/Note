@@ -14880,6 +14880,175 @@ int main()
 }
 ```
 
+[Problem - E - Compress Words - Codeforces](https://codeforces.com/contest/1200/problem/E)
+
+```c++
+#include <bits/stdc++.h>
+using namespace std;
+const int N = 1e5 + 10;
+const int M = 1e6 + 10;
+string s, t;
+int len;
+int Next[M];
+void getNext(string p)
+{
+    Next[0] = Next[1] = 0;
+    int plen = p.size();
+    for (int i = 1; i < plen; i++)
+    {
+        int j = Next[i];
+        while (j && p[i] != p[j])
+            j = Next[j];
+        if (p[i] == p[j]) Next[i + 1] = j + 1;
+        else Next[i + 1] = 0;
+    }
+}
+int kmp(int st)
+{
+    int j = 0;
+    int tlen = t.size();
+    for (int i = st; i < tlen; i++)
+    {
+        while (j && t[i] != s[j])
+            j = Next[j];
+        if (t[i] == s[j]) j++;
+    }
+    return j;
+}
+int main()
+{
+    int n; cin >> n;
+    cin >> t;
+    for (int i = 1; i < n; i++)
+    {
+        cin >> s;
+        len = s.size();
+        int st = max(0, (int)t.size() - len);
+        getNext(s);
+        int pos = kmp(st);
+        t += s.substr(pos);
+    }
+    cout << t << endl;
+    return 0;
+}
+```
+
+[Problem - 4847 Wow! Such Doge! (hdu.edu.cn)](https://acm.hdu.edu.cn/showproblem.php?pid=4847)
+
+**KMP字符串匹配** , 低端的题目往往需要高端的算法.
+
+```c++
+#include <iostream>
+#include <string>
+using namespace std;
+int Next[20][10];
+string p[20];
+string s;
+void init()
+{
+    p[1] = "doge", p[2] = "Doge", p[3] = "dOge", p[4] = "doGe", p[5] = "dogE", p[6] = "DOge", p[7] = "DoGe", p[8] = "DogE",
+    p[9] = "dOGe", p[10] = "dOgE", p[11] = "doGE", p[12] = "DOGe", p[13] = "DOgE", p[14] = "DoGE", p[15] = "dOGE", p[16] = "DOGE";
+    for (int k = 1; k <= 16; k++)
+    {
+        for (int i = 1; i < 4; i++)
+        {
+            int j = Next[k][i];
+            while (j && p[k][i] != p[k][j])
+                j = Next[k][j];
+            if (p[k][i] == p[k][j]) Next[k][i] = j + 1;
+            else Next[k][i + 1] = 0;
+        }
+    }
+}
+int kmp(string s)
+{
+    int cnt = 0;
+    int len = s.size();
+    for (int k = 1; k <= 16; k++)
+    {
+        int j = 0;
+        for (int i = 0; i < len; i++)
+        {
+            while (j && s[i] != p[k][j])
+                j = Next[k][j];
+            if (s[i] == p[k][j]) j++;
+            if (j == 4) cnt++;
+        }
+    }
+    return cnt;
+}
+int main()
+{
+    init();
+    int ans = 0;
+    while (getline(cin, s))
+        ans += kmp(s);
+    cout << ans << endl;
+    return 0;
+}
+```
+
+[P2375 NOI2014 动物园 - 洛谷](https://www.luogu.com.cn/problem/P2375)
+
+**不重叠前后缀**
+
+```c++
+//循环KMP法
+#include <bits/stdc++.h>
+using namespace std;
+const int N = 1e6 + 10;
+const int mod = 1e9 + 7;    
+int Next[N];
+int num[N];
+void getNext(string s)
+{
+    Next[0] = Next[1] = 0;
+    num[1] = 1;
+    for (int i = 1; i < s.size(); i++)
+    {
+        int j = Next[i];
+        while (j && s[i] != s[j])
+            j = Next[j];
+        if (s[i] == s[j]) j++;
+        Next[i + 1] = j;
+        num[i + 1] = num[j] + 1;
+    }
+}
+int main()
+{
+    int n; cin >> n;
+    while (n--)
+    {
+        string s; cin >> s;
+        getNext(s);
+        long long ans = 1;
+        //为什么下面重新计算j能ac, 但是直接j = Next[i]会TLE ?
+        //AC
+        for (int i = 1, j = 0; i < s.size(); i++)
+        {
+            while (j && s[i] != s[j]) 
+                j = Next[j];
+            if (s[i] == s[j]) j++;
+            while (j > (i + 1) / 2) j = Next[j];
+            ans = (ans * 1LL * (num[j] + 1)) % mod;
+        }
+        //TLE
+        // for (int i = 1; i < s.size(); i++)
+        // {
+        //     int j = Next[i + 1];
+        //     while (j > (i + 1) / 2) j = Next[j];
+        //     ans = (ans * 1LL * (num[j] + 1)) % mod;
+        // }
+        cout << ans << endl;
+    }
+    return 0;
+}
+
+
+//倍增法
+
+```
+
 
 
 ## 图论

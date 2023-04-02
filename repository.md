@@ -4948,6 +4948,36 @@ int main()
 }
 ```
 
+[D - Three Days Ago (atcoder.jp)](https://atcoder.jp/contests/abc295/tasks/abc295_d)
+
+```c++
+#include<bits/stdc++.h>
+using namespace std;
+using ll = long long;
+const int mod = 1e9 + 7;
+const int N = 5e5 + 10;
+int dp[2][2][2][2][2][2][2][2][2][2];
+int a[10];
+ll ans;
+int cnt, n;
+string s;
+int main()
+{ 
+    cin >> s;
+    n = s.length();
+    dp[0][0][0][0][0][0][0][0][0][0] = 1;
+    s = '?' + s;
+    for (int i = 1; i <= n; i++)
+    {
+        a[s[i] - '0']++;
+        a[s[i] - '0'] %= 2;
+        ans += dp[a[0]][a[1]][a[2]][a[3]][a[4]][a[5]][a[6]][a[7]][a[8]][a[9]];
+        dp[a[0]][a[1]][a[2]][a[3]][a[4]][a[5]][a[6]][a[7]][a[8]][a[9]]++;
+    }
+    cout << ans <<"\n";
+}
+```
+
 
 
 #### Codeforces
@@ -5034,7 +5064,7 @@ int main()
 
 [P8748 蓝桥杯 2021 省 B 时间显示 - 洛谷](https://www.luogu.com.cn/problem/P8748)
 
-```++
+```c++
 #include <bits/stdc++.h>
 using namespace std;
 typedef long long LL;
@@ -5188,6 +5218,71 @@ int main()
 	for (int i = 1; i <= n; i++)
 		ans += 1LL * (i - pre[i]) * (-i + nex[i]);
 	cout << ans;
+	return 0;
+}
+```
+
+[P8716 蓝桥杯 2020 省 AB2 回文日期 - 洛谷](https://www.luogu.com.cn/problem/P8716)
+
+巧妙处理字符与数字的手法, 包括计算和转换
+
+```c++
+#include <bits/stdc++.h>
+using namespace std;
+
+string s;
+int month[13] = {0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
+int f1, f2;
+bool check(int x)
+{
+	if ((x % 4 == 0 && x % 100 != 0) || (x % 400 == 0))
+		return true;
+	return false;
+}
+int main()
+{
+	cin >> s;
+	int a = atoi(s.substr(0, 4).c_str());
+	int b = atoi(s.substr(4, 2).c_str());
+	int c=  atoi(s.substr(6, 2).c_str());
+	int y = a, m = (((a % 10) * 10) + a / 10 % 100), d = (((a % 1000) / 100 * 10) + (a / 1000));
+	if (m <= 12 && m > 0)
+	{
+		string A = to_string(y);
+		if ((m == 2 && d <= (month[2] + check(y))) || (d <= month[m]))
+		{
+			if (b <= m && c < d)
+			printf("%d%.02d%.02d\n", y, m, d), f1 = 1;
+			if (b <= m && c < d && A[0] == A[2] && A[1] == A[3] && A[0] != A[1])
+			printf("%d%.02d%.02d\n", y, m, d), f2 = 1;
+		}
+	}
+
+	while (++a < 9999 || !(f1 && f2))
+	{
+		int y = a, m = (((a % 10) * 10) + a / 10 % 10), d = (((a % 1000) / 100 * 10) + (a / 1000));
+		string A = to_string(a);
+		if (m == 2)
+		{
+			if (d <= (28 + check(a)))
+			{
+				if (f1 == 0)
+					printf("%d%.02d%.02d\n", y, m, d), f1 = 1;
+				if (f2 == 0 && A[0] == A[2] && A[1] == A[3] && A[0] != A[1])
+					printf("%d%.02d%.02d\n", y, m, d), f2 = 1;
+			}
+		}
+		else if (m <= 12 && m > 0)
+		{
+			if (d <= month[m])
+			{
+				if (f1 == 0)
+					printf("%d%.02d%.02d\n", y, m, d), f1 = 1;
+				if (f2 == 0 && A[0] == A[2] && A[1] == A[3] && A[0] != A[1])
+					printf("%d%.02d%.02d\n", y, m, d), f2 = 1;
+			}
+		}
+	}
 	return 0;
 }
 ```

@@ -49,21 +49,99 @@ Minimum int value = -2147483648
 Bits per byte = 8
 ```
 
+#### cin
+
+```
+cin可以连续从键盘读取想要的数据，以空格、tab或换行作为分隔符
+
+注意:
+1. cin>>等价于cin.operator>>()，即调用成员函数operator>>()进行读取数据
+2. 当cin>>从缓冲区中读取数据时，若缓冲区中第一个字符是空格、tab或换行这些分隔符时，cin>>会将其忽略并清除，继续读取下一个字符，若缓冲区为空，则继续等待。但是如果读取成功，字符后面的分隔符是残留在缓冲区的，cin>>不做处理。
+3. 不想略过空白字符，那就使用 noskipws 流控制。比如cin>>noskipws>>input;
+4. cin>>对缓冲区中的第一个换行符视而不见，采取的措施是忽略清除，继续阻塞等待缓冲区有效数据的到来。但是，getline()读取数据时，并非像cin>>那样忽略第一个换行符，getline()发现cin的缓冲区中有一个残留的换行符，不阻塞请求键盘输入，直接读取，送入目标字符串后，再将换行符替换为空字符’\0’
+```
+
+```c++
+Cin.get()
+
+读取一个字符
+可以使用cin.get或者cin.get(var)
+//
+char a;
+char b;
+a=cin.get();
+cin.get(b);
+cout<<a<<b<<endl;
+
+注意: 
+1，cin.get()从输入缓冲区读取单个字符时不忽略分隔符，直接将其读取
+2.cin.get()的返回值是int类型，成功：读取字符的ASCII码值，遇到文件结束符时，返回EOF，即-1，Windows下标准输入输入文件结束符为Ctrl+z，Linux为Ctrl+d。cin.get(char var)如果成功返回的是cin对象，因此可以支持链式操作，如cin.get(b).get(c)。
 
 
+读取一行
+可以使用istream& get(char* s, streamsize n)或者istream& get(char* s, size_t n, streamsize delim) ,二者的区别是前者默认以换行符结束，后者可指定结束符。n表示目标空间的大小
+//
+char a;
+char array[20]={NULL}; 
+cin.get(array,20);
+cin.get(a);
 
+注意：
+1. cin.get(char* s, streamsize n);读取一行时，遇到换行符时结束读取，但是不对换行符进行处理，换行符仍然残留在输入缓冲区。第二次可由cin.get()将换行符读入，打印输入换行符的ASCII码值为10。这也是cin.get()读取一行与使用getline读取一行的区别所在. getline读取一行字符时，默认遇到’\n’时终止，并且将’\n’直接从输入缓冲区中删除掉，不会影响下面的输入处理。
+（2）cin.get(str,size);读取一行时，只能将字符串读入C风格的字符串中，即char*，但是C++的getline函数可以将字符串读入C++风格的字符串中，即string类型。鉴于getline较cin.get()的这两种优点，建议使用getline进行行的读取。关于getline的用法，下文将进行详述。
+    
+    
 
+    
+cin.getline()
+从标准输入设备键盘读取一串字符串，并以指定的结束符结束
 
+函数原型: 
+istream& getline(char* s, streamsize count); //默认以换行符结束
+istream& getline(char* s, streamsize count, char delim);
 
+//
+char array[20]={NULL};
+cin.getline(array,20); //或者指定结束符，使用下面一行
+//cin.getline(array,20,'\n');
+cout<<array<<endl;
 
+注意，cin.getline与cin.get的区别是，cin.getline不会将结束符或者换行符残留在输入缓冲区中
+```
 
+```c++
+getline()
+    
+C++中定义了一个在std名字空间的全局函数getline，因为这个getline函数的参数使用了string字符串，所以声明在了< string>头文件中。
+getline利用cin可以从标准输入设备键盘读取一行，当遇到如下三种情况会结束读操作：1）到文件结束，2）遇到函数的定界符，3）输入达到最大限度。
 
+函数原型有两种重载形式: 
+istream& getline ( istream& is, string& str);//默认以换行符结束
+istream& getline ( istream& is, string& str, char delim);
 
+//
+string str;
+getline(cin,str);
 
+注意，getline遇到结束符时，会将结束符一并读入指定的string中，再将结束符替换为空字符。因此，进行从键盘读取一行字符时，建议使用getline，较为安全。但是，最好还是要进行标准输入的安全检查，提高程序容错能力。
+该函数与cin.getline()类似，但是cin.getline()属于istream流，而getline()属于string流，是不一样的两个函数
+```
 
+```c++
+gets
 
+gets是C中的库函数，在< stdio.h>申明，从标准输入设备读字符串，可以无限读取，不会判断上限，以回车结束或者EOF时停止读取，所以程序员应该确保buffer的空间足够大，以便在执行读操作时不发生溢出。
 
+函数原型:
+char *gets( char *buffer );
 
+//
+char array[20]={NULL};
+gets(array);
+cout<<array<<endl;
+
+注意: 该函数是C的库函数，所以不建议使用，既然是C++程序，就尽量使用C++的库函数
+```
 
 #### sort
 
@@ -1115,7 +1193,13 @@ int main()
     
     ii = atoi("-123");
     cout << ii;    //-123 '-'是合法字符
+    
+    string s = "123455";
+    int a = atoi(s.substr(0, 3).c_str());
+    //a = 123;
 }
+
+
 ```
 
 #### to_string
@@ -1137,5 +1221,32 @@ int main()
 }
 
 //pi is 3.1415926
+```
+
+#### % *s    %. *s
+
+```c++
+%*s:取决于在scanf中使用还是在printf中使用
+
+1. 在scanf中使用, 则添加了*的部分会被忽略
+
+int a;
+char b[10];
+scanf("%d%*s", &a, b);
+//输入为：12 abc那么12将会读取到变量a中，但是后面的abc将在读取之后抛弃，不赋予任何变量(例如这里的字符数组b）
+
+2.在printf中使用,表示用后面的形参替代的位置，实现动态格式输出
+printf("%*s", 10, s);
+//意思是输出字符串s，但至少占10个位置，不足的在字符串s左边补空格，这里等同于printf("%10s", s);
+
+
+%.*s:  *用来指定宽度，对应一个整数。.（点）与后面的数合起来 是截取此宽度的字符，如果字符串长度大于这个数，则按此宽度输出，如果小于，则输出实际长度
+int i;
+for(i = 1; i <= 3; i++)
+printf("%.*s\n", i, "******");
+return 0;
+//*
+//**
+//***
 ```
 

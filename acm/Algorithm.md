@@ -6868,7 +6868,7 @@ int main()
 树状数组(Binary Indexed Tree, BIT)是利用数的二进制特征进行检索的一种树状结构
 
 lowbit(x)
-lowbit(x) = x&(-x), 功能是找到x的二进制数的最后一个1, 其原理是利用了负数的补码表示, 补码是原码取反加1, 令m = lowbit(x), tree[x]的值是把ax和她前面的的m个数相加的结果, 如lowbit(6) = 2, 则tree[6] = a5 + a6
+lowbit(x) = x&(-x), 功能是找到x的二进制数的最后一个1, 其原理是利用了负数的补码表示, 补码是原码取反加1, 令m = lowbit(x), tree[x]的值是把ax和她前面的的m-1个数相加的结果, 如lowbit(6) = 2, 则tree[6] = a5 + a6
 
 tree[x]是通过lowbit()计算出的树状数组, 她能够以二分的复杂度存储一个数列的数据, 具体地, tree[x]中存储的是区间[x - lowbit(x) + 1, x]中每个数的和
 ```
@@ -6998,7 +6998,8 @@ void Solve()
         LL q, L, R, d; cin >> q;
         if (q == 1)
         {
-            cin >> L >> d; R = L;
+            //cin >> L >> d; R = L;
+            cin >> L >> R >> d;
             update1(L, d); update1(R + 1, -d);
             update2(L, (L - 1) * d); update2(R + 1, R * (-d));
         }

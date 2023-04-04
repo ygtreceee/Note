@@ -6971,7 +6971,7 @@ $a[k]=D[1]+D[2]+...+D[k]$
 ```c++
 #include <iostream>
 #include <algorithm>
-#include <cstring>
+#include <cstring>	
 #define lowbit(x) ((x) & -(x))
 typedef long long LL;
 const int N = 500010;
@@ -6999,7 +6999,7 @@ void Solve()
         if (q == 1)
         {
             //cin >> L >> d; R = L;
-            cin >> L >> R >> d;
+            cin >> L >> R >> d;	
             update1(L, d); update1(R + 1, -d);
             update2(L, (L - 1) * d); update2(R + 1, R * (-d));
         }

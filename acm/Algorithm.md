@@ -7293,6 +7293,529 @@ int main()
 }
 ```
 
+[P5094 USACO04OPEN MooFest G 加强版 - 洛谷](https://www.luogu.com.cn/problem/P5094)
+
+**题意**
+
+给定两个长度为 n 的序列，每个点有两个信息： `xi` 和 `vi`，定义点对 `(i, j)`且 `i ≠ j` 有值 `f(i, j) = max(vi, vj) * |xi - xj|`，求共 `n * (n - 1) / 2` 个点对产生的 `f(i, j)` 总和。
+
+**思路**
+
+题意相当于求解：
+$$
+\sum_{i = 1}^{n}{\sum_{j = i + 1}^{n}{max(v_i, v_j) \times dis(i, j)}}
+$$
+
+发现 `max(vi, vj)` 不好维护，若能保证区间 `[i, n]` 上最大值就是 `vi`（即 `vi ≥ vj`）便可分离出该项，故对 `v` 进行**升序排序**（降序也可，这里以升序为例）后，区间`[1, i - 1]`上的值 `vj` 恒满足 `vj ≤ vi` 则原式变成：
+$$
+\sum_{i = 2}^{n}{v_i}\sum_{j = 1}^{i - 1}{dis(i, j)}
+$$
+此时对于`∑dis(i, j)` 来说，前面的 `vi`是个定值，随即维护`∑dis(i, j)`即可。但这样处理又带来新的问题：按对 `v`升序的顺序遍历求解时 `dis(i, j)` 会**有正有负**（`xi` 是乱序的），需要取绝对值，而绝对值又难以维护。那么我们可以分两种情况讨论：`vi`前面的元素满足 `xj < xi` 或 `xj > xi`。现维护**元素个数前缀和** `t1[xi]` 以及 **位置和前缀和** `t2[xi]`，这样可以获取以下信息：
+
+* 比 `xi` 位置**小**的元素个数 `cnt1` 和 位置值和 `sum1`：`cnt1 = sum(t1, xi), sum1 = sum(t2, xi)`
+* 比 `xi` 位置**大**的元素个数 `cnt2` 和 位置值和 `sum2`：`cnt2 = sum(t1, N) - sum(t1, xi), sum2 = sum(t2, N) - sum(t2, xi) `
+
+**位置差值和**分别可以计算出是 `xi * cnt1 - sum1` 和 `sum2 - xi * cnt2`，
+
+则每次有 `ans += vi * (xi * cnt1 - sum1) + vi * (sum2 - xi * cnt2)`。
+
+故正序遍历对 `v` 升序的序列，每次统计 `ans` 并插入当前点的信息即可。
+
+```c++
+#include <bits/stdc++.h>
+using namespace std;
+#define lowbit(x) ((x)&-(x))
+#define ll long long
+const int N = 5e4 + 10;
+int n;
+ll maxn;
+ll t1[N], t2[N];//t1[]维护元素个数和, t2[]维护位置和
+struct nd
+{
+    ll v, x;
+    bool operator < (const nd &nex) const
+    {
+        return v < nex.v;
+    }
+}q[N];
+void update(ll *t, ll x, ll d)
+{
+    for ( ; x <= maxn; x += lowbit(x))  //注意树状数组的大小不是n
+        t[x] += d;
+}
+ll sum(ll *t, ll x)
+{
+    ll res = 0;
+    for ( ; x > 0; x -= lowbit(x))
+        res += t[x];
+    return res;
+}
+int main()
+{
+    scanf("%d", &n);
+    for (int i = 1; i <= n; i++)
+    {
+        scanf("%lld%lld", &q[i].v, &q[i].x);
+        maxn = max(maxn, q[i].x);
+    }
+    sort(q + 1, q + 1 + n);
+    ll ans = 0;
+    for (int i = 1; i <= n; i++)
+    {
+        ll x = q[i].x, v = q[i].v;
+        ll cnt1 = sum(t1, x), sum1 = sum(t2, x);  //比xi小, 区间[1, x]的信息
+        ll cnt2 = sum(t1, maxn) - sum(t1, x), sum2 = sum(t2, maxn) - sum(t2, x); //比xi大, 求区间(x, maxx)的信息
+        ans += v * (x * cnt1 - sum1) + v * (sum2 - x * cnt2);
+        update(t1, x, 1);  //插入元素个数
+        update(t2, x, x);  //插入元素位置值
+    }
+    printf("%lld\n", ans);
+    return 0;
+}
+```
+
+[P5142 区间方差 - 洛谷](https://www.luogu.com.cn/problem/P5142)
+
+**前置知识**
+
+分数取模（数论）
+$$
+分数取模问题即求&\frac{1}{a}\ mod\ p \\
+小费马定理引用&a^{p - 1}\ mod \ p\ =\ 1\ mod\ p \\
+定理两侧同乘以\ \frac{1}{a} \ 得&a^{p - 2}\ mod \ p\ =\ \frac{1}{a}\ mod\ p \\
+故分数取模问题转化为求&a^{p - 2}\ mod \ p （变成整数求幂）
+$$
+然后**快速幂**求解即可。
+
+**题意**
+
+给定有 n 个初始值的序列 A，两种操作：第 `x` 个数赋值为 `y`，查询 `Ax ~ Ay` 的方差。
+
+**思路**
+
+* 分析：遇到这类数学公式题，一般拆解式子寻找**可维护的前缀和式**，现拆解方差式：
+
+$$
+已知&d = \frac{1}{n} \sum_{i = 1}^{n}{(a_i - \bar{a})^2}\  (\bar{a}\ 为平均数 \frac{\sum_{i = 1}^{n}{a_i}}{n})\\
+拆平方得&d = \frac{1}{n} \sum_{i = 1}^{n}{(a_{i}^2 - 2 \times a_i \times\bar{a} + \bar{a}^2)}\\
+化简有& d = \frac{1}{n}\sum_{i = 1}^{n}{a_{i}^2} - 2 \times \bar{a} \times \frac{\sum_{i = 1}^{n}{a_i}}{n} + \frac{1}{n}\times n\times\bar{a}^2\\ 
+再化简为& d = \frac{1}{n}\sum_{i = 1}^{n}{a_{i}^2} - 2 \times \bar{a}^2 + \bar{a}^2\\
+最简式为& d = \frac{1}{n}\sum_{i = 1}^{n}{a_{i}^2} - \bar{a}^2
+\\
+故要动态维护的有&前缀和\ \sum_{i = 1}^{n}{a_i}\ (用于求平均数\ \bar{a}^2)、前缀平方和\ \sum_{i = 1}^{n}{a_{i}^2}
+$$
+
+* 实现：维护两个树状数组 `t1[N]` 和 `t2[N]` 分别维护 前缀和 以及 前缀平方和，当然最终求解的是区间`[x, y]`的方差，求和上下限由 `1` 和 `n` 换成 `x` 和 `y` 即可。并且注意**处处取模**
+
+```c++
+#include <bits/stdc++.h>
+using namespace std;
+#define lowbit(x) ((x)&-(x))
+#define ll long long
+const int mod = 1e9 + 7;
+const int N = 1e5 + 10;
+ll t1[N], t2[N];
+int n, m;
+ll quick_pow(ll base, ll index = mod - 2)  //快速幂
+{
+    ll res = 1;
+    base %= mod;
+    for ( ; index; index >>= 1)
+    {
+        if (index % 2) res = res * base % mod; 
+        base = base * base % mod;
+    }
+    return res % mod;
+}
+void update(ll *t, int x, ll d)
+{
+    for ( ; x <= n; x += lowbit(x))
+        t[x]  = (t[x] + d) % mod;
+}
+ll sum(ll *t, int x)
+{
+    ll res = 0;
+    for ( ; x > 0; x -= lowbit(x))
+        res = (res + t[x]) % mod;
+    return res % mod;
+}
+int main()
+{
+    scanf("%d%d", &n, &m);
+    for (int i = 1; i <= n; i++)
+    {
+        ll x;
+        scanf("%lld", &x);
+        update(t1, i, x % mod);
+        update(t2, i, x * x % mod);
+    }
+    while (m--)
+    {
+        ll op, x, y;
+        scanf("%lld%lld%lld", &op, &x, &y);
+        if (op == 1)
+        {
+            ll v1 = sum(t1, x) - sum(t1, x - 1);
+            ll v2 = sum(t2, x) - sum(t2, x - 1);
+            update(t1, x, (y - v1) % mod);       //a[x]
+            update(t2, x, (y * y - v2) % mod);   //a[x] * a[x]
+        }
+        else 
+        {
+            ll s1 = (sum(t1, y) - sum(t1, x - 1)) % mod;  //∑ai
+            ll s2 = (sum(t2, y) - sum(t2, x - 1)) % mod;  //∑(ai ^ 2)  平方和
+            ll k = quick_pow(y - x + 1);                  // 1 / n  的逆元(分数取模)
+            ll ave = s1 * k % mod;                        //∑ai / n   平均数
+            ll ans = s2 * k % mod - ave * ave % mod;      //∑(ai ^ 2) / n - (∑ai) ^ 2
+            ans = (ans % mod + mod) % mod;                //存在求差运算,防止出现负数
+            printf("%lld\n", ans);
+        }
+    }
+    return 0;
+}
+```
+
+[P3531 POI2012 LIT-Letters - 洛谷](https://www.luogu.com.cn/problem/P3531)
+
+**题意**
+
+给定只含有大写字母的两个字符串 `S1` 和 `S2`，每次可以交换 `S1` 相邻两个字符的次序，问 `S1` 变成 `S2` 的最少交换次数。
+
+**思路**
+
+序列要从一种排列顺序 `Ord1` 变成另一种排列顺序 `Ord2`，我们将目标顺序 `Ord2` 的各字符位置存起 `id[ch] = i`，并用它来重定义 `Ord1`，如：
+
+```c++
+S1 = "CABC", S2 = "CCAB"
+根据 S2 定义目标顺序 C C A B -> 1 2 3 4
+各字符对应编号集：
+	A: 3
+	B: 4
+	C: 1, 2
+据此重定义当前 S1 排列顺序为 C A B C -> 1 3 4 2
+```
+
+问题变成求将 `1 3 4 2` 变换成正序 `1 2 3 4` 的相邻元素交换次数，即逆序对问题。
+
+每个数对应的逆序对个数其实就是该数实现**局部正序**的步数，而所有的逆序对个数即为整个序列**全局正序**所需的步数。
+
+这里说的局部正序是指该数在其后面的**小于它的序列**中排在最后，如 `{3 5 4 2 1}`中对 `3` 来说它需要在序列 `{3 2 1}` 中排在最后，即 `{2 1 3}`，有两个逆序对，共交换两次来实现。而对于整个 `{3 2 1}` 的正序变换，还会加上 `{2 1}`的变换次数（即一次） ，故不难证明所有局部实现正序后就是全局正序。
+
+整个过程例如 `5 3 7 6 2 1 4` -> `1 2 3 4 5 6 7`，逆序地看 `2` 的局部`{2 1} -> {1 2}`，交换 1 次；`6` 的局部`{6 1 2 4} -> {1 2 4 6}` ，需交换 3 次 ；同理，`7` 有 `{7 1 2 4 6} -> {1 2 4 6 7}` 共 4 次 ，`3` 有 `{3 1 2} -> {1 2 3}` 共 2 次，`5`有 `{5 1 2 3 4} -> {1 2 3 4 5}`共 4 次  最终整合起来就是全局正序所需交换次数 `ans = 14`。
+
+```c++
+#include <bits/stdc++.h>
+using namespace std;
+#define lowbit(x) ((x)&-(x))
+const int N = 1e6 + 10;
+int n, tree[N];
+int arr[N]; //实际操作序列
+char a[N], b[N];
+vector<int>  id[30];  //字符ch的编号集
+int pos[30];  //pos[ch] 对应字符 ch 编号集 id[ch] 当前遍历到的位置
+void update(int x, int d)
+{
+    for ( ; x <= N; x += lowbit(x))
+        tree[x] += d;
+}
+long long sum(int x)
+{
+    long long res = 0;
+    for ( ; x > 0; x -= lowbit(x))
+        res += tree[x];
+    return res;
+}
+int main()
+{
+    scanf("%d%s%s", &n, a, b);
+    for (int i = 0; i < n; i++)
+    {
+        int ch = b[i] - 'A';
+        id[ch].push_back(i + 1);
+    }
+    for (int i = 0; i < n; i++)
+    {
+        int ch = a[i] - 'A';
+        arr[i] = id[ch][pos[ch]++];  //构造当前顺序序列
+    }
+    long long ans = 0;
+    for (int i = n - 1; i >= 0; i--)  //求逆序对个数
+    {
+        update(arr[i], 1);
+        ans += sum(arr[i] - 1);
+    }
+    printf("%lld\n", ans);
+    return 0;
+}
+```
+
+[P1637 三元上升子序列 - 洛谷](https://www.luogu.com.cn/problem/P1637)
+
+**题意**
+
+给定有 n 个数的序列 A，定义三元上升子序列为 `Ai < Aj < Ak` 且 `i < j < k`，求该种子序列的个数。
+
+**思路**
+
+二维偏序问题
+
+[![公式块7](https://user-images.githubusercontent.com/113116777/229522570-3bacb613-8f71-4b3e-a5cc-f56c5592a4c2.png)](https://user-images.githubusercontent.com/113116777/229522570-3bacb613-8f71-4b3e-a5cc-f56c5592a4c2.png)
+
+不难想到先拆分成两个二元升序对，取**中间元素** `Am` 为参照，**分治两种偏序关系**：`Ai < Am (i < m)` 和 `Am < Aj (m < j)`，而每组同时符合两种条件的偏序三元组都是答案。
+
+先**分治**两种偏序关系分别产生的合法偏序对，再根据**乘法原理**得出同时满足两种偏序关系的偏序三元组组数：
+
+现记 `lef[m]` 为 `Am` **左侧小于** `Am` 的元素个数，`rig[m]` 为 `Am` **右侧大于** `Am` 的元素个数，
+
+取中间元素 `a[i]`，其左右合法的数两两配对，共 `lef[i] * rig[i]` 种组合情况（乘法原理），
+
+故枚举中间元素 `a[i]`, 分别遍历序列统计 `lef[i]` 和 `rig[i]`，最后再遍历统计 `lef[i] * rig[i]`即可。
+
+本题元素值最大为 `M <= 1e5`，是可接受的数组大小；若 `M` 的级别达到 `1e7 ~ 1e9`，只能离散化处理将复杂度降到 `O(n)` ，n 为数据量。
+
+```c++
+#include <bits/stdc++.h>
+using namespace std;
+#define lowbit(x) ((x)&-(x))
+const int N = 3e4 + 10, M = 1e5 + 10; 
+int n, maxn;
+int a[N], t1[M], t2[M];
+int lef[N], rig[N];
+void update(int *t, int x, int d)
+{
+    for ( ; x <= maxn; x += lowbit(x))
+        t[x] += d;
+}
+long long sum(int *t, int x)
+{
+    long long ans = 0;
+    for ( ; x > 0; x -= lowbit(x))
+        ans += t[x];
+    return ans;
+}
+int main()
+{
+    scanf("%d", &n);
+    for (int i = 1; i <= n; i++)
+    {
+        cin >> a[i];
+        maxn = max(maxn, a[i]);
+    }
+    for (int i = 1; i <= n; i++)
+    {
+        lef[i] = sum(t1, a[i] - 1);
+        update(t1, a[i], 1);
+    }
+    for (int i = n; i >= 1; i--)
+    {
+        rig[i] = (n - i) - sum(t2, a[i]);
+        update(t2, a[i], 1);
+    }
+    long long ans = 0;
+    for (int i = 1; i <= n; i++)
+    {
+        ans += (1LL * lef[i] * rig[i]);
+    }
+    printf("%lld\n", ans);
+    return 0;
+}
+```
+
+[P1972 SDOI2009 HH的项链 - 洛谷](https://www.luogu.com.cn/problem/P1972)
+
+**题意**
+
+给定 n 个数 `ai`，共询问 `m` 个区间 `[l, r]` 内有多少种不同的数（如 `{1 3 2 3}` 有 3 种不同的数）。
+
+**思路**
+
+二维偏序经典问题，现考虑用权值树状数组维护区间内不同数的个数。
+$$
+二维偏序关系联立式 =
+\begin{cases}
+    l ≤ i ≤ r\ ①\\
+    \\
+    vis[x] < l\ ②\\
+    \\
+    (其中\ x = a[i])
+\end{cases}
+\\
+设\ vis[x]\ 表示数\ x\ 上一次出现的位置\\
+总关系表示为元素值\ x\ 属于查询区间\ [l,\ r]\ ， 且其上次出现的位置\ vis[x]\ 不在查询区间内，\\
+则认为此时\ x\ 独立出现（即不重复），才进行计数（区间内不同数的个数加1），\\
+这样只要重复出现在区间\ [l, r]\ 内的\ x\ 都不会再计数，即查询区间和时不同数的个数只计一次\ x。
+$$
+本题重点在于如何给各查询区间 `[l, r]` 内元素判重：
+
+当询问区间 `[l, r]` 时，需先知道各元素重复情况 `vis[ a[l ... r] ]` 分别是否为 0，不妨将询问区间离线存储并按 `r` 升序排序（因为右端点 `r` 代表着该区间最远到达的地方，也就是此时 `vis[]` 的作用域所需要拓展到的地方），这样我们就能枚举偏序关系 ① 的情况并线性有序地维护偏序关系 ②。
+
+定义索引头 `p` 记录 `vis[]` 拓展到的位置。现遍历所有区间 `[l, r]`，并遍历区间 `[p, r]`以拓展更新 `vis[]`，对当前位置 `p` 上的数 `x`：
+
+* 首先若 `vis[x] != 0` ，则对上次 `x` 的位置 `last_p = vis[x]` 上单点修改减 1（即撤销该位置“存在”状态，防止重复），
+* 然后，当前位置 `p` 上单点修改加 1（更新当前位置`x` 值状态为“存在”）并记录 `vis[x] = p`，
+
+我们定义`vis[x]` 值为 `x` 上次出现的位置 `last_p`，是方便下次撤销操作。而且，在区间中重复的元素的计数只看**最右端**那个就可以了，因为我们是升序枚举查询区间右端点 R ，相当于定 R 看 L，所以只用看最右端那个元素的位置 `pos` 是否满足 `pos >= L` 即可判断其在该区间内是否计数。
+
+```c++
+#include <bits/stdc++.h>
+using namespace std;
+#define lowbit(x) ((x)&-(x))
+const int N = 1e6 + 10;
+struct node
+{
+    int l, r;
+    int id;  //原来的查询顺序
+    bool operator < (const node &x) const 
+    {
+        return r < x.r;
+    }
+}q[N];
+int n, m;
+int a[N], ans[N];
+int vis[N];  //vis[i]: 数字 i 上一次出现的位置 
+int tree[N]; //
+void update(int x, int d)
+{
+    for ( ; x <= n; x += lowbit(x))
+        tree[x] += d;
+}
+int sum(int x)
+{
+    int res = 0;
+    for ( ; x > 0; x -= lowbit(x))
+        res += tree[x];
+    return res;
+}
+int main()
+{
+    scanf("%d", &n);
+    for (int i = 1; i <= n; i++) scanf("%d", &a[i]);
+    scanf("%d", &m);
+    for (int i = 1; i <= m; i++)
+    {
+        scanf("%d%d", &q[i].l, &q[i].r);
+        q[i].id = i;
+    }
+    sort(q + 1, q + 1 + m);
+    int p = 1;
+    for (int i = 1; i <= m; i++)
+    {
+        for ( ; p <= q[i].r; p++)  //更新该偏序关系至当前所需最大区域
+        {
+            if (vis[a[p]]) update(vis[a[p]], -1); //若元素已存在, 撤销上一次位置的状态, 防止重复
+            update(p, 1);                         //更新该元素最新状态
+            vis[a[p]] = p;                        //记录当前元素位置p
+        }
+        ans[q[i].id] = sum(q[i].r) - sum(q[i].l - 1);
+    }
+    for (int i = 1; i <= m; i++) printf("%d\n", ans[i]);
+    return 0;
+}
+```
+
+[P1972 SDOI2009 HH的项链 - 洛谷](https://www.luogu.com.cn/problem/P1972)
+
+**题意**
+
+给定 n 朵花的颜色序列，查询 m 个区间 `[l, r]`，每个区间对“同种颜色出现至少两次”的元素计数并输出。如区间内有 `{1 2 2 2 3 3}`，其中 `2` 和 `3` 都出现至少两次，故答案为 2。
+
+**思路**
+
+**三维偏序问题**
+$$
+三维偏序关系联立式 =
+\begin{cases}
+    l ≤ i ≤ r\ ①\\
+    \\
+    last1[x] ≥ l\ ②\\
+    \\
+    last2[x] < l\ ③\\
+    \\
+    (其中\ x = a[i])
+\end{cases}\\
+
+设\ last1[x]\ 表示数\ x\ 上上次出现的位置，last2[x]\ 表示数\ x\ 上次出现的位置，\\
+总关系表示为元素值\ x\ 属于查询区间\ [l,\ r]\ ， 其第一次重复出现的位置\ last1[x]\ 在查询区间内，\\
+且第二次重复出现的位置\ last2[x]\ 不在查询区间内，\\
+则认为此时\ x\ 重复一次地出现，才进行计数（区间内不同数的个数加1），
+$$
+
+首先，和 P1972 HH的项链 一样，离线后按 `r` 升序排序。不一样的是，这里需要维护两个信息：
+
+* 数 `x` **上上次出现**的位置 `last1[x]`即当数 `x` 出现次数为 **1** 时的位置
+* 数 `x` **上次出现**的位置 `last2[x]`即当数 `x` 出现次数为 **2** 时的位置
+
+也同样需要定义索引头 `p` 来表示状态更新到的位置，并每次更新区间 `[p, q[i].r]`内各数的状态，根据题意得**判重**操作将在数 `x` **第三次出现**时进行。
+
+```c++
+#include <bits/stdc++.h>
+using namespace std;
+#define lowbit(x) (x & -(x))
+const int N = 2e6 + 10;
+struct nd
+{
+    int id;
+    int l, r;
+    bool operator < (const nd &x) const 
+    {
+        return r < x.r;
+    }
+}q[N];
+int n, c, m;
+int a[N], tree[N];
+int last1[N], last2[N]; //last1[x] 和 last2[x] 分别表示 x 上上次出现 和 上次出现 的位置
+int ans[N];
+void update(int x, int d)
+{
+    for ( ; x <= n; x += lowbit(x))
+        tree[x] += d;
+}
+int sum(int x)
+{
+    int res = 0;
+    for ( ; x > 0; x -= lowbit(x))
+        res += tree[x];
+    return res;
+}
+int main()
+{
+    scanf("%d%d%d", &n, &c, &m);
+    for (int i = 1; i <= n; i++) scanf("%d", &a[i]);
+    for (int i = 1; i <= m; i++)
+    {
+        scanf("%d%d", &q[i].l, &q[i].r);
+        q[i].id = i;
+    }
+    sort(q + 1, q + 1 + m);
+    int p = 1;
+    for (int i = 1; i <= m; i++)
+    {
+        for ( ; p <= q[i].r; p++)
+        {
+            if (!last1[a[p]]) last1[a[p]] = p;  //第一次出现
+            else
+            {
+                if (!last2[a[p]])               //第二次出现
+                {
+                    update(last1[a[p]], 1);  //在上上次位置更新状态, 因为只有区间左端点 l <= last1[a[p]] 才算有效
+                    last2[a[p]] = p;
+                }
+                else                            //第三次出现，判重
+                {
+                    update(last1[a[p]], -1);    //去除最左边的重复元素，然后状态往后推
+                    update(last2[a[p]], 1);
+                    last1[a[p]] = last2[a[p]];  //两个状态一起往后推
+                    last2[a[p]] = p;
+                }
+            }
+        }
+        ans[q[i].id] = sum(q[i].r) - sum(q[i].l - 1);
+    }
+    for (int i = 1; i <= m; i++) printf("%d\n", ans[i]);
+    return 0;
+}
+```
+
 
 
 #### 线段树
@@ -14042,7 +14565,7 @@ int main()
 }
 ```
 
-
+[Problem - 1247 Hat’s Words - (hdu.edu.cn)](https://acm.hdu.edu.cn/showproblem.php?pid=1247)
 
 ```c++
 #include <bits/stdc++.h>
@@ -14327,7 +14850,7 @@ int main()
 }
 ```
 
-[Problem - 5687 (hdu.edu.cn)](http://acm.hdu.edu.cn/showproblem.php?pid=5687)
+[Problem - Problem C - 5687 (hdu.edu.cn)](http://acm.hdu.edu.cn/showproblem.php?pid=5687)
 
 主要是一个`delete`操作需要注意, 在最后只需要切断该前缀最后一个字符和其所拥有子字符的链接即可
 

@@ -5058,6 +5058,41 @@ int main()
 }
 ```
 
+[Problem - E - Living Sequence - Codeforces](https://codeforces.com/contest/1811/problem/E)
+
+题意: 求数位中不包括数字 $4$ 的所有数字的第 `k` 个; 求解此问题之前, 我们先思考一个问题, 数位中只包括 $0$ 和 $1$ 的所有数字的第 `k` 个 (从 $0$ 开始) 是多少, 显然, 把 `k` 转换为二进制数字, 那就是我们所求的第 `k` 个数. 那么同样的道理, 如果我们要求数位只含 $0 ~ 8$ 这九个数的数字的第 `k` 个是多少, 也需要将其转换为九进制数, 便是我们所要求的答案, 而题目要求的不是 $[0,8]$, 而是 $[0,3], [5,9]$, 所以求出后, 我们需要将 $[4,8]$ 的数都向上移动 $1$ 位, 即 $+ 1$, 便是答案. 
+
+```c++
+#include <bits/stdc++.h>
+using namespace std;
+void Solve(long long x)
+{
+    vector <int> num;
+    while (x)
+    {
+        num.push_back(x % 9LL);
+        x /= 9LL;
+    }
+    reverse(num.begin(), num.end());
+    for (auto v : num)
+    {
+        if (v > 3) cout << v + 1;
+        else cout << v;
+    }
+    cout << endl;
+}
+int main()
+{
+    int t; cin >> t;
+    while (t--)
+    {
+        long long n; cin >> n;
+        Solve(n);
+    }
+    return 0;
+}
+```
+
 
 
 ####  lanqiao

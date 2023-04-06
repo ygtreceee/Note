@@ -5322,3 +5322,94 @@ int main()
 }
 ```
 
+[积木画](https://www.lanqiao.cn/problems/2110/learning/?page=1&first_category_id=1&sort=students_count&name=积木画)
+
+涉及取模最好开 `long long` , 可以避免一些加法的超限, 而涉及减法的取模, 一定要在最后加上 `mod` , 防止负数出现
+
+```c++
+#include <iostream>
+using namespace std;
+const int N = 1e7 + 10;
+const int mod = 1e9 + 7;
+long long dp[N][3];
+int n;
+int main()
+{
+    cin >> n;
+    dp[0][0] = 1;
+    for (int i = 1; i <= n; i++)
+    {
+        dp[i][0] = (dp[i - 1][0] + dp[i - 1][1] + dp[i - 1][2] + (i >= 2 ? dp[i - 2][0] : 0)) % mod;
+        dp[i][1] = (dp[i - 2][0] + dp[i - 1][2]) % mod;
+        dp[i][2] = (dp[i - 2][0] + dp[i - 1][1]) % mod;
+    }
+    cout << dp[n][0] << endl;
+    return 0;
+}
+```
+
+[扫雷 - lanqiao.cn](https://www.lanqiao.cn/problems/2113/learning/?page=1&first_category_id=1&sort=students_count&name=扫雷)
+
+```c++
+#include <iostream>
+#include <algorithm>
+using namespace std;
+const int N = 5e5 + 10;
+int n, m;
+int ans;
+struct bomb
+{
+    int x, y, r;
+    bool f;
+    bool operator < (const bomb &xx) const
+    {
+        return x < xx.x;
+    }
+}a[N];
+struct rocket
+{
+    int x, y, r;
+}b[N];
+void dfs(int x, int y, int r)
+{
+    int l1 = 1, r1 = n;
+    while (l1 < r1)
+    {
+        int mid = l1 + r1 + 1 >> 1;
+        if (a[mid].x <= x + r) l1 = mid;
+        else r1 = mid - 1;
+    }
+    int l2 = 1, r2 = n;
+    while (l2 < r2)
+    {
+        int mid = l2 + r2 >> 1;
+        if (a[mid].x >= x - r) r2 = mid;
+        else l2 = mid + 1;
+    }
+    for (int i = l2; i <= l1; i++)
+    {
+        if (a[i].f == 0 && (a[i].x - x) * (a[i].x - x) + (a[i].y - y) * (a[i].y - y) <= r * r)
+        {
+            ans++;
+            a[i].f = 1;
+            dfs(a[i].x, a[i].y, a[i].r);
+        }
+    }
+}
+int main()
+{
+    cin >> n >> m;
+    for (int i = 1; i <= n; i++)
+        cin >> a[i].x >> a[i].y >> a[i].r;
+    for (int i = 1; i <= m; i++)
+        cin >> b[i].x >> b[i].y >> b[i].r;
+    sort(a + 1, a + 1 + n);
+    for (int i = 1; i <= m && ans <= n; i++)
+    {
+        dfs(b[i].x, b[i].y, b[i].r);
+    }
+    cout << ans << endl;
+    return 0;
+}
+```
+

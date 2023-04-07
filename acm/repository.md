@@ -1092,6 +1092,202 @@ int main()
 }
 ```
 
+`class` 练习
+
+```c++
+#include <bits/stdc++.h>
+using namesapce std;
+int n;
+class student
+{
+	public:
+	void init()
+	{
+		cin >> name >> id >> sex >> fr >> phn;
+	}
+	void print()
+	{
+		cout << name << endl;
+	}
+	private:
+		char name[100], sex[100], fr[100];
+		long long id, phn;
+};
+int main()
+{
+	cin >> n;
+	student *p = (student*)malloc(sizeof (student) * n);
+	for (int i = 0; i < n; i++)
+	{
+		p[i].init();
+	}
+	for (int i = 0; i < n; i++)
+	{
+		p[i].print();
+	}
+	free(p);
+	p = NULL;
+	return 0;
+}
+
+
+
+#include <bits/stdc++.h>
+using namesapce std;
+class CAccount
+{
+	public:
+		void init()
+		{
+			cin >> id >> name >> mon;
+			printf("%s's balance is %d\n", name, mon);
+		}
+		void save()
+		{
+			cout << "saving ok!" << endl;
+			long long x; cin >> x;
+			mon += x;
+			printf("%s's balance is %d\n", name, mon);
+		}
+		void withdraw()
+		{
+			long long x; cin >> x;
+			if (x > mon)
+			{
+				printf("sorry! over limit!\n");
+				printf("%s's balance is %d\n", name, mon);
+			}
+			else
+			{
+				printf("withdraw ok!\n");
+				mon -= x;
+				printf("%s's balance is %d\n", name, mon);
+			}
+		}
+	private:
+		char id[100], name[100];
+		long long mon;
+};
+int main()
+{
+	CAccount ca[2];
+	for (int i = 0; i < 2; i++)
+	{
+		ca[i].init();
+		ca[i].save();
+		ca[i].withdraw();
+	}
+	return 0;
+}
+
+
+
+#include <bits/stdc++.h>
+using namespace std;
+class Point
+{
+	public:
+		void setPoint();
+		double getx() {return x;}
+		double gety() {return y;}
+	private:
+		double x, y;
+};
+void Point::setPoint() {cin >> x >> y;}
+class Circle
+{
+	public:
+		void setCircle();
+		double getArea();
+		double getLength();
+		void check(double px, double py);
+	private:
+		double x, y, r;
+};
+void Circle::setCircle() {cin >> x >> y >> r;}
+double Circle::getArea() {cout << fixed << setprecision(2) << 3.14 * r * r;}
+double Circle::getLength() {cout << fixed << setprecision(2) << 2 * 3.14 * r;}
+void Circle::check(double px, double py) {cout << (sqrt((px - x) * (px - x) + (py - y) * (py - y)) <= r ? "yes" : "no") << endl; }
+int main()
+{
+	Point p; Circle c;
+	c.setCircle(); p.setPoint(); 
+	c.getArea(); cout << ' '; c.getLength(); cout << endl;
+	c.check(p.getx(), p.gety());
+	return 0;
+}
+
+
+
+#include <bits/stdc++.h>
+using namesapce std;
+struct Cat
+{
+	public:
+		void init()
+		{
+			cin >> name >> w;
+		}
+		bool operator < (const Cat &x) const
+		{
+			return w < x.w;
+		}
+		void getname()
+		{
+			cout << name;
+		}
+	private:
+		char name[1000];
+		int w;
+};
+int main()
+{
+	int n; cin >> n;
+	Cat *p = (Cat *)malloc(sizeof (Cat) * n);
+	for (int i = 0; i < n; i++) p[i].init();
+	sort(p, p + n);
+	for (int i = 0; i < n; i++)
+	{
+		if (i) cout << ' ';
+		p[i].getname();
+	}
+	return 0;
+}
+
+
+
+#include <bits/stdc++.h>
+using namesapce std;
+struct man
+{
+	public:
+		void init() {cin >> name >> h >> we >> wr;}
+		void solve()
+		{
+			int bmi = int(we / (h * h) + 0.5);
+			double a = wr * 0.74, b = we * 0.082 + 34.89;
+			double r = (a - b) / we;
+			printf("%s的BMI指数为%d--体脂率为%.2f", name, bmi, r); 
+			cout << '\n';
+		}
+	private:
+		char name[100];
+		double h, we, wr;
+};
+int main()
+{
+	int n; cin >> n;
+	man *p = (man *)malloc(sizeof(man) * n);
+	for (int i = 0; i < n; i++)
+	{
+		p[i].init(); p[i].solve();
+	}
+	free(p);
+	p = NULL;
+	return 0;
+}
+```
+
 
 
 #### 校赛
@@ -5409,6 +5605,35 @@ int main()
         dfs(b[i].x, b[i].y, b[i].r);
     }
     cout << ans << endl;
+    return 0;
+}
+```
+
+[李白打酒加强版 - lanqiao.cn](https://www.lanqiao.cn/problems/2114/learning/?page=1&first_category_id=1&sort=students_count&name=李白打酒)
+
+记忆化搜索和剪枝优化
+
+```c++
+#include <iostream>
+#include <algorithm>
+#include <cstring>
+using namespace std;
+const int mod = 1e9 + 7;
+int dp[101][101][101];
+int n, m;
+int dfs(int d, int vn, int vm)
+{
+    if (vn < 0 || vm < 0 || d < 0) return 0;
+    if (d > m) return 0;
+    if (vn == 0 && d == 1 && vm == 1) return 1;
+    if (dp[d][vn][vm] != -1) return dp[d][vn][vm];
+    return dp[d][vn][vm] = (dfs(d * 2, vn - 1, vm) + dfs(d - 1, vn, vm - 1)) % mod;
+}
+int main()
+{
+    memset(dp, -1, sizeof dp);
+    cin >> n >> m;
+    cout << dfs(2, n, m) << endl;
     return 0;
 }
 ```

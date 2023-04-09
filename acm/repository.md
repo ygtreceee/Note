@@ -5174,6 +5174,38 @@ int main()
 }
 ```
 
+[E - Kth Takoyaki Set (atcoder.jp)](https://atcoder.jp/contests/abc297/tasks/abc297_e)
+
+题目大意: 任意组合得到的价格的第 `k` 小 (每种价格不限数量)
+
+思路: 一开始想用 `dp` , 但是明显开不了那么大的数组, 所以换一种思路, 使用小顶堆的 `priority_queue` , 每次取当前最小价格, 并与所有价格结合一次, 放入队列, 重复操作直到得到第 `k` 小, 注意还要判断价格是否已经出现过. 
+
+```c++
+#include <bits/stdc++.h>
+using namespace std;
+typedef long long LL;
+LL num[12];
+int main()
+{
+    int n, k; cin >> n >> k;
+    for (int i = 1; i <= n; i++) cin >> num[i];
+    priority_queue<LL, vector<LL>, greater<LL>> p;
+    set<LL> s;
+    int cnt = 0;
+    p.push(0);
+    while (1)
+    {
+        LL now = p.top(); p.pop();
+        if (s.count(now)) continue;
+        for (int i = 1; i <= n; i++) p.push(now + num[i]);
+        cnt++;
+        s.insert(now);
+        if (cnt == k + 1) {cout << now; break;}
+    }
+    return 0;
+}
+```
+
 
 
 #### Codeforces
@@ -5634,6 +5666,54 @@ int main()
     memset(dp, -1, sizeof dp);
     cin >> n >> m;
     cout << dfs(2, n, m) << endl;
+    return 0;
+}
+```
+
+#### 省赛训练
+
+[1197:共现的数 (csgrandeur.cn)](https://cpc.csgrandeur.cn/csgoj/problemset/problem?pid=1197)
+
+题目大意: 给定两个数, 统计有多少个数能在给定的数字集合中, 与这两个数都成为共现数.
+
+思路: 用 `bitset` 的 `0` 和 `1` 巧妙判断, 分别存储和 `x` , `y` 形成共现的数, 存在 `a1` 和 `a2` 里, 然后进行逻辑与即可, 注意最后答案还要减去 `x` 和 `y` 自身. 借此题要掌握 `bitset` 用法
+
+```c++
+#include <bits/stdc++.h>
+using namespace std;
+bitset<20010> q[55];
+bitset<20010> a1, a2;
+int main()
+{
+    int n;
+    while (cin >> n)
+    {
+        for (int i = 1; i <= n; i++) q[i].reset();
+        for (int i = 1; i <= n; i++)
+        {
+            int m; cin >> m;
+            while (m--)
+            {
+                int x; cin >> x; q[i][x] = 1;
+            }
+        }
+        int Q; cin >> Q;
+        while (Q--)
+        {
+            a1.reset(); a2.reset();
+            int x, y; cin >> x >> y;
+            for (int i = 1; i <= n; i++)
+            {
+                if (q[i][x]) a1 |= q[i];
+                if (q[i][y]) a2 |= q[i];
+            }
+            a1 &= a2;
+            int ans = a1.count();
+            if (a1[x]) ans--;
+            if (a1[y]) ans--;
+            cout << ans << endl;
+        }
+    }
     return 0;
 }
 ```

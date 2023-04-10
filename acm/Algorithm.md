@@ -13506,33 +13506,80 @@ int main()
 区间DP的复杂度大于O(n^2), 一般为O(n^3)
 ```
 
-石子合并
+[P1775 石子合并（弱化版） - 洛谷](https://www.luogu.com.cn/problem/P1775)
+
+不成环石子合并, 不能使用贪心来解决, 因为是有序的, 所以要使用区间 `dp` 思想, 进行状态转移. 
 
 
 ```c++
 //定义dp[i][j]为合并第i堆到第j堆的最小花费
 //dp[i][j] = min(dp[i][j], dp[i][k] + dp[k + 1][j] + w[i][j]);
-//
-for (int i = 1; i <= n; i++) dp[i][i] = 0;   //n为石子堆数, 初始化
-for (int j = 2; j <= n; j++)
-    for (int i = j - 1; j >= 1; j--)
+#include <bits/stdc++.h>
+using namespace std;
+const int N = 500;
+const int inf = 0x3f3f3f3f;
+int num[N];
+int w[N][N];
+int dp[N][N];
+int main()
+{
+    int n; cin >> n;
+    for (int i = 1; i <= n; i++) cin >> num[i];
+    for (int i = 1; i <= n; i++)
+        for (int j = i; j <= n; j++)
+            w[i][j] = w[i][j - 1] + num[j];
+    for (int len = 2; len <= n; len++)
+        for (int i = 1; i <= n - len + 1; i++)
+        {
+            int j = i + len - 1;
+            dp[i][j] = inf;
+            for (int k = i; k < j; k++)
+                dp[i][j] = min(dp[i][j], dp[i][k] + dp[k + 1][j] + w[i][j]);
+        }
+    cout << dp[1][n] << endl;
+    return 0;
+}
+```
+
+[P1880 NOI1995 石子合并 - 洛谷](https://www.luogu.com.cn/problem/P1880)
+
+相比上一题, 此题是成环的, 也就是说头尾可以合并, 我们可以化圆为链, 最后再取出大小为 `n` 的合并区间即可
+
+```c++
+#include <bits/stdc++.h>
+using namespace std;
+const int N = 210;
+const int inf = 0x3f3f3f3f;
+int num[N], w[N][N];
+int dp[N][N][2];
+int main()
+{
+    int n; cin >> n;
+    for (int i = 1; i <= n; i++) cin >> num[i], num[i + n] = num[i];
+    for (int i = 1; i <= 2 * n; i++)
+        for (int j = i; j <= 2 * n; j++)
+            w[i][j] = num[j] + w[i][j - 1];
+    for (int len = 2; len <= n; len++)
+        for (int i = 1; i <= 2 * n - len + 1; i++)
+        {
+            int j = i + len - 1;
+            dp[i][j][0] = inf, dp[i][j][1] = 0;
+            for (int k = i; k < j; k++)
+            {
+                dp[i][j][0] = min(dp[i][j][0], dp[i][k][0] + dp[k + 1][j][0] + w[i][j]);
+                dp[i][j][1] = max(dp[i][j][1], dp[i][k][1] + dp[k + 1][j][1] + w[i][j]);
+            }
+        }
+    int a1 = inf, a2 = 0;
+    for (int i = 1; i <= n; i++)
     {
-        dp[i][j] = INF;
-        for (int k = i; k < j; k++)
-        	dp[i][j] = min(dp[i][j], dp[i][k] + dp[k + i] + w[i][j]);
+        a1 = min(dp[i][i + n - 1][0], a1);
+        a2 = max(dp[i][i + n - 1][1], a2);
     }
+    cout << a1 << endl << a2;
+    return 0;
+}
 
-//
-
-for (int i = 1; i <= n; i++)
-for (int len = 2; len <= n; len++)
-	for (int i = 1; i <= n - len + 1; i++)
-    {
-        int j = i + len - 1;
-        dp[i][j] = INF;
-        for (int k = i; k < j; k++)
-            dp[i][j] = min(dp[i][j], dp[i][k] + dp[k + 1][j] + w[i][j]);
-	}
 ```
 
 HDU 2476

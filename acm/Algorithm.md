@@ -13759,6 +13759,45 @@ int main()
 }
 ```
 
+[2955 -- Brackets (poj.org)](http://poj.org/problem?id=2955)
+
+题目大意: 找出最长的符合匹配要求的子序列, 
+
+```c++
+#include <bits/stdc++.h>
+using namespace std;
+const int N = 110;
+int dp[N][N];
+char str[N];
+bool match(char a, char b)
+{
+    if (a == '(') return b == ')';
+    else if (a == '[') return b == ']';
+    else return 0;
+}
+int main()
+{
+    while (scanf("%s", str) && str[0] != 'e')
+    {
+        memset(dp, 0, sizeof dp);
+        int n = strlen(str);
+        for (int i = 0; i < n; i++)
+            if (match(str[i], str[i + 1])) dp[i][i + 1] = 2;
+        for (int len = 3; len <= n; len++)
+        {
+            for (int l = 0, r; (r = l + len - 1) < n; l++)
+            {
+                if (match(str[l], str[r])) dp[l][r] = dp[l + 1][r - 1] + 2;
+                for (int k = l; k < r; k++)
+                    dp[l][r] = max(dp[l][r], dp[l][k] + dp[k + 1][r]);
+            }
+        }
+        printf("%d\n", dp[0][n - 1]);
+    }
+    return 0;
+}
+```
+
 
 
 ## 数论和线性代数
@@ -18488,3 +18527,4 @@ int main()
 }
 ```
 
+​	

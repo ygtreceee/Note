@@ -13582,7 +13582,7 @@ int main()
 
 ```
 
-HDU 2476
+[Problem - 2476 - String painter (hdu.edu.cn)](https://acm.hdu.edu.cn/showproblem.php?pid=2476)
 
 ```c++
 #include <iostream>
@@ -13725,46 +13725,53 @@ int main()
 
 [Cheapest Palindrome - POJ 3280 - Virtual Judge](https://vjudge.csgrandeur.cn/problem/POJ-3280)
 
+题目大意: 对一个字符串可以进行增加或删减字符的操作, 每个操作都有对应的代价, 要求将字符串变为回文串的最小代价
+
+思路: 此题需要明白的一个思想就是对某一个字符, 加一个同样的字符或减去该字符的效果是一样的, 所以每个字符都可以取到一个最小的代价, 然后进行区间 `dp` 操作即可, 注意转移的方法.
+
 ```c++
 #include <iostream>
-#include <map>
 #include <string>
 #include <algorithm>
-const int mod = 1e9;
-const int maxn = 1e3 + 10;
+#include <map>
 using namespace std;
+const int N = 2010;
 int n, m;
+int dp[N][N];
 string s;
-int dp[2010][2010];
 int main()
 {
-        cin >> n >> m >> s;
-        memset(dp, 0, sizeof dp);
-        map<char, int> ma;
-        for (int i = 1; i <= n; i++)
+    cin >> n >> m >> s;
+    memset(dp, 0, sizeof dp);
+    map<char, int> ma;
+    for (int i = 1; i <= n; i++)
+    {
+        char ch; int x, y;
+        cin >> ch >> x >> y;
+        ma[ch] = min(x, y);
+    }
+    for (int len = 2; len <= m; len++)
+        for (int l = 0, r; (r = l + len - 1) < m; l++)
         {
-            char ch; int x, y;
-            cin >> ch >> x >> y;
-            ma[ch] = min(x, y);
+            dp[l][r] = 0x3f3f3f3f;
+            if (s[l] == s[r]) dp[l][r] = dp[l + 1][r - 1];
+            else dp[l][r] = min(dp[l + 1][r] + ma[s[l]], dp[l][r - 1] + ma[s[r]]);
         }
-        for (int i = 2; i <= m; i++)
-            for (int j = 0; j <= (m - i); j++)
-            {
-                if (s[j] == s[j + i - 1] && i == 2) dp[i][j + i - 1] = 0;
-                else if (s[j] == s[j + i - 1] && i != 2) dp[j][j + i - 1] = dp[j + 1][j + i - 2];
-                else dp[j][j + i - 1] = min(dp[j][j + i - 2] + ma[s[j + i - 1]], dp[j + 1][j + i - 1] + ma[s[j]]);
-            }
-        cout << dp[0][m - 1] << endl;
+    cout << dp[0][m - 1] << endl;
     return 0;
 }
 ```
 
 [2955 -- Brackets (poj.org)](http://poj.org/problem?id=2955)
 
-题目大意: 找出最长的符合匹配要求的子序列, 
+题目大意: 找出最长的符合匹配要求的子序列
+
+思路: 关键是要发现每一个合法的子序列都能够由该子序列的两段组合而成, 但是在扩展 `len` 的时候要注意先对首尾是否匹配的情况先判断, 再遍历区间. 
 
 ```c++
-#include <bits/stdc++.h>
+#include <iostream>
+#include <algorithm>
+#include <cstring>
 using namespace std;
 const int N = 110;
 int dp[N][N];
@@ -13794,6 +13801,66 @@ int main()
         }
         printf("%d\n", dp[0][n - 1]);
     }
+    return 0;
+}
+```
+
+[1651 -- Multiplication Puzzle (poj.org)](http://poj.org/problem?id=1651)
+
+```c++
+#include <iostream>
+#include <algorithm>
+using namespace std;
+const int N = 105;
+long long dp[N][N];
+long long num[N];
+int main()
+{
+    int n; cin >> n;
+    for (int i = 1; i <= n; i++) cin >> num[i];
+    for (int len = 3; len <= n; len++)
+        for (int l = 1, r; (r = l + len - 1) <= n; l++)
+        {
+            dp[l][r] = 0x3f3f3f3f;
+            for (int k = l + 1; k < r; k++)
+                dp[l][r] = min(dp[l][r], dp[l][k] + dp[k][r] + num[l] * num[r] * num[k]);
+        }
+    cout << dp[1][n] << endl;
+    return 0;
+}
+```
+
+[Problem - 607B - Zuma - Codeforces](https://codeforces.com/problemset/problem/607/B)
+
+题目大意: 一次操作可以删除字符串里面的回文串, 删除后两边的字符会合并形成新字符, 问最少需要几次操作才能把该字符串完全删除
+
+思路: 此题比较难处理的是合并后的判断, 但事实上, 区间 `dp` 在合并区间的时候, 加以首位判断就能够很好的处理, 例如 `1247452521` , 显然得先消去 `525` , 然后再消去 `1247421` , 在区间处理的时候, 不难发现 `474525` 本身就是两个回文串组成的, 而且各自独立, 如果 `525` 是被包含在另一个回文中, 则必有 `474525` 的前一个和后一个是相等的, 也就是 `2 == 2` , 所以遍历到此区间要先判断 `num[l] == num[r] ` 的情况, 其他操作和正常区间 `dp` 无异. 
+
+```c++
+#include <bits/stdc++.h>
+using namespace std;
+const int N = 2010;
+int n;
+int num[N];
+int dp[N][N];
+int main()
+{
+    int n; cin >> n;
+    for (int i = 1; i <= n; i++) cin >> num[i];
+    for (int i = 1; i <= n; i++)
+    {
+        dp[i][i] = 1;
+        dp[i][i + 1] = 1 + !(num[i] == num[i + 1]);
+    }
+    for (int len = 3; len <= n; len++)
+        for (int l = 1, r; (r = l + len - 1) <= n; l++)
+        {
+            dp[l][r] = 0x3f3f3f3f;
+            if (num[l] == num[r]) dp[l][r] = min(dp[l][r], dp[l + 1][r - 1]);
+            for (int k = l; k < r; k++)
+                dp[l][r] = min(dp[l][r], dp[l][k] + dp[k + 1][r]);
+        }
+    cout << dp[1][n];
     return 0;
 }
 ```

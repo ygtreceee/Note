@@ -13865,6 +13865,70 @@ int main()
 }
 ```
 
+[P1220 关路灯 - 洛谷](https://www.luogu.com.cn/problem/P1220)
+
+题目大意: 某人站在一个位置, 现在要关闭一排路灯, 要求总过程消耗的功率最少, 且在关闭一盏灯后, 她可以向左移动去关闭左边离她最近的那一盏, 也可以向右移动去关闭右边离她最近的那一盏.
+
+思路: 由于每次只能关一盏灯, 并且不会间隔关闭, 所以所关闭的灯必然是一个连续的子区间, 并且逐渐增大, 那就可以从小区间枚举到大区间, 大区间从小区间递推而来, 由于对每个区间, 她有站在左端点或者右端点两种情况 (如果存在) , 因此 `dp` 需要多开一维, 存储站在左端点或者右端点的状态. 
+
+```c++
+#include <bits/stdc++.h>
+using namespace std;
+const int N = 55;
+int n, c;
+int dp[N][N][2];
+int sum[N], a[N], b[N];
+int main()
+{
+    memset(dp, 0x3f, sizeof dp);
+    cin >> n >> c;
+    for (int i = 1; i <= n; i++) {cin >> a[i] >> b[i]; sum[i] = sum[i - 1] + b[i];}
+    dp[c][c][0] = dp[c][c][1] = 0;
+    for (int len = 2; len <= n; len++)
+        for (int l = 1, r; (r = l + len - 1) <= n; l++)
+        {
+            int ret1 = sum[l - 1] + sum[n] - sum[r - 1];
+            int ret2 = sum[l] + sum[n] - sum[r];
+            dp[l][r][0] = min(dp[l + 1][r][0] + (a[l + 1] - a[l]) * ret2, dp[l + 1][r][1] + (a[r] - a[l]) * ret2);
+            dp[l][r][1] = min(dp[l][r - 1][0] + (a[r] - a[l]) *ret1, dp[l][r - 1][1] + (a[r] - a[r - 1]) * ret1);
+        }
+    cout << min(dp[1][n][0], dp[1][n][1]) << endl;
+    return 0;
+}
+```
+
+[Clear the String - 洛谷](https://www.luogu.com.cn/problem/CF1132F)
+
+题目大意: 可以删除连续的一段相同字符, 问最少几次能删完字符串
+
+思路: 此题比较巧妙的就是 `dp[l][r] = dp[l + 1][r]` , 刚好可以涵盖 `s[l] == s[r]` 时的所有情况
+
+```c++
+#include <bits/stdc++.h>
+using namespace std;
+const int N = 550;
+int n;
+string s;
+int dp[N][N];
+int main()
+{
+    cin >> n >> s;
+    s = '#' + s;
+    for (int i = 1; i <= n; i++) dp[i][i] = 1;
+    for (int len = 2; len <= n; len++)
+        for (int l = 1, r; (r = l + len - 1) <= n; l++)
+        {
+            dp[l][r] = 0x3f3f3f3f;
+            if (len == 2) dp[l][r] = 1 + !(s[l] == s[r]);
+            else if (s[l] == s[r]) dp[l][r] = dp[l + 1][r];  //dp[l][r] = dp[l][r - 1]
+            for (int k = l; k < r; k++)
+                dp[l][r] = min(dp[l][r], dp[l][k] + dp[k + 1][r]);
+        }
+    cout << dp[1][n] << endl;
+    return 0;
+}
+```
+
 
 
 ## 数论和线性代数

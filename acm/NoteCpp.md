@@ -1279,3 +1279,6 @@ s.flip()把s所有位取反, 即s = ~s
 s.flip(k)把s的第k位取反，即s[k] ^= 1
 ```
 
+#### new/delete malloc/free
+
+[C++ 浅谈new/delete， operator new/operator delete，malloc/free和new/delete的区别 ，内存泄漏_双鱼211的博客-CSDN博客](https://blog.csdn.net/weixin_50886514/article/details/115796743?ops_request_misc=%7B%22request%5Fid%22%3A%22168147738716800182724693%22%2C%22scm%22%3A%2220140713.130102334.pc%5Fall.%22%7D&request_id=168147738716800182724693&biz_id=0&utm_medium=distribute.pc_search_result.none-task-blog-2~all~first_rank_ecpm_v1~rank_v31_ecpm-2-115796743-null-null.142^v83^wechat,239^v2^insert_chatgpt&utm_term=c%2B%2B delete 和operator delete&spm=1018.2226.3001.4187)

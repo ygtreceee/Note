@@ -13504,6 +13504,8 @@ int main()
 ```
 区间DP也是线性DP, 它把区间当作DP的阶段, 用区间的两个端点描述状态和处理状态的转移, 主要思想就是现在小区间进行DP得到最优解, 然后在合并小区间的最优解求得大区间的最优解. 解题时先解决小区间问题, 然后合并小区间, 得到更大的区间, 直到解决最后的大区间问题. 合并的操作一般是把左右两个相邻的子区间合并.
 区间DP的复杂度大于O(n^2), 一般为O(n^3)
+
+使用四边形不等式优化可以达到O(n^2), 具体实现看石子合并
 ```
 
 [P1775 石子合并（弱化版） - 洛谷](https://www.luogu.com.cn/problem/P1775)
@@ -13535,6 +13537,40 @@ int main()
             dp[i][j] = inf;
             for (int k = i; k < j; k++)
                 dp[i][j] = min(dp[i][j], dp[i][k] + dp[k + 1][j] + w[i][j]);
+        }
+    cout << dp[1][n] << endl;
+    return 0;
+}
+
+
+//四边形不等式优化
+#include <bits/stdc++.h>
+using namespace std;
+const int N = 305;
+int dp[N][N];
+int s[N][N];  //s[i][j]为dp[i][j]取得最优值时的k, 即最佳分割点
+int w[N][N];
+int lib[N];
+int main()
+{
+    int n; cin >> n;
+    for (int i = 1; i <= n; i++) cin >> lib[i];
+    for (int i = 1; i <= n; i++)
+        for (int j = i; j <= n; j++)
+            w[i][j] = w[i][j - 1] + lib[j];
+    for (int i = 1; i <= n; i++) s[i][i] = i;   //s[i][i]的初始值
+    for (int len = 2; len <= n; len++)
+        for (int l = 1, r; (r = l + len - 1) <= n; l++)
+        {
+            dp[l][r] = 0x3f3f3f3f;
+            for (int k = s[l][r - 1]; k <= s[l + 1][r]; k++)  //四边形不等式优化, 缩小循环范围
+            {
+                if (dp[l][r] > dp[l][k] + dp[k + 1][r] + w[l][r])  //是否最优
+                {
+                    dp[l][r] = dp[l][k] + dp[k + 1][r] + w[l][r];
+                    s[l][r] = k;   //更新最佳分割点
+                }
+            }
         }
     cout << dp[1][n] << endl;
     return 0;
@@ -13925,6 +13961,75 @@ int main()
                 dp[l][r] = min(dp[l][r], dp[l][k] + dp[k + 1][r]);
         }
     cout << dp[1][n] << endl;
+    return 0;
+}
+```
+
+[P4767 IOI2000 邮局 - 洛谷](https://www.luogu.com.cn/problem/P4767)
+
+题目大意: 在 `V` 的村庄里, 建 `P` 个邮局, 要求所有村庄到所有邮局距离总和最小
+
+思路: 此题 `dp` 数组的设立不再是以往的从 `i` 到 `j` 区间, 而是用 `dp[i][j]` 表示前 `i` 个村庄放 `j` 个邮局的前 `i` 个村庄的最小距离总和, 而 `w[i][j]` 表示村庄区间 `[i][j]` 内放一个邮局时该区间内所有村庄到该邮局的最小距离总和. 易得
+
+ 													                 $dp[i][j]=([dp[k][j−1]+w(k+1,i))_{min},k∈[0,i)$
+
+对于 $w[i][j]$ , 也可以通过预处理优化
+
+​															                    $w[l][r]=w[l][r−1]+X[r]−X[\lfloor \frac{l+r}{2} \rfloor]$
+
+因为 `dp` 满足四边形不等式, 所以对于 $dp[i][j]$ 的最优决策是
+
+​															                       $dp[i][j - 1] \leq dp[i][j] \leq dp[i + 1][j]$ 
+
+于是状态转移时, $dp[i][j]$ 从 $[dp[i][j - 1], dp[i + 1][j]]$ 中找最优分割点, 特别注意的是, 由于要用到 $dp[i + 1][j]$ , 所以倒序求解, 而石子合并的题之所以不需要倒序求解, 是因为 $dp[i + 1][j]$ 的状态已经遍历过了, 由于状态转移方程的不同,  在本题中需要倒序遍历才能保证 $dp[i + 1][j]$  是已经转移的状态. 
+
+```c++
+#include <bits/stdc++.h>
+#define MAXN 3010
+#define N 310
+#define INF 0x3f3f3f3f
+using namespace std;
+int V, P, X[MAXN], dp[MAXN][N], w[MAXN][MAXN], d[MAXN][N];
+void init()
+{
+    for (int l = 1; l <= V; l++)
+    {
+        w[l][l] = 0;
+        for (int r = l + 1; r <= V; r++)
+        {
+            w[l][r] = w[l][r - 1] + X[r] - X[l + r >> 1];
+        }
+    }
+}
+int main()
+{
+    cin >> V >> P;
+    for (int i = 1; i <= V; i++)
+        cin >> X[i];
+
+    init();
+    sort(X + 1, X + V + 1);
+    memset(dp, 0x3f, sizeof(dp));
+    dp[0][0] = 0;
+    for (int j = 1; j <= P; j++)
+    {
+        d[V + 1][j] = V;
+        for (int i = V; i >= 1; i--)
+        {
+            int minn = INF, minid;
+            for (int k = d[i][j - 1]; k <= d[i + 1][j]; k++)
+            {
+                if (dp[k][j - 1] + w[k + 1][i] < minn)
+                {
+                    minn = dp[k][j - 1] + w[k + 1][i];
+                    minid = k;
+                }
+            }
+            dp[i][j] = minn;
+            d[i][j] = minid;
+        }
+    }
+    cout << dp[V][P] << endl;
     return 0;
 }
 ```

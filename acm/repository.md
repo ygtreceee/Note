@@ -1286,6 +1286,370 @@ int main()
 	p = NULL;
 	return 0;
 }
+
+
+
+
+#include <bits/stdc++.h>
+using namespace std;
+class Point
+{
+    double x, y;
+public:
+    Point();
+    Point(double x_value, double y_value);
+    double getX();
+    double getY();
+    void setX(double x_value);
+    void setY(double y_value);
+    double getDisto(Point p);
+};
+Point::Point()
+{
+    this->x = 0;
+    this->y = 0;
+}
+Point::Point(double x_value, double y_value)
+{
+    this->x = x_value;
+    this->y = y_value;
+}
+double Point::getX()
+{
+    return x;
+}
+double Point::getY()
+{
+    return y;
+}
+void Point::setX(double x_value)
+{
+    this->x = x_value;
+}
+void Point::setY(double y_value)
+{
+    this->y = y_value;
+}
+double Point::getDistoo(Point p)
+{
+    return sqrt((x - p.x) * (x - p.x) + (y - p.y) * (y - p.y));
+}
+int main()
+{
+    int t; cin >> t;
+    while (t--)
+    {
+        double _x1, _x2, _y1, _y2;
+        cin >> _x1 >> _y1 >> _x2 >> _y2;
+        Point p1(_x1, _y1), p2(_x2, _y2);
+        printf("Distance of Point(%.2f,%.2f) to Point(%.2f,%.2f) is %.2f\n", p1.getX(), p1.getY(), p2.getX(), p2.getY(), p1.getDisto  o(p2));
+    }
+    return 0;
+}
+
+
+
+
+#include <bits/stdc++.h>
+using namespace std;
+int mon[13] = {0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
+bool check(int x)
+{
+    if ((x % 4 == 0 && x % 100 != 0) || x % 400 == 0) return true;
+    return false;
+}
+class Date
+{
+    int year, month, day;
+public:
+    Date();
+    Date(int y, int m, int d);
+    int getYear();
+    int getMonth();
+    int getDay();
+    void setDate(int y, int m, int d);
+    void print();
+    void addOneday();
+};
+Date::Date()
+{
+    this->year = 1900;
+    this->month = 1;
+    this->day = 1;
+}
+Date::Date(int y, int m, int d)
+{
+    this->year = y;
+    this->month = m;
+    this->day = d;
+}
+int Date::getYear()
+{
+    return year;
+}
+int Date::getMonth()
+{
+    return month;
+}
+int Date::getDay()
+{
+    return day;
+}
+void Date::setDate(int y, int m, int d)
+{
+    this->year = y;
+    this->month = m;
+    this->day = d;
+}
+void Date::print()
+{
+    printf("Today is %0.2d/%0.2d/%0.2d\n", year, month, day);
+    addOneday();
+    printf("Tomorrow is %0.2d/%0.2d/%0.2d\n", year, month, day);
+}
+void Date::addOneday()
+{
+    day++;
+    if (day > mon[month] && month != 2) month++, day = 1;
+    else if (day > mon[month] && month == 2)
+    {
+        if (!check(year) || (check(year) && day == 30)) month++, day = 1;
+    }
+    if (month > 12)
+    {
+        year++;
+        month = day = 1;
+    }
+}
+int main()
+{
+    int t; cin >> t;
+    while (t--)
+    {
+        int y, m, d; cin >> y >> m >> d;
+        Date da(y, m, d);
+        da.print();
+    }
+    return 0;
+}
+
+
+
+
+#include <bits/stdc++.h>
+using namespace std;
+class CFraction
+{
+    int fz, fm;
+public:
+    CFraction(int fz_val, int fm_val);
+    CFraction add(const CFraction& r);
+    CFraction sub(const CFraction& r);
+    CFraction mul(const CFraction& r);
+    CFraction div(const CFraction& r);
+    int getGCD();
+    void print();
+};
+CFraction::CFraction(int fz_val, int fm_val)
+{
+    fz = fz_val;
+    fm = fm_val;
+}
+CFraction CFraction::add(const CFraction& r)
+{
+    return CFraction(fz * r.fm + fm * r.fz, fm * r.fm);
+}
+CFraction CFraction::sub(const CFraction& r)
+{
+    return CFraction(fz * r.fm - fm * r.fz, fm * r.fm);
+}
+CFraction CFraction::mul(const CFraction& r)
+{
+    return CFraction(fz * r.fz, fm * r.fm);
+}
+CFraction CFraction::div(const CFraction& r)
+{
+    return CFraction(fz * r.fm,fm * r.fz);
+}
+int CFraction::getGCD()
+{
+    int r = fm;
+    int a = fabs(fz), b = fabs(fm);
+    while (a % b != 0)
+    {
+        r = a % b;
+        a = b;
+        b = r;
+    }
+    return b;
+}
+void CFraction::print()
+{
+    int gcd = getGCD();
+    fz /= gcd;
+    fm /= gcd;
+    string signal;
+    if (fz / fz == fm / fm)
+        signal = "";
+    else
+        signal = "-";
+    cout << signal << fz << "/" << fm << endl;
+}
+int main()
+{
+    int t; cin >> t;
+    int fz1, fm1, fz2, fm2;
+    char c;
+    while (t--)
+    {
+        cin >> fz1 >> c >>  fm1 >> fz2 >> c >> fm2;
+        CFraction cs1(fz1, fm1);
+        CFraction cs2(fz2, fm2);
+        CFraction cs3 = cs1.add(cs2);
+        cs3.print();
+        cs3 = cs1.sub(cs2);
+        cs3.print();
+        cs3 = cs1.mul(cs2);
+        cs3.print();
+        cs3 = cs1.div(cs2);
+        cs3.print();
+        cout << endl;
+    }
+    return 0;
+}
+
+
+
+
+#include <bits/stdc++.h>
+using namespace std;
+class Point
+{
+private:
+    double x, y;
+public:
+    Point() : x(0), y(0){};                                                                     //缺省构造函数
+    Point(double x_val, double y_val) : x(x_val), y(y_val) { cout << "Constructor." << endl; }; //有参构造函数
+    double getX() { return x; };
+    double getY() { return y; };
+    void setXY(double x_val, double y_val)
+    {
+        x = x_val;
+        y = y_val;
+    };
+    void sexX(double x_val) { x = x_val; };
+    void sexY(double y_val) { y = y_val; };
+    double getDisTo(const Point &p); //计算当前点到参数点p的距离
+    ~Point() { cout << "Distructor." << endl; };
+};
+double Point::getDisTo(const Point &p)
+{
+    return sqrt((x - p.x) * (x - p.x) + (y - p.y) * (y - p.y));
+}
+int main()
+{
+    int t;
+    cin >> t;
+    while (t--)
+    {
+        int n;
+        cin >> n;
+        int x, y, i, j;
+
+        Point *p = (Point *)operator new[](n * sizeof(Point));
+        for (int i = 0; i < n; i++)
+        {
+            cin >> x >> y;
+            new (&p[i]) Point(x, y);
+        }
+
+        int max1 = 0, max2 = 0;
+        double max = 0;
+        for (i = 0; i < n; i++)
+            for (j = 0; j < n; j++)
+                if (p[i].getDisTo(p[j]) > max)
+                {
+                    max = p[i].getDisTo(p[j]);
+                    max1 = i;
+                    max2 = j;
+                }
+
+        cout << "The longeset distance is " << fixed << setprecision(2) << max;
+        cout << ",between p[" << max1 << "] and p[" << max2 << "]." << endl;
+
+        for (int i = 0; i < n; i++)
+            p[i].~Point();  //析构对象
+        operator delete(p); //释放空间
+    }
+    return 0;
+}
+
+
+
+
+#include <bits/stdc++.h>
+using namespace std;
+class CStack
+{
+    int *a;
+    int size;
+    int top;
+public:
+    CStack()
+    {
+        a = new int[10];
+        top = 0; size = 10;
+        cout << "Constructor." << endl;
+    }
+    CStack(int s)
+    {
+        a = new int[s];
+        top = 0; size = s;
+        cout << "Constructor." << endl;
+    }
+    int get(int index)
+    {
+        return a[index];
+    }
+    void push(int n)
+    {
+        a[top++] = n;
+    }
+    int isEmpty()
+    {
+        return top == 0;
+    }
+    int isFull()
+    {
+        return top == size;
+    }
+    int pop()
+    {
+        return a[--top];
+    }
+    ~CStack()
+    {
+        delete []a;
+        cout << "Destructor." << endl;
+    }
+};
+int main()
+{
+    int t; cin >> t;
+    while (t--)
+    {
+        int n; cin >> n;
+        CStack s(n);   
+        for (int i = 0; i < n; i++)
+        {
+            int x; cin >> x; s.push(x);
+        }
+        for (int j = 0;j < n - 1; j++)
+            cout << s.pop() << " ";
+        cout << s.pop() << endl;
+    }
+    return 0;
+}
 ```
 
 

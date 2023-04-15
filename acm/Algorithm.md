@@ -10580,6 +10580,224 @@ int main()
 
 
 
+#### 简单树上问题
+
+###### 树的重心
+
+
+
+```
+
+```
+
+
+
+###### 树的直径
+
+[P5536 【XR-3】核心城市 - 洛谷](https://www.luogu.com.cn/problem/solution/P5536)
+
+```c++
+#include<cstdio>
+#include<algorithm>
+#define ri register int
+using namespace std;
+const int maxn=1e5+7;
+struct E{
+	int v,nxt;
+}e[maxn<<1];
+int head[maxn];
+int f[maxn];
+int d[maxn],maxd[maxn],dis[maxn];
+int cnt,n,k,tmp,r,ans;
+bool cmp(int x,int y){ return x>y;}
+inline int read(){//快读 
+	int x=0;
+	char c=getchar();
+	while(c>'9'||c<'0') c=getchar();
+	while(c>='0'&&c<='9') x=(x<<3)+(x<<1)+c-'0',c=getchar();
+	return x;
+}
+inline void add(int u,int v){//建边 
+	cnt++;
+	e[cnt].v=v;
+	e[cnt].nxt=head[u];
+	head[u]=cnt;
+}
+void dfs(int u,int fa,int kk){//第一、二遍dfs找直径 
+	if(d[u]>tmp) tmp=d[u],r=u;
+	for(ri i=head[u];i;i=e[i].nxt) 
+	{
+		int v=e[i].v;
+		if(v==fa) continue;
+		if(kk) f[v]=u;
+		d[v]=d[u]+1;
+		dfs(v,u,kk);
+	}
+}
+void dfs1(int u,int fa){//求d和maxd 
+	maxd[u]=d[u];
+	for(ri i=head[u];i;i=e[i].nxt)
+	{
+		int v=e[i].v;
+		if(v==fa) continue;
+		d[v]=d[u]+1;
+		dfs1(v,u);
+		if(maxd[v]>maxd[u]) maxd[u]=maxd[v];
+	}
+}
+int main(){
+	n=read(),k=read();
+	for(ri i=1;i<n;++i)
+	{
+		int u=read(),v=read();
+		add(u,v),add(v,u);
+	}
+	dfs(1,0,0);
+	d[r]=tmp=0;
+	dfs(r,0,1);
+	int x=r;
+	for(ri i=1;i<=(d[x]+1)>>1;++i) r=f[r];
+	d[r]=0;
+	dfs1(r,0);
+	for(ri i=1;i<=n;++i) dis[i]=maxd[i]-d[i];
+	sort(dis+1,dis+n+1,cmp);
+	printf("%d",dis[k+1]+1);//显然dis[k+1]+1是最大的
+	return 0;
+}
+
+
+
+
+//failure try (actually is TLE)
+#include <bits/stdc++.h>
+using namespace std;
+int n, k, c, d, root, ans;
+const int N = 1e3 + 10;
+vector<int> ve[N];
+vector<int> way;
+int dis[N];
+int max_dis[N], deep[N];
+bool vis[N];
+int step[N];
+void dfs(int u, int fa)
+{
+    for (auto v :ve[u])
+    {
+        if (v == fa) continue;
+        dis[v] = dis[u] + 1;
+        if (dis[v] > dis[c]) c = v;
+        dfs(v, u);
+    }
+}
+bool get_root(int u, int fa)
+{
+    if (u == d) return true;
+    for (auto v: ve[u])
+    {
+        if (v == fa) continue;
+        if (get_root(v, u))
+        {
+            way.push_back(v);
+            return true;
+        }
+    }
+    return false;
+}
+void init_dfs(int u, int fa)
+{
+    max_dis[u] = 1;
+    for (auto v: ve[u])
+    {
+        if (v == fa) continue;
+        deep[v] = deep[u] + 1;
+        init_dfs(v, u);
+        max_dis[u] = max(max_dis[u], max_dis[v] + 1);
+    }
+}
+void solve_bfs(int _root)
+{
+    // ans = 0x3f3f3f3f;
+    priority_queue<pair<int, int>> p;
+    pair<int, int> pp(max_dis[_root], _root);
+    p.push(pp);
+    // p.push(pair(max_dis[_root], _root));
+    while (p.size())
+    {
+        pair<int, int> now = p.top();
+        p.pop();
+        vis[now.second] = 1;
+        // ans = min(ans, now.first);
+        k--;
+        if (k == 0) break;
+        for (auto v: ve[now.second])
+        {
+            if (max_dis[v] > now.first) continue;
+            pair<int, int> pp(max_dis[v], v);
+            p.push(pp);
+            // p.push(pair(max_dis[v], v));
+        }
+    }
+}
+int get_ans_bfs(int x)
+{
+    int ret = 0;
+    queue<pair<int, int>> q;
+    pair<int, int> pp(x, 1);
+    q.push(pp);
+    // q.push(pair(x, 1));
+    while (q.size())
+    {
+        pair<int, int> now = q.front();
+        q.pop();
+        ret = max(ret, now.second);
+        // step[now.first] = now.second;
+        // vis[now.first] = 1;
+        for (auto v: ve[now.first])
+        {
+            if (vis[v] ||  deep[v] > deep[now.first])
+            continue;
+            pair<int, int> pp(v, now.second + 1);
+            q.push(pp);
+            // q.push(pair(v, now.second + 1));
+
+        }
+    }
+    return ret;
+}
+int main()
+{
+    cin >> n >> k;
+    for (int i = 1; i < n; i++)
+    {
+        int u, v; cin >> u >> v;
+        ve[u].push_back(v);
+        ve[v].push_back(u);
+    }
+    dfs(1, 0);
+    d = c;
+    dis[d] = 0;
+    dfs(d, 0);
+    get_root(c, 0);
+    way.push_back(c);
+    root = way[way.size() >> 1];
+    // cout << root << endl;
+    deep[root] = 1;
+    init_dfs(root, 0);
+    solve_bfs(root);
+    for (int i = 1; i <= n; i++)
+        if (vis[i] == 0)
+            ans = max(ans, get_ans_bfs(i));
+    cout << ans << endl;
+    return 0;
+}
+```
+
+
+
+#### LCA
+
+
+
 ## 动态规划
 
 #### DP概念和编码方法
@@ -14030,6 +14248,91 @@ int main()
         }
     }
     cout << dp[V][P] << endl;
+    return 0;
+}
+```
+
+[Problem - 149D - Coloring Brackets - Codeforces](https://codeforces.com/problemset/problem/149/D)
+
+题目大意: 给定一个字符串, 保证是一个合法的括号序列, 现在要对这个序列进行染色, 有以下要求. (1)每个字符串有三种情况: 不染色, 染成红色, 染成蓝色; (2) 每对匹配的括号, 有且仅有一个字符被染色; (3) 所有相邻的两个字符, 不能染成同一种颜色; 结果注意取模
+
+思路: 每个区间, 要记录左端点和右端点颜色的情况, 然后状态转移即可; 对于我们遍历到的区间 `dp[i][j]` , 需要分成两种情况,一种是 `i` 和 `j` 是匹配的, 另一种就是 `i` 和 `j` 不匹配. 对于匹配的, 直接进行状态转移, 对于不匹配的, 直接对 `dp[i][match[i]], dp[match[i] + 1][j]` 区间遍历操作, 注意有时候我们会遍历到一些不合法的区间, 但不用特判, 是因为不合法的区间的 `dp` 值都为 `0` , 而本题的状态转移是加法操作, 加 `0` 没有影响, 所以也就不用判断不合法的情况了, 省去了大量判断. 
+
+```c++
+#include <bits/stdc++.h>
+using namespace std;
+const int N = 703, mod = 1e9 + 7;
+char s[N];
+int S[N], tt;
+int match[N]; // match[i]记录与i相匹配的括号的位置
+long long dp[N][N][3][3];
+void init(int len)
+{
+    for (int i = 1; i <= len; i++)
+    {
+        if (s[i] == '(')
+            S[++tt] = i;
+        else
+        {
+            int t = S[tt--];
+            match[i] = t;
+            match[t] = i;
+        }
+    }
+}
+int main()
+{
+    scanf("%s", s + 1);
+    int length = strlen(s + 1);
+    init(length);
+    for (int i = 1; i <= length; i++)
+        for (int j = 0; j <= 2; j++)
+            for (int k = 0; k <= 2; k++)
+                if (j & k == 0 && (j | k))
+                    dp[i][i][j][k] = 1;
+    for (int len = 2; len <= length; len++)
+        for (int i = 1; i + len - 1 <= length; i++)
+        {
+            int j = i + len - 1;
+            if (match[i] == j)
+            {
+                if (len == 2)
+                {
+                    dp[i][j][0][1] = dp[i][j][0][2] = 1;
+                    dp[i][j][1][0] = dp[i][j][2][0] = 1;
+                    continue;
+                }
+                for (int k = 0; k <= 2; k++)
+                    for (int l = 0; l <= 2; l++)
+                    {
+                        if (l != 1)
+                            dp[i][j][0][1] = (dp[i][j][0][1] + dp[i + 1][j - 1][k][l]) % mod;
+                        if (l != 2)
+                            dp[i][j][0][2] = (dp[i][j][0][2] + dp[i + 1][j - 1][k][l]) % mod;
+                        if (k != 1)
+                            dp[i][j][1][0] = (dp[i][j][1][0] + dp[i + 1][j - 1][k][l]) % mod;
+                        if (k != 2)
+                            dp[i][j][2][0] = (dp[i][j][2][0] + dp[i + 1][j - 1][k][l]) % mod;
+                    }
+            }
+            else // match[i]!=j
+            {
+                int t = match[i];
+                for (int k = 0; k <= 2; k++)
+                    for (int l = 0; l <= 2; l++)
+                        for (int p = 0; p <= 2; p++)
+                            for (int q = 0; q <= 2; q++)
+                                if (p == q && (p != 0))
+                                    continue;
+                                else
+                                    dp[i][j][k][l] = (dp[i][j][k][l] + dp[i][t][k][p] * dp[t + 1][j][q][l]) % mod;
+            }
+        }
+    long long ans = 0;
+    for (int i = 0; i <= 2; i++)
+        for (int j = 0; j <= 2; j++)
+            ans = (ans + dp[1][length][i][j]) % mod;
+    printf("%lld", ans);
     return 0;
 }
 ```

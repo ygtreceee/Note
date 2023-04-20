@@ -399,91 +399,81 @@ Web 标准提出的最佳体验方案：**结构、样式、行为相分离**，
 
 
 
-###表单控件(表单元素)
+**表单控件(表单元素)**
 
- <input> 表单元素
+*<input>*
 
-在英文单词中，input 是输入的意思，而在表单元素中 <input> 标签用于收集用户信息。在 <input> 标签中，包含一个 type 属性，根据不同的 type 属性值，输入字段拥有很多种形式（可以是文本字段、复选框、掩码后的文本控件、单选按钮、按钮等）。
+在英文单词中，`input` 是输入的意思，而在表单元素中 `<input>` 标签用于收集用户信息。在 `<input>` 标签中，包含一个 `type` 属性，根据不同的 `type` 属性值，输入字段拥有很多种形式（可以是文本字段、复选框、掩码后的文本控件、单选按钮、按钮等）
 
-<input type="属性值"  />
+代码实现 
 
-<input /> 标签为单标签 type 属性设置不同的属性值用来指定不同的控件类型
+`<input type="属性值"  />`
 
-type 属性的属性值及其描述如下：
+`<input />` 标签为**单标签**, `type` 属性设置不同的属性值用来指定不同的控件类型
 
-![](E:/BaiduNetdisk/Download/images/表单标签.png)
+`type` 属性的属性值及其描述如下
 
-除 type 属性外，<input>标签还有其他很多属性，其常用属性如下：
+<img src="C:\Users\ygtrece\AppData\Roaming\Typora\typora-user-images\表单标签.png" alt="表单标签" style="zoom:67%;" />
 
-![](E:/BaiduNetdisk/Download/images/表单其他属性.png)
+除 `type` 属性外，`<input>` 标签还有其他很多属性，其常用属性如下
 
-###<label> 标签
-<label> 标签为 input 元素定义标注（标签）。
-<label> 标签用于绑定一个表单元素, 当点击<label> 标签内的文本时，浏览器就会自动将焦点(光标)转到或者选择对应的表单元素上,用来增加用户体验.
-语法：
-     <label for="sex">男</label>
-    <input type="radio" name="sex"  id="sex" />
-    核心： <label> 标签的 for 属性应当与相关元素的 id 属性相同。
+<img src="C:\Users\ygtrece\AppData\Roaming\Typora\typora-user-images\表单其他属性.png" alt="表单其他属性" style="zoom:67%;" />
 
-###<select> 表单元素
-使用场景: 在页面中，如果有多个选项让用户选择，并且想要节约页面空间时，我们可以使用<select>标签控件定义下拉列表。
 
-![](E:/BaiduNetdisk/Download/images/下拉列表.png)
 
-语法： 
+*<label>*
 
+`<label>` 标签为 `input` 元素定义标注(标签), `<label>` 标签用于绑定一个表单元素, 当点击 `<label>` 标签内的文本时, 浏览器就会自动将焦点(光标)转到或者选择对应的表单元素上, 用来增加用户体验.
+
+代码实现
+
+```
+    <input type="radio" name="sex"  id="sex" /> <label for="sex"> 男 </label>
+```
+
+核心： `<label>` 标签的 `for` 属性应当与相关元素的 `id` 属性相同
+
+
+
+*<select>*
+
+使用场景: 在页面中, 如果有多个选项让用户选择, 并且想要节约页面空间时, 我们可以使用`<select>`标签控件定义下拉列表
+
+语法
+
+```
 <select>
    <option>选项1</option>
    <option>选项2</option>
    <option>选项3</option>
    ...
- </select>
+</select>
+```
 
 
-###<textarea> 表单元素
 
-1. 使用场景: 当用户输入内容较多的情况下，我们就不能使用文本框表单了，此时我们可以使用 <textarea> 标签。
-2. 在表单元素中，<textarea> 标签是用于定义多行文本输入的控件。
-3. 使用多行文本输入控件，可以输入更多的文字，该控件常见于留言板，评论。
+*<textarea>*
 
-语法：
+使用场景: 当用户输入内容较多的情况下, 我们就不能使用文本框表单了, 此时我们可以使用 `<textarea>` 标签
 
-​	<textarea rows="3" cols="20">   文本内容 </textarea>
+在表单元素中，`<textarea>` 标签是用于定义**多行文本输入**的控件, 使用多行文本输入控件, 可以输入更多的文字, 该控件常见于留言板, 评论
 
-通过 <textarea> 标签可以轻松地创建多行文本输入框。cols=“每行中的字符数” ，rows=“显示的行数”，
+代码实现
 
-我们在实际开发中不会使用，都是用 CSS 来改变大小。
+```
+<textarea rows="3" cols="20">文本内容</textarea>
+```
 
-表单元素我们学习了三大组  input 输入表单元素  select 下拉表单元素  textarea 文本域表单元素.这三组表单元素都应该包含在form表单域里面,并且有 name 属性.
+通过 `<textarea>` 标签可以轻松地创建多行文本输入框
 
-具体代码：
+注意: `cols=“每行中的字符数” ，rows=“显示的行数”`, 但是我们在实际开发中不会使用, 都是用 CSS 来改变大小
 
-​	<form>
 
-​		<input type=“text " name=“username”>
 
-​		<select name="jiguan">  
+#### 文档查阅
 
-​		 <option>北京</option>
-
-​		</select> 
-
-​		<textarea name= "message">
-
-​		</textarea>
-
-​	</form>
-
-有三个名字非常相似的标签:表单域   form    使用场景:  提交区域内表单元素给后台服务器文件域   file      是input type 属性值   使用场景: 上传文件文本域   textarea    使用场景:  可以输入多行文字, 比如留言板  网站介绍等…4. 我们当前阶段不需要提交表单元素,所以我们只负责表单元素的外观形态即可.
-
-###完成综合案例
-
-###查阅文档：
-    经常查阅文档是一个非常好的学习习惯。
-    推荐的网址： 
-    百度:  http://www.baidu.com
-    W3C :  http://www.w3school.com.cn/
-    MDN: https://developer.mozilla.org/zh-CN/
+W3C :  http://www.w3school.com.cn/
+MDN: https://developer.mozilla.org/zh-CN/
 
 
 

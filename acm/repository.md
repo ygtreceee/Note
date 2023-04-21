@@ -1092,9 +1092,24 @@ int main()
 }
 ```
 
-`class` 练习
+23.4.7
+
+总结
 
 ```c++
+class Point
+{
+private:
+	//
+public:
+	//
+};
+```
+
+题目代码
+
+```c++
+//A
 #include <bits/stdc++.h>
 using namesapce std;
 int n;
@@ -1131,7 +1146,7 @@ int main()
 }
 
 
-
+//B
 #include <bits/stdc++.h>
 using namesapce std;
 class CAccount
@@ -1181,7 +1196,7 @@ int main()
 }
 
 
-
+//C
 #include <bits/stdc++.h>
 using namespace std;
 class Point
@@ -1218,7 +1233,7 @@ int main()
 }
 
 
-
+//D
 #include <bits/stdc++.h>
 using namesapce std;
 struct Cat
@@ -1255,7 +1270,7 @@ int main()
 }
 
 
-
+//E
 #include <bits/stdc++.h>
 using namesapce std;
 struct man
@@ -1287,9 +1302,60 @@ int main()
 	return 0;
 }
 
+```
+23.4.14
+
+总结
+
+```c++
+构造函数和析构函数
+//特别注意operator new和operator delete的使用, 以及与new (&p[i])的结合使用
+//关于动态开辟mallac, new和构造函数, 析构函数的本质联系参见Notecpp.md文档
+class Point
+{
+private:
+	int a, b;
+public:
+	Point() : a(0), b(0) {};              //成员函数默认赋值为0
+	Point(int _a, int _b) : a(_a), b(_b); //传参构造函数
+	~Point() {};
+};
+int main()
+{
+    int n; cin >> n;
+    Point *p = (Point *)operator new[](n * sizeof(Point));  //动态开辟, 在此处不会引用构造函数, 因为operator new本质是malloc
+    for (int i = 0; i < n; i++)
+    {
+        int x, y;
+        cin >> x >> y;
+        new (&p[i]) Point(x, y);  //构造对象, 在此处才会引用构造函数
+	}
+    //
+    for (int i = 0; i < n; i++)
+		p[i].~point();  //析构对象
+   operator delete(p);  //释放空间, 在此处也不会调用析构函数, 因为operator delete本质是free
+}
 
 
 
+this的使用
+this在一个成员函数中可以表示该成员
+Point::Point(const Point &x)
+{
+    *this = x;
+};
+//
+Point::set_value(int _a, int _b)
+{
+    this->a = _a;
+    this->b = _b;
+};
+```
+
+题目代码
+
+```c++
+//A
 #include <bits/stdc++.h>
 using namespace std;
 class Point
@@ -1349,7 +1415,7 @@ int main()
 
 
 
-
+//B
 #include <bits/stdc++.h>
 using namespace std;
 int mon[13] = {0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
@@ -1435,7 +1501,7 @@ int main()
 
 
 
-
+//C
 #include <bits/stdc++.h>
 using namespace std;
 class CFraction
@@ -1519,8 +1585,8 @@ int main()
 }
 
 
-
-
+//D
+//特别注意构造方法和析构方法	
 #include <bits/stdc++.h>
 using namespace std;
 class Point
@@ -1586,7 +1652,7 @@ int main()
 
 
 
-
+//E
 #include <bits/stdc++.h>
 using namespace std;
 class CStack
@@ -1647,6 +1713,394 @@ int main()
         for (int j = 0;j < n - 1; j++)
             cout << s.pop() << " ";
         cout << s.pop() << endl;
+    }
+    return 0;
+}
+```
+
+23.4.21
+
+总结
+
+```c++
+拷贝构造函数
+浅拷贝: 系统自动生成的拷贝构造函数, 可以处理一般的赋值拷贝;
+(1)不会处理静态数据成员, 如 const 或者 static;
+(2)当类成员里面有动态成员时, 也会出现问题;
+例如
+class Rect
+{
+public:
+    Rect()      // 构造函数，p指向堆中分配的一空间
+    {
+        p = new int(100);
+    }
+    ~Rect()     // 析构函数，释放动态分配的空间
+    {
+        if(p != NULL)
+        {
+            delete p;
+        }
+    }
+private:
+    int width;
+    int height;
+    int *p;     // 一指针成员
+};
+int main()
+{
+    Rect rect1;
+    Rect rect2(rect1);   // 复制对象
+    return 0;
+}
+上面代码的rect2的*p, 其实和rect1的*p指向的是同一块地址, 也就是说两个变量共用了同一块地址, 这就是浅拷贝的弊端
+    
+深拷贝: 我们自己定义的拷贝构造函数, 通过new开辟新的空间, 并使新成员的指针指向该空间, 然后再赋值, 除了下面函数的 *p=*(r.p),在遇到字符数组时使用strcpy
+class Rect
+{
+public:
+    Rect()      // 构造函数，p指向堆中分配的一空间
+    {
+        p = new int(100);
+    }
+    Rect(const Rect& r)
+    {
+        width = r.width;
+        height = r.height;
+        p = new int;    // 为新对象重新动态分配空间
+        *p = *(r.p);
+    }
+    ~Rect()     // 析构函数，释放动态分配的空间
+    {
+        if(p != NULL)
+        {
+            delete p;
+        }
+    }
+private:
+    int width;
+    int height;
+    int *p;     // 一指针成员
+};
+//字符数组的拷贝
+soft(soft &s1)
+{
+    name = new char[strlen(s1.name) + 1];
+    strcpy(name, s1.name);
+}
+```
+
+题目代码
+
+```c++
+//A
+class Equation
+{
+    double a, b, c;
+
+public:
+    Equation(double _a, double _b, double _c) : a(_a), b(_b), c(_c){};
+    Equation() : a(1.0), b(1.0), c(0){};
+    void set(double _a, double _b, double _c) { a = _a, b = _b, c = _c; }
+    void getRoot()
+    {
+        double delta = b * b - 4 * a * c;
+        if (delta > 0)
+        {
+            cout << fixed << setprecision(2) << "x1=" << (-b + sqrt(delta)) / (2 * a) << " x2=" << (-b - sqrt(delta)) / (2 * a) << endl;
+        }
+        else if (delta == 0)
+        {
+            cout << "x1=x2=" << fixed << setprecision(2) << (-b / (2 * a)) << endl;
+        }
+        else
+        {
+            double real = -b / (2 * a), ima = sqrt(-delta) / (2 * a);
+            cout << fixed << setprecision(2) << "x1=" << real << "+" << ima << "i x2=" << real << "-" << ima << "i" << endl;
+        }
+    }
+};
+int main()
+{
+    int t;
+    cin >> t;
+    double a, b, c;
+    while (t--)
+    {
+        cin >> a >> b >> c;
+        Equation equ(a, b, c);
+        equ.getRoot();
+    }
+    return 0;
+}
+
+
+//B
+class Cla
+{
+    int value;
+
+public:
+    Cla() : value(0) { cout << "Constructed by default, value = 0" << endl; }
+    Cla(int _value) : value(_value) { cout << "Constructed using one argument constructor, value = " << _value << endl; }
+    Cla(const Cla &last)
+    {
+        *this = last;
+        cout << "Constructed using copy constructor, value = " << this->value << endl;
+    }
+};
+int main()
+{
+    int t;
+    cin >> t;
+    Cla *ret;
+    while (t--)
+    {
+        int op, x;
+        cin >> op;
+        if (op == 0)
+        {
+            Cla cla = Cla();
+        }
+        else if (op == 1)
+        {
+            cin >> x;
+            Cla cla(x);
+        }
+        else if (op == 2)
+        {
+            cin >> x;
+            Cla cla(x);
+            Cla claa(cla);
+        }
+    }
+    return 0;
+}
+
+
+//C
+class CTelNumber
+{
+    string s;
+
+public:
+    CTelNumber(){};
+    CTelNumber(string _s) : s(_s){};
+    bool check()
+    {
+        if (s.size() != 7 || !(s[0] >= '2' && s[0] <= '8'))
+            return 0;
+        for (int i = 0; i < s.size(); i++)
+            if (s[i] > '9' || s[i] < '0')
+                return 0;
+        return 1;
+    }
+    void solve()
+    {
+        if (!check())
+            cout << "Illegal phone number" << endl;
+        else if (s[0] <= '4')
+            cout << '8' << s << endl;
+        else
+            cout << '2' << s << endl;
+    }
+};
+int main()
+{
+    int t;
+    cin >> t;
+    while (t--)
+    {
+        string num;
+        cin >> num;
+        CTelNumber ctel(num);
+        ctel.solve();
+    }
+    return 0;
+}
+
+
+//D
+class CDate
+{
+private:
+    int year, month, day;
+public:
+    CDate() {}
+    CDate(int _year, int _month, int _day) : year(_year), month(_month), day(_day) {};
+    void set(int y, int m, int d) {year = y; month = m; day = d;}
+    bool isLeapYear(int _year) { return (_year % 4 == 0 && _year % 100 != 0) || _year % 400 == 0; }
+    int getYear() { return year; }
+    int getMonth() { return month; }
+    int getDay() { return day; }
+    int getDayofYear()
+    {
+
+        int i, sum = day;
+        int a[13] = {0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
+        int b[13] = {0, 31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
+        for (int i = 2015; i < year; i++)
+            sum += (365 + isLeapYear(i));
+        if (isLeapYear(year))
+            for (i = 1; i < month; i++)
+                sum += b[i];
+        else
+            for (i = 1; i < month; i++)
+                sum += a[i];
+        return sum;
+    }
+};
+
+class soft
+{
+private:
+    char *name;
+    char type;
+    CDate d1;
+    char store;
+public:
+    soft(char *n, char t, char s, int y, int m, int d)
+    {
+        name = new char[strlen(n) + 1];
+        strcpy(name, n);
+        type = t;
+        store = s;
+        d1.set(y, m, d);
+    }
+    soft(soft &s1)
+    {
+        // *this = s1;
+        name = new char[strlen(s1.name) + 1];
+        strcpy(name, s1.name);
+        type = 'B';
+        store = 'H';
+        d1 = s1.d1;
+    }
+    void print()
+    {
+        cout << "name:" << name << endl;
+        switch (type)
+        {
+        case 'O':
+            cout << "type:original" << endl;
+            break;
+        case 'T':
+            cout << "type:trial" << endl;
+            break;
+        case 'B':
+            cout << "type:backup" << endl;
+            break;
+        }
+        switch (store)
+        {
+        case 'D':
+            cout << "media:optical disk" << endl;
+            break;
+        case 'H':
+            cout << "media:hard disk" << endl;
+            break;
+        case 'U':
+            cout << "media:USB disk" << endl;
+            break;
+        }
+        if (d1.getDay() == 0 && d1.getMonth() == 0 && d1.getYear() == 0)
+            cout << "this software has unlimited use" << endl;
+        else if ((d1.getYear() >= 2015 && d1.getMonth() >= 4 && d1.getDay() >= 7) || (d1.getYear() >= 2015 && d1.getMonth() > 4))
+        {
+            cout << "this software is going to be expired in " << d1.getDayofYear() - 98 << " days" << endl;
+        }
+        else
+        {
+            cout << "this software has expired" << endl;
+        }
+    }
+
+    ~soft() {delete[] name;}
+};
+int main()
+{
+    int t;
+    cin >> t;
+    int y, d, m;
+    char name[100], type, store;
+
+    while (t--)
+    {
+        cin >> name >> type >> store >> y >> m >> d;
+        soft s2(name, type, store, y, m, d);
+        s2.print();
+        cout << endl;
+        soft s3(s2);
+        s3.print();
+        cout << endl;
+    }
+}
+
+
+//E
+class Date
+{
+    int year, month, day;
+public:
+    Date() {};
+    Date(int _year, int _month, int _day) : year(_year), month(_month), day(_day) {};
+    void print()
+    {
+        cout << year << '.' << month << '.' << day << endl;
+    }
+};
+class TeleNumber
+{
+    char a; 
+    string s;
+    int c;
+    Date *d;
+public:
+    TeleNumber() {};
+    TeleNumber(char _a, string _s, int _c, Date _d) : a(_a), s(_s), c(_c), d(&_d) {};
+    void print_type()
+    {
+        if (a == 'A') cout << "类型=机构||";
+        else if (a == 'B') cout << "类型=企业||";
+        else if (a == 'C') cout << "类型=个人||";
+    }
+    void print_status()
+    {
+        cout << "||State=";
+        if (c == 1) cout << "在用";
+        else if (c == 2) cout << "未用";
+        else if (c == 3) cout << "停用";
+    }
+    void solve(int op)
+    {
+        if (op == 1) cout << "Construct a new phone " << s << endl;
+        else if (op == 2) cout << "Construct a copy of phone " << s << endl;
+        else if (op == 3) cout << "Stop the phone " << s << endl;
+        if (op == 1 || op == 3) print_type();
+        else cout << "类型=备份||";
+        cout << "号码=" << s;
+        if (op == 2) cout << 'X';
+        if (op == 1 || op == 2) print_status();
+        else cout << "||State=停用";
+        if (op == 3)
+        {
+            cout << "||停机日期=";
+            d->print();
+        }
+        if (op == 3) cout << "----";
+        cout << endl;
+    }
+};
+int main()
+{
+    int t; cin >> t;
+    char a; string s; int c; int year, month, day;
+    while (t--)
+    {
+        cin >> a >> s >> c >> year >> month >> day;
+        Date dat(year, month, day);
+        TeleNumber tele(a, s, c, dat);
+        for (int i = 1; i <= 3; i++) tele.solve(i);
     }
     return 0;
 }

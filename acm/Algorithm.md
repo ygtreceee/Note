@@ -924,7 +924,7 @@ int main()
 
 **链表哈希**实现模板
 
-```/
+```C++
 #include <bits/stdc++.h>
 using namespace std;
 #define MAX 200000   //取一个值大于预估哈希值
@@ -16465,19 +16465,7 @@ int main()
 }
 ```
 
-#### 树上问题
 
-###### 树基础
-
-
-
-###### 树的直径
-
-###### 最近公共祖先
-
-###### 树的重心
-
-###### 树上启发式合并
 
 #### 拓扑排序
 
@@ -17184,7 +17172,7 @@ struct edge
 {
     int to;           //邻居点
     long long w;      //权值
-    edge(int a, long long b){to = a; w = b;}
+    edge(int a, long long b) {to = a; w = b;}
 };
 vector<edge> e[N];    //邻接表储存图
 struct node

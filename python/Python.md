@@ -1,22 +1,88 @@
-## Python
+# Python
 
-[eval](https://blog.csdn.net/qq_26442553/article/details/94396532?ops_request_misc=%7B%22request%5Fid%22%3A%22166610478016782248518020%22%2C%22scm%22%3A%2220140713.130102334..%22%7D&request_id=166610478016782248518020&biz_id=0&utm_medium=distribute.pc_search_result.none-task-blog-2~all~top_positive~default-1-94396532-null-null.142^v59^control_1,201^v3^control_2&utm_term=eval&spm=1018.2226.3001.4187)
+## 
+
+## 简介
+
+定位: 一门解释型的高级语言
+
+特点: 简单, 优雅, 可移植性, 代码规范性, 胶水语言
+
+应用领域: Web全栈开发, 图形界面开发, 大数据, 人工智能, 爬虫, 系统网络运维, 云计算系统管理等
+
+版本: 流行版本是 Python3.x 和 Python2.x
+
+解释器: 作用是将源码转换为二进制代码进行运行
+
+## python程序的编译和执行
+
+#### 环境
+
+方式1: Python的交互模式下直接编写
+
+方式2: 使用任意的文本编辑器, 进行编写代码文件
+
+方式3: Python官方提供的 IDLE 工具
+
+**方式4(常用)**
+
+IDE 集成开发环境
+
+特点: 把开发相关的各种环境和工具集成到一起
+
+包括: 项目的组织管理, 编辑, 提示, 运行, 调试, 辅助工具, 代码规范( PEP8 标准)等
+
+常见的 Python IDE: Pycharm, PyScriper, Eclipse with PyDev, Emacs等
+
+#### 过程
+
+图解
+
+<img src="C:\Users\ygtrece\AppData\Roaming\Typora\typora-user-images\image-20230425161313753.png" alt="image-20230425161313753" style="zoom: 33%;" />
+
+**注意**
+
+严格来说 Python 是先编译成字节码, 然后再解释执行的一门语言
+
+`.pyc` 文件的主要作用是持久化编译结果, 提升下次的执行效率, 而会不会被持久化, 一般是根据 `import` 机制, 也可以通过命令手动编译&持久化, 以 `test.py` 文件为例, 代码是 `python -m py_compile test.py`, 这样就会生成 `test.pyc` 文件, 但要注意的是, 但我们再次运行 `test.py` 文件时, 并不会去执行刚才自己通过命令生成的 `test.pyc` , 可以理解为它本身不是一个被引用文件, 只有被 `import` 的文件, 才会在每次引用运行时编译其 `.pyc` 文件
+
+`.py` 和 `.pyc` 文件都可以直接交给解释器直接处理, 只不过处理的步骤有些差别. 
+
+## 基础编程
+
+#### 注释
+
+**单行注释** `#xxx`
+
+**多行注释** `'''xxx'''` 或者 `"""xxx"""` 
+
+**特殊注释** 
+
+`#!/usr/bin/python` 
+
+Linux 系统下用于增加一种运行模式, 更好的写法是 `#!/usr/bin/env python` , 它更加灵活, 因为它指明的是虚拟环境里的 python 路径, 而不是一个绝对的死路径. 
+
+`#encoding=utf-8`  
+
+解决的是中文支持问题, 对于非 ACSII 编码的中文, python3 直接支持, 但是 python2 默认不支持, 需在源文件顶部添加代码行 `#encoding=utf-8` 或者 `coding=utf-8` , 而推荐的最正规的官方写法则是 `# _*_coding:utf-8_*_` , 当然了, python3 默认支持中文, 所以不必写这句话. 
+
+#### 变量
+
+定义: 是一个存储数据的容器, 变量引用着某个具体数值, 并且可以改变这个引用. 
+
+定义变量
 
 ```
-a = eval(input("Please input :"))
-
-int a
-scanf("Please input: %d", &a)
+a = 6
+a, b = 6, 7
+a = b = 7
+name = "hhha"
 ```
 
-[format](https://blog.csdn.net/qq_45726327/article/details/115042863?ops_request_misc=%7B%22request%5Fid%22%3A%22166610585016782388064375%22%2C%22scm%22%3A%2220140713.130102334..%22%7D&request_id=166610585016782388064375&biz_id=0&utm_medium=distribute.pc_search_result.none-task-blog-2~all~top_positive~default-1-115042863-null-null.142^v59^control_1,201^v3^control_2&utm_term=format&spm=1018.2226.3001.4187)
+命名规范
 
-[if __name__ == '__main__'](https://blog.csdn.net/qq_33254870/article/details/81668297?ops_request_misc=%7B%22request%5Fid%22%3A%22166631938216782391859610%22%2C%22scm%22%3A%2220140713.130102334..%22%7D&request_id=166631938216782391859610&biz_id=0&utm_medium=distribute.pc_search_result.none-task-blog-2~all~sobaiduend~default-1-81668297-null-null.142^v59^control_1,201^v3^control_2&utm_term=python中的if __name__ %3D%3D __main__&spm=1018.2226.3001.4187)
+1. 必须只能由字母数字下划线组成, 数字不能在最前面
+2. 驼峰标识, 即驼峰命名法, 函数名中的每一个逻辑断点都有一个大写字母来标记, 如  `phoneNumber` , 首个单词的首字母若大写则为大驼峰法, 小写则为小驼峰法; 还有另一种命名法叫下划线法, 函数名中的每一个逻辑断点都有一个下划线来标记, 如 `phone_number` 
+3. 非关键字
 
-[_, __, __xx__ 区别](https://blog.csdn.net/qq_33254870/article/details/103188897)
-
-[pass](https://blog.csdn.net/violet_echo_0908/article/details/52052054?ops_request_misc=%7B%22request%5Fid%22%3A%22166624905116782417016876%22%2C%22scm%22%3A%2220140713.130102334..%22%7D&request_id=166624905116782417016876&biz_id=0&utm_medium=distribute.pc_search_result.none-task-blog-2~all~top_positive~default-2-52052054-null-null.142^v59^control_1,201^v3^control_2&utm_term=python中的pass&spm=1018.2226.3001.4187)
-
-[各类参数](https://blog.csdn.net/Thewei666/article/details/125743991?ops_request_misc=&request_id=&biz_id=102&utm_term=python中的参数&utm_medium=distribute.pc_search_result.none-task-blog-2~all~sobaiduweb~default-0-125743991.142^v59^pc_search_tree,201^v3^control_1&spm=1018.2226.3001.4187)
-
-[迭代器](https://blog.csdn.net/qq_45807032/article/details/105219674?ops_request_misc=%7B%22request%5Fid%22%3A%22166667254316800182149542%22%2C%22scm%22%3A%2220140713.130102334..%22%7D&request_id=166667254316800182149542&biz_id=0&utm_medium=distribute.pc_search_result.none-task-blog-2~all~top_positive~default-3-105219674-null-null.142^v59^pc_search_tree,201^v3^control_1&utm_term=python迭代器&spm=1018.2226.3001.4187)
+注意: 变量名使用之前要先赋值

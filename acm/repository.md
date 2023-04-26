@@ -6536,3 +6536,303 @@ int main()
 }
 ```
 
+
+
+
+
+#### python
+
+```python
+#合并列表
+def merge(L1,  L2):
+    if len(L1) == 0:
+        return L2
+    elif len(L2) == 0:
+        return L1
+
+    if L1[0] > L2[0]:
+        return [L1[0]] + merge(L1[1:len(L1)],  L2)
+    else:
+        return [L2[0]] + merge(L1,  L2[1:len(L2)])
+
+
+if __name__ == "__main__":
+    X = input("请输入列表X：").split(", ")
+    Y = input("请输入列表Y：").split(", ")
+    S = merge(X,  Y)
+    for i in range(len(S)):
+        S[i] = int(S[i])
+    print(S)
+
+#汉诺塔
+def Hanoi(n,  A,  C,  B):
+    global count
+    if n < 1:
+        print('invalid input')
+    elif n == 1:
+        count = count + 1
+        print("%d:\t%s ---> %s" % (count,  A,  C))
+    else:
+        Hanoi(n - 1,  A,  B,  C)
+        Hanoi(1,  A,  C,  B)
+        Hanoi(n - 1,  B,  C,  A)
+
+
+if __name__ == "__main__":
+    print("请输入A柱子上的圆盘个数:")
+    n = int(input())
+    count = 0
+    Hanoi(n,  "A",  "C",  "B")
+
+#斐波那契数列
+def fab(n):
+    if n == 1 or n == 2:
+        return 1
+    else:
+        return fab(n - 1) + fab(n - 2)
+
+
+if __name__ == "__main__":
+    global result
+    n_str = input('请输入需要计算fabonacci数列的第几个元素:')
+    n = int(n_str)
+    result = fab(n)
+    print(result)
+
+#欧几里得算法
+def assignment(a, dec):
+    x = a; y = dec
+    while y:
+        temp = x
+        r = x % y
+        x = y
+        y = r
+    if x != 1:
+        print("{}和{}的最大公约数为{}。".format(a,  dec,  x))
+    else:
+        print("{}与{}互质。".format(a,  dec))
+
+
+if __name__ == "__main__":
+    M = int(input())
+    N = int(input())
+    x = assignment(M,  N)
+
+#冒泡排序
+def bubbleSort(a):
+    for i in range(len(array),  1,  -1):
+        for j in range(i - 1):
+            if array[j] > array[j + 1]:
+                array[j],  array[j + 1] = array[j + 1],  array[j]
+        print(array)
+    return array
+
+
+if __name__ == '__main__':
+    arraystr = input().split(', ')
+    array = [int(i) for i in arraystr]
+    print("排序之后的结果为：{}".format(bubbleSort(array)))
+
+# 选择排序
+arraystr = input().split(', ')
+array = [int(i) for i in arraystr]
+
+
+def selectsort(array):
+    # ********* Begin *********
+    for i in range(len(array) - 1):
+        min_index = i
+        for j in range(i + 1,  len(array)):
+            if array[j] < array[min_index]:
+                min_index = j
+        if min_index != i:
+            array[i],  array[min_index] = array[min_index],  array[i]
+        print(array)
+    # ********* End *********
+    return array
+
+
+print("排序之后的结果为：{}".format(selectsort(array)))
+
+#数值数据表示（一） 基础习题1
+from random import *
+
+def dec2bin_Int(dec):
+    binum = ''
+    x = bin(dec)
+    binum = x[2:]
+    binum = binum[::-1]
+    return binum[::-1]
+
+
+def dec2bin_Point(dec,  length):
+    binum = ''
+    x = dec
+    while x:
+        x *= 2
+        binum += ('1' if x >= 1. else '0')
+        x -= int(x)
+    binum = binum[:length]
+    return '0.'+binum
+
+
+def bin2oh(binum,  oh):
+    result = ''
+    if oh == 'o':
+        x = oct(int(binum,  2))
+        result = x[2:]
+        return result
+    elif oh == 'h':
+        x = hex(int(binum,  2))
+        result = x[2:]
+        result = result.upper()
+        return result
+
+
+if __name__ == '__main__':
+    seed(0)
+    tests = [randint(1,  n) for n in [10,  20,  50,  100,  200,  500,  1000,  2000,  5000,  10000]]
+    bins = []
+    for num in tests:
+        binum = dec2bin_Int(num)
+        print(binum)
+        bins.append(binum)
+
+    print('*'*30)
+
+    seed(99)
+    decimals = []
+    for i in range(10):
+        decimals.append(round(random(),  3))
+    print(decimals)
+    for dec in decimals:
+        print(dec2bin_Point(dec,  8))
+
+    print('*' * 30)
+    print(tests)
+    for binum in bins:
+        print(bin2oh(binum,  'o'))
+    print('*' * 30)
+    for binum in bins:
+        print(bin2oh(binum,  'h'))
+
+#基础习题(2)
+from random import *
+
+def makechange(num):
+    changes = {}
+    t = [50,  20,  10,  5,  2,  1,  0.5,  0.2,  0.1,  0.05,  0.02,  0.01]
+    numint = int(num)
+    numdec = round(num - numint,  2)
+    for i,  money in enumerate(t):
+        if numint != 0:
+            res = numint // money
+        else:
+            res = numdec // money
+        if i < 6 and res != 0:
+            changes[t[i]] = numint // money
+            numint = numint % money
+        elif i > 5 and res != 0:
+            changes[t[i]] = int(numdec // money)
+            numdec = round(numdec % money,  2)
+    return changes
+
+
+if __name__ == '__main__':
+    seed(0)
+    for i in range(10):
+        num = round(random() * 100,  2)
+        print(sorted(makechange(num).items(),  key=lambda item: item[0],  reverse=True))
+
+#置换加密
+import math
+
+def encryptMessage(key,  message):
+    if key <= 0:
+        return message
+    else:
+        return "".join([message[i::key] for i in range(key)])
+
+def decryptMessage(key,  message):
+    numOfColumns = math.ceil(len(message) / key)
+    numOfRows = key
+    numOfShadeBoxes = (numOfColumns * numOfRows) - len(message)
+    plaintext = [''] * numOfColumns
+
+    col = 0
+    row = 0
+    for symbol in message:
+        plaintext[col] += symbol
+        col += 1
+
+        if (col == numOfColumns) or (col == numOfColumns-1 and row >= numOfRows - numOfShadeBoxes):
+            col = 0
+            row += 1
+    return ''.join(plaintext)
+
+
+if __name__ == '__main__':
+    messages = ["Behind every successful man there's a lot of unsuccessful years.", 
+                'Common sense is not so common.', 
+                'There are no secrets to success.It is the result of preparation,  hard work,  and learning from failure.', 
+                'All things are difficult before they are easy.']
+    for message in messages:
+        for key in range(8,  10):
+            encrytext = encryptMessage(key,  message)
+            print(encrytext)
+            print(decryptMessage(key,  encrytext))
+
+
+#找词
+import jieba
+
+def countWords(excludes,  merges):
+    txt = open('西游记.txt', 'r', encoding='utf-8').read()
+    words = jieba.lcut(txt)
+    counts = {}
+    # 取出⻓度为⼀的词和符号以及excludes中的词
+    for word in words:
+        if len(word) == 1 or word in excludes:
+            continue
+        else:
+            counts[word] = counts.get(word, 0) + 1
+    # 合并名称相同的⼈名
+    for merge in merges:
+        for name in merge[1]:
+            counts[merge[0]] += counts.get(name, 0)
+            del counts[name]
+    word_list = list(counts.items())
+    word_list.sort(key=lambda x: x[1], reverse=True)
+    return word_list
+
+excludes =  {'怎么','两个','那怪','甚么','这个','不曾','不是','三个','出来','只是','真个','有些','闻言','这里','进去','那个','乃是','袈裟','这般',
+'铁棒','果然','就是','不要','小妖','如今','弟子','宝贝','妇人','认得','观看','上前','起来','哥哥','行李','一个个','国王','金光','叫做','一座','晓得',
+'不好','十分','取经','师徒','他们','一把','听见','兵器','人家','性命','女婿','金星','神仙','扯住','云头','王子','问道','你们','所以','童子','变化',
+'看看','怎生','取出','员外','里面','故此','西方','也罢','西天','女儿','公主','妖魔','欢喜','吩咐','一条','本事','不尽','金箍棒','慌得','口里','老儿',
+'大仙','果子','看见','驸马','贫僧','人参果','进来','转身','还有','罢了','拜佛','手段','大唐','多少','几个','忍不住','老魔道','高叫','抬头','赶上','洞口',
+'降妖','回来','洞里','模样','一场','天地','为证','一般','礼拜','儿子','女子','之下','出去','言语','叩头','走路','东土','叫声','唬得','老者','玉帝','那些',
+'方才','有个','不住','神通','地下','不题','空中','还是','一口','只有','下界','哪吒','二郎','放心','清风','老师','造化','天上','报道','仔细','烦恼','明日',
+'近前','一则','却是','毕竟','下回分解','四众','知道','坐在','做个','未曾','看时','怪物','老爷','喝道','土地','老魔','厉声','说话','脱身','失迎','人参','帝君',
+'老王','宫殿','二怪','三怪','东胜','宝殿','南天门','之物','宝塔','烟霞','抽身','之类','慌忙','长生','筵宴','高山','不怕','真言','一发','茶饭','供养','那洞',
+'用手','五色','十个','躬身','外面','去处','好歹','老和尚','古人云','借宿','方可','起身','看处','一张','山头','黄金','四位','走上','好道','等候','怎敢','勾当',
+'急急','来时','莫想','简帖','可是','五行','大闹天宫','祥光','二位','浑家','医治','暗笑','舍利子','这话','天师','径转','父王','几时','道人','举起','即便','方丈',
+'一阵','无奈','何如','教他','相识','法力','不济','当时','李天王','牌位','香案','蟠桃','保护','毫毛','一杯','禅师','万寿山','猴儿','元子','一家','施主','正在',
+'逃生','众怪','大鹏','钻风','毒药','丝绳','无人','万物','五千四百岁','部洲','之意','玉皇','奉旨','大字','身上','处处','听得','头上','说出','二则','不远','山坡',
+'望见','紧闭','开门','接待','菩提','一见','明白','暗喜','纵身','万望','般若','报怨','沙门','担子','半空中','门楼','丈夫','闻得','推倒','关门','二哥','剥皮',
+'摇身一变','今朝','丈母','伏侍','难禁','还要','神通广大','亏了','息怒','几日','不管','打得','一棍','径回','老妖','凡间','筋斗','无边','只闻','兄长','正说',
+'蓬莱','门上','这厮','三年','这场','莫忙','迎着','黑熊','早到','仙丹','一粒','这样','大神','好生','开口','吹口','前后','今番','放下','左手','高老','高才',
+'不多时','果树','偷吃','妈妈','安在','梆铃','圆满','老妪','暴纱亭','武艺','蜘蛛精','蓝道','混沌','正当','至此','下降','牛贺洲','青松','石猴','山上','石崖',
+'应声','欠身','一行','猿猴','走兽','时节','仙山','凤凰','满心欢喜','这一去','富贵','果是','四时','急忙','天明','打扮','樵夫','念念','君子','他家','汉子',
+'假若','彩云','想必','老实','既然','天色','安歇','高老庄','怠慢','那般','之情','我们','那里','两个','怎么','那怪','甚么','这个','不曾','不是','兄弟','原来',
+'正是','不得','如何','不敢','今日','天王','大王','如来','道士','一声'}
+merges =  [  ('孙悟空',('孙行者','齐天大圣','大圣','孙长老','孙大圣','悟空','行者','老孙')),
+        ('猪八戒',('猪悟能','八戒','呆子')),
+        ('沙和尚',('沙僧','师弟')),
+        ('唐僧',('唐三藏','唐长老','金蝉子','长老'))]
+word_list = countWords(excludes,  merges)
+for i in range(30):
+    word,  count = word_list[i]
+    print(i+1,  word,  count) # chr(12288)为中⽂空格·
+
+```
+

@@ -14,6 +14,8 @@
 
 解释器: 作用是将源码转换为二进制代码进行运行
 
+
+
 ## python程序的编译和执行
 
 #### 环境
@@ -48,6 +50,8 @@ IDE 集成开发环境
 
 `.py` 和 `.pyc` 文件都可以直接交给解释器直接处理, 只不过处理的步骤有些差别. 
 
+
+
 ## 基础编程
 
 #### 注释
@@ -65,6 +69,8 @@ Linux 系统下用于增加一种运行模式, 更好的写法是 `#!/usr/bin/en
 `#encoding=utf-8`  
 
 解决的是中文支持问题, 对于非 ACSII 编码的中文, python3 直接支持, 但是 python2 默认不支持, 需在源文件顶部添加代码行 `#encoding=utf-8` 或者 `coding=utf-8` , 而推荐的最正规的官方写法则是 `# _*_coding:utf-8_*_` , 当然了, python3 默认支持中文, 所以不必写这句话. 
+
+
 
 #### 变量
 
@@ -86,3 +92,143 @@ name = "hhha"
 3. 非关键字
 
 注意: 变量名使用之前要先赋值
+
+
+
+#### 数据类型
+
+**常用数据类型**
+
+Numbers (数值类型): int (二进制, 八进制, 十进制, 十六进制), long, float, complex 
+
+Bool (布尔类型): True, Flase
+
+String (字符串): `'abc'`, `"abc"`, `'''abc'''`, `"""abc"""` (三个引号, 赋值情况下才是字符串, 否则就是注释)
+
+List (列表), Set (集合), Tuple(元组),  Dictory (字典), NoneType (空类型). 
+
+**查看数据类型**: `type()`
+
+```python
+print(type(6))
+
+result = type("8")
+print(result)
+
+# output
+<class 'int'>
+<class 'str'>
+```
+
+**数据类型转换**
+
+常用于输入时, 无法控制数据类型
+
+```py
+score = input("请输入一个数字")
+print(type(score))
+print(int(score) + 6)
+
+#input
+5
+#output
+请输入一个数字
+<class 'str'>
+11
+```
+
+注意:
+
+有时候数据类型转换无法实现
+
+```py
+ret = "123a"
+print(int(ret))
+
+#报错
+Exception has occurred: ValueError
+invalid literal for int() with base 10: '123a'
+```
+
+也并非所有的数据类型都能进行相互转换
+
+**数据类型转换图**
+
+<img src="C:\Users\ygtrece\AppData\Roaming\Typora\typora-user-images\image-20230427001942350.png" alt="image-20230427001942350" style="zoom:50%;" />
+
+**动态类型/静态类型**
+
+静态类型: 类型是编译的时候确定的, 后期无法修改, 如 C++
+
+```C++
+int ret = 6;
+ret = "hhh"  //error
+```
+
+动态类型: 类型是运行时进行判定的, 可以动态修改, 如 python
+
+```python
+ret = 6
+ret = "hhh"
+```
+
+**强类型/弱类型**
+
+强类型: 类型比较强势, 不轻易随着环境的变化而变化
+
+弱类型: 类型比较柔和, 不同的环境下, 容易被改变
+
+**Python属于强类型的, 动态类型的语言**
+
+
+
+#### 运算符
+
+**算术运算符**
+
+加法运算符 `+` 
+
+```
+print(1 + 2)
+print('1' + '2')
+print([1, 2] + [3, 4])
+```
+
+减法运算符 `-`
+
+乘法运算符 `*`
+
+幂运算符 `**`
+
+```
+print(3 ** 4)
+```
+
+除法运算符 `/`
+
+```py
+print(5 / 2)
+#output
+2.5
+
+print(5 / 0)
+#error
+Exception has occurred: ZeroDivisionError
+division by zero
+```
+
+整除运算符 `//`
+
+```py
+print(5 // 2)
+print(5.2 // 2) #5.2 / 2 = 2.6 直接取整数部分, 而不是四舍五入
+#ouput
+2
+2.0  
+```
+
+求模运算符 `%`
+
+赋值运算符 `=`
+
+**注意**

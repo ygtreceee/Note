@@ -97,7 +97,7 @@ name = "hhha"
 
 #### 数据类型
 
-**常用数据类型**
+1. 常用数据类型
 
 Numbers (数值类型): int (二进制, 八进制, 十进制, 十六进制), long, float, complex 
 
@@ -120,7 +120,7 @@ print(result)
 <class 'str'>
 ```
 
-**数据类型转换**
+2. 数据类型转换
 
 常用于输入时, 无法控制数据类型
 
@@ -152,11 +152,13 @@ invalid literal for int() with base 10: '123a'
 
 也并非所有的数据类型都能进行相互转换
 
+当 int 和 float 类型进行算数运算时, 结果会被提升为 float 类型
+
 **数据类型转换图**
 
 <img src="C:\Users\ygtrece\AppData\Roaming\Typora\typora-user-images\image-20230427001942350.png" alt="image-20230427001942350" style="zoom:50%;" />
 
-**动态类型/静态类型**
+3. 动态类型/静态类型
 
 静态类型: 类型是编译的时候确定的, 后期无法修改, 如 C++
 
@@ -172,7 +174,7 @@ ret = 6
 ret = "hhh"
 ```
 
-**强类型/弱类型**
+4. 强类型/弱类型
 
 强类型: 类型比较强势, 不轻易随着环境的变化而变化
 
@@ -184,7 +186,7 @@ ret = "hhh"
 
 #### 运算符
 
-**算术运算符**
+1. 算术运算符
 
 加法运算符 `+` 
 
@@ -231,13 +233,13 @@ print(5.2 // 2) #5.2 / 2 = 2.6 直接取整数部分, 而不是四舍五入
 
 赋值运算符 `=`
 
-**复合运算符**
+2. 复合运算符
 
 ```
 *=   /=   //=   **=  -=   +=   %=
 ```
 
-**比较运算符**
+3. 比较运算符
 
 ```
 >   <    != (在python2.x中也可写作<>)    >=    <=    ==
@@ -278,7 +280,7 @@ False
 False
 ```
 
-**链状比较运算符**
+4. 链状比较运算符
 
 python 允许链式比较
 
@@ -292,7 +294,7 @@ True
 False
 ```
 
-**逻辑运算符**
+5. 逻辑运算符
 
 `not`  `and`  `or` 
 
@@ -338,7 +340,7 @@ True
 
 #### 输入和输出
 
-##### **输入**
+1. 输入
 
 **Python2**
 
@@ -489,7 +491,7 @@ print(num2)
 123.5
 ```
 
-##### **输出**
+2. 输出
 
 **Python2**
 
@@ -745,7 +747,7 @@ c    #整数:将数字转换成其unicode对应的值, 10进制范围为 0 <= i 
 
 #### 分支循环
 
-**分支**
+1. 分支
 
 `if`
 
@@ -776,7 +778,7 @@ elif 条件:
 
 Python 中没有 `switch ... case ...` 语法
 
-**循环**
+2. 循环
 
 `while`
 
@@ -816,3 +818,116 @@ for x in range(1, num + 1)
 注意:
 
 `range()` 是左闭右开区间的集合; `break` 打断本次循环, 跳出整个循环; `continue` 结束本次循环, 继续执行下次循环
+
+
+
+#### 常用数据类型操作
+
+##### 数值
+
+1. 类型
+
+整数 `int` 
+
+类型: 二进制 `0b` , 八进制 `0/0o`, 十进制 (不需要加前缀) , 十六进制 `0x`
+
+```py
+num = 0b111
+print(num)  #7
+```
+
+浮点数 `float`
+
+由整数部分和小数部分组成, `168,2` ; 也可以用科学计数法表示, `1.682e2`
+
+复数 `complex` 
+
+由实部和虚部组成, `a  + bj` 表示为 `complex(a, b)` ; 注意 `a, b` 都是浮点数
+
+注意: Python3 的整型, 可以自动调整大小, 当作 `long` 类型使用 
+
+2. 进制转换
+
+```python
+#x进制转换为其他进制
+num = 0x37
+print(bin(num))
+print(oct(num))
+print(hex(num))
+print(num)   #十进制不需要前缀
+
+#output
+0b110111
+0o67
+0x37
+55
+```
+
+3. 常用操作
+
+注意: 部分函数使用前注意要引入对应模块, 如 `import math` ; 使用函数时**格式**是 '模块名.函数名(参数)', 如 `math.fabs(-10)`
+
+**适用于几乎所有 Python 运算符操作**
+
+**数学函数** 
+
+- 内建函数: 存在于 `builtins.pyi` 文件中, 无需导入
+
+  `abs(num)`, `min(a, b, c, ...)` , `max(a, b, c, ...)` , `pow(x, y)` 
+
+  `round(num[, n])` : n 表示四舍五入的小数位数, 同样可以不写, 默认为0, 即四舍五入取整
+
+- math 模块函数: 使用前需要先导入 `math` 模块, 即 `import math` 
+
+  `ceil(num)` : 上取整    `floor(num)` : 下取整    `sqrt(num)` : 开平方    `log(x, base)` : 以 base 为基数, x 为对数
+
+**随机函数**
+
+以下函数均属于 `random` 模块, 需加入 `import random` 
+
+`random()` :  $[ 0, 1)$ 范围之间的随机小数
+
+```python
+print(random.random())            #0.818697325436201
+```
+
+`choice` : 从一个序列中随机挑选一个数值
+
+```python
+seq = [1, 3, 4, 5, 8, 10]
+print(random.choice(seq))         #4
+```
+
+ `uniform(x, y)` : $[x, y]$ 范围内的随机小数
+
+```python
+print(random.uniform(1, 3))       #1.5886732714782932
+```
+
+`randint(x, y)` : $[x, y]$ 范围内的随机整数
+
+```python
+print(random.randint(1, 3))       #3
+```
+
+`randrange(start, stop=None, step=1)` : 给定区间 `[start, stop)` 内取一整数, 且可以设置步长
+
+```python
+print(random.randrange(1, 4))     #3
+print(random.randrange(1, 20, 2)) #17
+```
+
+**三角函数**
+
+属于 `math` 模块
+
+`sin(x)` , `cos(x)`, `tan(x)`, `asin(x)`, `acos(x)`, `atan(x)` , `degress(x)` : 弧度 -> 角度, `radian(x)` : 角度 -> 弧度
+
+数学常量 `pi` : 数学中的 $Π$ , 可直接调用  `math.pi` 
+
+```python
+import math
+result = math.sin(math.radians(30))  #注意三角函数参数接受的是弧度, 传入角度需要先转换为弧度
+print(result)   #0.49999999999999994
+```
+

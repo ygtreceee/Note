@@ -2106,6 +2106,193 @@ int main()
 }
 ```
 
+*23.4.28*
+
+总结
+
+**静态成员函数**
+
+作用: 如果希望各对象中的某个变量值是一样的, 就可以用 `static`把它定义为静态数据成员, 这样它就为各对象所共有, 而不只属于某个对象的成员
+
+- 使用**静态成员**数据需要两条语句: 一条在类中, 用 `static` 关键字声明, 一条在类外; 且静态数据成员的初始化应该在主函数调用之前, 并且不能在类的声明中初始化; 定义和初始化格式如下：
+
+  ```c++
+  //初始化格式
+  //不必在初始化语句中加static; 如果未对静态数据成员赋初值，则编译系统会自动赋予初值0
+  <数据类型> <类名>::<静态数据成员名> = <值>；
+  int Point::score = 10;
+  ```
+
+- 在类外引用公有静态数据成员时, 可采用如下格式: `<类名>::<静态数据成员名>` , 用类名来引用静态数据成员, 表示该成员是属于某个类的, 而不是属于某个类的特定的对象的,从而提高可理解性
+
+- 用关键字 `static` 声明的成员函数为**静态成员函数**
+
+- 静态成员函数主要用于表示该函数逻辑上是属于某个类的, 它只访问逻辑上属于一个类的静态数据成员, 全局变量和静态成员函数的参数, 而不访问描述该类各对象状态的非静态数据成员
+
+- 由于静态成员函数不访问非静态数据成员, 因而静态成员函数不能被声明为 `const`. 静态成员函数没有 `this` 指针, 由此决定了静态成员函数不能默认访问本类中的非静态成员
+
+- 静态成员函数的作用是为了能处理静态数据成员
+
+- 调用静态成员函数
+
+  ```c++
+  //格式
+  //既可用目标对象名, 也可用类名采用如下格式调用:
+  <类名>::<静态成员函数名>(<参数表>)
+  //实际上也允许通过对象名调用静态成员函数, 但这并不意味着此函数是属于对象的, 而只是用对象的类型而已
+  <对象名>.<静态成员函数名>(<参数表>) 
+  ```
+
+**友元和友元函数**
+
+在一个类中可以有公用的 `public` 成员和私有的 `private` 成员, 在类外可以访问公用成员, 只有本类中的函数可以访问本类的私有成员, 但是C++即存在严格性也存在灵活性, 严格性体现在强类型检查, 类的私有和受保护数据访问的控制(类, 封装), 灵活性体现在打破类型检查的隐式和强制类型转换, 打破访问控制的友元. 
+
+C++允许使用关键字 `friend` 在一个类的内部将一个全局非成员函数, 另一个类的成员函数, 或另外一个类说明为该类的友元; 作为一个类的友元, 可以访问该类的所有成员(包括公有和私有的数据成员和成员函数)
+
+- 友元函数不是类的成员函数, 不能被声明为 `const`, 也没有 `this` 指针
+
+- 在友元函数体内只能通过作为友元函数参数传递进来的对象名, 对象指针或对象引用来访问对象成员
+
+- 定义格式
+
+  ```C++
+  //友元函数在类定义花括号内声明的一般格式为：
+  friend 函数返回类型 友元函数名(类名 & 对象名，…)
+  //友元函数定义的格式为
+  函数返回类型 友元函数名(类名 & 对象名，…)
+  {函数体}
+  ```
+
+- 在友元函数中引用私有数据成员时, 必须加上对象名, 不能直接引用私有数据成员, 因为友元函数不算是该类的成员函数, 不能默认引用该类的数据成员
+
+  ```C++
+  //格式
+  对象.私有数据成员
+  ```
+
+- `friend` 函数不仅可以是一般函数(非成员函数), 而且可以是另一个类中的成员函数, 与普通函数不同, 成员函数的原型必须先被定义, 才能被有效地声明为友元函数
+
+- 不仅可以将一个函数声明为一个类的“朋友”,  而且可以将一个类(例如B类)声明为另一个类(例如A类)的“朋友”. 这时B类就是A类的友元类. 友元类B中所有函数都是A类的友元函数, 可以访问A类中所有成员; 在A类的定义体中用以下语句声明B类为其友元类: `friend B` ; 声明友元类的一般形式为 `friend 类名`
+
+-  友元的关系是单向的而不是双向的
+
+- 友元的关系不能传递
+
+- 在实际工作中, 除非确有必要, 一般并不把整个类声明为友元类, 而只将确实有需要的成员函数声明为友元函数, 这样更安全一些; 友元利弊分析: 面向对象程序设计的一个基本原则是封装性和信息隐蔽, 而友元却可以访问其他类中的私有成员, 不能不说这是对封装原则的一个小的破坏. 但是它能有助于数据共享, 能提高程序的效率, 在使用友元时, 要注意到它的副作用, 不要过多地使用友元, 只有在使用它能使程序精炼, 并能大大提高程序的效率时才用友元
+
+
+
+实验代码
+
+```C++
+//A
+#include <bits/stdc++.h>
+using namespace std;
+class Point
+{
+    friend double Distance(Point &p1, Point &p2);
+    double x, y;
+public: 
+    Point(double xx, double yy) : x(xx), y(yy) {};
+};
+double Distance(Point &p1, Point &p2)
+{
+    return sqrt((p1.x - p2.x) * (p1.x - p2.x) + (p1.y - p2.y) * (p1.y - p2.y));
+}
+int main()
+{
+    int t; cin >> t;
+    while (t--)
+    {
+        double _x1, _x2, _y1, _y2; cin >> _x1 >> _y1 >> _x2 >> _y2;
+        Point p1(_x1, _y1), p2(_x2, _y2);
+        cout << (int)Distance(p1, p2) << endl;
+    }
+    return 0;
+}
+
+
+//B
+#include <bits/stdc++.h>
+using namespace std;
+
+class Account
+{
+private:
+    static float total;
+    static int count; //银行账户数量
+    static float InterestRate; //利率
+    float _balance;
+    string _accno, _accname; 
+
+public:
+    Account(string accno, string name, float balance) :_accno(accno), _accname(name) ,_balance(balance)
+    {
+        count ++;
+        total += _balance;
+    }
+    void Deposit(float account)  {_balance += account,total += account;} //存款
+    void Withdraw(float ammount) {_balance -= ammount; total -= ammount;} //取款
+    float GetBalance() {return _balance;} //获取账户余额
+    void Show() {cout << _accno << " " << _accname << " " << _balance << " ";}   //显示账户所有基本信息
+    static float GetTotal() {return total;} //获取总额
+    static float GetInterestRate() {return InterestRate;}    //获取利率
+    static void SetInterestRate(float rate) {InterestRate = rate;} //设置利率
+    friend void Update(Account& a) 
+    {
+        total += a._balance * Account :: InterestRate;
+        a._balance += a._balance * Account :: InterestRate;
+    }
+    static int GetCount() {return count;}
+    ~Account() 
+    {
+        count --;
+        total -= _balance;
+    }
+};
+
+int Account :: count = 0;
+float Account :: InterestRate = 0;
+float Account :: total = 0;
+
+
+int main()
+{
+    float rate;
+    cin >> rate;
+    Account :: SetInterestRate(rate);
+
+    int t;
+    cin >> t;
+    Account **p = new Account*[t];
+
+    for(int i = 0;i < t;i ++)
+    {
+        string id, name;
+        float balance, account, ammount;
+        cin >> id >> name >> balance >> account >> ammount;
+        p[i]= new Account(id, name, balance);
+        p[i] -> Deposit(account);
+        p[i] -> Show();
+        Update(*p[i]);
+        cout << p[i] -> GetBalance() << " ";
+        p[i] -> Withdraw(ammount);
+        cout << p[i] -> GetBalance() << endl;
+    }
+
+    cout << Account :: GetTotal() << endl;
+    for(int i = 0;i < t;i ++) delete p[i];
+    delete []p;
+    return 0;
+}
+
+
+//C
+
+```
+
+
+
 
 
 #### 校赛

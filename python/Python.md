@@ -823,7 +823,7 @@ for x in range(1, num + 1)
 
 #### 常用数据类型操作
 
-##### 数值
+**数值**
 
 1. 类型
 
@@ -867,21 +867,22 @@ print(num)   #十进制不需要前缀
 
 注意: 部分函数使用前注意要引入对应模块, 如 `import math` ; 使用函数时**格式**是 '模块名.函数名(参数)', 如 `math.fabs(-10)`
 
-**适用于几乎所有 Python 运算符操作**
+- **适用于几乎所有 Python 运算符操作**
 
-**数学函数** 
+- **数学函数** 
 
-- 内建函数: 存在于 `builtins.pyi` 文件中, 无需导入
+  - 内建函数: 存在于 `builtins.pyi` 文件中, 无需导入
 
-  `abs(num)`, `min(a, b, c, ...)` , `max(a, b, c, ...)` , `pow(x, y)` 
+    `abs(num)`, `min(a, b, c, ...)` , `max(a, b, c, ...)` , `pow(x, y)` 
 
-  `round(num[, n])` : n 表示四舍五入的小数位数, 同样可以不写, 默认为0, 即四舍五入取整
+    `round(num[, n])` : n 表示四舍五入的小数位数, 同样可以不写, 默认为0, 即四舍五入取整
 
-- math 模块函数: 使用前需要先导入 `math` 模块, 即 `import math` 
 
-  `ceil(num)` : 上取整    `floor(num)` : 下取整    `sqrt(num)` : 开平方    `log(x, base)` : 以 base 为基数, x 为对数
+  - math 模块函数: 使用前需要先导入 `math` 模块, 即 `import math` 
 
-**随机函数**
+    `ceil(num)` : 上取整    `floor(num)` : 下取整    `sqrt(num)` : 开平方    `log(x, base)` : 以 base 为基数, x 为对数
+
+- **随机函数**
 
 以下函数均属于 `random` 模块, 需加入 `import random` 
 
@@ -917,7 +918,7 @@ print(random.randrange(1, 4))     #3
 print(random.randrange(1, 20, 2)) #17
 ```
 
-**三角函数**
+- **三角函数**
 
 属于 `math` 模块
 
@@ -930,4 +931,260 @@ import math
 result = math.sin(math.radians(30))  #注意三角函数参数接受的是弧度, 传入角度需要先转换为弧度
 print(result)   #0.49999999999999994
 ```
+
+
+
+**布尔**
+
+1. `Bool` : `True`, `Flase` 
+
+2. `int` 类型的子类
+
+```python
+print(True + 2)
+print(issubclass(bool, int))
+#output
+3
+True
+```
+
+
+
+**字符串**
+
+由单个字符组成的一个集合
+
+1. **形式**
+
+- 非原始字符串
+
+  ```
+  'abc'          #使用单引号包含
+  "abc"          #使用双引号包含
+  '''abc'''      #使用三个单引号包含
+  """abc"""      #使用三个双引号包含
+  ```
+
+- 原始字符串: 能使字符串忽略转义符, 保留原始内容
+
+  ```python
+  #格式: r'abc'
+  #同样可以改为其他引号形式
+  
+  name = r"And the last character is \n, not \t."
+  print(name)
+  #output
+  And the last character is \n, not \t.
+  ```
+
+- 转义符: 有 `\n`       `\t`       `\'`        `\"`        `\` : (在行尾时), 表示续行符
+
+    ```python
+    name = "Hong"\
+    "Kong"
+    print(name)  #HongKong 
+    ```
+
+
+
+2. **各形式特点**
+
+单/双引号
+
+- 混合使用能避免使用引号转义符
+
+    ```python
+    print('I am "King"')   #I am "King"
+    print("I am 'King'")   #I am 'King'
+    ```
+
+- 需要跨行时
+
+  ```
+  # 需要换行符
+  name = "Hong" \ 
+  "Kong"
+  
+  # 使用小括号
+  name = ("Hong "
+  "Kong")
+  ```
+  
+
+三引号
+
+- 可以直接跨行书写
+
+  ```python
+  print("""So who
+  am I ?""")
+  
+  #output
+  So who
+  am I ?
+  ```
+
+- 可用于注释
+
+  ```python
+  '''
+  hhh
+  '''
+  ```
+
+  
+
+3. **字符串一般操作**
+
+字符串**拼接**
+
+```python
+#1. str1 + str2
+print("I am" + "King")  #I am King
+
+#2. str1srt2  直接把两个字符串放在一起, 只要保证字符串在同一行即可, 且中间的空格都会被忽略
+print("I am "    "King") #I am King
+
+#3. "str1%s" % (str2)
+print("I am %s" % ("King")) #I am King
+
+#4. str * n  字符串乘法
+print("I am King " * 3) #I am King I am King I am King
+```
+
+字符串**切片**
+
+概念: 获取字符串的某个片段
+
+- 获取某个字符
+
+  ```
+  name[index]
+  index: 正数则从头部开始定位, 初始为0; 负数则从尾部开始定位, 初始为-1
+  name[-1]: 表示字符串末位字符
+  ```
+
+- 获取一个字符串片段
+
+  ```
+  name[start:end:step]
+  获取范围: [start, end) 左闭右开
+  
+  默认值
+  起始默认值: 0
+  结束默认值: len(name) 即整个字符串长度
+  步长默认值: 1
+  
+  获取顺序
+  step > 0: 从左到右
+  step < 0: 从右到左
+  注意: 不能从头跳跃到尾部, 也不能从尾部跳跃到头部
+  #下面代码无输出
+  name = "abcdefg"
+  print(name[0:len(name):-1])
+  print(name[len(name):0:1])
+  
+  特殊
+  name[::-1]  反转字符串
+  ```
+
+字符串**函数操作**
+
+如果是内建函数, 可直接使用; 如果是属于对象方法, 使用格式是 `对象.方法(参数)` 
+
+- 查找计算
+
+  ```
+  内建函数
+  len
+  作用: 用于字符串字符个数; 一个汉字, 字母或转义符都是占一个
+  语法: len(str1)
+  print("我是hh\n") #5
+  
+  对象方法
+  find()
+  作用: 查找子串(下标)的索引位置
+  语法: str.find(sub, start=0, end=len(str))
+  参数: sub 需要检索的子字符串, start 检索的起始位置, end 检索的结束位置
+  返回: 子串首字符下标, 找不到则返回-1
+  注意: 从左到右查找, 找到后立即停止, 范围[start, end)
+  
+  rfind()
+  功能同find(), 区别是该函数从右往左查找, 且同样返回sub首字符下标
+  
+  index()
+  功能同find(), 区别是找不到时不返回-1, 而是报错
+  
+  rindex()
+  功能同index(), 区别是从右往左查找
+  
+  count()
+  作用: 计算某个子字符串出现的次数
+  语法: str.count(sub, start=0, end=len(str))
+  返回值: 子字符串出现的个数
+  ```
+
+- 转换操作
+
+  ```
+  对象方法
+  replace()
+  作用: 使用新的字符串, 替换原字符串中的旧字符串
+  语法: str.replace(old, new[, count])
+  参数: old 需要被替换的旧字符串;  new 替换后的新字符串; count 替换的个数, 可省略, 表示替换全部
+  返回值: 替换后的结果字符串
+  注意: 不会修改原字符串
+  
+  capitalize()
+  作用: 将字符串的首字母变成大写
+  语法: str.capitalize()
+  参数: 无
+  返回值: 首字符大写后的新字符串
+  注意: 不会修改原字符串; 如果字符串不是字母开头, 则没有作用
+  
+  title()
+  作用: 将字符串中每个单词首字母变成大写
+  语法: str.title()
+  参数: 无
+  返回值: 每个单词首字母大写后的新字符串
+  注意: 不会修改原字符串; 且只要是非字母字符都算是单词分隔符
+  name = "abc1de*fg"
+  print(name.title())  #Abc1De*Fg
+  
+  lower()
+  作用: 将字符串中每个字符都变为小写
+  语法: str.lower()
+  参数: 无
+  返回值: 作用后的新字符串
+  
+  upper()
+  作用: 将字符串中每个字符都变为大写
+  ```
+
+- 填充压缩
+
+  ```
+  对象方法
+  ljust()
+  作用: 根据一个指定字符, 将原字符串填充够指定长度, l表示原字符串靠左
+  语法: str.ljust(width, fillchar)
+  参数: width 指定结果字符串的长度; fillchar 如果原字符串长度小于指定长度, 填充字符
+  返回值: 作用后的字符串
+  注意: 不会修改原字符串; fillchar的字符长度只能为1; 只有原字符串长度小于指定长度才会填充, 大于指定长度就返回原字符串
+  
+  rjust()
+  作用同上, 区别是原字符串靠右
+  
+  center()
+  作用同上, 区别是原字符串居中
+  
+  lstrip()
+  作用: 移除原字符串指定字符(默认是空白字符), l表示从左侧开始移除
+  语法: lstrip(chars)
+  参数: chars 需要移除的字符集, 表现形式为字符串
+  返回值: 作用后的新字符串
+  注意: 不会改变原字符串, 
+  ```
+
+  
 

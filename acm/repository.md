@@ -2224,8 +2224,10 @@ private:
     static float InterestRate; //利率
     float _balance;
     string _accno, _accname; 
+    // friend void Update(Account& a);
 
 public:
+    Account() {};
     Account(string accno, string name, float balance) :_accno(accno), _accname(name) ,_balance(balance)
     {
         count ++;
@@ -2238,7 +2240,8 @@ public:
     static float GetTotal() {return total;} //获取总额
     static float GetInterestRate() {return InterestRate;}    //获取利率
     static void SetInterestRate(float rate) {InterestRate = rate;} //设置利率
-    friend void Update(Account& a) 
+
+    friend void Update(Account &a) 
     {
         total += a._balance * Account :: InterestRate;
         a._balance += a._balance * Account :: InterestRate;
@@ -2255,40 +2258,182 @@ int Account :: count = 0;
 float Account :: InterestRate = 0;
 float Account :: total = 0;
 
-
 int main()
 {
     float rate;
     cin >> rate;
     Account :: SetInterestRate(rate);
-
     int t;
     cin >> t;
-    Account **p = new Account*[t];
-
-    for(int i = 0;i < t;i ++)
+    Account *p = new Account[t];
+    for(int i = 0; i < t; i++)
     {
         string id, name;
         float balance, account, ammount;
         cin >> id >> name >> balance >> account >> ammount;
-        p[i]= new Account(id, name, balance);
-        p[i] -> Deposit(account);
-        p[i] -> Show();
-        Update(*p[i]);
-        cout << p[i] -> GetBalance() << " ";
-        p[i] -> Withdraw(ammount);
-        cout << p[i] -> GetBalance() << endl;
+        new (&p[i]) Account(id, name, balance);
+        p[i].Deposit(account);
+        p[i].Show();
+        Update(p[i]);
+        cout << p[i].GetBalance() << " ";
+        p[i].Withdraw(ammount);
+        cout << p[i].GetBalance() << endl;
     }
-
     cout << Account :: GetTotal() << endl;
-    for(int i = 0;i < t;i ++) delete p[i];
     delete []p;
     return 0;
 }
 
 
 //C
+#include <iostream>
+using namespace std;
+class Complex
+{
+private:
+	double real; // 实部
+	double imag; // 虚部
+public:
+	Complex(){}
+	Complex(double r, double i)
+    {
+        real = r, imag = i;
+    }
+	friend Complex addCom(const Complex& c1, const Complex& c2)
+    {
+        Complex t(c1.real + c2.real, c1.imag + c2.imag);
+        return t;
+    }
+    friend Complex minusCom(const Complex& c1, const Complex& c2)
+    {
+        Complex t(c1.real - c2.real, c1.imag - c2.imag);
+        return t;
+    }
+	friend void outCom(const Complex& c)
+    {
+        cout << "(" << c.real <<"," << c.imag << ")\n";
+    }
+    
+};
 
+int main()
+{
+    double rl, ig;
+    cin >> rl >> ig;
+    Complex c(rl, ig);
+    int n;
+    cin >> n;
+    while(n--)
+    {
+        char op[5];
+        cin >> op >> rl >> ig;
+        Complex ct(rl, ig);
+        if(op[0] == '+') c = addCom(c, ct);
+        else c = minusCom(c, ct);
+        outCom(c);
+    }
+    return 0;
+}
+
+
+//D
+#include <bits/stdc++.h>
+using namespace std;
+class Hotel
+{
+    private:
+        static int totalCustNum; // 顾客总人数
+        static float totalEarning; // 旅店总收入
+        static float rent; // 每个顾客的房租
+        char *customerName; // 顾客姓名
+        int customerId; // 顾客编号
+    public:
+        Hotel(){}
+        Hotel(char* customer)
+        {
+            Hotel::totalCustNum++;
+            Hotel::totalEarning += rent;
+            customerName = new char[strlen(customer) + 10];
+            strcpy(customerName, customer);
+        }
+        ~Hotel()
+        {
+            delete customerName;
+        }
+        void Display()
+        {
+            printf("%s %04d %d %d\n", customerName, 20150000 + Hotel::totalCustNum, Hotel::totalCustNum, (int)totalEarning);
+        }
+        static void setRent(float rt)
+        {
+            Hotel::rent = rt;
+        }
+};
+
+int Hotel::totalCustNum = 0;
+float Hotel::totalEarning = 0;
+float Hotel::rent = 0;
+
+int main()
+{
+    float rt;
+    cin >> rt;
+    Hotel::setRent(rt);
+    char s[50];
+    while(cin >> s)
+    {
+        if(s[0] == '0') break;
+        Hotel h(s);
+        h.Display();
+    }
+    return 0;
+}
+
+
+//E
+#include <bits/stdc++.h>
+using namespace std;
+class CDate;
+class CTime
+{
+	private:
+		int hour, min, sec;
+	public:
+		friend void Display(CDate &, CTime &);
+		void input()
+		{
+			cin >> hour >> min >> sec;
+		}
+};
+class CDate
+{
+	private:
+		int year,month,day;
+	public:
+		friend void Display(CDate &,CTime &);
+		void input()
+		{
+			cin >> year >> month >> day;
+		}
+};
+void Display(CDate & date,CTime & time)
+{
+	cout << date.year << '-' << setfill('0') << setw(2) << date.month << '-' << setw(2) << date.day << ' ' << setw(2) << time.hour << ':' << setw(2) << time.min << ':' << setw(2) << time.sec << '\n';
+}
+int main()
+{
+	int t;
+	CDate date;
+	CTime time;
+	cin >> t;
+	while(t--)
+	{
+		date.input();
+		time.input();
+		Display(date, time);
+	}
+    return 0;
+}
 ```
 
 

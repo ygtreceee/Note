@@ -1189,9 +1189,279 @@ print("I am King " * 3) #I am King I am King I am King
   
   rstrip()
   作用同上, 区别是从右往左遍历
+  ```
+
+- 分割拼接
+
+  ```
+  对象方法
+  split()
+  作用: 将一个大的字符串分割成几个子字符串
+  语法: str.split(sep, maxsplit)
+  参数: sep 分隔符; maxsplit 最大的分割次数, 可省略, 代表有多少分割多少
+  返回值: 分割后的子字符串, 组成的列表; list列表类型
+  注意: 不会修改字符串本身
+  name = "hh-ww-pp"
+  print(name.split("-"))  #['hh', 'ww', 'pp']
   
+  partition()
+  作用: 根据指定的分隔符, 返回分隔符左侧内容, 分隔符和分隔符右侧内容
+  语法: str.partition(sep)
+  参数: sep 分隔符
+  返回值: 如果找到分割附, 则返回分隔符左侧内容, 分隔符和分隔符右侧内容(tuple类型); 如果没有找到, 则返回('str', ",")
+  注意: 不会修改原字符串; 从左侧开始查找分隔符
+  name = "I-am-King"
+  word = "IamKing"
+  print(name.partition("-"))
+  print(word.partition("-"))
+  #output
+  ('I', '-', 'am-King')
+  ('IamKing', '', '')
+  
+  rpatition()
+  作用同上, 区别是从右往左开始查找
+  
+  splitlines()
+  作用: 按照换行符(\r, \n), 将字符串拆成多个元素, 保存到列表中
+  语法: str.splitlines(keepends)
+  参数: keepends 是否保留换行符, bool类型
+  返回值; 被换行符分割的多个字符串, 作为元素组成的列表, list类型
+  注意: 不会修改原字符串
+  name = "I \n am \r King"
+  print(name.splitlines())
+  #output
+  ['I ', ' am ', ' King']
+  
+  join()
+  作用: 根据指定的字符串, 将给定的迭代对象, 进行拼接, 得到拼接后的字符串
+  语法: sep.join(iterable)
+  参数: iterable 可迭代对象, 如字符串,元组,列表...; sep 分割每个对象的分隔符
+  返回值: 拼接好的新字符串
+  item = ["I", "am", "King"]
+  print(" ".join(item))  #I am King
+  ```
+
+- 判定
+
+  ```
+  对象方法
+  str.isalpha()
+  作用: 判断是否字符串所有的字符都是字母, 即不包含数字,特殊符号,标点符号等等
+  参数: 无
+  返回类型: Bool类型, 给定一个空串则判定为False
+  
+  str.isdigit()
+  作用: 判断字符串所有字符都是数字
+  
+  str.isalnum()
+  作用: 判断字符串所有字符都是数字或字母
+  
+  str.isspace()
+  作用: 判断字符串所有字符都是空白字符, 包括空格,缩进,换行符等不可见转义字符
+  
+  startswith()
+  作用: 判断字符串是否以某个前缀开头
+  语法: str.startswith(prefix, start = 0, end=len(str))
+  参数: prefix 需要判定的前缀字符串; start 判定起始位置; end 判定结束位置
+  返回值: Bool类型
+  
+  endswith()
+  作用: 判定一个字符串是否以某个后缀结尾
+  语法: str.endswith(suffix, start=0, end=len(str))
+  ```
+
+- 补充
+
+  ```
+  in
+  判定一个字符串是否被另一个字符串包含
+  not in
+  判定一个字符串是否不被另一个字符串包含
+  
+  name = "I am King"
+  print("am" in name)
+  print("I" not in name)
+  #output
+  True
+  False
+  ```
+
+
+
+**列表**
+
+**有序**的**可变**的元素集合
+
+1. 定义
+
+- 方式1
+
+  ```
+  [ele1, ele2, ...]
+  
+  注意:
+  列表集合其中的元素可以多种数据类型的元素, 且可以为空;
+  列表本身也可以是一个元素, 可以列表嵌套列表;
+  [1, 2, 3, ["a", "b", True]]
+  ```
+
+- 方式2
+
+  ```
+  #列表生成式
+  快速生成list([start, end))
+  语法:range(stop)  or  range(start, end, step) 
+  
+  注意: 为了防止生成的列表没有被使用导致空间浪费, python3做了改变, 不会立即生成列表
+  #python2
+  num = range(10)
+  print(num) #[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+  #python3
+  num = range(10)
+  print(num) #range(0, 10)
+  
+  
+  #列表推导式
+  从一个list, 推导出另一个list
+  概念:
+  1.映射解析: 一对一变更
+  2.过滤: 从多到少
+  
+  nums = [1, 2, 3, 4, 5]
+  new_list1 = [num ** 2 for num in nums if num % 2 == 1]
+  new_list2 = [1 for num in nums]
+  new_list3 = [num for num in nums for num2 in nums]
+  print(new_list1)
+  print(new_list2)
+  print(new_list3)
+  #output
+  [1, 9, 25]
+  [1, 1, 1, 1, 1]
+  [1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 4, 4, 4, 4, 4, 5, 5, 5, 5, 5]
+  ```
+
+2. 常用操作
+
+- 增
+
+  ```
+  append()
+  作用: 在列表的最后增加一个新的元素
+  语法: l.append(object)
+  参数: object 增加的元素
+  返回值: None
+  注意: 会修改原列表
+  
+  
+  insert()
+  作用: 在列表中, 在指定索引值之前增加一个新的元素
+  语法: l.insert(index, object)
+  参数: index 下标索引值; object 想要添加的元素
+  返回值: None
+  注意: 会修改原列表
+  
+  
+  extend()
+  作用: 在列表中扩展另一个可迭代序列
+  语法: l.extend(iterable)
+  参数: iterable 可迭代集合, 如字符串,列表,元组...
+  返回值: None
+  注意: 会修改原列表
+  list1 = [1, 2, 3]
+  list2 = ['a', 'b', 'c']
+  list3 = [4, 5, 6]
+  ret = "abcdefg"
+  # list1.extend(list2)
+  print(list1.extend(list2))
+  print(list1)
+  list3.extend(ret)  #特别注意
+  print(list3)
+  #output
+  None
+  [1, 2, 3, 'a', 'b', 'c']
+  [4, 5, 6, 'a', 'b', 'c', 'd', 'e', 'f', 'g']
+  
+  
+  乘法运算
+  list1 = [1, 2, 3]
+  print(list1 * 3)   #[1, 2, 3, 1, 2, 3, 1, 2, 3]
+  
+  加法运算
+  list1 = [1, 2, 3]
+  list2 = ['a', 'b', 'c']
+  print(list1 + list2) #[1, 2, 3, 'a', 'b', 'c']
+  #和extend()的区别: 加法运算时左右两端都应该是列表; 但是extend()的参数可以是任何可迭代集合, extend()本质是集合的扩充, 加法运算时列表简单相加
+  
+  ```
+
+- 删
+
+  ```
+  del()
+  作用: 可以删除一个指定元素(对象)
+  语法: del 指定元素
+  注意: 也可以删除整个列表
+  nums = [1, 2, 3, 4, 5]
+  del nums[2]
+  print(nums)  #[1, 2, 4, 5]
+  #del nums
+  #print(nums)  #Error
+  
+  pop()
+  作用: 移除并返回列表中指定索引对应的元素
+  语法: l.pop(index=-1)
+  参数: index 需要被删除元素的索引, 默认是-1, 即最后一个元素
+  返回值: 被删除的元素
+  注意: 会直接修改原列表, 注意索引越界
+  
+  remove()
+  作用: 移除列表中的指定元素
+  语法: l.remove(object)
+  参数: 需要被删除的元素
+  返回值: None
+  注意: 会直接修改原列表, 如果元素不存在, 会报错; 若存在多个元素, 只会删除最左边的一个, 注意删除内循环列表带来的坑
+  ```
+
+- 改
+
+  ```
+  l[index] = val;
+  当我们以后要操作一个列表当中的某个元素时, 一定是通过这个索引(下标), 来操作指定元素的
+  ```
+
+- 查
+
+  ```
+  获取单个元素
+  items[index]
+  注意负索引
+  
+  获取元素索引
+  list.index(val, start, end)
+  同样可以限定索引区间, 也可以不写, 取默认值
+  
+  获取指定元素的个数
+  list.count(val, start, end)
+  
+  获取多个元素
+  list[start:end:step]
+  [::-1]是反转列表
+  
+  遍历
+  
+  ```
+
+- 额外操作
+
+  ```
   
   ```
 
   
+
+  **元组**
+
+
+
+
 

@@ -1448,13 +1448,162 @@ print("I am King " * 3) #I am King I am King I am King
   [::-1]是反转列表
   
   遍历
+  1.根据元素进行遍历
+  for item in list:
+  	pass
   
+  2.根据索引进行遍历
+  for index in range(len(list)):
+  	print(index, list[index])
+  
+  3.创建对应的枚举对象, 遍历枚举对象(了解)
+  枚举对象: 通过枚举函数生成的一个新的对象
+  作用: 函数用于将一个可遍历的数据对象(如列表,元组或字符串)组合为一个索引序列, 同时列出数据下标和数据
+  语法: enumerate(sequence[, start])
+  示例
+  values = ['a', 'b', 'c', 'd', 'e']
+  print(enumerate(values))
+  # 将枚举对象转换为列表类型
+  print(list(enumerate(values)))
+  # 遍历整个枚举对象（枚举对象可以直接被遍历）
+  for idx, val in enumerate(values):
+      print(idx, val)
+  for tup in enumerate(values):
+      print(tup)
+  #output
+  <enumerate object at 0x0000019D7BC7BFC0>
+  [(0, 'a'), (1, 'b'), (2, 'c'), (3, 'd'), (4, 'e')]
+  0 a
+  1 b
+  2 c
+  3 d
+  4 e
+  (0, 'a')
+  (1, 'b')
+  (2, 'c')
+  (3, 'd')
+  (4, 'e')
+  
+  4.使用迭代器进行遍历(了解)
+  (1)概念
+  迭代: 是访问集合的一种方式, 按照某种顺序逐个访问集合中的每一项
+  可迭代对象: 能够被迭代的对象; 判定依据是能作用于for in;
+  判定方法:
+  from collections.abc import Iterable
+  nums = [1, 2, 3, 4]
+  values = 123
+  print(isinstance(nums, Iterable))   #True
+  print(isinstance(values, Iterable)) #False
+  
+  迭代器: 是可以记录遍历位置的对象; 从第一个元素开始, 往后通过next()函数进行遍历; 只能往后不能往前;判断依据是能做用于next()
+  判定方法: 
+  import collections.abc
+  nums = [1, 2, 3, 4]
+  print(isinstance(nums, collections.abc.Iterator))   # False
+  # 借助iter() 生成迭代器
+  i = iter(nums)
+  print(isinstance(i, collections.abc.Iterator))      # True
+  # 迭代器本身也是可迭代对象
+  print(isinstance(i, collections.abc.Iterable))      # True
+  注意: 迭代器也是可迭代对象, 所以也可以作用于for in
+  
+  (2)为什么会产生迭代器?
+  Ⅰ.仅仅在迭代到某个元素时才处理该元素, 在此之前元素可以不存在, 在此之后元素可以被销毁, 特别适合于遍历一些巨大的或是无限的集合
+  Ⅱ.提供了一个统一的访问集合的接口, 可以把所有的可迭代对象, 转换成迭代器进行使用
+  生成迭代器: iter(iterable)
+  
+  (3)迭代器的简单使用
+  使用next()函数, 从迭代器中取出下一个对象, 从第1个元素开始; 因为迭代器比较常用, 所以在Python中, 可以直接作用于for in, 其内部会自动调用迭代器对象的next(), 会自动处理迭代完毕的错误
+  nums = [1, 2, 3, 4]
+  it = iter(nums)
+  print(next(it))          # 1
+  print(next(it))          # 2
+  v = iter(nums)
+  print(v)                 # <list_iterator object at 0x000001C916D78A60>
+  for vv in v:
+      print(vv, end=' ')   # 1 2 3 4
+  
+  (4)注意事项
+  如果取出完毕, 再继续取, 则会报错: StopIteration
+  迭代器一般不能多次迭代, 即只能使用一次, 想再次使用必须重新创建
+  nums = [1, 2, 3, 4]
+  it = iter(nums)
+  for v in it:
+      print(v)  # 1 2 3 4
+  for v in it:
+      print(v)  # 无输出, 因为迭代器it已经被使用过了
   ```
 
 - 额外操作
 
   ```
+  判定
+  print(ele in list)
+  print(ele not in list)
+  事实上, in 和 not in 适用于所有集合的元素的判定
   
+  
+  比较
+  Python2: 内建函数, 如果比较的是列表, 则针对每个元素从左到右逐一比较, 若左大于右则返回1, 左等于右则返回0, 左小于右则返回-1
+  Python3: 直接使用比较运算符进行比较, 即 > < ==
+  
+  
+  排序
+  (1)内建函数
+  可适用于对所有可迭代对象进行排序
+  语法: sorted(itetable, key=None, reverse=False)
+  参数: iterable 可迭代对象; key 排序关键字,值为一个函数,此函数只有一个参数且返回一个值; reverse 控制升序降序, 默认False, 即升序
+  返回值: 一个排好序的列表
+  注意: 列表本身不会发生改变
+  示例
+  values = "hcfboahfu"
+  nums = [2, 6, 4, 9, 1, -1]
+  mems = [("s1", 14), ("s3", 19), ("s2", 15), ("s4", 20)]
+  print(sorted(values))
+  print(sorted(values, reverse=True))
+  print(sorted(nums))
+  print(sorted(mems)) 
+  def getKey(x):
+      return x[1]
+  print(sorted(mems, key=getKey)) 
+  # output
+  ['a', 'b', 'c', 'f', 'f', 'h', 'h', 'o', 'u']
+  ['u', 'o', 'h', 'h', 'f', 'f', 'c', 'b', 'a']
+  [-1, 1, 2, 4, 6, 9]
+  [('s1', 14), ('s2', 15), ('s3', 19), ('s4', 20)]
+  [('s1', 14), ('s2', 15), ('s3', 19), ('s4', 20)]
+  
+  (2)列表对象方法
+  语法: list.sort(key=None, reverse=False)
+  参数: key 排序关键字, 值为一个函数, 此函数只有一个参数且返回一个值用来比较; reverse 控制升序降序, 默认False, 即升序
+  返回值: None
+  注意: 列表本身直接发生改变
+  示例
+  nums = [2, 6, 4, 9, 1, -1]
+  mems = [("s1", 14), ("s3", 13), ("s2", 15), ("s4", 20)]
+  print(mems.sort())
+  print(mems)
+  def getKey(x):
+      return x[1]
+  mems.sort(key=getKey)   # 注意不要写成getkey(), 因为不是立即调用, 而是传入后由该方法内部进行调用
+  print(mems)
+  # output
+  None
+  [('s1', 14), ('s2', 15), ('s3', 13), ('s4', 20)]
+  [('s3', 13), ('s1', 14), ('s2', 15), ('s4', 20)]
+  
+  
+  乱序
+  可以随机打乱一个列表
+  返回值为None, 列表直接被改变
+  导入random模块
+  import random
+  random.shuffle(list)
+  
+  
+  反转
+  对象方法: l.reverse()  返回值同样为None, 列表直接被改变
+  切片反转: l[::-1]      返回值为反转后的对象, 原对象不改变
   ```
 
   

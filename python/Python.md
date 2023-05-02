@@ -823,7 +823,7 @@ for x in range(1, num + 1)
 
 #### 常用数据类型操作
 
-**数值**
+###### 数值
 
 1. 类型
 
@@ -950,9 +950,9 @@ True
 
 
 
-**字符串**
+###### 字符串
 
-由单个字符组成的一个集合
+概念: 由单个字符组成的一个集合
 
 1. **形式**
 
@@ -1058,7 +1058,7 @@ print("I am King " * 3) #I am King I am King I am King
 
 - 获取某个字符
 
-  ```
+  ```python
   name[index]
   index: 正数则从头部开始定位, 初始为0; 负数则从尾部开始定位, 初始为-1
   name[-1]: 表示字符串末位字符
@@ -1066,7 +1066,7 @@ print("I am King " * 3) #I am King I am King I am King
 
 - 获取一个字符串片段
 
-  ```
+  ```python
   name[start:end:step]
   获取范围: [start, end) 左闭右开
   
@@ -1094,7 +1094,7 @@ print("I am King " * 3) #I am King I am King I am King
 
 - 查找计算
 
-  ```
+  ```python
   内建函数
   len
   作用: 用于字符串字符个数; 一个汉字, 字母或转义符都是占一个
@@ -1126,7 +1126,7 @@ print("I am King " * 3) #I am King I am King I am King
 
 - 转换操作
 
-  ```
+  ```python
   对象方法
   replace()
   作用: 使用新的字符串, 替换原字符串中的旧字符串
@@ -1163,7 +1163,7 @@ print("I am King " * 3) #I am King I am King I am King
 
 - 填充压缩
 
-  ```
+  ```python
   对象方法
   ljust()
   作用: 根据一个指定字符, 将原字符串填充够指定长度, l表示原字符串靠左
@@ -1193,7 +1193,7 @@ print("I am King " * 3) #I am King I am King I am King
 
 - 分割拼接
 
-  ```
+  ```python
   对象方法
   split()
   作用: 将一个大的字符串分割成几个子字符串
@@ -1243,7 +1243,7 @@ print("I am King " * 3) #I am King I am King I am King
 
 - 判定
 
-  ```
+  ```python
   对象方法
   str.isalpha()
   作用: 判断是否字符串所有的字符都是字母, 即不包含数字,特殊符号,标点符号等等
@@ -1272,7 +1272,7 @@ print("I am King " * 3) #I am King I am King I am King
 
 - 补充
 
-  ```
+  ```python
   in
   判定一个字符串是否被另一个字符串包含
   not in
@@ -1288,15 +1288,15 @@ print("I am King " * 3) #I am King I am King I am King
 
 
 
-**列表**
+###### 列表
 
-**有序**的**可变**的元素集合
+概念: **有序**的**可变**的元素集合
 
 1. 定义
 
 - 方式1
 
-  ```
+  ```python
   [ele1, ele2, ...]
   
   注意:
@@ -1307,7 +1307,7 @@ print("I am King " * 3) #I am King I am King I am King
 
 - 方式2
 
-  ```
+  ```python
   #列表生成式
   快速生成list([start, end))
   语法:range(stop)  or  range(start, end, step) 
@@ -1344,7 +1344,7 @@ print("I am King " * 3) #I am King I am King I am King
 
 - 增
 
-  ```
+  ```python
   append()
   作用: 在列表的最后增加一个新的元素
   语法: l.append(object)
@@ -1396,7 +1396,7 @@ print("I am King " * 3) #I am King I am King I am King
 
 - 删
 
-  ```
+  ```python
   del()
   作用: 可以删除一个指定元素(对象)
   语法: del 指定元素
@@ -1424,119 +1424,151 @@ print("I am King " * 3) #I am King I am King I am King
 
 - 改
 
-  ```
+  ```python
   l[index] = val;
   当我们以后要操作一个列表当中的某个元素时, 一定是通过这个索引(下标), 来操作指定元素的
   ```
 
 - 查
 
-  ```
-  获取单个元素
-  items[index]
-  注意负索引
-  
-  获取元素索引
-  list.index(val, start, end)
-  同样可以限定索引区间, 也可以不写, 取默认值
-  
-  获取指定元素的个数
-  list.count(val, start, end)
-  
-  获取多个元素
-  list[start:end:step]
-  [::-1]是反转列表
-  
-  遍历
-  1.根据元素进行遍历
-  for item in list:
-  	pass
-  
-  2.根据索引进行遍历
-  for index in range(len(list)):
-  	print(index, list[index])
-  
-  3.创建对应的枚举对象, 遍历枚举对象(了解)
-  枚举对象: 通过枚举函数生成的一个新的对象
-  作用: 函数用于将一个可遍历的数据对象(如列表,元组或字符串)组合为一个索引序列, 同时列出数据下标和数据
-  语法: enumerate(sequence[, start])
-  示例
-  values = ['a', 'b', 'c', 'd', 'e']
-  print(enumerate(values))
-  # 将枚举对象转换为列表类型
-  print(list(enumerate(values)))
-  # 遍历整个枚举对象（枚举对象可以直接被遍历）
-  for idx, val in enumerate(values):
-      print(idx, val)
-  for tup in enumerate(values):
-      print(tup)
-  #output
-  <enumerate object at 0x0000019D7BC7BFC0>
-  [(0, 'a'), (1, 'b'), (2, 'c'), (3, 'd'), (4, 'e')]
-  0 a
-  1 b
-  2 c
-  3 d
-  4 e
-  (0, 'a')
-  (1, 'b')
-  (2, 'c')
-  (3, 'd')
-  (4, 'e')
-  
-  4.使用迭代器进行遍历(了解)
-  (1)概念
-  迭代: 是访问集合的一种方式, 按照某种顺序逐个访问集合中的每一项
-  可迭代对象: 能够被迭代的对象; 判定依据是能作用于for in;
-  判定方法:
-  from collections.abc import Iterable
-  nums = [1, 2, 3, 4]
-  values = 123
-  print(isinstance(nums, Iterable))   #True
-  print(isinstance(values, Iterable)) #False
-  
-  迭代器: 是可以记录遍历位置的对象; 从第一个元素开始, 往后通过next()函数进行遍历; 只能往后不能往前;判断依据是能做用于next()
-  判定方法: 
-  import collections.abc
-  nums = [1, 2, 3, 4]
-  print(isinstance(nums, collections.abc.Iterator))   # False
-  # 借助iter() 生成迭代器
-  i = iter(nums)
-  print(isinstance(i, collections.abc.Iterator))      # True
-  # 迭代器本身也是可迭代对象
-  print(isinstance(i, collections.abc.Iterable))      # True
-  注意: 迭代器也是可迭代对象, 所以也可以作用于for in
-  
-  (2)为什么会产生迭代器?
-  Ⅰ.仅仅在迭代到某个元素时才处理该元素, 在此之前元素可以不存在, 在此之后元素可以被销毁, 特别适合于遍历一些巨大的或是无限的集合
-  Ⅱ.提供了一个统一的访问集合的接口, 可以把所有的可迭代对象, 转换成迭代器进行使用
-  生成迭代器: iter(iterable)
-  
-  (3)迭代器的简单使用
-  使用next()函数, 从迭代器中取出下一个对象, 从第1个元素开始; 因为迭代器比较常用, 所以在Python中, 可以直接作用于for in, 其内部会自动调用迭代器对象的next(), 会自动处理迭代完毕的错误
-  nums = [1, 2, 3, 4]
-  it = iter(nums)
-  print(next(it))          # 1
-  print(next(it))          # 2
-  v = iter(nums)
-  print(v)                 # <list_iterator object at 0x000001C916D78A60>
-  for vv in v:
-      print(vv, end=' ')   # 1 2 3 4
-  
-  (4)注意事项
-  如果取出完毕, 再继续取, 则会报错: StopIteration
-  迭代器一般不能多次迭代, 即只能使用一次, 想再次使用必须重新创建
-  nums = [1, 2, 3, 4]
-  it = iter(nums)
-  for v in it:
-      print(v)  # 1 2 3 4
-  for v in it:
-      print(v)  # 无输出, 因为迭代器it已经被使用过了
-  ```
+  - 获取单个元素:  `items[index]` 
+
+    注意负索引
+
+  - 获取元素索引: `list.index(val, start, end)`
+
+    同样可以限定索引区间, 也可以不写, 取默认值
+
+  - 获取指定元素的个数: `list.count(val, start, end)`
+
+  - 获取多个元素: `list[start:end:step]`
+
+    `[::-1]` 是反转列表
+
+  - 遍历
+
+    - 根据元素进行遍历
+
+      ```python
+      for item in list:
+      	pass
+      ```
+
+    - 根据索引进行遍历
+
+      ```python
+      for index in range(len(list)):
+      	print(index, list[index])
+      ```
+
+    - 创建对应的枚举对象, 遍历枚举对象(了解)
+
+      枚举对象: 通过枚举函数生成的一个新的对象
+
+      作用: 函数用于将一个可遍历的数据对象(如列表,元组或字符串)组合为一个索引序列, 同时列出数据下标和数据
+
+      语法: `enumerate(sequence[, start])`
+
+      ```python
+      values = ['a', 'b', 'c', 'd', 'e']
+      print(enumerate(values))
+      # 将枚举对象转换为列表类型
+      print(list(enumerate(values)))
+      # 遍历整个枚举对象（枚举对象可以直接被遍历）
+      for idx, val in enumerate(values):
+          print(idx, val)
+      for tup in enumerate(values):
+          print(tup)
+      #output
+      <enumerate object at 0x0000019D7BC7BFC0>
+      [(0, 'a'), (1, 'b'), (2, 'c'), (3, 'd'), (4, 'e')]
+      0 a
+      1 b
+      2 c
+      3 d
+      4 e
+      (0, 'a')
+      (1, 'b')
+      (2, 'c')
+      (3, 'd')
+      (4, 'e')
+      ```
+
+    - 使用**迭代器**进行遍历(了解)
+
+      (1) 概念
+
+      **迭代**: 是访问集合的一种方式, 按照某种顺序逐个访问集合中的每一项
+
+      **可迭代对象**: 能够被迭代的对象; 判定依据是能作用于 `for in` 
+
+      判定方法: 
+
+      ```python
+      from collections.abc import Iterable
+      nums = [1, 2, 3, 4]
+      values = 123
+      print(isinstance(nums, Iterable))   #True
+      print(isinstance(values, Iterable)) #False
+      ```
+
+      **迭代器**: 是可以记录遍历位置的对象; 从第一个元素开始, 往后通过 `next()` 函数进行遍历; 只能往后不能往前;判断依据是能做用于 `next()` 
+
+      判定方法: 
+
+      ```python
+      import collections.abc
+      nums = [1, 2, 3, 4]
+      print(isinstance(nums, collections.abc.Iterator))   # False
+      # 借助iter() 生成迭代器
+      i = iter(nums)
+      print(isinstance(i, collections.abc.Iterator))      # True
+      # 迭代器本身也是可迭代对象
+      print(isinstance(i, collections.abc.Iterable))      # True
+      注意: 迭代器也是可迭代对象, 所以也可以作用于for in
+      ```
+
+      (2) 为什么会产生迭代器?
+
+      Ⅰ.仅仅在迭代到某个元素时才处理该元素, 在此之前元素可以不存在, 在此之后元素可以被销毁, 特别适合于遍历一些巨大的或是无限的集合
+      Ⅱ.提供了一个统一的访问集合的接口, 可以把所有的可迭代对象, 转换成迭代器进行使用
+      生成迭代器: `iter(iterable)` 
+
+      (3) 迭代器的简单使用
+
+      使用`next()`函数, 从迭代器中取出下一个对象, 从第1个元素开始; 因为迭代器比较常用, 所以在Python中, 可以直接作用于`for in`, 其内部会自动调用迭代器对象的 `next()` , 会自动处理迭代完毕的错误
+
+      ```python
+      nums = [1, 2, 3, 4]
+      it = iter(nums)
+      print(next(it))          # 1
+      print(next(it))          # 2
+      v = iter(nums)
+      print(v)                 # <list_iterator object at 0x000001C916D78A60>
+      for vv in v:
+          print(vv, end=' ')   # 1 2 3 4
+      ```
+
+      (4) 注意事项
+
+      如果取出完毕, 再继续取, 则会报错: `StopIteration`
+
+      迭代器一般不能多次迭代, 即只能使用一次, 想再次使用必须重新创建
+
+      ```python
+      nums = [1, 2, 3, 4]
+      it = iter(nums)
+      for v in it:
+          print(v)  # 1 2 3 4
+      for v in it:
+          print(v)  # 无输出, 因为迭代器it已经被使用过了
+      ```
+
+      
 
 - 额外操作
 
-  ```
+  ```python
   判定
   print(ele in list)
   print(ele not in list)
@@ -1608,9 +1640,689 @@ print("I am King " * 3) #I am King I am King I am King
 
   
 
-  **元组**
+######   元组
+
+概念: **有序的不可变的**集合, 和列表的区别就是元组元素不能修改
+
+1. 定义
+
+   ```python
+   一个元素的写法
+   t = (1,)        #主要需要添加一个逗号, 与提升运算优先级的小括号作区分
+   print(type(t))  # <class, 'tuple'> 
+   
+   多个元素的写法
+   t = (1, 2, 3)
+   
+   多个对象, 以逗号隔开, 默认为元组
+   t = 1, 2, 3, "hh"
+   print(type(t))  # <class, 'tuple'>
+   
+   从列表转换成元组
+   l = [1, 2, 3, 4]
+   changeTuple = tuple(l)
+   print(changeTuple, type(changeTuple))  # (1, 2, 3, 4)  <class, 'tuple'>
+   
+   元组嵌套
+   t = (1, 2, (3, 4))  # 元组中的元素可以是元组
+   ```
+
+2. 常用操作
+
+- 由于元组元素不可修改, 所以也不支持**增, 删, 改**的操作
+
+- 查
+
+  ```python
+  获取单个元素
+  tuple[index]
+  index是索引, 可以为负
+  
+  获取多个元素
+  切片
+  tuple[start:end:step]
+  ```
+
+- 额外操作
+
+  ```python
+  获取
+  tuple.count(item)   # 统计元素中指定元素的个数
+  tuple.index(item)   # 获取元组中指定元素的索引
+  len(tuple)          # 返回元组中元素的个数
+  max(tuple)          # 返回元组中元素最大的值
+  min(tuple)          # 返回元组中元素最小的值
+  
+  判定
+  in                  
+  not in
+  
+  比较
+  Python2
+  cmp()
+  内建函数, 如果比较的是元组, 则针对每个元素, 从左到右注意比较; 左大于右, 返回1; 左小于右, 返回-1; 相等则返回0; 类型相同逐一比较元素, 类型不同则比较类型名称, 如列表和元组是'list'和'tuple'的比较
+  Python3
+  比较运算符 == > <   返回的是True或False
+  
+  拼接
+  乘法: tuple * n       # n是整型数值
+  加法: tuple1 + tuple2
+  
+  拆包
+  a, b = (ele1, ele2)  # 结果: a = ele1, b = ele2
+  ```
+
+  
+
+###### 字典
+
+概念: 无序的可变的键值对集合
+
+1. 定义
+
+   ```python
+   方式1
+   {key:value; key:value; ...}
+    
+   
+   方式2
+   fromkeys(S, v=None)
+   静态方法: 类和对象都可以调用
+   
+   类调用:
+   dict.fromkeys(seq, val)   # 此处的dict是指字典类型, seq是有序集合, val是值
+   示例
+   dic = dict.fromkeys("abc", 123)
+   print(dic)        # {'a': 123, 'b': 123, 'c': 123}
+   
+   对象调用(不常用):
+   dic.fromkeys(seq, val)    # 此处的dic是实例化的字典对象
+   示例
+   dic = {1: 2, 2: 3}.fromkeys("abc", 123)
+   print(dic)        #{'a': 123, 'b': 123, 'c': 123}
+   
+   
+   注意:
+   1. key不能重复, 如果key重复, 旧的值则会被新的覆盖
+   2, key必须是任意不可变类型
+   (1) 原因: Python的字典, 采用的是哈希(Hash)的方式实现
+   (2) 简单储存过程: 初始化一个表格, 用来存放所有的值, 这个表格成为"哈希表"; 在存储一个键值对时, 会根据给定的key, 通过哈希函数得到一个在"哈希表"中的索引位置, 然后根据索引位置, 存储给定的值
+   哈希: 把key通过"哈希函数"转换成一个整型数字, 称为一个"哈希值", 将该数字对数组长度进行取余, 取余结果就是数组的下标, 如果发生了"哈希冲突", 则采用"开放寻址法", 通过探测函数查找下一个空位
+   (3) 简单查找过程: 再次使用哈希函数将key转换为对应的哈希表的索引, 定位到哈希表位置然后获取value
+   
+   
+   类型
+   可变: 列表, 字典, 可变集合...
+   不可变: 数值, 布尔, 字符串, 元组...
+   如何判断是否可变? 尝试修改, 如果修改之后id()发生改变, 则说明是不可变的, id()不变则类型是可变的
+   ```
+
+2. 存在意义
+
+   - 可以通过key, 访问对应的值, 使得这种访问更具意义
+
+   - 查询的效率得到很大提升
+
+3.  常用操作
+
+- 增
+
+  ```python
+  dic[key] = value
+  ```
+
+- 删
+
+  ```python
+  del dic[key]
+  注意: key不存在时会报错
+  
+  dic.pop(key[, default])
+  删除指定的键值对, 并返回对应的值
+  如果key不存在那么直接返回给定的default值, 不作删除动作; 如果没有给定default, key不存在时会报错
+  
+  dic.popitem()
+  删除最后一个键值对, 并以元组的形式返回键值对
+  如果字典为空则报错
+  
+  dic.clear()
+  删除字典内所有键值对, 返回值是None, 且字典仍然是存在的, 只是为空; 而del删除整个字典后, 字典将不存在
+  示例
+  dic = {"a": 12, "b": 13, "c": 14}
+  dic.clear()
+  print(dic)  # {}
+  del dic
+  print(dic)  # Error
+  ```
+
+- 改
+
+  ```python
+  只能改值, 不能修改key
+  
+  修改单个键值对
+  dic[key] = value  # 直接设置, 如果key不存在则新增, 若存在则是修改
+  
+  批量修改键值对
+  oldDic.update(newDic)
+  根据新的字典, 批量修改旧字典中的键值对; 如果旧字典中没有对应的key, 则是新增键值对
+  ```
+
+- 查
+
+  ```python
+  1.获取单个值
+  方式1: dic[key]
+  方式2: dic.get(key[, default]) 如果不存在对应的key, 则取给定的default值, 如果没有默认值, 则为None, 但不会报错, 且原字典不会新增这个键值对
+  方式3: dic.setdefault(key[, default]) 和方式2相同, 区别是它在key不存在时给字典加上新的键值对key:default(key:None)
+  
+  
+  2.获取所有的值
+  dic.values()
+  
+  3.获取所有的键
+  dic.keys()
+  
+  4.获取字典的键值对
+  dic.items()
+  
+  注意: 
+  Python2和Python3版本之间关于通过keys(),values(),items()获取键,值,item之间的区别: Python2直接是一个列表, 可通过下标获取指定元素, 而Python3中是Dictionary view objects(视图对象), 不能通过下标获取指定元素, 除非通过list()强转为列表或tuple()强转为元组;
+  而且Python2中也提供了viewkeys(), viewvalues(), viewitems(), 作用等同于Python3中的Dictionary view objects
+  
+  示例(Python3环境)
+  d = {"a": 12, "b": 13, "c": 14}
+  ks = d.keys()
+  vs = d.values()
+  its = d.items()
+  print(ks, vs, its)
+  d["d"] = 19
+  print(ks, vs, its)
+  #output
+  dict_keys(['a', 'b', 'c']) dict_values([12, 13, 14]) dict_items([('a', 12), ('b', 13), ('c', 14)])
+  dict_keys(['a', 'b', 'c', 'd']) dict_values([12, 13, 14, 19]) dict_items([('a', 12), ('b', 13), ('c', 14), ('d', 19)])
+  
+  
+  5.遍历
+  方法1:获取键
+  示例
+  keys = d.keys()
+  for key in keys:
+  	print(key, d[key])
+  方法2:获取键值对(更推荐, 因为所得kvs是视图对象, 在字典添加新元素时其依然能起到获取字典所有元素的作用)
+  kvs = d.items()
+  for k, v in kvs:
+  	print(k, v)
+  
+  
+  6.计算
+  len(info)   # 键值对的个数
+  
+  
+  7.判定
+  x in dic
+  x not in dic
+  判定的是key是否存在
+  dic.has_key(key)
+  Python2中会存在, 但Python3中已过期, 建议使用is替代
+  ```
 
 
+
+###### **集合**
+
+1. 概念: **无序的, 不可随机访问的, 不可重复的**元素集合; 与数学中的集合的概念类似, 可对其进行交, 并, 差, 补等逻辑运算
+
+   分为**可变集合**和**非可变集合**: 
+
+   - `set` 为可变集合, 可进行增, 删, 改操作
+
+   - `frozenset` 为不可变集合, 创建好之后无法增删改
+
+
+
+2. 定义
+
+   - 可变集合
+
+     ```python
+     方法1: s = {v1, v2, ...}
+     
+     
+     方法2: s = set(itetable)
+     iterable可以是字符串, 列表, 元组, 字典等, 但是为字典时, 只会获取key作为set的元素
+     示例
+     d = {"a": 12, "b": 13, "c": 14}
+     s = set(d)
+     print(s, type(s))  # {'b', 'a', 'c'} <class 'set'>
+     
+     
+     方法3: 集合推导式
+     s = set(推导式)  
+     s = {推导式}
+     示例
+     s = set(x ** 2 for x in range(1, 10) if x % 2 == 0)  # {16, 64, 4, 36}
+     ```
+
+   - 不可变集合
+
+     ```python
+     大致与可变集合的定义相似
+     fs = frozenset(iterable)
+     fs = frozenset(推导式)
+     ```
+
+   - 注意事项
+
+     ```python
+     1. 创建一个空的集合时, 需要使用set()或者frozenset(), 不能直接使用{}, 否则会被识别为字典
+     示例
+     d = {}
+     s = set()
+     fs = frozenset()
+     print(type(d), type(s), type(fs))  # <class 'dict'> <class 'set'> <class 'frozenset'>
+     
+     2. 集合中的元素, 必须是可哈希的值. 如果一个对象在自己的生命周期中有一哈希值(hash value)是不可改变的, 那么它就是可哈希的(hashable), 可以暂时理解为不可变类型
+     
+     3. 如果集合中的元素值出现重复, 则会被合并为1个
+     可利用此性质进行去重操作
+     示例
+     l = [1, 1, 2, 3, 2, 3, 3]
+     s = set(l)           # 转换为set去重
+     print(s, type(s))        
+     result = list(s)     # 转换回list
+     print(result, type(result))
+     # output
+     {1, 2, 3} <class 'set'>
+     [1, 2, 3] <class 'list'>
+     ```
+
+   
+
+3. 常用操作
+
+   - 单一集合操作
+
+     ```python
+     可变集合
+     1.增
+     s.add(element)   # 增加的元素也必须是hashable
+     
+     2.删
+     s.remove(element)
+     指定删除set对象的一个元素, 如果没有这个元素则返回一个错误
+     s.discard(element)
+     指定删除set对象的一个元素, 如果没有这个元素则返回None
+     s.pop(element)
+     随机删除并返回一个集合中的元素, 若集合为空, 则返回一个错误
+     s.clear()
+     清空集合中的所有元素, 但是集合还存在, 即结果为set(), 除非使用del
+     
+     3.改
+     元素为不可变类型, 不可修改
+     
+     4.查
+     无法通过索引或者key进行查询, 但是可以通过for in进行遍历或者迭代器进行访问
+     示例
+     s = {1, 2, 3, 4}
+     for v in s:
+         print(v, end=' ')   # 1 2 3 4 
+     its = iter(s)           # 生成迭代器
+     for it in its:
+         print(it, end=' ')  # 1 2 3 4 
+     
+     
+     不可变集合
+     不能进行增删改 
+     查: 通过for in进行遍历或迭代器进行访问, 方式同上
+     ```
+
+   - 集合之间的操作
+
+     ```python
+     交集
+     方法1: intersection(Iterable) 
+     参数: Iterable 可以是字符串, 列表, 元组, 字典, 集合..., 但其中的元素必须是可哈希的值
+     注意: 可变与不可变类型混合运算, 返回结果类型以运算符左侧为主;
+     示例
+     s1 = frozenset([1, 2, 3, 4])
+     s2 = {3, 4, 5, 6}
+     res1 = s1.intersection(s2)
+     res2 = s2.intersection(s1)
+     print(res1, type(res1))    # frozenset({3, 4}) <class 'frozenset'>
+     print(res2, type(res2))    # {3, 4} <class 'set'>
+     
+     方法2: 逻辑与'&'
+     示例
+     s1 = frozenset([1, 2, 3, 4])
+     s2 = {3, 4, 5, 6}
+     res1 = s1 & s2
+     res2 = s2 & s1
+     print(res1, type(res1))    # frozenset({3, 4}) <class 'frozenset'>
+     print(res2, type(res2))    # {3, 4} <class 'set'>
+     
+     方法3: intersection_update(...)
+     交集计算完毕后, 会再次赋值给原对象, 且返回值为None, 即直接修改原对象本身, 所以只适用于可变集合, 否则会报错;
+     示例
+     s1 = {3, 4, 5, 6}
+     s2 = {1, 2, 3, 4}
+     s1.intersection_update(s2)
+     print(s1, s2)              # {3, 4} {1, 2, 3, 4}
+     
+     
+     并集
+     union()  返回并集
+     逻辑或'|' 返回并集
+     update() 更新并集
+     
+     
+     差集
+     difference()         返回差集
+     算术运算符'-'          返回差集
+     difference_update()  更新差集
+     
+     
+     判定
+     isdisjoint()   两个集合是否相交, 相交返回False, 不相交返回True
+     issuperset()   一个集合是否包含另一个集合, 或者是否是另一个集合的父集合, 是则返回True, 否则返回False
+     issubset()     一个集合包含于另一个集合, 或者是否是另一个集合的子集和, 是则返回True, 否则返回False
+     ```
+
+     
+
+###### 时间日历
+
+Python程序能用很多方式处理日期和时间, 转换日期格式是一个常见的功能
+
+**常用操作**
+
+- `time` 模块
+
+  提供了处理时间和表示之间转换的功能, 使用下列函数前都需要添加语句 `import time` 表示引用模块
+
+  - 获取当前的时间戳
+
+    概念: 从0时区的1970年1月1日0时0分0秒, 到所给定日期时间的秒数;
+
+    类型: 浮点数
+
+    获取方式: `time.time()`
+
+  - 获取时间元组
+
+    概念: 很多python时间函数将时间处理为9个数字的元组, 见图
+
+    <img src="C:\Users\ygtrece\AppData\Roaming\Typora\typora-user-images\image-20230502232002949.png" alt="image-20230502232002949" style="zoom:50%;" align="center"/>
+
+    获取方式: `time.localtime([seconds])`
+
+    参数: `seconds` 可选的时间戳, 默认是当前的时间戳
+
+    ```python
+    import time
+    print(time.localtime())
+    # output
+    time.struct_time(tm_year=2023, tm_mon=5, tm_mday=2, tm_hour=23, tm_min=21, tm_sec=51, tm_wday=1, tm_yday=122, tm_isdst=0)
+    ```
+
+  - 获取格式化时间
+
+    - 时间戳格式化. 获取方式: `time.ctime([seconds])`
+
+    - 时间元组格式化. 获取方式: `time.asctime([p_tuple])`
+
+      参数: `p_tuple` 可选的时间元组, 默认是当前的时间元组
+
+  - 格式化日期字符串
+
+    - 时间元组转为格式化日期
+
+      实现方式: `time.strftime(string, p_tuple)` 
+
+      ```python
+      import time
+      print(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()))
+      print(time.strftime("%y-%m-%d %H:%M:%S", time.localtime()))
+      # output
+      2023-05-02 23:33:13
+      23-05-02 23:33:13
+      ```
+
+      常用格式符
+
+      ```python
+      %Y: 返回四位数格式的年份。在我们的例子中，它返回 “2018”
+      %y: 返回两位数格式的年份，例如，”18“ 而不是 ”2018“
+      %b: 返回月份名称的前三个字符。在我们的例子中，它返回 “Sep”
+      %d: 返回本月的日期，从 1 到 31。在我们的例子中，它返回 “15”
+      %H: 返回小时。在我们的例子中，它返回 “00”
+      %M: 返回分钟，从 00 到 59。在我们的例子中，它返回 “00”
+      %S: 返回秒，从 00 到 59。在我们的例子中，它返回 “00”
+      %a: 返回工作日的前三个字符，例如 Wed
+      %A: 返回返回工作日的全名，例如 Wednesday
+      %B: 返回月份的全名，例如 September
+      %w: 返回工作日作为数字，从 0 到 6，周日为 0
+      %m: 将月份作为数字返回，从 01 到 12
+      %p: 返回 AM/PM 标识
+      %f: 返回从 000000 到 999999 的微秒
+      %Z: 返回时区
+      %z: 返回 UTC 偏移量
+      %j: 返回当年的日期编号，从 001 到 366。
+      %W: 返回年份的周数，从 00 到 53。星期一被记为一周第一天
+      %U: 返回年份的周数，从 00 到 53。星期日被记为一周第一天
+      %c: 返回本地日期和时间版本
+      %x: 返回本地日期版本
+      %X: 返回本地时间版本
+      ```
+
+    - 格式化日期改为时间元组
+
+      实现方式: `time.strptime(string, format)` 
+
+      也可将时间元组再转回时间戳: `time.mktime(t_tuple)` 
+
+      ```python
+      import time
+      t1 = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
+      t2 = time.strptime(t1, "%Y-%m-%d %H:%M:%S")
+      t3 = time.mktime(t2)
+      print(t1)
+      print(t2)
+      print(t3)
+      # output
+      2023-05-02 23:54:18
+      time.struct_time(tm_year=2023, tm_mon=5, tm_mday=2, tm_hour=23, tm_min=54, tm_sec=18, tm_wday=1, tm_yday=122, tm_isdst=-1)
+      1683042858.0
+      ```
+
+  - 获取当前 CPU 时间
+
+    获取方式: `time.perf_counter()` 
+
+    ```python
+    import time
+    start = time.perf_counter()
+    for i in range(0, 10000):
+        pass
+    end = time.perf_counter()
+    print(end - start)
+    # output
+    0.0004401000333018601
+    ```
+
+  - 休眠
+
+    推迟线程的执行, 可简单理解为, 让程序暂停
+
+    实现方式: `time.sleep(secs)`
+
+    ```python
+    import time
+    while True:
+        print(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()))
+        time.sleep(1)
+    # output
+    2023-05-03 00:02:04
+    2023-05-03 00:02:05
+    2023-05-03 00:02:06
+    ...
+    ```
+
+
+
+- `calendar` 模块
+
+  提供与日历相关的动能, 例如为给定的月份或年份打印文本日历的功能; 使用前要添加 `import calendar` 
+
+  获取某月日历实现方式: `calendar.month(2023, 5)` 
+
+  ```python
+  import calendar
+  print(calendar.month(2023, 5))
+  #output
+        May 2023
+  Mo Tu We Th Fr Sa Su
+   1  2  3  4  5  6  7
+   8  9 10 11 12 13 14
+  15 16 17 18 19 20 21
+  22 23 24 25 26 27 28
+  29 30 31
+  
+  ```
+
+
+
+- `datetime` 模块
+
+  Python 处理日期和时间的标准库, 这个模块里面有 `datetime` 类, 此外常用的还有 `date` 类, 以及 `time` 类, 可以做一些计算之类的操作
+
+  - 获取当天日期
+
+    ```python
+    import datetime
+    print(datetime.datetime.now())
+    print(datetime.datetime.today())
+    # output
+    2023-05-03 00:11:13.718011
+    2023-05-03 00:11:13.718989
+    ```
+
+  - 单独获取当天的年月日时分秒
+
+    ```python
+    import datetime
+    t = datetime.datetime.now()
+    print(t, type(t))
+    print(t.year)
+    print(t.minute)
+    # output
+    2023-05-03 00:15:43.063749 <class 'datetime.datetime'>
+    2023
+    15
+    ```
+
+  - 计算 n 天之后的日期
+
+    ```python
+    import datetime
+    t = datetime.datetime.now()
+    tt = t + datetime.timedelta(days=7)
+    print(t)
+    print(tt)
+    # output
+    2023-05-03 00:21:42.325113
+    2023-05-10 00:21:42.325113
+    ```
+
+  - 获取两个日期时间的时间差
+
+    ```python
+    import datetime
+    start = datetime.datetime(2023, 5, 3, 0, 23, 0)
+    end = datetime.datetime(2023, 11, 10, 0, 0, 0)
+    res = end - start
+    print(res, type(res))
+    print(res.total_seconds())
+    # output
+    190 days, 23:37:00 <class 'datetime.timedelta'>
+    16501020.0
+    ```
+
+    
+
+#### 函数
+
+**分类:** 内建函数, 三方函数, 自定义函数
+
+**定义**
+
+```python
+def name():
+	pass
+```
+
+**参数**
+
+- 多个参数调用
+
+    ```python
+    方式1
+    function(p1, p2, p3...)    # 形参与实参一一对应
+    
+    方式2
+    function(name1 = p1, name2 = p2...)  # 可以指明形参名称, 称为"关键字参数", 不需要严格按照顺序
+    ```
+
+- 不定长参数
+
+    场景: 如果函数体中, 需要处理的数据不确定长度, 则可以以不定长参数的方式接收数据
+
+    实现
+
+    - 方式1
+
+      定义: `def function(*args)` 
+
+      函数体中可以直接以**元组**变量的方式使用该参数, 接收参数时则是逐一接收即可; 而使用元组的原因是元组有序且不可改变, 这是函数所需要的特性
+
+      ```python
+      def col(*t):
+          print(t, type(t))
+          res = 0
+          for v in t:
+              res += v
+          print(res)
+      
+      col(1, 2, 3, 4)
+      
+      # output
+      (1, 2, 3, 4) <class 'tuple'>
+      10
+      ```
+
+    - 方式2
+
+      定义: `def function(**args)` 
+
+      函数体中可以直接以**字典**变量的方式使用该参数, 接收参数时同样逐一接受即可. 
+
+      ```python
+      def Stu(**d):
+          print(d, type(d))
+      
+      Stu(name="hh", age=19)   # key在这里不需要引号
+      
+      # output
+      {'name': 'hh', 'age': 19} <class 'dict'>
+      ```
+
+- 参数拆包
+
+    装包: 把传递的参数包装成一个集合
+
+    拆包: 把集合参数, 再次分解为单独的个体
+
+    
 
 
 

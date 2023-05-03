@@ -2749,6 +2749,84 @@ print(type(newFuncs[0]))
 [None, None, None]
 <class 'list'>
 <class 'NoneType'>
+
+
+
+# fifth example
+# 从空间地址看闭包本质
+def test():
+    funcs = []
+    for i in range(1, 4):
+        print(id(i))
+        def test2():
+            num = i
+            print(id(num))
+            print(num)
+        funcs.append(test2)
+    return funcs
+
+
+newFuncs = test()
+print(newFuncs)
+print(type(newFuncs))
+print(type(newFuncs[0]))
+newFuncs[0]()
+newFuncs[1]()
+newFuncs[2]()
+
+# output
+2465119338736
+2465119338768
+2465119338800              # i指向了3的空间地址
+[<function test.<locals>.test2 at 0x0000023DF7866170>, <function test.<locals>.test2 at 0x0000023DF7866200>, <function test.<locals>.test2 at 0x0000023DF7866290>]
+<class 'list'>
+<class 'function'>
+2465119338800              # num指向的空间和最后的i一致, 说明在这里实际已经受了闭包影响
+3
+2465119338800
+3
+2465119338800
+3
+
+
+# sixth example
+# 从空间地址看闭包本质, 本质就是变量指向数据存储空间
+def test():
+    funcs = []
+    for i in range(1, 4):
+        print("test()  running when i =", i, "  id:", id(i))
+        def test2():
+            num = i
+            print("test2() running when num =", num, "id:", id(num))
+            def inner():
+                print("inner() running ans num is", num, "id:", id(num))
+                # print(num)
+            return inner
+        funcs.append(test2())
+    return funcs
+
+
+newFuncs = test()
+print(newFuncs)
+print(type(newFuncs))
+print(type(newFuncs[0]))
+newFuncs[0]()
+newFuncs[1]()
+newFuncs[2]()
+
+# output
+test()  running when i = 1   id: 2878097981680
+test2() running when num = 1 id: 2878097981680
+test()  running when i = 2   id: 2878097981712
+test2() running when num = 2 id: 2878097981712
+test()  running when i = 3   id: 2878097981744
+test2() running when num = 3 id: 2878097981744
+[<function test.<locals>.test2.<locals>.inner at 0x0000029E1EF26200>, <function test.<locals>.test2.<locals>.inner at 0x0000029E1EF26170>, <function test.<locals>.test2.<locals>.inner at 0x0000029E1EF26290>]
+<class 'list'>
+<class 'function'>
+inner() running ans num is 1 id: 2878097981680
+inner() running ans num is 2 id: 2878097981712
+inner() running ans num is 3 id: 2878097981744
 ```
 
 

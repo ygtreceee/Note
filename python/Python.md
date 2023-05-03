@@ -1716,7 +1716,7 @@ print("I am King " * 3) #I am King I am King I am King
 
 ###### 字典
 
-概念: 无序的可变的键值对集合
+概念: **无序的可变的**键值对集合
 
 1. 定义
 
@@ -2322,7 +2322,434 @@ def name():
 
     拆包: 把集合参数, 再次分解为单独的个体
 
+    ```python
+    def Sum(*t):                # 装包
+        print(t, type(t))       
+        print(*t)               # 拆包, *t = 1, 2, 3, 4
     
+    
+    def myPrint(a, b):           # 传进来的是a和b, 所以也要是a和b的参数名接受, 若不同则会报错
+        print(a, b)
+    
+    
+    def Std(**d):
+        print(d, type(d))
+        # print(**d)              # 此处于元组拆包不同, 不能直接打印, 否则会报错, 字典拆包可用于函数传参
+        myPrint(**d)              # 效果相当于下一条语句, 要特别注意的是, 传进去的键值对的key值必须拥有接受参数的函数的参数名
+        # myPrint(a="hh", b=19)
+    
+    
+    Sum(1, 2, 3, 4)
+    Std(a="hh", b=19)
+    
+    # output
+    (1, 2, 3, 4) <class 'tuple'>
+    1 2 3 4
+    {'a': 'hh', 'b': 19} <class 'dict'>
+    hh 19
+    ```
+
+- 缺省参数
+
+    场景: 当我们使用一个函数的时候, 如果大多数情况下, 使用的某个数据是一个固定值, 或者属于主功能之外的小功能实现, 则可以使用默认值, 这种参数, 则称为"缺省参数"
+
+    定义: `def function(p1 = v1, p2 = v2): ` 
+
+    函数体中, 即使外界没有传递指定变量, 也可以使用, 只不过该值是给定的默认值
+
+    ```python
+    def fun(someone="you"):
+        print("I love", someone)
+    
+    fun()
+    fun("her")
+    
+    # output
+    I love you
+    I love her
+    ```
+
+- 参数注意
+
+    值传递和引用传递
+
+    - 值传递: 是指传递过来的, 是一个数据的副本, 修改副本, 对原件没有任何影响
+    - 引用传递: 是指传递过来的是一个变量的地址, 通过地址可以操作同一份原件
+
+    - 注意: 在 Python 中, 我们无法选择传递方式, **只有引用传递(地址传递)**, 而能否改变变量**只取决于该变量的类型**. 如果数据类型是不可变类型, 则是无法改变的, 如果是可变类型, 则可以改变. 
+
+    ```python
+    # 不可变类型
+    def change(num):
+        print(id(num))          # 1934455603824
+        num = 14                # 数值是不可变类型, 如果强行修改, 程序会自动开辟一个新的空间储存新的变量
+        print(id(num))          # 1934455603856
+    
+    
+    b = 13
+    print(id(b))                # 1934455603824
+    change(b)
+    print(b)                    # 13
+    print(id(b))                # 1934455603824
+    
+    
+    # 可变类型
+    def change(num):
+        print(id(num))          # 2154446641728
+        num.append(5)           # 列表是可变类型, 可直接修改, 地址不会改变
+        print(id(num))          # 2154446641728
+    
+    
+    a = [1, 2, 3]
+    print(id(a))                # 2154446641728
+    change(a)
+    print(a)                    # [1, 2, 3, 5]
+    print(id(a))                # 2154446641728
+    ```
+
+    
+
+**返回值**
+
+`return` 
+
+注意: 
+
+1. `return` 后续代码不会被执行
+2. 只能返回一次
+3. 如果想要返回多个数据, 可先把多个数据包装成一个集合 (列表, 元组, 字典...) , 整体返回.
+
+```python
+def cal(a, b):
+    return (a + b, a - b, a * b, a / b)   # 包装成元组
+
+print(cal(3, 4))                          # (7, -1, 12, 0.75)
+v1, v2, v3, v4 = cal(3, 4)                # 拆包
+print(v1, v2, v3, v4)                     # 7 -1 12 0.75    
+```
+
+
+
+**使用描述**
+
+场景: 当我们编写三方函数, 为了方便他人使用, 就需要描述清楚我们所写的函数功能以及使用方式等信息
+
+格式: 直接在函数体的最上边, 添加三个引号对注释
+
+```python
+def function():
+	"""
+	Exegesis
+	"""
+	pass
+```
+
+查看函数使用文档: `help(function)` 
+
+```python
+help(print)
+# output
+Help on built-in function print in module builtins:
+
+print(...)
+    print(value, ..., sep=' ', end='\n', file=sys.stdout, flush=False)
+
+    Prints the values to a stream, or to sys.stdout by default.
+    Optional keyword arguments:
+    file:  a file-like object (stream); defaults to the current sys.stdout.
+    sep:   string inserted between values, default a space.
+    end:   string appended after the last value, default a newline.
+    flush: whether to forcibly flush the stream.
+
+```
+
+规范
+
+一般函数的描述, 需要说明如下信息
+
+1. 函数的功能
+2. 函数的参数: 含义, 类型, 是否可以省略, 默认值
+3. 函数返回值; 含义, 类型
+
+
+
+**偏函数**
+
+概念: 当我们写一个参数比较多的函数时, 如果有些参数, 不同使用下需要固定不同的值, 那么为了简化使用, 就可以创建多个新函数, 并在不同的新函数中固定不同的参数; 或者, 某个函数的某个参数在大部分情况下都是一个固定的值, 我们也可以利用创建新函数, 新函数中对该参数固定一个值; 这个新函数就是"偏函数"
+
+语法
+
+```python
+#
+import functools
+
+
+def cal(a, b, c, d):
+    print(a + b + c + d)
+
+
+newFunc1 = functools.partial(cal, d=1)      # 固定我们所需要固定的值
+newFunc2 = functools.partial(cal, d=2)
+newFunc1(1, 2, 3)              # 7
+newFunc2(1, 2, 3)              # 8
+print(newFunc2)                # functools.partial(<function cal at 0x000002964CBC6050>, d=2)
+
+
+#
+import functools
+
+new_int = functools.partial(int, base=2)   # 创建一个函数,能将二进制的字符串转变为十进制数据,这样可以不必每次都写base=2
+print(new_int("10010"))        # 18
+```
+
+
+
+**高阶函数**
+
+概念: 当一个函数 A 的参数, 接受的又是另一个函数时, 则把这个函数 A 称为是 "高阶函数"
+
+例如: `sorted(iterable, key, reverse)` , 其中的 `key` , 就是需要接收一个排序函数
+
+```python
+#
+# mems = [("s1", 14), ("s3", 19), ("s2", 15), ("s4", 20)]
+mems = [{"name": "aa", "age": 17}, {"name": "bb", "age": 15}, {"name": "cc", "age": 19}]
+
+
+def getKey(x):
+    return x["age"]       # mems列表元素是字典, 无法直接比较(字典无序), 需要将成员传入函数, 返回需要比较的值
+    
+    
+print(sorted(mems, key=getKey))      # key在这里就是高阶函数
+
+#
+def add(a, b):
+    print(a + b)
+
+
+def sub(a, b):
+    print(a - b)
+
+
+def cal(a, b, func):
+    func(a, b)
+
+
+cal(1, 2, add)            # 3
+cal(1, 2, sub)            # -1
+```
+
+
+
+**返回函数**
+
+概念: 是指一个函数内部, 它返回的数据是另一个函数, 把这样的操作称为 "返回函数", **可以认为函数也是一种数据变量, 可以赋予, 可以返回**
+
+```python
+def getFunc(flag):
+    def add(a, b):
+        return a + b
+    def sub(a, b):
+        return a - b
+    if flag == '+':
+        return add
+    elif flag == '-':
+        return sub
+
+
+func = getFunc('+')
+print(func, type(func))         # <function getFunc.<locals>.add at 0x000002319E366170> <class 'function'>
+print(func(1, 2))               # 3
+```
+
+
+
+**匿名函数**
+
+概念: 顾名思义就是没有名字的函数, 也称为 "lambda函数" 
+
+语法: `lambda 参数1, 参数2, ...: 表达式`
+
+限制: 只能写一个表达式, 不能直接 `return` , 而表达式的结果就是返回值, 所以只适用于一些简单的操作处理或简短的函数
+
+```python
+mems = [{"name": "aa", "age": 17}, {"name": "bb", "age": 15}, {"name": "cc", "age": 19}]
+print(sorted(mems, key=lambda x: x["name"]))
+# output
+[{'name': 'aa', 'age': 17}, {'name': 'bb', 'age': 15}, {'name': 'cc', 'age': 19}]
+```
+
+
+
+**闭包**
+
+概念: 在函数嵌套的前提下, 内层函数引用了外层函数的变量(包括参数); 与此同时, 外层函数又把内层函数当作返回值进行返回, 这个内层函数加上所引用的外层变量, 称为"闭包"
+
+标准格式: 
+
+```python
+def test1(a):            # 外层函数
+	b = 13
+	def test2():         # 内层函数
+		print(a, b)      # 内层函数引用了外层函数变量(包括参数)
+	return test2         # 外层函数将内层函数当作返回值进行返回
+```
+
+应用场景: 外层函数, 根据不同的参数, 来生成不同作用功能的函数
+
+案例: 根据配置信息, 生成不同的分割线函数
+
+```python
+def line_config(content, length):
+    def line():
+        print("-" * (length // 2) + content + "-" * (length // 2))
+    return line
+
+func = line_config("bibao", 20)            # 生成函数
+func()                                     # 多次使用时, 不用再传参, 直接使用生成过的函数
+func()
+# output
+----------bibao----------
+----------bibao----------
+```
+
+注意事项: 
+
+1. 闭包中, 如果要修改引用的外层变量, 需要使用 `nonlocal` 进行变量声明, 否则当作是闭包内新定义的变量, 即不同于地址传递
+
+```python
+def test():
+   num1 = 10
+   num2 = 15
+   def test2():
+       nonlocal num2
+       num1 = 13
+       num2 = 19
+       print(num1, num2)           # 13 19
+   print(num1, num2)               # 10 15
+   test2()
+   print(num1, num2)               # 10 19
+
+test()
+```
+
+2. 当闭包内引用了一个后期会发生变化的变量时, 一定要注意变量和函数所形成的闭包关系
+
+```python
+# first example
+# 这个例子中for循环产生的闭包, 都是共用变量i的, 所以最后执行的时候只取决于最后i的值
+def test():
+    funcs = []
+    for i in range(1, 4):
+        def test2():
+            print(i)
+        funcs.append(test2)
+    return funcs
+
+
+newFuncs = test()
+print(newFuncs)
+print(type(newFuncs))
+print(type(newFuncs[0]))
+newFuncs[0]()
+newFuncs[1]()
+newFuncs[2]()
+
+
+# output
+[<function test.<locals>.test2 at 0x0000023A60506170>, <function test.<locals>.test2 at 0x0000023A60506200>, <function test.<locals>.test2 at 0x0000023A60506290>]
+<class 'list'>
+<class 'function'>
+3
+3
+3
+
+
+
+# second example
+# 这个例子是执行test2()函数, 而test2()函数内又返回一个inner()函数, 因此将inner()函数传给了funcs, 后面调用时, inner()去在它所属的闭包内寻找num变量的值, 而在每个闭包所属的空间中, num的值都是不同的, 所以输出的结果是不同的; 在这里, 我们一定要理解, 每个闭包都有自己的num和inner(), 也就是说每个循环都产生一个新的闭包, 这里从每个inner()的存储地址都是不同的就可以看出, 然后每个inner()再去寻找自己闭包对应的num, 所以每次结果是不同的.
+def test():
+    funcs = []
+    for i in range(1, 4):
+        def test2(num):
+            num = i
+            def inner():
+                print(num)
+            return inner
+        funcs.append(test2(i))
+    return funcs
+
+
+newFuncs = test()
+print(newFuncs)
+print(type(newFuncs))
+print(type(newFuncs[0]))
+newFuncs[0]()
+newFuncs[1]()
+newFuncs[2]()
+
+# output
+[<function test.<locals>.test2.<locals>.inner at 0x0000023DCBDD2200>, <function test.<locals>.test2.<locals>.inner at 0x0000023DCBDD2170>, <function test.<locals>.test2.<locals>.inner at 0x0000023DCBDD2290>]
+<class 'list'>
+<class 'function'>
+1
+2
+3
+
+
+# third example
+# 这里例子中, 由于test2(i)在执行时, 我们选择直接执行inner()函数, 所以funcs得到的是None, 而在执行时, inner()函数与外层的test2()函数的num变量形成了一个闭包, 所以inner()函数中的num取决于闭包内此时的num, 即num = i, 其实本质上这就是每次都直接执行inner()函数
+def test():
+    funcs = []
+    for i in range(1, 4):
+        def test2(num):
+            num = i
+            def inner():
+                print(num)
+            inner()
+            # return inner
+        funcs.append(test2(i))
+    return funcs
+
+
+newFuncs = test()
+print(newFuncs)
+print(type(newFuncs))
+print(type(newFuncs[0]))
+
+# output
+1
+2
+3
+[None, None, None]
+<class 'list'>
+<class 'NoneType'>
+
+
+# fourth example
+# 这个例子也是利用了test2()函数和test()函数的i变量形成的闭包, 直接执行, 每次执行时i取决于闭包内此时的i变量
+def test():
+    funcs = []
+    for i in range(1, 4):
+        def test2():
+            print(i)
+        funcs.append(test2())  # test2()是执行函数, test2是传递函数, 注意写法不同导致的作用不同
+    return funcs
+
+
+newFuncs = test()
+print(newFuncs)
+print(type(newFuncs))
+print(type(newFuncs[0]))
+
+# output
+1
+2
+3
+[None, None, None]
+<class 'list'>
+<class 'NoneType'>
+```
 
 
 

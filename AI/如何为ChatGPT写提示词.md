@@ -22,7 +22,7 @@ There's a lot of material to cover. First you'll learn some prompting best pract
 
 So in the development of large language models or LLMs, there have been broadly two types of LLMs, which I'm going to refer to as **base LLMs** and **instruction tuned LLMs**. 
 
-So base OMS has been trained to predict the next word based on text training data. Often trained on a large amount of data from the internet and other sources to figure out what's the next most likely word to follow. So for example, if you were to prompt this "once upon a time there was a unicorn", it may complete this, that is it may predict the next several words are "That live in a magical forest with all unicorn friends". But if you were to prompt this with "what is the capital of France", then based on what articles on the internet might have, it's quite possible that a base LLMs will complete this with "What is France's largest city", "what is France's population" and so on. Because articles on the internet could quite plausibly be lists of quiz questions about the country of France.
+So base LLM has been trained to predict the next word based on text training data. Often trained on a large amount of data from the internet and other sources to figure out what's the next most likely word to follow. So for example, if you were to prompt this "once upon a time there was a unicorn", it may complete this, that is it may predict the next several words are "That live in a magical forest with all unicorn friends". But if you were to prompt this with "what is the capital of France", then based on what articles on the internet might have, it's quite possible that a base LLMs will complete this with "What is France's largest city", "what is France's population" and so on. Because articles on the internet could quite plausibly be lists of quiz questions about the country of France.
 
 In contrast, an instruction tuned LLMs, which is where a lot of momentum of LLMs research and practice has been going. An instruction tuned LLMs has been trained to follow instructions, so if you were to ask it "what is the capital of France" is much more likely to output something like the capital of France is Paris.
 
@@ -98,7 +98,7 @@ This is an example of where the model kind of confabulates a description of a ma
 
 ## Iterative
 
-When I've been building applications with large language models, I don't think I've ever come to the prompt that I ended up using in the final application on my first attempt. And this isn't what matters. As long as you have a good process to iteratively make your prompt better, then you'll be able to come to something that works well for the task you want to achieve. 
+​	
 
 You may have heard me say that when I train a machine learning model, it almost never works the first time. In fact, I'm very surprised if the first model I train works. I think we're prompting, the odds of it working the first time is maybe a little bit higher, but as he's saying, it doesn't matter if the first prompt works. What matters most is the process for getting to the prompts that work for your application. So with that, let's jump into the code and let me show you some frameworks to think about how to iteratively develop a prompt. 
 

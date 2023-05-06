@@ -2436,7 +2436,362 @@ int main()
 }
 ```
 
+23.3.5
 
+总结: 
+
+当我们创建的类中有适用于动态开辟空间的指针, 且析构函数写了 `delete` 时, 我们在整个程序中的任何地方, 都不适宜用浅拷贝, 而是要采用深拷贝, 当一个类中存在另一个类的对象时, 在构造函数中我们要使用一个 `: name(v1, v2) ` , 具体请看 `D` 题
+
+代码
+
+```c++
+//A
+#include <bits/stdc++.h>
+using namespace std;
+class CVector
+{
+    int *data;
+    int n;
+public:
+    CVector()
+    {
+        n = 5;
+        data = new int[5];
+        for (int i = 0; i < n; i++) data[i] = i;
+    }
+    CVector(int _n, int *_data)
+    {
+        n = _n;
+        data = new int[n];
+        for (int i = 0; i < n; i++)
+            data[i] = _data[i];
+    }
+    void myPrint()
+    {
+        for (int i = 0; i < n; i++) 
+            printf(" %d" + !i, data[i]);
+        printf("\n");
+    }
+    ~CVector() {};
+};
+int main()
+{
+    int n; cin >> n;
+    int *p;
+    p = new int[n];
+    for (int i = 0; i < n; i++) cin >> p[i];
+    CVector c1 = CVector();
+    c1.myPrint();
+    CVector c2 = CVector(n, p);
+    c2.myPrint();
+    return 0;
+}
+
+
+//B
+#include <bits/stdc++.h>
+using namespace std;
+class CVector
+{
+    int *data;
+    int n;
+public:
+    CVector()
+    {
+        n = 5;
+        data = new int[5];
+        for (int i = 0; i < n; i++) data[i] = i;
+    }
+    CVector(int _n, int *_data)
+    {
+        n = _n;
+        data = new int[n];
+        for (int i = 0; i < n; i++)
+            data[i] = _data[i];
+    }
+    void myPrint()
+    {
+        for (int i = 0; i < n; i++) 
+            printf(" %d" + !i, data[i]);
+        printf("\n");
+    }
+    friend void add(const CVector v1, const CVector v2)
+    {
+        for (int i = 0; i < v1.n; i++)
+            v1.data[i] += v2.data[i];
+        print(v1);
+    }
+    friend void print(CVector c)
+    {
+        for (int i = 0; i < c.n; i++)
+            printf(" %d" + !i, c.data[i]);
+        printf("\n");
+    }
+    ~CVector() {};
+};
+int main()
+{
+    int t; cin >> t;
+    while (t--)
+    {    
+        int n; cin >> n;
+        int *p;
+        p = new int[n];
+        for (int i = 0; i < n; i++) cin >> p[i];
+        CVector c1 = CVector(n, p);
+        c1.myPrint();
+        for (int i = 0; i < n; i++) cin >> p[i];
+        CVector c2 = CVector(n, p);
+        c2.myPrint();
+        add(c1, c2);
+    }
+    return 0;
+}
+
+
+
+//C
+#include <bits/stdc++.h>
+using namespace std;
+class CVector
+{
+    static int sum;
+    int *data;
+    int n;
+public:
+    CVector()
+    {
+        n = 5;
+        data = new int[5];
+        for (int i = 0; i < n; i++) data[i] = i;
+    }
+    CVector(int _n, int *_data)
+    {
+        n = _n;
+        data = new int[n];
+        for (int i = 0; i < n; i++)
+            data[i] = _data[i], sum += data[i];
+    }
+    void myPrint()
+    {
+        for (int i = 0; i < n; i++) 
+            printf(" %d" + !i, data[i]);
+        printf("\n");
+    }
+    // friend void add(const CVector v1, const CVector v2)
+    // {
+    //     for (int i = 0; i < v1.n; i++)
+    //         v1.data[i] += v2.data[i];
+    //     print(v1);
+    // }
+    // friend void print(CVector c)
+    // {
+    //     for (int i = 0; i < c.n; i++)
+    //         printf(" %d" + !i, c.data[i]);
+    //     printf("\n");
+    // }
+    static void print() {cout << sum << endl;}
+    static void init() {sum = 0;}
+    ~CVector() {};
+};
+
+int CVector::sum = 0;
+
+
+int main()
+{
+    int t; cin >> t;
+    while (t--)
+    {   
+        CVector::init();
+        int m; cin >> m;
+        while (m--)
+        {
+            int n; cin >> n;
+            int *p;
+            p = new int[n];
+            for (int i = 0; i < n; i++) cin >> p[i];
+            CVector c1 = CVector(n, p);
+            c1.myPrint();
+        }
+        CVector::print();
+    }
+    return 0;
+}
+
+
+
+//D
+#include <bits/stdc++.h>
+using namespace std;
+
+class CVector
+{
+    friend class CStudent;
+    double sum;
+    int *data;
+    int n;
+public:
+    CVector()
+    {
+        n = 5;
+        sum = 0;
+        data = new int[5];
+        for (int i = 0; i < n; i++) data[i] = i;
+    }
+    CVector(int _n, int *_data, double sum = 0)
+    {
+        n = _n;
+        data = new int[n];
+        for (int i = 0; i < n; i++)
+            data[i] = _data[i], sum += data[i];
+    }
+    void myPrint()
+    {
+        for (int i = 0; i < n; i++) 
+            printf("%d ", data[i]);
+    }
+    void print() {cout << fixed << setprecision(2) << sum / n << endl;}
+    ~CVector() {delete []data;};
+};
+
+class CStudent
+{
+    string name;
+    CVector score;
+public:
+    CStudent() {}
+    CStudent(string _name, int _n, int *_data): score(_n, _data)   //深拷贝
+    {
+        // CVector score = CVector(n, a);   浅拷贝: 错误!
+        name = _name;
+        score.sum = 0;
+        for (int i = 0; i < _n; i++)
+            score.sum += _data[i];
+    }
+    void print()
+    {
+        cout << name << ' ';
+        score.myPrint();
+        score.print();
+    }
+};
+
+
+int main()
+{
+    string s;
+    while (cin >> s)
+    {   
+        int n; cin >> n;
+        int *p;
+        p = new int[n];
+        for (int i = 0; i < n; i++) cin >> p[i];
+        CStudent(s, n, p).print();
+    }
+    return 0;
+}
+
+
+
+//E
+#include <bits/stdc++.h>
+using namespace std;
+
+class CVector;
+class CMatrix
+{
+    friend class CVector;
+    int n;
+    int **data;
+public:
+    CMatrix() {}
+    CMatrix(int _n, int **_data)
+    {
+        n = _n;
+        data = new int *[n];
+        for (int i = 0; i < n; i++)
+            data[i] = new int[n];
+        for (int i = 0; i < n; i++)
+            for (int j = 0; j < n; j++)
+                // data[i][j] = _data[i][j];
+                *(*(data + i) + j) = *(*(_data + i) + j);
+    }
+    friend void mul(CVector _cv, CMatrix _cm);
+};
+
+class CVector
+{
+    int *data;
+    int n;
+public:
+    CVector()
+    {
+        n = 5;
+        data = new int[5];
+        for (int i = 0; i < n; i++)
+            data[i] = i;
+    }
+    CVector(int _n, int *_data)
+    {
+        n = _n;
+        data = new int[n];
+        for (int i = 0; i < n; i++)
+            data[i] = _data[i];
+    }
+    friend void mul(CVector _cv, CMatrix _cm)
+    {
+        for (int i = 0; i < _cv.n; i++)
+        {
+            int sum = 0;
+            for (int j = 0; j < _cv.n; j++)
+            {
+                // cout << _cv.data[j] << ' ' << _cm.data[i][j] << endl;
+                sum += (_cv.data[j] * _cm.data[i][j]);
+            }
+            printf(" %d" + !i, sum);
+        }
+        printf("\n");
+    }
+    ~CVector(){};
+};
+
+
+
+
+int main()
+{
+    int t;
+    cin >> t;
+    while (t--)
+    {
+        int n, m;
+        int **data, *p;
+        cin >> n;
+        // 先创建n行
+        data = new int *[n];
+        // 再创建n列
+        for (int i = 0; i < n; i++)
+            data[i] = new int[n];
+        // 打印矩阵
+        for (int i = 0; i < n; i++)
+            for (int j = 0; j < n; j++)
+                cin >> data[i][j];
+        CMatrix cm = CMatrix(n, data);
+        cin >> m;
+        p = new int[m];
+        for (int i = 0; i < m; i++) cin >> p[i];
+        if (n != m)
+            cout << "error" << endl;
+        else
+        {
+            CVector cv = CVector(n, p);
+            mul(cv, cm);
+        }
+    }
+    return 0;
+}
+```
 
 
 
@@ -7168,3 +7523,4 @@ for i in range(30):
 
 ```
 
+​	

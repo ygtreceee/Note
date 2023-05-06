@@ -2254,7 +2254,7 @@ Python程序能用很多方式处理日期和时间, 转换日期格式是一个
 
 **分类:** 内建函数, 三方函数, 自定义函数
 
-**定义**
+###### **定义**
 
 ```python
 def name():
@@ -2473,7 +2473,7 @@ print(...)
 
 
 
-**偏函数**
+###### **偏函数**
 
 概念: 当我们写一个参数比较多的函数时, 如果有些参数, 不同使用下需要固定不同的值, 那么为了简化使用, 就可以创建多个新函数, 并在不同的新函数中固定不同的参数; 或者, 某个函数的某个参数在大部分情况下都是一个固定的值, 我们也可以利用创建新函数, 新函数中对该参数固定一个值; 这个新函数就是"偏函数"
 
@@ -2504,7 +2504,7 @@ print(new_int("10010"))        # 18
 
 
 
-**高阶函数**
+###### **高阶函数**
 
 概念: 当一个函数 A 的参数, 接受的又是另一个函数时, 则把这个函数 A 称为是 "高阶函数"
 
@@ -2541,7 +2541,7 @@ cal(1, 2, sub)            # -1
 
 
 
-**返回函数**
+###### **返回函数**
 
 概念: 是指一个函数内部, 它返回的数据是另一个函数, 把这样的操作称为 "返回函数", **可以认为函数也是一种数据变量, 可以赋予, 可以返回**
 
@@ -2564,7 +2564,7 @@ print(func(1, 2))               # 3
 
 
 
-**匿名函数**
+###### **匿名函数**
 
 概念: 顾名思义就是没有名字的函数, 也称为 "lambda函数" 
 
@@ -2581,7 +2581,7 @@ print(sorted(mems, key=lambda x: x["name"]))
 
 
 
-**闭包**
+###### **闭包**
 
 概念: 在函数嵌套的前提下, 内层函数引用了外层函数的变量(包括参数); 与此同时, 外层函数又把内层函数当作返回值进行返回, 这个内层函数加上所引用的外层变量, 称为"闭包"
 
@@ -2828,6 +2828,176 @@ inner() running ans num is 1 id: 2878097981680
 inner() running ans num is 2 id: 2878097981712
 inner() running ans num is 3 id: 2878097981744
 ```
+
+
+
+###### **装饰器**
+
+作用: 在函数名以及函数体不改变的前提下, 给一个函数附加一个额外代码, 属于python语法糖 (Syntactic sugar) 的一种
+
+语法: 
+
+```python
+def delicate(func):
+	def inner(*args, **kwargs):
+		pass;
+		return func(*args, **kwargs);
+	return inner;
+	
+@delicate
+def func():
+	pass;
+```
+
+**本质**是为了遵循开发时下面的原则
+
+- 开放封闭原则: 已经写好的代码, 尽可能不要修改, 如果你想要新增功能, 在原先代码的基础上, 单独进行扩展
+
+- 单一职责: 每个函数都有自己对应的单一功能, 不要在其中添加额外的功能
+
+**注意**: 装饰器的执行时间, 是立即执行, 也就是说, 就算没有使用被装饰的函数, 一旦加了装饰器代码, 且运行了程序, 那函数就会被装饰
+
+实现
+
+```python
+//装饰器用法
+def check(func):
+    def inner():
+        print("what?")
+        func()
+    return inner
+
+@check
+def work():
+    print("hh")
+
+work()
+
+# output
+what?
+hh
+
+
+//上面代码等价于
+def check(func):
+    def inner():
+        print("what?")
+        func()
+    return inner
+
+def work():
+    print("hh")
+
+work = check(work)
+work()
+
+# output
+what?
+hh
+```
+
+**进阶**
+
+- 装饰器的叠加: 从上到下装饰, 从下到上执行 (从实现原理出发, 不难理解) 
+
+- 对有参函数进行装饰: 使用**不定长参数**
+
+  ```python
+  def delc(func):
+      def inner(*args, **kwargs):   # 约定俗成的参数名称, 分别代表元组和字典, 且作用是装包
+          print("hh")
+          func(*args, **kwargs)    # 怎样装包就怎样拆包
+      return inner
+  
+  
+  @delc
+  def func1(n1, n2, name):
+      print(n1, n2, name)
+  
+  
+  @delc
+  def func2(n1, n2):
+      print(n1, n2)
+  
+  
+  func1(1, 2, name='kk')
+  func2(3, 4)
+  
+  # output
+  hh
+  1 2 kk
+  hh
+  3 4
+  ```
+
+- 对有返回值的函数进行装饰
+
+  **原理剖析**: 在这里其实就可以对装饰器的本质有更深的理解: 首先是 `func1()` 指向函数的空间地址, 然后装饰器生效后, 调用 `delc()` 函数, `func` 和 `func1` 一样, 都指向了 `func1` 函数的空间地址, 而 `func1` 被 `delc` 返回的 `inner` 函数的空间地址赋值, 所以 `func1` 指向了 `inner` 函数的空间地址, 然后运行 `func1()` 时, 实质上是执行 `inner()` 函数, 然后 `inner()` 函数里面的 `func()` 执行的是 `func1` 原本指向的函数, 其返回的返回值再交给 `inner()` 返回; 所以我们在书写
+
+  ```python
+  def delc(func):
+      def inner(*args, **kwargs):
+          print("hh")
+          return func(*args, **kwargs)   # 必须对应的对函数返回的结果进行返回
+      return inner
+  
+  
+  @delc
+  def func1(n1, n2, n3):
+      print(n1, n2, n3)
+      return n1 + n2 + n3
+  
+  
+  res1 = func1(1, 2, 9)
+  print(res1)
+  
+  # output
+  hh
+  1 2 9
+  12
+  ```
+
+- 带有参数的装饰器
+
+  当我们需要传递参数给装饰器时, 由于原有的装饰器和语法糖格式无法改变, 所以我们可以给原本的装饰器的外面定义一个外部函数接受参数, 该函数返回的是装饰器
+
+  ```python
+  def getdelc(char):         # 接收参数
+      def delc(func):
+          def inner(*args, **kwargs):
+              print("hh", 'k' * 7)
+              return func(*args, **kwargs)
+          return inner
+      return delc            # 返回装饰器
+  
+  
+  
+  @getdelc('k')              # 写法有所不同
+  def func1(n1, n2, n3):
+      print(n1, n2, n3)
+      return n1 + n2 + n3
+  
+  
+  res1 = func1(1, 2, 9)
+  print(res1)
+  
+  # output
+  hh kkkkkkk
+  1 2 9
+  12
+  ```
+
+
+
+###### 生成器
+
+概念: 是一种特殊的迭代器 (迭代器的抽象层级更高) , 所以, 拥有迭代器的特性, 但是, 如果打造一个自己的迭代器, 比较复杂, 需要是心啊很多方法, 故有一个更加优雅的方式 "生成器" 
+
+拥有的迭代器的特性: 
+
+- 惰性计算数据, 节省内存
+- 能够记录状态, 并通过 `next()` 函数, 访问下一个状态
+- 具备可迭代特性
 
 
 

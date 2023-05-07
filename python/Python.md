@@ -2617,6 +2617,8 @@ func()
 
 1. 闭包中, 如果要修改引用的外层变量, 需要使用 `nonlocal` 进行变量声明, 否则当作是闭包内新定义的变量, 即不同于地址传递
 
+   特别注意: `nonlocal` 仅仅适用于内层函数对应外层函数的闭包, 仅仅一层函数时不可以使用这个声明! 
+
 ```python
 def test():
    num1 = 10
@@ -2991,13 +2993,331 @@ hh
 
 ###### 生成器
 
-概念: 是一种特殊的迭代器 (迭代器的抽象层级更高) , 所以, 拥有迭代器的特性, 但是, 如果打造一个自己的迭代器, 比较复杂, 需要是心啊很多方法, 故有一个更加优雅的方式 "生成器" 
+1. **概念**: 是一种特殊的迭代器 (迭代器的抽象层级更高) , 所以, 拥有迭代器的特性, 但是, 如果打造一个自己的迭代器, 比较复杂, 需要实现很多方法, 故有一个更加优雅的方式 "生成器" 
 
 拥有的迭代器的特性: 
 
 - 惰性计算数据, 节省内存
 - 能够记录状态, 并通过 `next()` 函数, 访问下一个状态
 - 具备可迭代特性
+
+2. **创建方式**
+
+- 生成器表达式: 把列表推导式的 `[]` 修改成 `()` 
+
+  ```python
+  gt = (i for i in range(0, 10000) if i % 2 == 1)
+  print(gt)                  # <generator object <genexpr> at 0x000001C958C57ED0>
+  print(next(gt))            # 1
+  print(gt.__next__())        # 3
+  
+  # or
+  # for i in gt:
+  #	 pass
+  ```
+
+- 生成函数: 函数中包含 `yield` 语句, 这个函数的执行结果就是"生成器"
+
+  `yield` : 可以阻断当前函数的执行, 然后当使用 `next()` 函数或者 `__next__()` 都会让函数继续执行, 直至下一个 `yield` 语句, 才会被挂起暂停
+
+  ```python
+  # example 1
+  def gen():
+      print("xx")
+      yield 1
+      print("xxx")
+      yield 2
+      print("xxxx")
+      yield 3
+      print("xxxxx")
+      yield 4
+  
+  
+  t = gen()         # 执行函数, 产生一个生成器, 而函数里面的代码不会执行
+  print(t)
+  print(next(t))
+  print(t.__next__())
+  r = gen()         # 执行函数, 又能够重新产生一个新的生成器
+  
+  # output
+  <generator object gen at 0x0000029491144040>
+  xx
+  1                 # 还会紧跟着打出此时的状态值
+  xxx
+  2
+  
+  
+  
+  # example 2
+  def gen():
+      for i in range(0, 10):
+          yield i
+      
+  
+  t = gen()
+  for i in range(0, 5):
+      print(next(t))
+      
+  # output
+  0
+  1
+  2
+  3
+  4
+  ```
+
+3. **产生数据的方式**
+
+生成器具有可迭代性, 故可用 `next() ` 或者 `__next__()` 函数, 或 `for in ` 访问
+
+`next()` 和 `__next__` : 遇到对应的 `yield` 就挂起
+
+`for in` : 遇到下一个 `yield` 前才挂起
+
+```python
+# for in 访问与next()或__next__()有所不同, 它能够
+def test():
+    print("hh")
+    yield 1
+    print("x")
+    yield 2
+    print("xx")
+    yield 3
+    print("xxx")
+
+
+g = test()
+for i in g:
+    print(i)
+
+# output
+hh
+1
+x
+2
+xx
+3
+xxx         # 在这里, 它能够打印出最后一个yield后面的部分, 且不报错, 与next()或__next()__有所区别
+```
+
+4. **`send` 方法**
+
+`send` 方法有一个参数, 指定的是上一个被挂起的 `yield` 语句的返回值, 相比于 `__next__` , 可以额外的给 `yield` 传值
+
+注意: 如果不存在上一个 `yield` , 即第一次调用时, 则要写成 `send(None)` , 即表示是个空值, 如果强行赋值则会报错; 当然, 存在上一个 `yield` 时, 我们写为 `send(None)` 也可以, 虽然没有意义
+
+```python
+def test():
+    res1 = yield 1
+    print(res1)
+    res2 = yield 2
+    print(res2)
+    res3 = yield 3
+    print(res3)
+
+
+g = test()
+print(next(g))
+print(g.__next__())
+print(g.send("xxx"))           # 给上一个yield, 也就是yield 2赋值
+
+# output
+1
+None
+2
+xxx
+3
+```
+
+5. **关闭生成器**
+
+`g.close()` : 后续如果继续调用, 会抛出 `StopIteration` 异常提示
+
+6. **注意**
+
+- 如果碰到 `return` , 会直接终止, 抛出 `StopIteration` 异常提示
+
+  ```python
+  def test():
+      print("xx")
+      yield 1
+      print("xxx")
+      return 9
+      yield 2
+  
+  g = test()
+  print(g.__next__())
+  print(g.__next__())
+  
+  # output
+  xx
+  1
+  xxx
+  Error: StopIteration: 9
+  ```
+
+- 生成器只会遍历一次
+
+
+
+
+
+###### 函数作用域
+
+1. **概念**: 变量的作用域就是变量的作用范围, 或是可操作范围. Python 是静态作用域, 也就是说变量的作用域源于它在代码中的位置, 在不同的位置, 可能有不同的命名空间
+
+​		**命名空间**: 是作用域的体现形式, 不同的具体的操作范围
+
+2. **Python-LEGB:**
+
+    Python中的变量解析顺序（Variable Resolution Order）被称为**LEGB规则**，其中LEGB是一个缩写，分别表示 **Local、Enclosing、Global 和 Built-in** 四个作用域。
+
+    - Local: 指代函数内的作用域, 也就是局部变量. 作用范围: 当前整个函数体范围
+    - Enclosing: 指代函数内部嵌套函数的作用域, 也就是嵌套作用域. 作用范围: 闭包函数
+    - Global: 指代模块的作用域, 也就是全局变量. 作用范围: 当前模块(文件)
+    - Built-in: 指代Python内置模块的作用域, 也就是内置变量和函数. 作用范围: 所有模块(文件)
+
+    如果一个变量在当前作用域找不到, Python会按照上述顺序依次进行查找, 直到找到为止. 如果还是找不到, 则会抛出 NameError 异常。
+
+    注意: Python 中**没有块级作用域** (块级作用域: 代码块中, 比如 `if` , `while` , `for` 后的代码块)
+
+3. **基于命名空间的常见变量类型:**
+
+	- **局部变量**: 在一个函数内部定义的变量; 作用域为函数内部
+	
+	  查看局部变量: `locals()` 
+	
+	- **全局变量**: 在函数外部, 文件最外层定义的变量; 作用域为整个文件内部
+	
+	  查看全局变量: `globals()` 
+	
+	  ```python
+	  print(globals())
+	  print(locals())
+	  ```
+	
+	- **注意**
+	
+	  - 访问原则: 从内到外
+	  - 结构规范
+	  - 命名: 一般全局变量名前会加 `g_` , 便于了解
+	
+	-  `global` 和 `nonlocal` 的使用区别
+	
+	  在Python中，`nonlocal`和`global`关键字都用于修改变量作用域, 但是它们的使用方式和作用范围是不同的
+	
+	  `nonlocal`: `nonlocal`是Python 3新增的关键字, 用于指示变量在外层的封闭函数作用域中声明. 在函数内部使用`nonlocal`关键字声明的变量, 可以从内层函数中访问并修改外层函数中声明的同名变量.
+	
+	  ```python
+	  def outer():
+	      x = 1
+	      def inner():
+	          nonlocal x
+	          x += 1
+	          print(x)
+	      inner()
+	  
+	  outer()  # 输出2
+	  
+	  该例子中，通过nonlocal关键字声明的变量x可以从内层函数inner中访问并修改外层函数outer中声明的同名变量x
+	  ```
+	
+	  `global`: `global`关键字用于在函数内部声明一个全局变量. 在函数内部使用`global`关键字声明的变量, 可以跨越模块级别的作用域, 对全局变量进行修改.
+	
+	  ```python
+	  x = 1
+	  def foo():
+	      global x
+	      x += 1
+	      print(x)
+	  
+	  foo()  # 输出2
+	  
+	  在上面的例子中，通过global关键字声明的变量x可以在内部函数foo中访问全局变量，并对其进行修改。需要注意的是，全局变量不推荐在函数内部声明和修改。
+	  ```
+
+
+
+
+
+#### 文件操作
+
+###### 文件
+
+- 数据存放的容器
+
+- 作用: 持久性的存储数据内容
+
+- 组成
+
+  - 文件名: 同级目录下, 不允许同名文件存在
+
+  - 扩展名: `.jpg` , `.avi` , `.doc` , `.xls` , `.html` ...  
+
+    注意: 一般不同的扩展名, 对应着不同的文件格式, 不同的文件格式有着不同的存储约定, 方便程序处理
+
+  - 文件内容
+
+    - 文本文件: `.txt` , `.doc` , `.xls` ...
+    - 二进制文件: 图片, 视频, 音乐...
+
+###### 文件使用流程
+
+- 打开: `open(file, mode)` 
+
+  语法: 
+
+  ```
+  file = open('文件路径', '模式')
+  ```
+
+  使用`open()`函数打开文件，在打开文件时需要 `file` 传递文件路径和 `mode` 指定文件打开模式。其中文件打开模式有以下几种
+
+  - `r`: 读取文件（默认值），如果文件不存在会抛出异常。
+  - `w`: 写入文件，如果文件不存在则会创建文件，如果文件存在则会截断文件。
+  - `a`: 追加写入，如果文件不存在则会创建文件。
+  - `b`: 以二进制形式打开文件。
+  - `+`: 以读写模式打开文件。
+
+- 读写: 对于打开的文件，可以使用文件对象进行读写操作。
+
+  常见的文件读写方法有：
+
+  - `read()`: 读取文件内容，可以指定读取的字符数，如果不指定则读取整个文件的内容。
+  - `readline()`: 读取文件的一行内容。
+  - `write()`: 向文件中写入内容。
+  - `writelines()`: 向文件中写入多行内容。
+
+  示例:
+
+  ```python
+  # 读取文件
+  file = open('example.txt', 'r')
+  contents = file.read()
+  print(contents)
+  file.close()
+  
+  # 写入文件
+  file = open('example.txt', 'w')
+  file.write('hello, world!')
+  file.close()
+  ```
+
+- 关闭: 使用完文件之后需要使用`close()`方法关闭文件，释放该文件所占用的资源。
+
+  ```
+  file.close()
+  ```
+
+  `with` 语句: 使用`with`语句可以自动关闭文件，不需要手动调用`close()`方法。当`with`语句与文件对象配合使用时，在语句块中对文件的操作结束后，会自动调用`close()`方法释放资源。
+
+  ```python
+  with open('example.txt', 'r') as file:
+      contents = file.read()
+      print(contents)
+  ```
+
+以上是Python中文件的基本使用流程，使用文件时需要注意关闭文件以避免资源浪费和数据丢失的情况发生。
 
 
 

@@ -2793,6 +2793,259 @@ int main()
 }
 ```
 
+23.5.10
+
+代码
+
+```c++
+//A
+#include <bits/stdc++.h>
+using namespace std;
+class CRobot
+{
+    string name;
+    char type;
+    int blood, att, def, grd;
+public:
+    CRobot() {}
+    CRobot(string _name, char _type, int _grd)
+    {
+        name = _name;
+        type = _type;
+        grd = _grd;
+        blood = att = def = 5 * grd;
+        switch (_type)
+        {
+        case 'A':
+            att = 10 * grd;
+            break;
+        case 'D':
+            def = 10 * grd;
+            break;
+        case 'H':
+            blood = 50 * grd;
+            break;
+        default:
+            break;
+        }
+    }
+    void print()
+    {
+        cout << name;
+        printf("--%c--%d--%d--%d--%d\n", type, grd, blood, att, def);
+    }
+    friend bool change(CRobot &rob, char type)
+    {
+        if (type == rob.type) return false;
+        else
+        {
+            rob = CRobot(rob.name, type, rob.grd);
+            return true;
+        }
+    }
+};
+int main()
+{
+    int t; cin >> t;
+    int cnt = 0;
+    while (t--)
+    {
+        string name;
+        char type, ch;
+        int grd;
+        cin >> name >> type >> grd;
+        CRobot rob = CRobot(name, type, grd);
+        cin >> ch;
+        if (change(rob, ch)) cnt++;
+        rob.print();
+    }
+    printf("The number of robot transform is %d\n", cnt);
+    return 0;
+}
+
+
+//B
+#include <bits/stdc++.h>
+using namespace std;
+class CVirNum;
+class CNum
+{
+    friend CVirNum;
+    int num;
+    char type;
+public:
+    CNum() {}
+    CNum(int _num, char _type): num(_num), type(_type) {}
+    friend bool _find(CVirNum &cv, int num);
+};
+class CVirNum
+{
+    CNum tnum;
+    bool status;
+    string name;
+public:
+    CVirNum() {}
+    CVirNum(int _num, char _type, bool _status, string _name): tnum(_num, _type), status(_status), name(_name)
+    {
+        cout << _num << " constructed." << endl;
+    }
+    ~CVirNum()
+    {
+        cout << tnum.num << " destructed." << endl;
+    }
+    friend bool _find(CVirNum &cv, int num)
+    {
+        if (cv.tnum.num == num)
+        {
+            printf("Phone=%d--Type=%c--State=%s--Owner=", num, cv.tnum.type, cv.status ? "use" : "unuse");
+            cout << cv.name << endl;
+            return true;
+        }
+        else return false;
+    }
+};
+int main()
+{
+    string _name;
+    char _type;
+    bool _status;
+    int _num;
+    CVirNum *p = (CVirNum *)operator new[](3 * sizeof(CVirNum));
+    for (int i = 0; i < 3; i++)
+    {
+        cin >> _num >> _type >> _status >> _name;
+        new (&p[i]) CVirNum(_num, _type, _status, _name);
+    }
+    int t; cin >> t;
+    while (t--)
+    {
+        int ret; cin >> ret;
+        for (int i = 0; i < 3; i++)
+        {
+            if (_find(p[i], ret)) break;
+            if (i == 2) cout << "wrong number." << endl;
+        }
+    }
+    for (int i = 2; i >= 0; i--)
+        p[i].~CVirNum();
+    operator delete(p);
+    return 0;
+}
+
+
+//C
+#include <bits/stdc++.h>
+using namespace std;
+class cBankAccount
+{
+    int balance;
+    double rate;
+    int id;
+    char type;
+public:
+    cBankAccount() {}
+    cBankAccount(int _balance, double _rate, int _id, char _type): balance(_balance), rate(_rate), id(_id), type(_type) {}
+    cBankAccount(const cBankAccount &c)   // 此处不加const会报错
+    {
+        balance = c.balance;
+        rate = 0.015;
+        id = c.id + 5e7;
+        type = c.type;
+    }
+    void cal()
+    {
+        balance += balance * rate;
+        printf("Account=%d--sum=%d\n", id, balance);
+    }
+    void print()
+    {
+        printf("Account=%d--%s--sum=%d--rate=%.3f\n", id, type == 'P' ? "Person": "Enterprise", balance, rate);
+    }
+    friend void solve(cBankAccount &c, char op)
+    {
+        if (op == 'C') c.cal();
+        else c.print();
+    }
+};
+int main()
+{
+    int t; cin >> t;
+    while (t--)
+    {
+        int id, balance;
+        char type;
+        cin >> id >> type >> balance;
+        cBankAccount c1 = cBankAccount(balance, 0.005, id, type);
+        // cBankAccount c2 = cBankAccount(balance, 0.015, id + 5e7, type);
+        cBankAccount c2 = cBankAccount(c1);
+        char op1, op2;
+        cin >> op1 >> op2;
+        solve(c1, op1);
+        solve(c2, op2);
+    }
+    return 0;
+}
+
+
+
+//D
+#include <bits/stdc++.h>
+using namespace std;
+class cTV
+{
+    static int cnt1, cnt2;
+    int voice;
+    int status;
+    int channel;
+public:
+    cTV() {}
+    cTV(int _chanenl)
+    {
+        channel = -channel;
+        voice = 50;
+        status = 1;
+        cnt1++; 
+    }
+    friend void change(cTV &c, int status, int channel, int voice, int id)
+    {
+        c.channel = channel;
+        c.voice += voice;
+        c.voice = min(c.voice, 100);
+        c.voice = max(c.voice, 0);
+        if (c.status != status)
+        {
+            if (c.status == 1) cnt1--, cnt2++;
+            else cnt2--, cnt1++;
+            c.status = status;
+        }
+        printf("第%d号电视机--%s模式--频道%d--音量%d\n", id, c.status == 1 ? "TV" : "DVD", c.channel, c.voice);
+    }
+    static void print()
+    {
+        printf("播放电视的电视机数量为%d\n", cnt1);
+        printf("播放DVD的电视机数量为%d\n", cnt2);
+    }
+};
+int cTV::cnt1 = 0;
+int cTV::cnt2 = 0;
+int main()
+{
+    int n; cin >> n;
+    cTV *p = new cTV[n];
+    for (int i = 0; i < n; i++) p[i] = cTV(i + 1);
+    int t; cin >> t;
+    while (t--)
+    {
+        int id, status, channel, voice;
+        cin >> id >> status >> channel >> voice;
+        change(p[id], status, channel, voice, id);
+    }
+    cTV::print();
+    delete []p;
+    return 0;
+}
+```
+
 
 
 #### 校赛

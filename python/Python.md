@@ -3510,3 +3510,306 @@ os.chdir(sys.path[0])
 ```
 
 总结: 在命令行中运行 py 文件, 工作目录取决于当前命令行所在的目录,由于通常我们会将命令行 cd 到 py 文件同目录下(这样没有执行的时候不需要敲一堆路径，python src/bala/bala/program.py 之类的), 工作目录就与 py 文件同目录, 生成的文件自然在这个目录下. 如果从 vscode 中启动，如果没有修改 launch.json 中的 cwd 的值，默认以 "${workspaceFolder}" 作为工作目录(项目根目录)，所以相对路径的起点也要从这个目录开始，需要我们手动进行修改。
+
+###### 案例
+
+1. 文件复制
+
+2. 文件分类
+
+   ```python
+   import os
+   import shutil
+   
+   path = "files"
+   if not os.path.exists(path):   # 容错处理
+       exit()
+    
+   os.chdir(path)                 # 转移当前目录
+   file_list = os.listdir("files")
+   
+   for file_name in file_list:
+       # 分解文件后缀名
+       index = file_name.rfind('.')
+       if index == -1:            # 容错处理
+           continue
+       extension = file_name(index + 1:)
+       # 不存在该目录则创建
+       if not os.path.exists(extension):
+           os.mkdir(extension)
+       # 移动到对应的目录下
+       shutil.move(file_name, extension)
+   ```
+
+3. 生成文件清单
+
+   ```python
+   # 递归
+   import os
+   def listFiles(dir):
+   	file_list = os.listdir(dir)
+   	for file_name in file_list:
+   		new_filename = dir + "/" + file_name
+           # 判定是否是目录
+   		if os.path.isdir(new_filename):
+   			print(new_filename)
+   			listFiles(new_filename)
+   		else:
+               # 打印文件名称
+   			print("\t" + file_name)
+   	print("")
+   
+   listFiles("files")
+   ```
+
+
+
+
+
+## 面向对象
+
+#### 基本理论
+
+**对象**
+
+对象是指在内存中分配的一块区域，有状态和行为。在Python中，每个对象都有自己的标识、类型和值。
+
+Python中的体现: Python是一门特别**彻底的面向对象编程** (OOP) 的语言. 其他语言可能包括基本数据类型 (int, float, bool...) 和对象类型(string, arrat...), 而Python中都是对象类型 (int, float, bool, list). 
+
+**面向对象&面向结果**
+
+Python既是面向过程的，也是面向对象的编程语言。
+
+- **面向过程编程**的核心是**过程**，是一种以顺序、选择和循环为主线的程序设计方法。其中函数是一种重要的组织代码的方式，使用函数封装代码，便于复用和维护。在Python中，使用`def`语句定义函数，对函数进行调用可以实现程序的不同功能。面向过程编程的优点是逻辑清晰，执行效率高，但是代码可读性差，并且不易扩展和维护。
+
+- **面向对象编程**的核心是**对象**，是一种以封装、继承和多态为主线的程序设计方法。其中类是一种重要的组织代码的方式，使用类可以定义对象的属性和方法，进而实现一个个具有特定功能的对象。在Python中，使用`class`语句定义类，对类进行实例化可以创建对象。面向对象编程的优点是代码可读性强，易于扩展和维护，并且易于重用代码，但是执行效率相对较低。
+
+Python是一种支持多种编程范式的语言，既可以使用面向过程的方式编写程序，也可以使用面向对象的方式编写程序。通常情况下，面向对象编程比面向过程编程更加适用于大型和复杂的程序，而面向过程编程则更加适合简单的处理过程。因此，需要根据具体的项目需求和程序规模选择合适的编程范式。
+
+
+
+#### **类**
+
+**概念**: 在Python中，面向对象的编程是通过定义类的形式来实现的，类是一种抽象数据类型，表示一类具有相同属性和行为的对象
+
+**定义**
+
+类的定义以`class`关键字开头，其后是类名，然后是一个冒号`:`，接着是类的定义体，类的定义体中可以定义类的属性和方法
+
+```python
+class Name:
+    pass
+```
+
+类的**实例化**就是创建类的一个对象。可以使用类名后面跟一对括号`()`来创建类的对象
+
+创建好对象后，可以通过对象名访问其属性和方法
+
+```python
+print(my_computer.brand)
+my_computer.describe()
+```
+
+
+
+**对象属性**
+
+- 给对象添加属性
+
+  ​	对于已经创建的对象，可以在任何时候添加属性。添加属性的方法有两种：
+
+  - 直接给对象添加属性, 可以使用`.`符号，直接给对象添加一个新属性
+
+    ```python
+    class Person:
+        pass
+    
+    person = Person()
+    person.name = "Tom"   # 直接给person对象添加一个name属性，值为"Tom"
+    ```
+
+  - 使用`setattr`函数给对象动态添加属性
+
+    `setattr`函数接受3个参数，第一个参数是要添加属性的对象，第二个参数是属性的名字，第三个参数是属性的值
+
+    ```python
+    class Person:
+        pass
+    
+    person = Person()
+    setattr(person, "age", 18)   # 动态给person对象添加一个age属性，值为18
+    ```
+
+    需要注意的是，虽然Python允许在运行时动态地给对象添加属性，但这样做可能会让代码变得难以理解和维护。最好在类的定义中指定所有属性，避免动态添加属性导致代码的不确定性。
+
+- 删除对象属性
+
+  使用 `del` 可以直接删除对象属性
+
+- 查看对象属性
+
+  在Python中，每个正常的对象都有一个字典属性 `__dict__`，它存储了该对象的所有属性。这个字典是一个包含属性名称和对应值的映射，可以通过 `__dict__` 属性来访问和更新。
+
+  ```python
+  # 例如
+  class MyClass:
+      def __init__(self):
+          self.a = 1
+          self.b = 2
+  
+  my_object = MyClass()
+  print(my_object.__dict__)
+  
+  # 运行代码会输出一个字典，里面包括了 `my_object` 的全部属性：
+  {'a': 1, 'b': 2}
+  ```
+
+  `__dict__` 属性对于动态地添加或修改对象属性非常有用，可以直接通过操作字典来完成。但是需要注意，对于某些特殊类来说，`__dict__` 属性可能会被禁用或者限制。或者说，默认来说，对于类的 `__dict__` 属性，是只读而不能修改的；对象的 `__dict__` 才可以修改
+
+  ```python
+  class Person:
+  	pass
+  
+  one = Person()
+  one.__dict__ = {"name": "hh", "age": 19}
+  print(one.name, one.age)   # hh 19
+  one.__dict__["age"] = 13
+  print(one.age)             # 13 
+  ```
+
+  
+
+**类属性**
+
+- 查看类属性
+
+  同样可以使用 `__dict__` 进行查看, 或者直接 `class.属性`  或者 `对象.属性` 
+
+  Python对象属性查找机制: **优先**到对象自身去查找属性, 找到则结束, 如果没找到, 则根据 `__class__` 找到对象的类, 在这个类中进行查找, 所以我们也可以动态修改对象 `__class__` 指向的类, 从而修改对象所属的类
+
+  ```python
+  class One:
+      pass
+  
+  class Two:
+      pass
+  
+  ret = One()
+  print(ret.__class__)       # <class '__main__.One'>
+  ret.__class__ = Two
+  print(ret.__class__)       # <class '__main__.Two'>
+  ```
+
+- 添加类属性
+
+  可以在定义类的时候直接添加, 也可以后续在实现过程中使用 `类.属性` 进行添加, 注意无法通过对象直接添加类属性
+
+- 修改类属性
+
+  使用 `类.属性` 或者 `对象.属性` 进行修改, 但是 `对象.属性` 修改时不影响类的属性, 也可以理解为对象只是自己为属性创建了一个新的值, 也就是说无法通过对象修改类属性
+
+- 删除类属性
+
+  使用`del` 删除即可, 同样无法通过类的对象删除类属性
+
+- 内存存储问题
+  - 一般情况下, 属性存储在 `__dict__` 的字典中, 有些内置对象没有这个 `__dict__` 属性; 一般对象可以直接修改 `__dict__` 属性, 但类对象的 `__dict__` 为只读, 默认无法修改, 不过可以通过 `setattr` 方法修改 
+  - 类属性被各个对象所共享
+
+- 限制类属性
+
+  在 Python 中，我们可以使用 `__slots__` 来限制一个类的属性，防止在运行时动态地给对象添加新的属性。 `__slots__` 是一个特殊的属性，它是一个类属性，定义为一个字符串列表或一个字符串元组，其中每个字符串表示一个属性名。
+
+  当一个类定义了 `__slots__` 属性时，该类的实例将不能动态地添加新的属性，只能使用 `__slots__` 中定义的属性。这样一来，实例所需要的内存空间就更小了，程序的执行速度也会更快。
+
+  例如
+
+  ```python
+  class Person:
+      __slots__ = ('name', 'age')
+      
+      def __init__(self, name, age):
+          self.name = name
+          self.age = age
+  
+  person = Person('Tom', 18)
+  person.gender = 'male'
+  #AttributeError: 'Person' object has no attribute 'gender'
+  ```
+
+  在上面的代码中，我们定义了 `Person` 类，其中 `__slots__` 属性包含了 `name` 和 `age` 两个属性。当我们尝试为 `person` 实例添加 `gender` 属性时，就会抛出 `AttributeError` 异常。因此，使用 `__slots__` 可以限制我们动态地为实例添加任意属性的能力。
+
+  需要注意的是，使用 `__slots__` 会让代码变得更加脆弱。因为实例属性的数量是限制的，所以如果你在 `__slots__` 中添加属性名时出现错误，就会导致程序运行出现各种奇怪的问题。
+
+**类和对象属性总结**:
+
+- 类本质上也属于对象, 只是在程序中, 为了区分出抽象级或者相互之间的层次, 才有类和对象的关系
+
+- 类属性和对象属性的查看, 修改, 添加和删除操作语法基本是一致的. 区别就是, 类属性的添加还可以写在类的构造中; 修改类属性, 只能通过类进行修改, 不能通过对象进行修改
+
+- 再次强调, 属性本质是存储在 `__dict__` 字典中, 访问对象属性时, 先到对象本身查找, 查找不到时, 就会在其所属的类中再继续查找; 同时, 对于一个 `对象.属性` 或者 `类.属性` , 我们在使用时, 应该清楚该语法在此处是查询, 还是修改, 抑或新增
+
+  ```python
+  class Person:
+  	age = 19
+  
+  
+  print(id(Person.age))
+  print(Person.age)      # 查询
+  one = Person()
+  print(id(one.age))
+  print(one.__dict__)    # 特别注意: 此时对象的__dict__并没有任何内容! 这也证明了上文提及的查找机制.
+  one.age = 19           # 新增
+  print(one.__dict__)    # 注意, 此处相比之前, 多了'age': 19
+  print(id(one.age))
+  one.age = 13           # 修改
+  print(one.age)
+  print(id(one.age))
+  
+  # 输出
+  2030017512240
+  19
+  2030017512240
+  {}
+  {'age': 19}
+  2030017512240
+  13
+  2030017512048
+  ```
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+类的属性和方法可以是公有的（即默认可访问），也可以是私有的（即只能在类中访问）。私有属性和方法以两个下划线`__`开头
+
+```python
+class Computer:
+    brand = "Lenovo"
+    
+    def __init__(self, price):
+        self.__price = price
+        
+    def __describe(self):
+        print(f"This is a {self.brand} computer, priced at {self.__price}.")
+
+    def describe(self):
+        self.__describe()
+        
+        
+在上面的例子中，price属性和describe方法都加上了两个下划线作为前缀，变成了私有属性和方法。私有属性和方法不能从类的外部访问，而只能从类内部访问。
+```
+
+在实际编程中，类是一个非常重要的概念，它可以将对象的属性和行为封装起来，使得代码更加可读、模块化和易于维护。

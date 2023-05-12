@@ -3046,6 +3046,504 @@ int main()
 }
 ```
 
+23.5.12
+
+总结
+
+**继承**
+
+1. 定义：继承(inheritance)机制是面向对象程序设计中使代码可以复用的最重要的手段，它允许程序员在保持原有类特性的基础上进行扩展，增加功能。这样产生的新类，称派生类（或子类），被继承的类称基类（或父类）。继承呈现了面向对象程序设计的层次结构，体现了由简单到复杂的认知过程。之前接触的复用都是函数复用，继承是类设计层次的复用。
+
+   语法: `class 新类的名字:继承方式 继承类的名字{};`
+
+   ```c++
+   class student:public human{}；
+   //student是新类的名字，public是继承方式，human是要继承的类
+   //意思就是说我定义了一个名叫 student的类 以public的方式 来继承你human
+   ```
+
+2. 继承后的子类成员访问权限
+
+![在这里插入图片描述](https://img-blog.csdnimg.cn/5a485e017c514125b2697eca37cb08be.png)
+
+​		可以理解为 `public>protectd>private`
+
+	3. 注意: 
+
+    - 基类private成员无论以什么方式继承到派生类中都是不可见的。这里的不可见是指基类的私有成员还是被继承到了派生类对象中，但是语法上限制派生类对象不管在类里面还是类外面都不能去访问它。
+    - 基类private成员在派生类中不能被访问，如果基类成员不想在派生类外直接被访问，但需要在派生类中访问，就定义为protected。可以看出保护成员限定符是因继承才出现的。
+    - 基类的私有成员在子类都是不可见；基类的其他成员在子类的访问方式就是访问限定符和继承方式中权限更小的那个（权限排序：public>protected>private）。
+    - 使用关键字class时默认的继承方式是private，使用struct时默认的继承方式是public，但最好显式地写出继承方式。
+
+	4. 子类和父类的相互赋值
+
+    - 方式1: 使用 `=` , 按照**切片原则**
+
+      ```c++
+      student st;//子类
+      human hm;//父类
+      hm = st;
+      ```
+
+    - 方式2: 引用
+
+      ```c++
+      student st;//子类
+      human& hm=st;//父类
+      ```
+
+    - 方式3: 指针
+
+      ```C++
+      student st;//子类
+      human* hm=&st;//父类
+      ```
+
+	5. 同名的成员变量, 以子类优先, 如果要访问子类的该成员变量, 则需要加上修饰 `父类::变量` 
+
+	6. 同名成员函数, 会构成隐藏, 函数的隐藏, 编译器会默认调用子类中匹配的函数. 虽然成员函数的隐藏, 只需要函数名相同就构成隐藏, 对参数列表没有要求, 如果没有编译器就会报错
+
+	7. 子类中默认的成员函数
+
+    - 构造函数
+
+      编译器会默认先调用父类的构造函数, 再调用子类的构造函数. 若自行编写了父类构造函数, 则要保证父类构造函数有效, 否则会导致父类构造失效
+
+    - 析构函数
+
+      析构函数和构造函数相反, 编译器默认先调用子类的析构函数, 再调用父类的析构函数. 注意, 千万不要在子类中调用父类的析构, 如果是指针类型, 那么同一块区域被析构两次就会造成野指针问题
+
+    - 拷贝构造
+
+      子类中调用父类的拷贝构造时, 直接传入子类对象即可, 父类的拷贝构造会通过“切片”拿到父类的那一部分
+
+    - 赋值运算符重载
+
+      子类的 `operator=` 必须要显式调用父类的 `operator=` 完成父类的赋值
+
+      因为子类和父类的运算符, 编译器默认给与了同一个名字, 所以构成了隐藏, 所以每次调用 `=` 这个赋值运算符都会一直调用子类, 会造成循环, 所以这里的赋值要直接修饰限定父类
+
+代码
+
+```c++
+//A
+#include <bits/stdc++.h>
+using namespace std;
+class CPoint
+{
+protected:
+    int x, y;
+
+public:
+    CPoint(int _x, int _y) : x(_x), y(_y) {}
+};
+class CCircle : public CPoint
+{
+protected:
+    int r;
+
+public:
+    CCircle(int _x, int _y, int _r) : CPoint(_x, _y), r(_r) {}
+    double Area()
+    {
+        return 3.14 * r * r;
+    }
+    void print()
+    {
+        cout << "Circle:(" << x << "," << y << ")," << r << endl;
+        cout << "Area:" << Area() << endl;
+    }
+};
+class CCylinder : public CCircle
+{
+protected:
+    int h;
+
+public:
+    CCylinder(int _x, int _y, int _r, int _h) : CCircle(_x, _y, _r), h(_h) {}
+    double Volume()
+    {
+        return 3.14 * r * r * h;
+    }
+    void print()
+    {
+        cout << "Cylinder:(" << x << "," << y << ")," << r << "," << h << endl;
+        cout << "Volume:" << Volume() << endl;
+    }
+};
+int main()
+{
+    int x, y, r, h;
+    cin >> x >> y >> r;
+    CCircle c1(x, y, r);
+    c1.print();
+    cin >> x >> y >> r >> h;
+    CCylinder c2(x, y, r, h);
+    c2.print();
+    return 0;
+}
+
+
+
+//B
+#include <bits/stdc++.h>
+using namespace std;
+class C2D
+{
+protected:
+    int x, y;
+public:
+    C2D(int _x, int _y): x(_x), y(_y) {}
+    double getDistance()
+    {
+        return sqrt(x * x + y * y);
+    }
+    void print()
+    {
+        cout << getDistance() << endl;
+    }
+};
+class C3D: public C2D
+{
+protected:
+    int z;
+public:
+    C3D(int _x, int _y, int _z): C2D(_x, _y), z(_z) {}
+    double getDistance()
+    {
+        return sqrt(x * x + y * y + z * z);
+    }
+    void print()
+    {
+        cout << setw(7) << getDistance() << endl;
+        // printf("%f\n", getDistance());
+    }
+};
+int main()
+{
+    int x, y, z;
+    cin >> x >> y;
+    C2D p1(x, y);
+    p1.print();
+    cin >> x >> y >> z;
+    C3D p2(x, y, z);
+    p2.print();
+    cin >> x >> y >> z;
+    C3D p3(x, y, z);
+    p3.print();
+    C2D p4 = p3;
+    p4.print();
+    return 0;
+}
+
+
+
+//C
+#include <bits/stdc++.h>
+using namespace std;
+class CCounter
+{
+protected:
+    int value;
+
+public:
+    CCounter(int v) : value(v) {}
+    void increment() { value++; }
+    int getvalue() { return value; }
+};
+class CCyclecounter : public CCounter
+{
+private:
+    int min_value, max_value;
+
+public:
+    CCyclecounter(int minv, int maxv, int v) : min_value(minv), max_value(maxv), CCounter(v) {}
+    void increment()
+    {
+        if (++value == max_value)
+            value = min_value;
+    }
+};
+class CCLOCK
+{
+private:
+    CCyclecounter hour, minute, second;
+
+public:
+    CCLOCK(int h, int m, int s) : hour(0, 24, h), minute(0, 60, m), second(0, 60, s) {}
+    void time(int s)
+    {
+        while (s--)
+        {
+            second.increment();
+            if (second.getvalue() == 0)
+            {
+                minute.increment();
+                if (minute.getvalue() == 0)
+                    hour.increment();
+            }
+        }
+    }
+    void showoff() { cout << hour.getvalue() << ':' << minute.getvalue() << ':' << second.getvalue() << endl; }
+};
+int main()
+{
+    int t, hour, min, sec, s;
+    cin >> t;
+    while (t--)
+    {
+        cin >> hour >> min >> sec >> s;
+        CCLOCK Clock(hour, min, sec);
+        Clock.time(s);
+        Clock.showoff();
+    }
+    return 0;
+}
+
+
+
+//D
+#include <bits/stdc++.h>
+using namespace std;
+int leap[12] = {31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
+int common[12] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
+int digitpower[17] = {7, 9, 10, 5, 8, 4, 2, 1, 6, 3, 7, 9, 10, 5, 8, 4, 2};
+char checkcode[11] = {'1', '0', 'X', '9', '8', '7', '6', '5', '4', '3', '2'};
+class CDate
+{
+private:
+    int year, month, day;
+
+public:
+    CDate(){};
+    CDate(int _year, int _month, int _day) : year(_year), month(_month), day(_day) {}
+    void datain()
+    {
+        cin >> year >> month >> day;
+    }
+    int getyear()
+    {
+        return year;
+    }
+    int getmonth()
+    {
+        return month;
+    }
+    int getday()
+    {
+        return day;
+    }
+    bool check()
+    {
+        if (year > 2021 || year == 2021 && month > 11 || year == 2021 && month == 11 && day > 9)
+            return false;
+        if (isLeap())
+        {
+            if (leap[month - 1] < day)
+                return false;
+        }
+        else
+        {
+            if (common[month - 1] < day)
+                return false;
+        }
+        return true;
+    } // 检验日期是否合法
+    string tostring()
+    {
+        string a = to_string(year), b = to_string(month), c = to_string(day);
+        if (b.length() == 1) b = '0' + b;
+        if (c.length() == 1) c = '0' + c;
+        a = a + b + c;
+        return a;
+    }
+    bool isLeap()
+    {
+        if (year % 4 == 0 && year % 100 != 0 || year % 400 == 0)
+            return true;
+        return false;
+    }
+    void print()
+    {
+        cout << year << "年" << month << "月" << day << "日 ";
+    }
+};
+class COldID
+{
+protected:
+    string p_id15, p_name; // 15位身份证号码，姓名
+    CDate birthday;        // 出生日期
+public:
+    COldID() {}
+    void datain()       
+    {
+        cin >> p_name;
+        birthday.datain();
+        cin >> p_id15;
+    }
+    //		COldID(char *p_idval, char *p_nameval, CDate &day){};
+    bool check()
+    {
+        cout << p_name << endl;
+        if (!birthday.check())
+            return false;
+        if (p_id15.length() != 15)
+            return false;
+        for (int i = 0; i < 15; i++)
+        {
+            if (!isdigit(p_id15[i]))
+                return false;
+        }
+        return true;
+    } // 验证15位身份证是否合法
+    void print() {}
+    ~COldID() {}
+};
+class CNewID : public COldID
+{
+    string p_id18;
+    CDate issueday;
+    int validyear;
+
+public:
+    CNewID()
+    {
+        COldID::datain();
+        cin >> p_id18;
+        issueday.datain();
+        cin >> validyear;
+    }
+    bool check()
+    {
+        if (!COldID::check())
+            return false;
+        if (p_id18.substr(0, 5) != p_id15.substr(0, 5) || p_id18.substr(8, 8) != p_id15.substr(6, 8)) // 比较子串
+            return false;
+        if (p_id18.find(birthday.tostring()) == p_id18.npos) // 判断身份证号码里面的出生日期是不是和所给的一样
+            return false;
+        if (!issueday.check()) // 判断签发日期是不是有效的
+            return false;
+        if (p_id18.length() != 18)
+            return false;
+        int temp = 0;
+        for (int i = 0; i < 17; i++)
+        {
+            temp += (p_id18[i] - '0') * digitpower[i];
+        }
+        temp %= 11;
+        if (checkcode[temp] != p_id18[17])
+            return false;
+        if (issueday.getyear() + validyear < 2021 || issueday.getyear() + validyear == 2021 && issueday.getmonth() > 11 || issueday.getyear() + validyear == 2021 && issueday.getmonth() == 11 && issueday.getday() > 9)
+            return false;
+        return true;
+    }
+    void print()
+    {
+        COldID::print();
+        cout << p_id18 << ' ';
+        issueday.print();
+        if (validyear < 100)
+            cout << validyear << "年" << endl;
+        else
+            cout << "长期" << endl;
+    }
+};
+
+int main()
+{
+    int t;
+    cin >> t;
+    while (t--)
+    {
+        CNewID test;
+        if (test.check()) test.print();
+        else cout << "illegal id" << endl;
+    }
+    return 0;
+}
+
+
+
+
+//E
+#include <bits/stdc++.h>
+using namespace std;
+class Person
+{
+protected:
+    string name;
+    int age;
+public:
+    Person() {}
+    Person(string _name, int _age) : name(_name), age(_age) {}
+    void base_print()
+    {
+        cout << name << ' ' << age << ' ';
+    }
+    char cal(double fscore)
+    {
+        char grade;
+        switch ((int)fscore)
+        {
+        case 0 ... 59: grade = 'F'; break;
+        case 60 ... 64: grade = 'D'; break;
+        case 65 ... 74: grade = 'C'; break;
+        case 75 ... 84: grade = 'B'; break;
+        default: grade = 'A'; break;
+        }
+        return grade;
+    }
+};
+class Rstu : public Person
+{
+    double uscore, escore;
+    char grade;
+public:
+    Rstu(string _name, int _age, double _uscore, double _escore) : Person(_name, _age), uscore(_uscore), escore(_escore) {}
+    void print()
+    {
+        base_print();
+        cout << cal(uscore * 0.4 + escore * 0.6) << endl;
+    }
+};
+class Sstu : public Person
+{
+    double fscore;
+    char grade;
+public:
+    Sstu(string _name, int _age, double _fscore) : Person(_name, _age), fscore(_fscore) {}
+    void print()
+    {
+        base_print();
+        cout << cal(fscore) << endl;
+    }
+};
+int main()
+{
+    int n; cin >> n;
+    for (int i = 0; i < n; i++)
+    {
+        char ch; 
+        string name;
+        int a; double b, c;
+        cin >> ch >> name;
+        if (ch == 'R')
+        {
+            cin >> a >> b >> c;
+            Rstu rs(name, a, b, c);
+            rs.print();
+        }
+        else 
+        {
+            cin >> a >> b;
+            Sstu ss(name, a, b);
+            ss.print();
+        }
+    }
+    return 0;
+}
+```
+
 
 
 #### 校赛

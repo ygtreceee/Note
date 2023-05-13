@@ -3781,15 +3781,148 @@ my_computer.describe()
 
 ###### **方法**
 
-概念:  
+**概念**:  方法是一段代码，它可以在类或对象的上下文中调用并执行任务。方法包含在类中，并且可以仅在类实例化后通过该对象执行。方法是类中的函数，用于执行特定的任务。在Python中，方法是类中定义的一种函数。
 
+**划分**
 
+- 实例方法
 
+  这是最基本的方法类型，它与类实例相关联并允许访问实例属性和方法。通常，实例方法的第一个参数称为 `self`，并将实例作为参数传递。
 
+  ```python
+  class MyClass:
+      def instance_method(self, x, y):
+          print(self, x, y)
+          
+  # 标准调用
+  obj = MyClass()
+  obj.instance_method(3, 4) #Output: <__main__.MyClass object at 0x00000208EF3B8A00> 3 4
+  
+  # 间接调用, self参数可以传参
+  func = MyClass.instance_method 
+  func(1, 2, 3)             #Output: 1 2 3
+  
+  ```
 
+  **调用**
 
+  - 标准调用 (常用)
+    使用实例调用实例方法, 不用手动传, 解释器本身会自动把调用对象本身传递过去, 如果实例方法没有接受任何参数, 则会报错, 即一个自动传, 一个不接收, 会报错; 还要注意的是, 即便函数第一个参数不写 `self` , 解释器也会将对象本身传到第一个参数, 也就是说写法不会改变解释器的传递, 也可以理解为, 我们一定要一个参数来接收对象, 这个参数我们通常写为 `self` 
+  - 其他调用: 使用类调用, 间接调用, 本质就是直接找到函数本身来调用
 
+- 类方法
 
+  这种方法与整个类相关联，而不是与类实例相关联。它们被作为从类本身调用的方法定义，而不是从类的实例调用。编写函数前要加一个装饰器 `@classsmethod`,  通常，它们的第一个参数称为`cls`，并将类作为参数传递。
+
+  ```python
+  class MyClass:
+      @classmethod
+      def class_method(cls, x, y):
+          return x + y
+  
+  print(MyClass.class_method(3, 4)) #Output: 7
+  ```
+
+- 静态方法
+
+  这种方法类似于类方法，但与整个类和类实例都没有绑定, 使用前要添加装饰器 `@staticmethod` . 静态方法通常用于较小的任务，不需要访问类的属性或方法。它们没有参数 `self` 或 `cls` ，并且可以由类本身或类的实例引用。
+
+  ```python
+  class MyClass:
+      @staticmethod
+      def static_method(x, y):
+          return x + y
+  
+  print(MyClass.static_method(3, 4)) #Output: 7
+  
+  obj = MyClass()
+  print(obj.static_method(3, 4)) #Output: 7
+  ```
+
+- 注意：
+  - 总之，Python中的方法有三种类型：实例方法、类方法和静态方法。实例方法与特定的类实例相关联，类方法与整个类相关联，而静态方法与整个类和类实例都没有绑定。需要根据需求选择适当的方法类型。
+  - 划分依据：方法的第一个参数必须要接接收的数据类型
+  - 不管是哪一种方法，都是存储在类的 `__dict__` 字典中，没有存储在实例中, 因为函数也可以视为对象, 作为 `value` 值
+  - 不同类型方法的调用方式不同, 调用的时候把握的原则是, 无论是我们自己传递还是解释器帮我们传递, 最终要保证不同类型的的方法第一个参数接收到的数据是对应的数据
+
+###### 元类
+
+**概念**
+
+元类是Python面向对象编程中的高级概念之一. 元类实际上就是用来创建类的类. 在Python中, 所有的类都是通过 `type`(元类)动态创建的. 在Python中, 元类实际上就是一个可以创建类的类. 它可以控制类的生成过程, 决定类的属性, 方法等行为, 甚至可以在类创建之前修改类的定义. 元类的实例是类对象, 它可以定义新的类
+
+```python
+class MyClass:
+    def instance_method(self, x, y):
+        print(self, x, y)
+        
+
+print(MyClass.__class__)          # output: <class, 'type'>
+print(int.__class__)              # output: <class, 'type'>
+print(str.__class__)              # output: <class, 'type'>
+print(int.__class__.__class__)    # output: <class, 'type'>
+```
+
+**类对象创建**
+
+1. **方式**
+
+- 使用 `class` 关键字, 利用解释器会根据我们的类描述自动创建对应的类对象
+
+- 调用 `type` 函数进行手动创建
+
+  ```python
+  def run(self):
+      print(self)
+  
+  
+  func = type("Cla", (), {"count": 0, "run": run})
+  print(func)
+  print(func.__dict__)
+  
+  obj = func()
+  print(obj)
+  obj.run()
+  
+  #output
+  <class '__main__.Cla'>
+  {'count': 0, 'run': <function run at 0x000002821F856050>, '__module__': '__main__', '__dict__': <attribute '__dict__' of 'Cla' objects>, '__weakref__': <attribute '__weakref__' of 'Cla' objects>, '__doc__': None}
+  <__main__.Cla object at 0x000002821F8889D0>
+  <__main__.Cla object at 0x000002821F8889D0>
+  ```
+
+不管是什么方式, 本质都是通过 `type` 元类, 来创建类对象, 这也是元类的作用, 但是也并不是所有类对象的创建都是通过 `type` 元类, 
+
+2. **流程**
+   1. 检测类中是否有明确 `__metaclass__` 属性
+   2. 检测父类中是否存在 `__metaclass__` 属性
+   3. 检测模块中是否存在 `__metaclass__` 属性
+   4. 通过内置的 `type` 这个元素, 来创建这个类对象
+
+3. 元类的应用场景
+   - 拦截类的创建
+   - 修改类
+   - 返回修改之后的类
+
+###### 描述
+
+描述方式
+
+~~~python
+class Person:
+	```
+	类的描述, 类的作用, 类的构造函数等等;
+	Attributes:
+		类属性的描述
+	```
+	def func(self)
+        ```
+        参数含义, 参数类型int, 是否有默认值
+        返回结果, 返回数据类型
+        ```
+	
+help(Person)
+~~~
 
 
 

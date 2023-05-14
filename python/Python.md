@@ -3614,6 +3614,8 @@ my_computer.describe()
 
 ###### **属性**
 
+**对象属性**
+
 - 给对象添加属性
 
   ​	对于已经创建的对象，可以在任何时候添加属性。添加属性的方法有两种：
@@ -3777,7 +3779,9 @@ my_computer.describe()
   2030017512048
   ```
 
-  
+
+
+
 
 ###### **方法**
 
@@ -3924,41 +3928,142 @@ class Person:
 help(Person)
 ~~~
 
+生成项目文档
+
+- 方式1: 使用内置模块 `pydoc` 
+
+  步骤:
+
+  - 查看文档描述 `python3 -m pydoc` 模块名称
+  - 启动本地服务, 浏览文档 `python3 -m pydoc -p`
+  - 生成指定模块 `html` 文档 `python3 -m pydoc -w` 模块名称
+
+  注意: 具体细节可以在cmd窗口输入`python3 -m pydoc -p` , 能得到具体的指令描述 
+
+- 方式2: 使用第三方模块 `Sphinx` , `epydoc` , `doxygen`  
 
 
 
+###### 属性访问权限
 
+**概念**: 属性访问权限指的是对类成员的公开程度。Python 中的属性有三种访问权限：公开的（public）、保护的（protected）和私有的（private）
 
+**类型**
 
+- 共有属性
 
+  - 允许类内部访问, 子类内部访问 
+  - 模块内其他位置: 允许父类和派生类, 父类实例和派生类实例访问
+  - 跨模块访问: 通过 `import` 和 `from 模块 import *` 形式导入也可访问
 
+- 受保护属性
 
+  受保护属性以单下划线 `_` 为前缀. 
 
+  当使用单下划线 `_` 为前缀时，Python并不会将属性或方法视为私有，只是表示这是一个受保护属性或方法。可以在类的外部访问受保护属性或方法，只是作为一种约定俗成的编程风格，建议只在类的内部或子类中访问这些属性和方法. 
 
+  - 允许类内部访问, 子类内部访问
 
+  - 模块内其他位置: 可以访问, 但是会编译器会发出警告
 
+  - 跨模块访问: 以 `_` 开头的全局变量, 在其他文件以 `import` 形式导入, 可以访问, 会发出警告;  `from 模块 import *` 形式导入, 若变量放入 `__all__` 列表中, 则可以访问, 且不会有警告, 否则将无法访问
 
+    ```python
+    __all__ = ["_x"]
+    _x = 79
+    ```
 
+- 私有属性
 
+  通过在属性或方法名前添加双下划线 `__ `来将其私有化
 
-
-类的属性和方法可以是公有的（即默认可访问），也可以是私有的（即只能在类中访问）。私有属性和方法以两个下划线`__`开头
+  - 可以在类内部访问, 不能在子类内部访问
+  - 也不允许在模块内其他位置进行访问
+  - 跨模块访问: 以 `__` 开头的全局变量, 系统会识别为以 `_` 开头的变量, 例如 `__x` 识别为以 `_` 开头的 `_x` 变量, 所以权限与受保护属性一致, 即可参照单下划线的访问原则.
 
 ```python
-class Computer:
-    brand = "Lenovo"
-    
-    def __init__(self, price):
-        self.__price = price
-        
-    def __describe(self):
-        print(f"This is a {self.brand} computer, priced at {self.__price}.")
-
-    def describe(self):
-        self.__describe()
-        
-        
-在上面的例子中，price属性和describe方法都加上了两个下划线作为前缀，变成了私有属性和方法。私有属性和方法不能从类的外部访问，而只能从类内部访问。
+class MyClass:
+    def __init__(self):
+        self.mypublicattribute = 1        # public attribute
+        self._myprotectedattribute = 2    # protected attribute
+        self.__myprivateattribute = 3     # private attribute
 ```
 
-在实际编程中，类是一个非常重要的概念，它可以将对象的属性和行为封装起来，使得代码更加可读、模块化和易于维护。
+**注意**
+
+-  Python 中并没有真正的私有化支持, 但是可以通过下划线完成伪私有的效果, 类属性(方法) 和实例属性(方法) 遵循相同的规则; 也就是说, 本质上其实没有真正的私有化, 只是基于名字重整（Name Mangling）, Python 自动将其重命名, 从而使得我们在某些区域无法直接通过表面的名称来调用属性, 但是通过使用系统内存储的真正名称, 还是能够调用, 所以并没有真正的私有化.
+
+- 有些代码可能会出现 `xx_` 或者 `__xx__` 形式的变量, 这只是出于规范, 并不涉及访问权限, 可以用于区分系统关键字; 通常我们使用的是 `xx_` 来回避关键字, 而 `__xx__` 通常表示是系统内置的变量或函数, 我们自己命名时尽量避免使用这种命名方法. 
+
+**实现机制**
+
+名字重整(Name Mangling)
+
+名字重整指的是一种在类定义中使用的特殊命名约定，用于将变量和函数名与类名区分开来，以避免名称冲突。该机制使用双下划线“__”作为前缀，将变量和函数名重命名成类名和前缀的组合。
+
+主要分为两种形式
+
+- 双下划线前缀和类名重命名：在类定义中，以双下划线 `__` 为前缀的变量和函数名将被重命名为 `_类名__变量名` 或`_类名__函数名` 的形式。这种形式一般用于避免变量和函数名与类的属性和方法发生冲突。
+
+- 单下划线前缀和类名重命名：在类定义中，以单下划线 `_` 为前缀的变量和函数名将被重命名为`_类名_变量名` 或 `_类名_函数名` 的形式。这种形式一般用于指示变量和函数是受保护的，建议只在类内部或派生类中使用。
+
+  ```python
+  # vscode python3.10.8版本下的文字重整, 显然在受保护属性上有所区别
+  class MyClass:
+      _my_protected_variable = 2
+      __my_private_variable = 3
+  
+      def _my_protected_function(self):
+          print("Protected!")
+  
+      def __my_provited_function(self):
+          print("Privated!")
+  
+      def my_public_function(self):
+          print(self._my_protected_variable)
+          print(self.__my_private_variable)
+          self._my_protected_function()
+  
+  
+  print(MyClass.__dict__)
+  # output
+  {'__module__': '__main__', '_my_protected_variable': 2, '_MyClass__my_private_variable': 3, '_my_protected_function': <function MyClass._my_protected_function at 0x0000026D476C6170>, '_MyClass__my_provited_function': <function MyClass.__my_provited_function at 0x0000026D476C6200>, 'my_public_function': <function MyClass.my_public_function at 0x0000026D476C6290>, '__dict__': <attribute '__dict__' of 'MyClass' objects>, '__weakref__': <attribute '__weakref__' of 'MyClass' objects>, '__doc__': None}
+  ```
+
+需要注意的是，名字重整只对**类定义内**的变量和函数有效，对类定义之外的变量和函数没有影响，因此直接访问“`_类名_变量名`”或 `_类名_函数名` 仍然是可以的，但是不建议这样使用。另外，名字重整只是一种约定，并没有强制性规定，因此在某些情况下可能会出现命名冲突。而且, 不同解释器的名字重整规则可能不一样, 比如有的解释器并不会重整单下滑线开头的受保护属性. 
+
+```python
+class Person:
+    def __init__(self) -> None:
+        self.__age = 19
+
+
+a = Person()
+a.__age = 18
+print(a.__dict__)        # {'_Person__age': 19, '__age': 18}
+print(a._Person__age)    # 19 (No advised!)
+print(a.__age)           # 18
+```
+
+**补充**
+
+1. **只读属性**
+
+   概念: Python中的只读属性指的是只能读取不能修改的类成员。在一些应用场景中，我们可能需要保护某些属性，避免外部程序不小心修改它们而导致程序出现问题，例如数据库连接信息或者配置文件中的信息等。定义只读属性可以有效地解决这个问题。
+
+   - 使用只读属性装饰器：可以使用Python的属性装饰器来实现只读属性，且可用调用属性的方式，来调用函数。装饰器实际上是包裹在函数外部的第三层函数，可以在访问器中添加`@property`装饰器，以保护属性不被修改。注意此方式不能实现修改
+
+     ```python
+     class MyClass:
+         def __init__(self):
+             self._myreadonlyattribute = 3
+         @property
+         def myreadonlyattribute(self):
+             return self._myreadonlyattribute
+         
+     print(MyClass.myreadonlyattribute)  # 3
+     ```
+
+   - 使用属性访问器和修改器：在Python中，可以分别使用@property装饰器和@name.setter装饰器来定义属性的getter和setter方法。只需实现getter方法，而不实现setter方法，即可创建只读属性。
+
+

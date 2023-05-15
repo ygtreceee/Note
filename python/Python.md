@@ -4051,19 +4051,190 @@ print(a.__age)           # 18
 
    概念: Python中的只读属性指的是只能读取不能修改的类成员。在一些应用场景中，我们可能需要保护某些属性，避免外部程序不小心修改它们而导致程序出现问题，例如数据库连接信息或者配置文件中的信息等。定义只读属性可以有效地解决这个问题。
 
-   - 使用只读属性装饰器：可以使用Python的属性装饰器来实现只读属性，且可用调用属性的方式，来调用函数。装饰器实际上是包裹在函数外部的第三层函数，可以在访问器中添加`@property`装饰器，以保护属性不被修改。注意此方式不能实现修改
+   - 方法1：使用·`property()` 
 
      ```python
-     class MyClass:
+     class MyClass(object):
          def __init__(self):
-             self._myreadonlyattribute = 3
-         @property
-         def myreadonlyattribute(self):
-             return self._myreadonlyattribute
+             self._my_var = 3
+     
+         def get_my_var(self):
+             return self._my_var
          
-     print(MyClass.myreadonlyattribute)  # 3
+         my_var = property(get_my_var)
+     
+     Stu = MyClass()
+     print(Stu.my_var)   # 3
      ```
 
-   - 使用属性访问器和修改器：在Python中，可以分别使用@property装饰器和@name.setter装饰器来定义属性的getter和setter方法。只需实现getter方法，而不实现setter方法，即可创建只读属性。
+   - 方法2：使用 `@property` 
 
+     ```python
+     class MyClass(object):
+         def __init__(self):
+             self._my_var = 3
+     
+         @property
+         def my_var(self):
+             return self._my_var
+     
+     Stu = MyClass()
+     print(Stu.my_var)   # 3
+     ```
 
+   - 方法3：
+
+2. **经典类和新式类**
+
+   在Python中，类可以分为经典类和新式类。
+
+   经典类是Python早期版本中的类定义方式，不需要继承自 `object` 类。当Python 3.x 中定义一个类时，如果没有显式指定其继承自任何类，那么默认会继承自 `object` 类。这种默认继承方式被称为新式类。Python中的新式类于2001年正式引入。
+
+   新式类和经典类在多继承、super() 函数调用、特殊方法的解析顺序等方面表现不同。下面展示了一个新式类和经典类的定义和使用示例：
+
+   - 经典类：
+
+   ```python
+   class OldStyle:
+       def __init__(self):
+           self.attr = 0
+   
+   class ChildOldStyle(OldStyle):
+       def __init__(self):
+           OldStyle.__init__(self)
+           self.child_attr = 1
+   
+   c1 = ChildOldStyle()
+   print(c1.attr)
+   ```
+
+   在 Python 2.x 版本中，如果没有显式指定类继承自 `object`，那么定义出来的类为经典类。在 Python 3.x 版本中，所有定义的类都默认继承自对象（object）类，如果没有指定，则也是继承自 object 类，即默认为新式类。`OldStyle.__init__(self)` 表示 `ChildOldStyle` 继承了 `OldStyle` 类。
+
+   - 新式类：
+
+   ```python
+   class NewStyle(object):
+       def __init__(self):
+           self.attr = 0
+   
+   class ChildNewStyle(NewStyle):
+       def __init__(self):
+           super().__init__()
+           self.child_attr = 1
+   
+   c2 = ChildNewStyle()
+   print(c2.attr)
+   ```
+
+   在 Python 3.x 版本中，如果采用 `class NewStyle(object):` 这种方式定义类，则该类为新式类。子类 `ChildNewStyle` 继承自父类 `NewStyle`，`super().__init__()` 表示调用父类构造函数，即初始化 `NewStyle` 类的 `self.attr`，然后才能调用 `c2.attr`。与经典类不同，新式类必须继承自 `object`。
+
+   新式类相比经典类提供了更多的特性，如多重继承、属性修饰符等，也更符合面向对象的设计理念，因此在 Python 中推荐使用新式类。但在 Python 2.x 版本中，如果不需要使用新式类的特性，经典类仍然可有实用价值。而在 Python 3.x 版本中，经典类已经被弃用，只允许使用新式类。在 Python 3.x 版本中，我们要使用新式类最好也显式地表示出来，这样的话如果代码被移植到 Python 2.x 版本中也能很好的兼容。
+
+3. `property` 
+
+   用于把类中的方法变成属性，从而控制对类属性的访问和修改，使得代码更加简洁和易读。它实现对类属性的取值和赋值的控制和封装，从而达到保护属性的目的。它在新式类和经典类中的使用方法是不同的
+
+   **property() 函数**
+
+   语法：
+
+   ```python
+   property(fget=None, fset=None, fdel=None, doc=None) -> property attribute
+   说明：
+   fget 是获取属性值的方法
+   fset 是设置属性值的方法
+   fdel 是删除属性值的方法
+   doc 是属性描述信息。如果省略，会把 fget 方法的 docstring 拿来用（如果有的话）
+   ```
+   
+   **@property 装饰器**
+   
+   `@property` 语法糖提供了比 `property()` 函数更简洁直观的写法。
+   
+   ```python
+   被 @property 装饰的方法是获取属性值的方法，被装饰方法的名字会被用做 属性名
+   被 @属性名.setter 装饰的方法是设置属性值的方法
+   被 @属性名.deleter 装饰的方法是删除属性值的方法
+   ```
+   
+   **用法**
+   
+   - 新式类
+   
+     - 第一种方法
+   
+       使用 `@property` 装饰器和 `setter` 方法定义 `getter` ， `setter` 和 `delete` 方法。示例代码如下，需要注意使用这种方法的时候，不同的方法的名称必须要一致，且不能和变量名重合，否则会死循环，示例中 `_my_var` 使用的是 `my_var` 属性名称
+   
+         ```python
+       class MyClass(object):
+           def __init__(self):
+               self._my_var = None
+       
+           @property
+           def my_var(self):
+               print("Getting _my_var")
+               return self._my_var
+       
+           @my_var.setter
+           def my_var(self, value):
+               print('Setting _my_var to %s' % value)
+               self._my_var = value
+       
+           @my_var.deleter
+           def my_var(self):
+               print("Deleting _my_var")
+               del self._my_var
+       
+       
+       Stu = MyClass()
+       Stu.my_var = "hh"
+       print(Stu.my_var)
+       del Stu.my_var
+       
+       #output
+       Setting _my_var to hh
+       Getting _my_var
+       hh
+       Deleting _my_var
+         ```
+     
+     - 第二种方法
+     
+       这种方法需要使用 `property` 方法，重写函数，并定义 `setter` ，`getter` 和 `delete` 方法。示例代码如下，需要注意的是这里的方法名称是不同的，这里也要注意新包装成的属性名称与变量名称不能相同
+     
+       ```python
+       class MyClass(object):
+           def __init__(self):
+               self._my_var = None
+       
+           def get_my_var(self):
+               print("Getting _my_var")
+               return self._my_var
+       
+           def set_my_var(self, value):
+               print('Setting _my_var to %s' % value)
+               self._my_var = value
+       
+           def del_my_var(self):
+               print("Deleting _my_var")
+               del self._my_var
+       
+           my_var = property(get_my_var, set_my_var, del_my_var, "Describtion")
+           
+       
+       Stu = MyClass()
+       Stu.my_var = "hh"
+       print(Stu.my_var)
+       print(MyClass.my_var.__doc__)   # 注意要使用 class.attribution.__doc__
+       del Stu.my_var
+       # output
+       Setting _my_var to hh
+       Getting _my_var
+       hh
+       Describtion
+       Deleting _my_var
+       ```
+   
+   - 经典类
+   
+     经典类中property 的用法与新式类基本一致，区别就是经典类中无论是哪一种方法，都是能实现`get`的功能，也就是说只读，并不能设置或者删除，尽管在编写的时候可能能够顺利编写且不会报错。

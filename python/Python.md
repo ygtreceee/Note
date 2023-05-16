@@ -4082,7 +4082,36 @@ print(a.__age)           # 18
      print(Stu.my_var)   # 3
      ```
 
-   - 方法3：
+   - 方法3：使用 `__setattr__`
+
+     ```python
+     class MyClass(object):
+         def __setattr__(self, key, value) -> None:
+             print(key, value)
+             if key == "age" and key in self.__dict__.keys():   # 先判断是否为我们要设置的可读属性名称
+                 print("You can't change this value.")
+             else:
+                 # 下面不能使用self.age = value，否则就又是调用了__setattr__，会死循环
+                 self.__dict__[key] = value
+     
+     
+     Stu = MyClass()
+     Stu.age = 18
+     print(Stu.age)
+     Stu.age = 19
+     print(Stu.age)
+     print(Stu.__dict__)
+     
+     #output
+     age 18
+     18
+     age 19
+     You can't change this value.
+     18
+     {'age': 18}
+     ```
+
+     
 
 2. **经典类和新式类**
 
@@ -4163,7 +4192,7 @@ print(a.__age)           # 18
    
      - 第一种方法
    
-       使用 `@property` 装饰器和 `setter` 方法定义 `getter` ， `setter` 和 `delete` 方法。示例代码如下，需要注意使用这种方法的时候，不同的方法的名称必须要一致，且不能和变量名重合，否则会死循环，示例中 `_my_var` 使用的是 `my_var` 属性名称
+       使用 `@property` 装饰器和 `setter` 方法定义 `getter` ， `setter` 和 `deleter` 方法。示例代码如下，需要注意使用这种方法的时候，不同的方法的名称必须要一致，且不能和变量名重合，否则会死循环，示例中 `_my_var` 使用的是 `my_var` 属性名称
    
          ```python
        class MyClass(object):
@@ -4200,7 +4229,7 @@ print(a.__age)           # 18
      
      - 第二种方法
      
-       这种方法需要使用 `property` 方法，重写函数，并定义 `setter` ，`getter` 和 `delete` 方法。示例代码如下，需要注意的是这里的方法名称是不同的，这里也要注意新包装成的属性名称与变量名称不能相同
+       这种方法需要使用 `property` 方法，重写函数，并定义 `setter` ，`getter` 和 `deleter` 方法。示例代码如下，需要注意的是这里的方法名称是不同的，这里也要注意新包装成的属性名称与变量名称不能相同
      
        ```python
        class MyClass(object):
@@ -4238,3 +4267,32 @@ print(a.__age)           # 18
    - 经典类
    
      经典类中property 的用法与新式类基本一致，区别就是经典类中无论是哪一种方法，都是能实现`get`的功能，也就是说只读，并不能设置或者删除，尽管在编写的时候可能能够顺利编写且不会报错。
+
+4. `__setattr__` 
+
+   `__setattr__`是Python中的一个特殊方法，用于自定义类的属性赋值。当我们使用一个类的对象来设置属性值时，如果这个类中定义了`__setattr__`方法，那么Python就会调用这个方法来实现属性设置的逻辑。
+
+   `__setattr__`方法需要至少两个参数，第一个参数是`self`，代表类的实例对象，在`__setattr__`方法中不用特别传递，Python解释器会自动传递。第二个参数是属性名，第三个参数是属性值。
+
+   我们可以在`__setattr__`方法中**自定义属性赋值的逻辑**。例如，我们可以对属性进行验证、修改或记录属性赋值的历史记录等，包括上面的只读属性的设置。
+
+   下面是一个简单的例子来演示`__setattr__`的用法：
+
+   ```python
+   class MyClass:
+       def __setattr__(self, name, value):
+           if name == 'my_var':
+               print('Setting my_var to %s' % value)
+               self._my_var = value
+           else:
+               print('Setting %s to %s' % (name, value))
+               super(MyClass, self).__setattr__(name, value)
+   
+   a = MyClass()
+   a.my_var = "hello"
+   a.other_var = "world"
+   ```
+
+   在这个例子中，我们定义了一个名为`MyClass`的类，并重写了`__setattr__`方法。当代码执行到`a.my_var = "hello"`时，Python会调用`__setattr__`方法来设置`my_var`属性的值。在`__setattr__`方法中，我们打印了一个信息，然后将传递的值存储到变量`_my_var`中。当代码执行到`a.other_var = "world"`时，因为`MyClass`类没有定义`other_var`属性的设置逻辑，所以Python会使用默认的属性赋值逻辑，并将`"world"`赋值给`other_var`属性。
+
+   需要注意，当我们在`__setattr__`方法中使用属性赋值的方式来代替直接为属性赋值时，需要使用super函数来调用父类的`__setattr__`方法，否则会陷入死循环。

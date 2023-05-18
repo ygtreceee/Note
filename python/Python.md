@@ -4296,3 +4296,483 @@ print(a.__age)           # 18
    在这个例子中，我们定义了一个名为`MyClass`的类，并重写了`__setattr__`方法。当代码执行到`a.my_var = "hello"`时，Python会调用`__setattr__`方法来设置`my_var`属性的值。在`__setattr__`方法中，我们打印了一个信息，然后将传递的值存储到变量`_my_var`中。当代码执行到`a.other_var = "world"`时，因为`MyClass`类没有定义`other_var`属性的设置逻辑，所以Python会使用默认的属性赋值逻辑，并将`"world"`赋值给`other_var`属性。
 
    需要注意，当我们在`__setattr__`方法中使用属性赋值的方式来代替直接为属性赋值时，需要使用super函数来调用父类的`__setattr__`方法，否则会陷入死循环。
+
+5. 私有化方法
+
+   私有化方法同样采用的是名字重整的机制, 命名和使用方式和私有化属性一致
+
+
+
+###### 内置
+
+**类内置属性**
+
+- `__dict__` : 类的属性
+- `__bases__` : 类的所有父类构成的元组
+- `__doc__` : 类的文档字符串, 和 `help()` 相比, 它只能查看类的描述, 不会出现属性等信息
+- `__name__` : 类名
+- `__module__` : 类定义所在的模块
+
+**实例内置属性**
+
+- `__dict__` : 实例的属性
+- `__class__` : 实例对应的类
+
+**方法内置特殊方法**
+
+- 生命周期方法
+
+- 信息格式化操作
+
+  - `_str_` 
+
+    ` __str__` 是一个用于自定义类的字符串表示的特殊方法。它可以让我们在类的对象被打印（使用 `print` 函数）时，能够以我们期望的方式输出类的信息，而不是默认的 `<__main__.ClassName object at 0x7f1a1162f550>` 格式。该方法应该返回一个字符串，用于代表类的对象。
+
+  - `__repr__` 
+
+     `__repr__` 方法也是一个特殊的方法，它用于返回类的对象的“官方字符串表示”，它的使用场景与 `__str__` 基本相同, 但是主要用于调试和开发。也就是说，但开发者要查看该对象的属性时，可以使用此方法查看该对象属性的官方字符串表示，以便进行编程调试。
+
+    例如，我们可以为一个时间类定义一个 `__str__` 方法和一个`__repr__`来实现自定义时间格式的输出: 
+
+    ```python
+    class Time:
+        def __init__(self, hour, minute):
+            self.hour = hour
+            self.minute = minute
+    
+        def __str__(self):
+            return "{}:{}".format(self.hour, self.minute)
+    
+        def __repr__(self):
+            return "Time({}, {})".format(self.hour, self.minute)
+    
+    
+    t = Time(12, 30)
+    print(t, type(t))           #  __str__第一种使用方式
+    s = str(t)                  #  __str__第二种使用方式
+    print(s, type(s))
+    print(repr(t))              # __repr__的使用方式
+    print(eval(repr(t)), type(eval(repr(t))))  # 使用eval(), 能将其再次转化为对象
+    
+    # output
+    12:30 <class '__main__.Time'>
+    12:30 <class 'str'>
+    Time(12, 30)
+    12:30 <class '__main__.Time'>
+    ```
+
+    在这个例子中，我们定义了一个 `Time` 类来表示时间。在类的 `__str__` 方法中，我们使用了字符串格式化来输出时间的小时与分钟。当我们将 `Time` 类的实例对象 `t` 传递给 `print` 函数时，Python 自动会调用 `__str__` 方法，并输出时间对象的字符串表示。需要注意的是，`__str__` 方法的返回值应该是一个描述类对象的字符串，而不是编程调试信息，这个任务应该交给 `__repr__` 方法完成。
+
+    除了上述使用方式外，两种方法也可以在交互模式下使用，使用方式有所不同，示例如下
+
+    ```python
+    class Time:
+        def __init__(self, hour, minute):
+            self.hour = hour
+            self.minute = minute
+    
+        def __str__(self):
+            return "{}:{}".format(self.hour, self.minute)
+    
+        def __repr__(self):
+            return "Time({}, {})".format(self.hour, self.minute)
+    
+    t = Time(12, 30)
+    print(t)      #输出：12:30
+    r             #输出：Time(12, 30)
+    ```
+
+- 调用操作
+
+  `__call__` 方法
+
+  在Python中，对象有时需要像函数一样被调用。为了实现这个功能，可以在类中定义一个特殊方法`__call__`。
+
+  当对象被调用时，会自动调用`__call__`方法，可以在这个方法中实现自定义的对象调用行为。
+
+  以下是一个使用`__call__`方法的例子：
+
+  ```python
+  class CallableClass:
+      def __init__(self, value):
+          self.value = value
+  
+      def __call__(self, value_to_add):
+          self.value += value_to_add
+  
+  c = CallableClass(10)
+  print(c.value)  # 输出 10
+  
+  c(2)            # 等同于调用 c.__call__(2)
+  print(c.value)  # 输出 12
+  ```
+
+  在这个例子中，定义了一个名为`CallableClass`的类，它有一个初始化方法`__init__`和一个`__call__`方法。在初始化方法中，对象被赋予初始值。在`__call__`方法中，对象的值被增加。在调用对象时，会自动调用`__call__`方法。
+
+  需要注意的是，如果一个类实现了`__call__`方法，那么这个类的对象就可以像函数一样被调用，但是调用对象本身并不会变成一个函数对象。因此，对象保留了对象状态和类自己的名称空间等信息。同时，由于可以传递参数，这种方式比使用闭包更为灵活。
+
+- 索引和切片操作
+
+  在Python中，`__getitem__`，`__setitem__` 和 `__delitem__` 方法定义了对象的索引和切片行为。
+
+  `__getitem__(self, idx)` 方法用于实现对象的索引和切片操作。当我们对一个对象进行索引或切片时，`__getitem__` 方法将被调用。它接受一个参数 `idx`，如果 `idx` 是整数，则为索引操作，如果 `idx` 是一个 `slice` 对象，则为切片操作。索引操作时，如果对象不支持索引操作，此方法应当抛出`TypeError`异常。
+
+  `__setitem__(self, idx, value)` 方法用于设置对象的索引和切片值。当我们对一个对象进行设置索引或切片赋值时，`__setitem__` 方法将被调用。它接受两个参数：`idx` 和 `value`。如果 `idx` 是整数，则为索引操作，将相应位置设置为 `value`。如果 `idx` 是一个 `slice` 对象，则为切片操作，将相应切片位置设置为 `value`。索引时，如果对象不支持修改某个索引值，此方法应当抛出`TypeError`异常。
+
+   `__delitem__(self, idx)` 方法用于删除对象的索引和切片值。当我们对一个对象进行删除索引或切片赋值时，`__delitem__` 方法将被调用。它接受一个参数 `idx`。如果 `idx` 是整数，则为删除索引操作。如果 `idx` 是一个 `slice` 对象，则为删除切片操作。索引操作时，如果对象不支持删除某个索引值，此方法应当抛出 `TypeError` 异常。
+
+  示例如下
+
+  ```python
+  class MyList:
+      def __init__(self, data):
+          self.data = data
+  
+      def __getitem__(self, idx):
+          if isinstance(idx, slice):
+              return MyList(self.data[idx])
+          else:
+              return self.data[idx]
+  
+      def __setitem__(self, idx, value):
+          if isinstance(idx, slice):
+              self.data[idx] = value
+          else:
+              self.data[idx] = value
+  
+      def __delitem__(self, idx):
+          if isinstance(idx, slice):
+              self.data = self.data[:idx.start] + self.data[idx.stop:]
+          else:
+              del self.data[idx]
+  
+      def __repr__(self):
+          return repr(self.data)
+  ```
+
+  在上面这个示例中，我们创建了一个 `MyList` 类，其内部包含一个列表。我们实现了 `__getitem__`、`__setitem__` 和 `__delitem__` 方法，允许我们对 `MyList` 对象进行索引、切片、赋值和删除操作。
+
+  ```python
+  >>> m = MyList([1, 2, 3, 4, 5])
+  >>> print(m[1:4])
+  [2, 3, 4]
+  >>> m[1:4] = [10, 20, 30]
+  >>> print(m)
+  [1, 10, 20, 30, 5]
+  >>> del m[2]
+  >>> print(m)
+  [1, 10, 30, 5]
+  ```
+
+  需要注意的是，Python内置类型如`list`、`tuple`、`dict`等也实现了这些方法，因此，它们也可以进行索引操作。但是，它们的索引操作有时候并不完全符合我们的需求，这时就可以自定义类来实现自己需要的索引行为。
+
+- 比较操作
+
+  在 Python 中，我们可以通过实现特殊方法（也称为魔术方法）来定义对象类型之间的比较操作。下面是一些常用的特殊方法：
+
+  ```python
+  __eq__(self, other)：定义 == 操作符的行为；
+  __ne__(self, other)：定义 != 操作符的行为；
+  __lt__(self, other)：定义 < 操作符的行为；
+  __le__(self, other)：定义 <= 操作符的行为；
+  __gt__(self, other)：定义 > 操作符的行为；
+  __ge__(self, other)：定义 >= 操作符的行为；
+  
+  这些特殊方法都以双下划线 __ 开头和结尾，其中 self 表示当前实例对象，other 表示与之比较的另一个对象。在实现这些方法时，我们可以根据具体情况判断是否需要比较对象的值、引用（即身份是否相同）或其他属性，从而实现不同类型之间的比较行为。
+  注意：如果对于反向操作的比较符，只定义了其中一个方法，但使用的是另外一种比较运算，那么解释器会采用调换参数的方式进行调用该方法，但是不支持叠加操作
+  例如我们已经定义了__lt__，此时我们可以使用>比较符，因为系统会帮我们自动调换，但是如果我们已经定义了__eq__和__lt__，我们不能使用<=或者>=，因为无法叠加，除非使用装饰器
+  
+  # 装饰器实现操作符“反向”，“组合”的方法
+  import functools
+  @functools.total_ordering
+  class Person:
+      def __init__(self) -> None:
+          pass
+  
+      def __eq__(self, other):
+          pass
+  
+      def __lt__(self, other):
+          pass
+  
+  p1 = Person()
+  p2 = Person()
+  print(p1 <= p2)
+  ```
+
+  例如，假设我们有一个自定义的类 `Person`，我们可以实现 `__eq__` 方法来判断两个 `Person` 对象是否相等，如下所示：
+
+  ```python
+  class Person:
+      def __init__(self, name, age):
+          self.name = name
+          self.age = age
+  
+      def __eq__(self, other):
+          if isinstance(other, Person):
+              return self.name == other.name and self.age == other.age
+          return False
+  ```
+
+  在上面的代码中，我们通过判断 `other` 是否为 `Person` 对象，再根据 `name` 和 `age` 属性的值进行比较，来实现两个 `Person` 对象的相等性定义。这样，我们就可以使用 `==` 操作符对两个 `Person` 对象进行比较了。
+
+  ```python
+  p1 = Person("Alice", 20)
+  p2 = Person("Bob", 30)
+  p3 = Person("Alice", 20)
+  
+  print(p1 == p2) # False
+  print(p1 == p3) # True
+  ```
+
+- 对象布尔值
+
+  Python 中的 `__bool__` 是一个特殊方法，用于定义一个对象的真假判断行为。该方法在 Python 3 中替代了 Python 2 中的 `__nonzero__` 方法。
+
+  当我们在 Python 中对一个对象执行条件判断时，比如使用 `if` 语句，Python 会调用该对象的 `__bool__` 方法来确定其真假值。在 `__bool__` 方法中，我们需要返回一个布尔值 `True` 或 `False`，来表示对象的真假状态。
+
+  下面是一个例子，展示如何实现 `__bool__` 方法来定义一个自定义对象的真假值判断行为：
+
+  ```python
+  class MyObject:
+      def __init__(self, value):
+          self.value = value
+  
+      def __bool__(self):
+          return self.value != 0
+  ```
+
+  在上面的例子中，我们定义了一个 `MyObject` 类，其中包含一个值属性 `value`。我们通过实现 `__bool__` 方法来定义当该对象被作为条件判断时，如果 `value` 不等于 0，则返回 `True`，否则返回 `False`。
+
+  ```python
+  obj1 = MyObject(10)
+  obj2 = MyObject(0)
+  
+  if obj1:
+      print("obj1 is true")
+  else:
+      print("obj1 is false")
+  
+  if obj2:
+      print("obj2 is true")
+  else:
+      print("obj2 is false")
+  ```
+
+  在上面的代码中，我们分别创建了两个 `MyObject` 对象 `obj1` 和 `obj2`，分别初始化为 10 和 0。然后我们对它们进行了条件判断，输出了它们的真假状态。
+
+  由于 `obj1` 的 `value` 属性为 10，不为 0，因此在条件判断时返回的是 `True`，输出了 "obj1 is true"。而 `obj2` 的 `value` 属性为 0，因此在条件判断时返回的是 `False`，输出了 "obj2 is false"。
+
+  当我们需要自定义一个对象的真假判断行为时，我们可以实现 `__bool__` 方法来满足自己的需求。
+
+- 遍历操作
+
+  在 Python 中，实现一个迭代器的最基本方法是为所需类定义`__iter__()`和`__next__()`方法，且缺一不可。其中`__iter__()`方法返回一个自身的迭代器对象，而`__next__()`方法返回当前迭代位置的数据，并将位置移动到下一个数据。
+
+  示例
+
+  ```python
+  class MyIterator:
+      def __init__(self, n):
+          self.num = n
+          self.count = 0
+  
+      def __iter__(self):
+          return self
+  
+      def __next__(self):
+          if self.count < self.num:
+              self.count += 1
+              return self.count
+          else:
+              raise StopIteration
+  ```
+
+  在上面的例子中，我们定义了 `MyIterator` 类来表示一个迭代器。类的构造方法中，我们接收一个整数作为参数，作为迭代器的长度。在 `__iter__()` 方法中，我们返回自身作为迭代器对象。实际上，这个方法是必须实现的，因为迭代器对象必须是一个迭代器。最后，在`__next__()` 方法中，我们实现了迭代器的主要逻辑，即每次返回下一个数据，直到迭代完毕抛出 StopIteration 异常。
+
+  我们现在可以使用 `for` 循环来迭代该迭代器，像这样：
+
+  ```python
+  my_iterator = MyIterator(5)          # 此时my_iterator是一个迭代器
+  for i in my_iterator:
+      print(i)
+  ```
+
+  在上面的代码中，我们创建了一个名为 `my_iterator` 的 `MyIterator` 实例，并使用 `for` 循环来遍历它。在循环中，`i` 将依次被赋值为迭代器的下一个元素，并被打印出来。
+
+  要注意的是，上面的`my_iterator`同样遵循迭代器的特性，例如，再对其进行`for in`循环时，会从上一次的位置继续走。若要实现每次`for in`都能重新开始，则需要在`__iter__`中添加初始化语句
+
+  ```python
+  delf __iter__(self):
+  	self.count = 0
+  	return self
+  ```
+
+  还有一种更简洁的定义迭代器的方法是使用生成器函数。我们可以使用 yield 语句来简化上面的 `MyIterator` 迭代器实现：
+
+  ```python
+  def my_generator(n):
+      count = 0
+      while count < n:
+          yield count
+          count += 1
+  ```
+
+  在上面的代码中，我们使用了一个名为 `my_generator` 的生成器函数来创建一个迭代器。生成器函数包含一个 while 循环，用于不断产生下一个元素，直到达到指定的数量。在每次迭代时，我们使用`yield`语句来返回当前元素，并让生成器函数暂停，等待下一次迭代。
+
+  我们可以像这样使用生成器函数来迭代：
+
+  ```python
+  for i in my_generator(5):
+      print(i)
+  ```
+
+  在上面的代码中，生成器函数 `my_generator(5)` 将产生 0 到 4 的 5 个数字，这些数字将分别被赋值给变量' i '然后打印出来。
+
+  **Tips**：
+
+  1. 迭代器一定是一个可迭代对象，一个可迭代对象却不一定是一个迭代器
+
+  ```python
+  from collections.abc import Iterable
+  from collections.abc import Iterator
+  
+  p = MyIterator(5)
+  print(type(p))
+  print(isinstance(p, Iterator))     # 判断是否是迭代器 
+  print(isinstance(p, Iterable))     # 判断是否是可迭代对象
+  # output
+  True
+  True
+  ```
+
+  查看`_collections_abc.py`可以看到, `class Iterable` 中只包含了`__iter__`函数, 而没有`__next__` 函数, 说明, 只要有`__iter__`, 就是一个可迭代对象, 而`class Iterator`中有`__iter__` 函数和`__next__` 函数, 说明作为一个迭代器必须同时要有`__iter__`和`__next__`函数
+
+  2. 一个可迭代对象必定可以通过`for in`进行访问, 但是能通过`for in`进行访问, 不一定就是一个可迭代对象
+
+     例如我们修改类的定义: 
+
+  ```python
+  class MyIterator:
+      def __init__(self, n):
+          self.num = n
+          self.count = 0
+  
+      def __getitem__(self, item):
+      	return 1
+      
+  p = MyIterator(5)
+  print(isinstance(p, Iterator))     # False
+  print(isinstance(p, Iterable))     # False
+  for i in p:                        # 可以执行
+      print(p)
+  ```
+
+  上面的类实例出的对象可以用于`for in`遍历, 但却不是可迭代对象, 因为不存在`__item__`函数
+
+  3. `iter()`函数
+
+  `iter()` 函数的作用是将一个可迭代的对象转化为一个迭代器。
+
+  它在此处有两种使用方式, 第一种是直接传入一个实例. 如果一个对象实例实现了 `__iter__()` 方法并返回一个迭代器对象，那么该对象实例就可以使用内置函数 `iter()` 来返回一个迭代器。
+
+  ```python
+  class MyIterator:
+      def __init__(self, n):
+          self.num = n
+          self.count = 0
+  
+      # def __getitem__(self, item):
+      # 	return 1
+  
+      def __iter__(self):
+          return self
+  
+      def __next__(self):
+          if self.count < self.num:
+              self.count += 1
+              return self.count
+          else:
+              raise StopIteration
+          
+  
+  p = MyIterator(5)
+  pt = iter(p)
+  print(p is pt)          # p是迭代器,pt也是迭代器,两者都是迭代器,且内存地址都是一致的
+  for i in pt:
+      print(i, end=' ')
+  
+  # output
+  True
+  1 2 3 4 5
+  ```
+
+  第二种方式是前面写一个可调用对象, 后面写一个终止值. 例如, 可以定义`__call__` 函数, 使其能够接收多个参数, 在下面的例子中, `item(p, 3)` 代表迭代器迭代到`3`会停止, 且不会执行`3`的内容. 其中的原理,  `item()` 执行的是前面传进去的可调用对象, 也就说此时是直接调用 `p` 来获取下一个数据, 再将数据和后面的`3`进行比较, 如果是`3`就立即终止
+
+  ```python
+  class MyIterator:
+      def __init__(self, n):
+          self.num = n
+          self.count = 0
+  
+      def __iter__(self):
+          return self
+          
+      def __call__(self, *args: Any, **kwds: Any) -> Any:
+          if self.count < self.num:
+              self.count += 1
+              return self.count
+          else:
+              raise StopIteration
+  
+  p = MyIterator(5)
+  pt = iter(p, 3)
+  for i in pt:
+      print(i, end=' ')
+      
+  # output
+  1 2 
+  
+  
+  # 也可以使用iter(p.__next__, 3), 但是此时pt却不是同一个迭代器,内存地址不一致
+  class MyIterator:
+      def __init__(self, n):
+          self.num = n
+          self.count = 0
+  
+      # def __getitem__(self, item):
+      # 	return 1
+  
+      def __iter__(self):
+          return self
+  
+      def __next__(self):
+          if self.count < self.num:
+              self.count += 1
+              return self.count
+          else:
+              raise StopIteration
+          
+  
+  p = MyIterator(5)
+  pt = iter(p.__next__, 3)
+  print(p is pt)                        # False 两者内存地址不同
+  for i in pt:
+      print(i, end=' ')                 # 1 2
+  print('')
+  print(isinstance(pt, Iterator))       # True 说明pt是迭代器
+  print(isinstance(p, Iterator))        # True 说明p是迭代器
+  ```
+
+- 描述器
+
+  
+
+
+
+
+
+​		
+
+
+

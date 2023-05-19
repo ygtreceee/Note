@@ -3554,6 +3554,390 @@ int main()
 }
 ```
 
+23.5.19
+
+总结
+
+**继承与多态**
+
+
+
+代码
+
+```c++
+//A
+#include <bits/stdc++.h>
+using namespace std;
+class Shape
+{
+public:
+    virtual void area() {}
+};
+class Circle : public Shape
+{
+private:
+    float r;
+public:
+    Circle(double _r): r(_r) {}
+    virtual void area() {cout << fixed << setprecision(2) << r * r * 3.14 << endl;}
+};
+class Square : public Shape
+{
+private:
+    double l;
+public:
+    Square(double l_) : l(l_) {}
+    virtual void area() {cout << fixed << setprecision(2) << l * l << endl;}
+};
+class Rectangle : public Shape
+{
+private:
+    double l, w;
+public:
+    Rectangle(double l_, double w_) : l(l_), w(w_) {}
+    virtual void area() {cout << fixed << setprecision(2) << l * w << endl;}
+};
+int main()
+{
+    int t;
+    Shape *sh;
+    double l, w, r;
+    for (cin >> t; t--; )
+    {
+        cin >> r;
+        Circle c(r); sh = &c;
+        sh->area();
+        cin >> l;
+        Square sq(l); sh = &sq;
+        sh->area();
+        cin >> l >> w;
+        Rectangle rec(l, w); sh = &rec;
+        sh->area();
+    }
+    return 0;
+}
+
+
+
+//B
+#include <bits/stdc++.h>
+using namespace std;
+class Vehicle
+{
+protected:
+    string no;
+public:
+    Vehicle(string no_) : no(no_) {}
+    virtual void display() = 0;
+};
+class Car : virtual public Vehicle
+{
+protected:
+    int num, weight;
+public:
+    Car(string no_, int num_, int weight_) : Vehicle(no_), num(num_), weight(weight_) {}
+    virtual void display() {cout << no << ' ' << num * 8 + weight * 2 << endl;}
+};
+class Truck : public Vehicle
+{
+protected:
+    int weight;
+public:
+    Truck(string no_, int weight_) : Vehicle(no_), weight(weight_) {}
+    virtual void display() {cout << no << ' ' << weight * 5 << endl;}
+};
+class Bus : public Vehicle
+{
+protected:
+    int num;
+public:
+    Bus(string no_, int num_) : Vehicle(no_), num(num_) {}
+    virtual void display() {cout << no << ' ' << num * 30 << endl;}
+};
+int main()
+{
+    int t;
+    string no;
+    int type, num, weight;
+    Vehicle *ve;
+    for (cin >> t; t--; )
+    {
+        cin >> type >> no; 
+        if (type == 1)
+        {
+            cin >> num >> weight;
+            Car ca(no, num, weight);
+            ve = &ca;
+            ve->display();
+        }
+        else if (type == 2)
+        {
+            cin >> weight;
+            Truck tr(no, weight);
+            ve = &tr;
+            ve->display();
+        }
+        else
+        {
+            cin >> num;
+            Bus bs(no, num);
+            ve = &bs;
+            ve->display();
+        } 
+    }
+    return 0;
+}
+
+
+
+//C
+#include <bits/stdc++.h>
+using namespace std;
+class BaseAccount
+{
+protected:
+    string name, account;
+    int balance;
+public:
+    BaseAccount(string name_, string account_, int balance_) : name(name_), account(account_), balance(balance_) {}
+    void deposit(int money)
+    {
+        balance += money;
+    }
+    virtual void withdraw(int money)
+    {
+        if (money > balance) cout << "insufficient" << endl;
+        else balance -= money;
+    }
+    virtual void display()
+    {
+        cout << name << ' ' << account << ' ' << "Balance:" << balance << endl;
+    }
+};
+class BasePlus : public BaseAccount
+{
+private:
+    int limit;
+    int limitSum;
+public:
+    BasePlus(string name_, string account_, int balance_) : BaseAccount(name_, account_, balance_), limit(5000), limitSum(0) {}
+    virtual void withdraw(int money)
+    {
+        if (money > balance)
+        {
+            if (money - balance > limit - limitSum)
+            {
+                cout << "insufficient" << endl;
+            }
+            else limitSum += (money - balance), balance = 0;
+        }
+        else balance -= money;
+    }
+    virtual void display()
+    {
+        cout << name << ' ' << account << ' ' << "Balance:" << balance << ' ';
+        cout << "limit:" << limit - limitSum << endl;
+    }
+};
+int main()
+{
+    int t; 
+    string name, account;
+    int balance, money;
+    BaseAccount *ba;
+    for (cin >> t; t--; )
+    {
+        cin >> name >> account >> balance;
+        if (account[1] == 'A')
+        {
+            BaseAccount baa(name, account, balance);
+            ba = &baa;
+            for (int j = 0; j < 4; j++)
+            {
+                cin >> money;
+                if (j % 2) ba->withdraw(money);
+                else ba->deposit(money);
+            }
+            ba->display();
+        }
+        else
+        {
+            BasePlus bap(name, account, balance);
+            ba = &bap;
+            for (int j = 0; j < 4; j++)
+            {
+                cin >> money;
+                if (j % 2) ba->withdraw(money);
+                else ba->deposit(money);
+            }
+            ba->display();
+        }
+
+        
+    }
+    return 0;
+}
+
+
+
+//D
+#include <bits/stdc++.h>
+using namespace std;
+class Group
+{
+public:
+    virtual int add(int x, int y) = 0;
+    virtual int sub(int x, int y) = 0;
+};
+class GroupA : public Group
+{
+public:
+    virtual int add(int x, int y) {return x + y;}
+    virtual int sub(int x, int y) {return x - y;}
+};
+class GroupB : public GroupA
+{
+public:
+    virtual int sub(int x, int y)
+    {
+        string ans;
+        if (x < y) swap(x, y);
+        while (x)
+        {
+            ans = to_string((x % 10 + 10 - y % 10) % 10) + ans;
+            x /= 10; y /= 10;
+        }
+        return atoi(ans.c_str());
+    }
+};
+class GroupC : public GroupB
+{
+public:
+    virtual int add(int x, int y)
+    {
+        string ans;
+        if (x < y) swap(x, y);
+        while (x)
+        {
+            ans = to_string((x % 10 + y % 10) % 10) + ans;
+            x /= 10; y /= 10;
+        }
+        return atoi(ans.c_str());
+    }
+};
+int main()
+{
+    int t, op, x, y;
+    char ch;
+    Group *g;
+    for (cin >> t; t--; )
+    {
+        cin >> op;
+        scanf("%d%c%d", &x, &ch, &y);
+        if (op == 1)
+        {
+            GroupA ga;
+            g = &ga;
+            if (ch == '+') cout << g->add(x, y);
+            else cout << g->sub(x, y);
+        }
+        else if (op == 2)
+        {
+            GroupB gb;
+            g = &gb;
+            if (ch == '+') cout << g->add(x, y);
+            else cout << g->sub(x, y);
+        }
+        else if (op == 3)
+        {
+            GroupC gc;
+            g = &gc;
+            if (ch == '+') cout << g->add(x, y);
+            else cout << g->sub(x, y);
+        }
+        cout << endl;
+    }
+    return 0;
+}
+
+
+
+//E
+#include <bits/stdc++.h>
+using namespace std;
+class Animal
+{
+protected:
+    int age;
+    string name;
+public:
+    Animal(int age_, string name_) : age(age_), name(name_) {}
+    virtual void Speak() = 0;
+};
+class Tiger : public Animal
+{
+public:
+    Tiger(int age_, string name_) : Animal(age_, name_) {}
+    virtual void Speak() {cout << "Hello,I am " << name << ",AOOO." << endl;}
+};
+class Dog : public Animal
+{
+public:
+    Dog(int age_, string name_) : Animal(age_, name_) {}
+    virtual void Speak() {cout << "Hello,I am " << name << ",WangWang." << endl;}
+};
+class Duck : public Animal
+{
+public:
+    Duck(int age_, string name_) : Animal(age_, name_) {}
+    virtual void Speak() {cout << "Hello,I am " << name << ",GAGA." << endl;}
+};
+class Pig : public Animal
+{
+public:
+    Pig(int age_, string name_) : Animal(age_, name_) {}
+    virtual void Speak() {cout << "Hello,I am " << name << ",HENGHENG." << endl;}
+};
+int main()
+{
+    int t;
+    Animal *a;
+    for (cin >> t; t--; )
+    {
+        string type, name;
+        int age;
+        cin >> type >> name >> age;
+        if (type == "Tiger")
+        {
+            Tiger t(age, name);
+            a = &t;
+            a->Speak();
+        }
+        else if (type == "Pig")
+        {
+            Pig p(age, name);
+            a = &p;
+            a->Speak();
+        }
+        else if (type == "Dog")
+        {
+            Dog d(age, name);
+            a = &d;
+            a->Speak();
+        }
+        else if (type == "Duck")
+        {
+            Duck d(age, name);
+            a = &d;
+            a->Speak();
+        }
+        else 
+        cout << "There is no " << type << " in our Zoo." << endl;
+    }
+    return 0;
+}
+```
+
 
 
 #### 校赛

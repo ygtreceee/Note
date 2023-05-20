@@ -7856,6 +7856,53 @@ int main()
 }
 ```
 
+[E - Isolation (atcoder.jp)](https://atcoder.jp/contests/abc302/tasks/abc302_e)
+
+```c++
+#include <bits/stdc++.h>
+using namespace std;
+int main()
+{
+    ios::sync_with_stdio(false);
+    cin.tie(0); cout.tie(0);
+    int n, q;
+    cin >> n >> q;
+    vector<int> del(n, 0), del_time(n, -1);
+    vector<vector<array<int, 2>>>gra(n);
+    int ans = n;
+    for (int i = 0; i < q; i++)
+    {
+        int k, u, v;
+        cin >> k >> u;
+        u--;
+        if (k == 1)
+        {
+            cin >> v;
+            v--;
+            gra[u].push_back({v, i});
+            gra[v].push_back({u, i});
+            if (gra[v].size() - del[v] == 1) ans--;
+            if (gra[u].size() - del[u] == 1) ans--;
+        }
+        else
+        {
+            if (gra[u].size() - del[u] != 0) ans++;
+            for (auto [nex, t] : gra[u])
+            {
+                if (t < del_time[nex]) continue;
+                del[nex]++;
+                if (gra[nex].size() - del[nex] == 0) ans++;
+            }
+            gra[u].clear();
+            del_time[u] = i;
+            del[u] = 0;
+        }
+        cout << ans << endl;
+    }
+    return 0;
+}
+```
+
 
 
 #### Codeforces

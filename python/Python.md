@@ -4390,6 +4390,8 @@ print(a.__age)           # 18
 
   当对象被调用时，会自动调用`__call__`方法，可以在这个方法中实现自定义的对象调用行为。
 
+  一般直接定义为`__call__(self, *args: Any, **kwds: Any) -> Any:`
+
   以下是一个使用`__call__`方法的例子：
 
   ```python
@@ -4764,11 +4766,212 @@ print(a.__age)           # 18
   print(isinstance(p, Iterator))        # True 说明p是迭代器
   ```
 
-- 描述器
+- **描述器**
+
+  - 方式一: 使用`property` 
+
+  - 方式二: 定义一个描述器的类, 并用包含该描述器的类的实例进行操作, 注意不能直接在类操作, 需要先创建实例对象, 才能将属性的增删查改操作转化到描述器的实例方法中. 还要注意的是, 此种装饰器方式只适用于新式类, 在经典类不适用
+
+    ```c++
+    class Age:
+        def __get__(sefl, instance, owner):
+            print("get")
+    
+        def __set__(self, instance, value):
+            print("set")
+    
+        def __delete__(self, instance):
+            print("delete")
+    
+    
+    class Person:
+        age = Age()
+    
+    
+    p = Person()
+    p.age = 10
+    p.age
+    del p.age
+    
+    #output
+    set
+    get
+    delete
+    ```
+
+  注意: 
+
+  - `__getattrubution__` 注意使用装饰器时, 不要使用该名称再次命名某种方法, 因为这是系统内置的函数, 再次实现会导致原来的方法被覆盖而导致失去对应的功能, 在这里会导致装饰器失效, 所以我们在命名方法的时候, 一定要小心, 不要覆盖系统内置的函数
+
+  - 描述器和实例属性同名时, 操作优先级
+
+    概念补充:
+
+    - 资料描述器: 存在`get` 和`set` 方法
+
+    - 非资料描述器: 仅仅实现了`get`方法,  
+
+    如果是资料描述器, 则该描述器的优先级高于实例属性, 会优先操作资料描述器, 例如下面的代码, 创建实例对象`p`时, `__init__` 初始化方法中, 调用的是装饰器的`__set__`进行设置
+
+    ```python
+    class Age:
+        def __get__(sefl, instance, owner):
+            print("get")
+    
+        def __set__(self, instance, value):
+            print("set")
+    
+        def __delete__(self, instance):
+            print("delete")
+    
+    
+    class Person:
+        age = Age()
+    
+        def __init__(self) -> None:
+            self.age = 10
+    
+    
+    p = Person()
+    p.age = 10
+    p.age
+    print(p.__dict__)
+    del p.age
+    ```
+
+    如果是非资料描述器, 实例属性的优先级大于资料描述器, 例如下面的代码, 从输出中, 可以看出并没有调用`__get__` 函数
+
+    ```c++
+    class Age:
+        def __get__(sefl, instance, owner):
+            print("get")
+    
+    
+    class Person:
+        age = Age()
+    
+        def __init__(self) -> None:
+            self.age = 10
+    
+    
+    p = Person()
+    p.age = 10
+    print(p.age)
+    print(p.__dict__)
+                
+    # output
+    10
+    {'age': 10}
+    ```
+
+  - 数据存储问题
+
+    类创建的不同实例, 实际上是公用同一个`age` 对象, 因为创建的都是`Person`的实例, 它们自然是共用父类的`age`属性, 从下面代码运行得到的内存地址也可以看出, 它们的`age`属性的内存地址都是一致的, 只有不同的实例的内存地址不同, 所以, 如果我们将存储的数据保存到`self`中, 也就是存在`age`中, 那每次实例的创建和修改, 都会导致该属性改变, 即该属性是共享的
+
+    ```c++
+    class Age:
+        def __get__(self, instance, owner):
+            print("get", end=' ')
+            return self.v
+    
+        def __set__(self, instance, value):
+            print("set", self, instance, value)
+            self.v = value
+    
+        def __delete__(self, instance):
+            print("delete")
+    
+    
+    class Person:
+        age = Age()
+    
+        def __init__(self) -> None:
+            self.age = 10
+    
+    
+    p1 = Person()
+    p1.age = 12
+    p2 = Person()
+    p2.age = 13
+    print(p1.age)
+    print(p2.age)
+                
+    # output
+    set <__main__.Age object at 0x000002B1A8068670> <__main__.Person object at 0x000002B1A80686A0> 10
+    set <__main__.Age object at 0x000002B1A8068670> <__main__.Person object at 0x000002B1A80686A0> 12
+    set <__main__.Age object at 0x000002B1A8068670> <__main__.Person object at 0x000002B1A8068A30> 10
+    set <__main__.Age object at 0x000002B1A8068670> <__main__.Person object at 0x000002B1A8068A30> 13
+    get 13
+    get 13
+    ```
+
+    我们可以将数据存储到`instance`中, 也就是对应的实例的内存地址, 所以能够存储实例各自不同的数据
+
+    ```C++
+    class Age:
+        def __get__(self, instance, owner):
+            print("get", end=' ')
+            return instance.v
+    
+        def __set__(self, instance, value):
+            print("set", self, instance, value)
+            instance.v = value
+    
+        def __delete__(self, instance):
+            print("delete")
+    
+    
+    class Person:
+        age = Age()
+    
+        def __init__(self) -> None:
+            self.age = 10
+    
+    
+    p1 = Person()
+    p1.age = 12
+    p2 = Person()
+    p2.age = 13
+    print(p1.age)
+    print(p2.age)
+    
+    # output
+    set <__main__.Age object at 0x00000258C20A8640> <__main__.Person object at 0x00000258C20A8670> 10
+    set <__main__.Age object at 0x00000258C20A8640> <__main__.Person object at 0x00000258C20A8670> 12
+    set <__main__.Age object at 0x00000258C20A8640> <__main__.Person object at 0x00000258C20A8A00> 10
+    set <__main__.Age object at 0x00000258C20A8640> <__main__.Person object at 0x00000258C20A8A00> 13
+    get 12
+    get 13
+    ```
+
+- 类实现装饰器
+
+  借助语法糖, 实现实例的创建, 之前提及的装饰器的作用是重新实现函数, 现在是利用语法糖创建一个类对象, 然后使用`__call__`直接调用类对象, 同样实现了装饰器的效果
+
+  ```python
+  from typing import Any
+  
+  class check:
+      def __init__(self, func) -> None:
+          self.f = func
+  
+      def __call__(self, *args: Any, **kwds: Any) -> Any:
+          print("Today is 520")
+          self.f()
+  
+  @check
+  def work():
+      print("I am working")
+  
+  # work = check(work)      @check 等价于此行代码, 作用是创建一个check类的对象
+  work()
+  
+  # output
+  Today is 520
+  I am working
+  ```
 
   
-
-
 
 
 

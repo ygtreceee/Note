@@ -3938,6 +3938,2309 @@ int main()
 }
 ```
 
+23.5.26
+
+总结：
+
+菱形继承
+
+代码
+
+```C++
+//A
+#include <bits/stdc++.h>
+using namespace std;
+class Student
+{
+protected:
+    string name;
+    string type;
+    int courses[3];
+    string courseGreade;
+public:
+    Student(string n, int t, int a1, int a2, int a3) : name(n)
+    {
+        courses[0] = a1; courses[1] = a2; courses[2] = a3;
+        if (t == 1) type = "本科生";
+        else type = "研究生";
+    }
+    virtual void calculateGrade() = 0;
+    void print()
+    {
+        cout << name << ',' << type << ',' << courseGreade << endl;
+    }
+};
+class Undergraduate : public Student
+{
+public:
+    Undergraduate(string n, int t, int a1, int a2, int a3) : Student(n, t, a1, a2, a3) {}
+    virtual void calculateGrade()
+    {
+        int ret = (courses[0] + courses[1] + courses[2]);
+        ret /= 3;
+        if (ret > 80) courseGreade = "优秀";
+        else if (ret > 70 && ret <= 80) courseGreade = "良好";
+        else if (ret > 60 && ret <= 70) courseGreade = "一般";
+        else if (ret > 50 && ret <= 60) courseGreade = "及格";
+        else courseGreade = "不及格";
+    }
+};
+class Postgraduate : public Student
+{
+public:
+    Postgraduate(string n, int t, int a1, int a2, int a3) : Student(n, t, a1, a2, a3) {}
+    virtual void calculateGrade()
+    {
+        int ret = (courses[0] + courses[1] + courses[2]);
+        ret /= 3;
+        if (ret > 90) courseGreade = "优秀";
+        else if (ret > 80 && ret <= 90) courseGreade = "良好";
+        else if (ret > 70 && ret <= 80) courseGreade = "一般";
+        else if (ret > 60 && ret <= 70) courseGreade = "及格";
+        else courseGreade = "不及格";
+    }
+};
+int main()
+{
+    Student *s;
+    int n; cin >> n;
+    string name;
+    int type, a1, a2, a3;
+    for (int i = 0; i < n; i++)
+    {
+        cin >> name >> type >> a1 >> a2 >> a3;
+        if (type == 1)
+        {
+            Undergraduate u(name, type, a1, a2, a3);
+            s = &u;
+            s->calculateGrade();
+            s->print();
+        }
+        else
+        {
+            Postgraduate p(name, type, a1, a2, a3);
+            s = &p;
+            s->calculateGrade();
+            s->print();
+        }
+    }
+    return 0;
+}
+
+
+
+//B
+//这道题涉及到类的多重继承，CPeople作为基类派生出CStudent和CTeacher，然后由这两个子类共同派生出CGradOnWork类。
+//问题是CStudent和CTeacher都分别继承了CPeople的属性，而CGradOnWork同时把它们相同的属性都继承了，这就导致了CGradOnWork在访问CPeople的属性时会不知道是去找CStudent的还是去找CTeacher的。
+//因此，需要在父类继承的时候加上virtual修饰，这样多重继承的时候就只会继承一个相同的属性。
+//还有一个问题就是在多重继承的类的构造函数带参数的时候，需要把所有父辈的构造函数的参数带上，包括祖辈的。
+#include <bits/stdc++.h>
+using namespace std;
+class CPeople
+{
+protected:
+    string name;
+    char gender;
+    int age;
+public:
+    CPeople(string name_, char gender_, int age_) : name(name_), gender(gender_), age(age_) {}
+    void print() {cout << "People:" << endl << "Name: " << name << endl <<  "Sex: " << gender << endl <<  "Age: " << age << endl << endl;}
+};
+class CStudent : virtual public CPeople
+{
+protected:
+    string id;
+    double grade;
+public:
+    CStudent(string name_, char gender_, int age_, string id_, double grade_) : CPeople(name_, gender_, age_), id(id_), grade(grade_) {}
+    void print() {cout << "Student:" << endl << "Name: " << name << endl <<  "Sex: " << gender << endl <<  "Age: " << age << endl << "No.: " << id << endl << "Score: " << grade << endl << endl;}
+
+};
+class CTeacher : virtual public CPeople
+{
+protected:
+    string work;
+    string room;
+public:
+    CTeacher(string name_, char gender_, int age_, string work_, string room_) : CPeople(name_, gender_, age_), work(work_), room(room_) {}
+    void print() {cout << "Teacher:" << endl << "Name: " << name << endl <<  "Sex: " << gender << endl <<  "Age: " << age << endl << "Position: " << work << endl << "Department: " << room << endl << endl;}
+};
+class CGradOnWord : public CTeacher, public CStudent
+{
+protected:
+    string item;
+    string teacher;
+public:
+    CGradOnWord(string name_, char gender_, int age_, string id_, double grade_, string work_, string room_, string item_, string teacher_) : CPeople(name_, gender_, age_), CStudent(name_, gender_, age_, id_, grade_), CTeacher(name_, gender_, age_, work_, room_), item(item_), teacher(teacher_) {}
+    void print() {cout << "GradOnWork:" << endl << "Name: " << name << endl <<  "Sex: " << gender << endl <<  "Age: " << age << endl << "No.: " << id << endl << "Score: " << grade << endl << "Position: " << work << endl << "Department: " << room << endl << "Direction: " << item << endl << "Tutor: " << teacher << endl << endl;}
+};
+int main()
+{
+    string name, id, work, room, item, teacher;
+    char gender;
+    double grades; int age;
+    cin >> name >> gender >> age >> id >> grades >> work >> room >> item >> teacher;
+    CPeople p(name, gender, age);
+    p.print();
+    CStudent s(name, gender, age, id, grades);
+    s.print();
+    CTeacher t(name, gender, age, work, room);
+    t.print();
+    CGradOnWord g(name ,gender, age, id, grades, work, room, item, teacher);
+    g.print();
+    return 0;
+}
+
+
+
+//C
+#include <bits/stdc++.h>
+using namespace std;
+class CVehicle
+{
+protected:
+    int max_speed, speed, weight;
+public:
+    CVehicle(int ms, int s, int w) : max_speed(ms), speed(s), weight(w) {};
+    void display() {cout << "Vehicle:" << endl << "max_speed:" << max_speed << endl << "speed:" << speed << endl << "weight:" << weight << endl << endl;}
+};
+class CBicycle : virtual public CVehicle
+{
+protected:
+    int height;
+public:
+    CBicycle(int ms, int s, int w, int h) : CVehicle(ms, s, w), height(h) {}
+    void display() {cout << "Bicycle:" << endl << "max_speed:" << max_speed << endl << "speed:" << speed << endl << "weight:" << weight << endl << "height:" << height << endl << endl;}
+};
+class CMotomcar : virtual public CVehicle
+{
+protected:
+    int seat_num;
+public:
+    CMotomcar(int ms, int s, int w, int sn) : CVehicle(ms, s, w), seat_num(sn) {}
+    void display() {cout << "Motocar:" << endl << "max_speed:" << max_speed << endl << "speed:" << speed << endl << "weight:" << weight << endl << "seat_num:" << seat_num << endl << endl;}
+};
+class CMotocycle : public CBicycle, public CMotomcar
+{
+public:
+    CMotocycle(int ms, int s, int w, int h, int sn) : CVehicle(ms, s, w), CBicycle(ms, s, w, h), CMotomcar(ms, s, w, sn) {}
+    void display() {cout << "Motocycle:" << endl << "max_speed:" << max_speed << endl << "speed:" << speed << endl << "weight:" << weight << endl << "height:" << height << endl << "seat_num:" << seat_num << endl << endl;}
+};
+int main()
+{
+    int max_speed, speed, weight, height, seat_num;
+    cin >> max_speed >> speed >> weight >> height >> seat_num;
+    CVehicle cv(max_speed, speed, weight);
+    cv.display();
+    CBicycle cb(max_speed, speed, weight, height);
+    cb.display();
+    CMotomcar cm(max_speed, speed, weight, seat_num);
+    cm.display();
+    CMotocycle cmc(max_speed, speed, weight, height, seat_num);
+    cmc.display();
+    return 0;
+}
+
+
+
+//D
+#include <bits/stdc++.h>
+using namespace std;
+
+class vip
+{
+protected:
+    int num, points;
+public:
+    vip() : points(0) {}
+    vip(int n) : num(n), points(0) {}
+};
+
+class credit
+{
+protected:
+    int num2, limit;
+    int points2;
+    string name;
+    double money;
+public:
+    credit() : money(0), points2(0) {}
+    credit(int n, string na, int l) : num2(n), name(na), limit(l), points2(0) {}
+};
+
+class vipcredit : public vip, public credit
+{
+public:
+    vipcredit(int n, int n2, string s, int l) : vip(n), credit(n2, s, l) {}
+    void refund(double m)
+    {
+        if (m <= money)
+        {
+            money -= m;
+            points2 -= (int)m;
+        }
+    }
+    void order(double m)
+    {
+        points += (int)m;
+        points2 += (int)m;
+        money += m;
+    }
+    void consume(double m)
+    {
+        if (m + money <= limit)
+        {
+            money += m;
+            points2 += (int)m;
+        }
+    }
+    void exchange(double m)
+    {
+        if (m <= points2)
+        {
+            points2 -= (int)m;
+            points += (int)m / 2;
+        }
+    }
+    void display()
+    {
+        cout << num << " " << points << endl;
+        cout << num2 << " " << name << " " << money << " " << points2 << endl;
+    }
+};
+
+int main()
+{
+    int num, num2, limit, n;
+    string name, command;
+
+    cin >> num >> num2 >> name >> limit >> n;
+    vipcredit v(num, num2, name, limit);
+    while (n--)
+    {
+        double m;
+        cin >> command >> m;
+        if (command == "o") v.order(m);
+        else if (command == "c") v.consume(m);
+        else if (command == "q") v.refund(m);
+        else if (command == "t") v.exchange(m);
+    }
+    v.display();
+    return 0;
+}
+
+
+//E
+#include <bits/stdc++.h>
+using namespace std;
+class CPeople
+{
+	protected:
+		char id[20],name[10];
+	public:
+		CPeople(){}
+}; 
+class CInternetUser:public CPeople
+{
+	protected:
+		char password[20];
+	public:
+		CInternetUser(){}
+		void registerUser(char *name,char * id,char * password)
+		{
+			strcpy(this->id,id);
+			strcpy(this->name,name);
+			strcpy(this->password,password);
+		}
+		bool login(char *id,char *password)
+		{
+			return (!strcmp(this->id,id))&&(!strcmp(this->password,password));
+		}
+}; 
+class CBankCustomer:public CPeople
+{
+	protected:
+		double balance=0;
+	public:
+		CBankCustomer(){}
+		void openAccount(char *name,char *id)
+		{
+			strcpy(this->name,name);
+			strcpy(this->id,id);
+		}
+		void deposit(double money){balance+=money;}
+		bool withdraw(double money)
+		{
+			if(money>balance)
+			return 0;
+			balance-=money;	
+			return 1;		
+		}		
+};
+class CInternetBankCustomer:public CBankCustomer,public CInternetUser
+{
+	protected:
+		double balance=0,lastbalance=0,todayprofit,interest,lastinterest=0;
+	public:
+		CInternetBankCustomer(){}
+		void setInterest(double interest)
+		{
+			lastinterest=this->interest;
+			this->interest=interest;
+		}
+		void calculateProfit()
+		{
+			todayprofit=lastbalance*lastinterest*0.0001;
+			balance+=todayprofit;
+			lastbalance=balance;
+		}
+		bool login(char * id,char *password)
+		{
+			return (!strcmp(id,CInternetUser::id))&&(!strcmp(password,this->password))&&(!strcmp(CBankCustomer::name,CInternetUser::name))&&(!strcmp(CBankCustomer::id,CInternetUser::id));
+		}
+		bool deposit(double money)
+		{
+			if(money>CBankCustomer::balance)
+			return 0;
+			balance+=money;
+			CBankCustomer::withdraw(money);
+			return 1;			
+		}
+		bool withdraw(double money)
+		{
+			if(money>balance)
+			return 0;
+			balance-=money;
+			CBankCustomer::deposit(money);	
+			return 1;			
+		}		
+		void print()
+		{
+			cout<<"Name: "<<CBankCustomer::name<<" ID: "<<CBankCustomer::id<<endl<<"Bank balance: "<<CBankCustomer::balance<<endl<<"Internet bank balance: "<<balance<<endl;
+		}
+};
+int main() {
+    int t, no_of_days, i;
+    char i_xm[10], i_id[20], i_mm[20], b_xm[10], b_id[20], ib_id[20], ib_mm[20];
+    double money, interest;char op_code;//输入测试案例数t
+    cin >> t;
+    while (t--){//输入互联网用户注册时的用户名,id,登陆密码
+       cin >> i_xm >> i_id >> i_mm;//输入银行开户用户名,id
+       cin >> b_xm >> b_id;//输入互联网用户登陆时的id,登陆密码
+       cin >> ib_id >> ib_mm;
+       CInternetBankCustomer ib_user;
+       ib_user.registerUser(i_xm, i_id, i_mm);
+       ib_user.openAccount(b_xm, b_id);
+       if (!ib_user.login(ib_id, ib_mm)) //互联网用户登陆,若id与密码不符;以及银行开户姓名和id与互联网开户姓名和id不同
+        { cout << "Password or ID incorrect" << endl;
+          continue;
+        }//输入天数
+        cin >> no_of_days;
+        for (i=0; i < no_of_days; i++){//输入操作代码, 金额, 当日万元收益
+          cin >> op_code >> money >> interest;
+          switch (op_code){
+              case 'S': //从银行向互联网金融帐户存入
+              case 's': if (!ib_user.deposit(money)){
+                            cout << "Bank balance not enough" << endl;
+                            continue;
+                         }
+                         break;
+               case 'T': //从互联网金融转入银行帐户
+               case 't':if (!ib_user.withdraw(money)){
+                            cout << "Internet bank balance not enough" << endl;
+                            continue;
+                         }
+                         break;
+               case 'D': //直接向银行帐户存款
+               case 'd':ib_user.CBankCustomer::deposit(money);
+                        break;
+               case 'W': //直接从银行帐户取款
+               case 'w':if (!ib_user.CBankCustomer::withdraw(money)){
+                            cout << "Bank balance not enough" << endl;
+                            continue;
+                        }
+                        break;
+               default:cout << "Illegal input" << endl;
+                       continue;
+           }
+           ib_user.setInterest(interest);
+           ib_user.calculateProfit();//输出用户名,id//输出银行余额 //输出互联网金融账户余额
+           ib_user.print();
+           cout << endl;
+        }
+    }
+    return 0;
+}
+```
+
+23.6.2
+
+总结
+
+**类的操作符重载**
+
+关于前缀++和后缀++的返回类型是`const` 或者是引用类型`&` , 大概率是根据需求, 但是又或许有所规范, 结合实际应用场景吧!
+
+```C++
+#include <bits/stdc++.h>
+using namespace std;
+class Distance
+{
+private:
+	int feet, inches;
+	int arr[10];
+public:
+	Distance() {feet = inches = 0;}
+	Distance(int f, int i)
+	{
+		feet = f; inches = i;
+		for (int i = 0; i < 10; i++) arr[i] = i;
+	}
+	int dis() {return feet * inches;}
+	//重载负运算符（-）
+	Distance operator-()
+	{
+		Distance temp = *this;
+		temp.feet = -feet;
+		temp.inches = -inches;
+		return temp;
+	}
+	//重载加运算符（+）
+	Distance operator+(const Distance d)
+	{
+		Distance temp = *this;
+		temp.feet += d.feet;
+		temp.inches += d.inches;
+		return temp;
+	}
+	//重载减运算符（ - ）
+	Distance operator-(const Distance d)
+	{
+		Distance temp = *this;
+		temp.feet -= d.feet;
+		temp.inches -= d.inches;
+		return temp;
+	}
+	//重载乘运算符（*）
+	Distance operator*(const Distance d)
+	{
+		Distance temp = *this;
+		temp.feet *= d.feet;
+		temp.inches *= d.inches;
+		return temp;
+	}
+	//重载除运算符（/）
+	Distance operator/(const Distance d)
+	{
+		Distance temp = *this;
+		temp.feet /= d.feet;
+		temp.inches /= d.inches;
+		return temp;
+	}
+	//重载前缀递增运算符（++），前缀--同理
+	Distance& operator++()
+	{
+		feet++; inches++;
+		return *this;
+	}
+	//重载后缀递增运算符（++）， 后缀--同理
+	const Distance operator++(int)
+	{
+		Distance temp = *this;
+		++*this;
+		return temp;
+	}
+	//重载关系运算符（<），>, <=, >=, == 同理
+	bool operator<(Distance& d)   //此处的Distance&可以写成Distance即可
+	{
+		return this->dis() < d.dis();
+	}
+	//重载赋值运算符（=）
+	void operator=(const Distance &d)
+	{
+		feet = d.feet;
+		inches = d.inches;
+	}
+	//重载调用运算符（）
+	void operator()()
+	{
+		cout << "This distance object is " << feet << " feet" << " and " << inches << " inches." << endl; 
+	}
+	//重载下标运算符[]
+	int& operator[](unsigned int i)
+	{
+		//You can check whether the i is out of the size or not.
+		if (i > sizeof(arr))
+		{
+			cout << "Error!" << endl;
+			return arr[0];
+		}
+		return arr[i];
+	}
+	//重载逻辑非运算符
+	bool operator!()
+	{
+		if (feet <= 0 || inches <= 0) return true;
+		return false;
+	}
+	//输入输出运算符重载
+	friend istream& operator>>(istream &input, Distance &d)
+	{
+		input >> d.feet >> d.inches;
+		return input;
+	}
+	friend ostream& operator<<(ostream &output, Distance &d)
+	{
+		output << d.feet << ' ' << d.inches << ' ';
+		return output;
+	}
+};
+int main()
+{
+	Distance d1(2, 3), d2(3, 4);
+	cout << d1 << d2 << endl;
+	Distance d3 = -d1;
+	cout << d3 << endl;
+	Distance d4 = d1 + d2;
+	cout << d4 << endl;
+	d4 = d2 - d1;
+	cout << d4 << endl;
+	d4 = d2 * d1;
+	cout << d4 << endl;
+	d4 = d1 * d2 / d1;
+	cout << d4 << endl;
+	if (d1 < d2) {cout << "d1 < d2" << endl;}
+	// Distance d5;
+	// cin >> d5;
+	// cout << d5 << endl;
+	d1 = d2;
+	cout << d1 << endl;
+	cout << ++d1 << endl;
+	d1();
+	cout << d1[3] << endl;
+	d1 = -d1;
+	if (!d1) cout << "It is not narrow" << endl;
+	return 0;
+}
+```
+
+代码实现
+
+```C++
+//A
+#include <bits/stdc++.h>
+using namespace std;
+class myclock
+{
+	int hour, minute, second;
+public:
+	myclock(int hour, int minute, int second) : hour(hour), minute(minute), second(second) {}
+	myclock& operator++()
+	{
+		second++;
+		if (second > 59) {second = 0; minute++;}
+		if (minute > 59) {minute = 0; hour++;}
+		if (hour > 11) {hour = 0;}
+		return *this;
+	}
+	myclock operator--(int)
+	{
+		myclock temp(hour, minute, second);
+		second--;
+		if (second < 0) {second = 59; minute--;}
+		if (minute < 0) {minute = 59; hour--;}
+		if (hour < 0) {hour = 11;}
+		return temp;
+	}
+	void print()
+	{
+		cout << hour << ":" << minute << ":" << second << endl;
+	}
+};
+int main()
+{
+	int hour, minute, second, t, cnt;
+	cin >> hour >> minute >> second;
+	myclock mc(hour, minute, second);
+	for (cin >> t; t--; )
+	{
+		cin >> cnt;
+		if (cnt > 0)
+		{
+			for ( ; cnt--; ++mc);
+			mc.print();
+		}
+		else
+		{
+			for (cnt = -cnt; cnt--; mc--);
+			mc.print();
+		}
+	}
+	return 0;
+}
+
+
+//B
+#include <bits/stdc++.h>
+using namespace std;
+
+// 定义矩阵类
+class CMatrix
+{
+private:
+    int n, m; // n-行，m-列
+    int** data; // 存储矩阵数据
+public:
+    CMatrix()
+	{
+		n = m = 0;
+		data = NULL;
+	}
+    CMatrix(int n1, int m1);
+	CMatrix &operator = (const CMatrix &a)
+	{
+		if (data != NULL)
+		{
+			for (int i = 0; i < n; i++)
+				delete []data[i];
+			delete []data;
+		}
+		n = a.n; m = a.m;
+		data = new int*[n];
+		for (int i = 0; i < n; i++)
+			data[i] = new int[m];
+		for (int i = 0; i < n; i++)
+			for (int j = 0; j < m; j++)
+				data[i][j] = a.data[i][j];
+		return *this;
+	}
+	int *const operator[] (const int k)
+	{
+		return data[k];
+	}
+	int operator() (int i, int j)
+	{
+		return data[i][j];
+	}
+    ~CMatrix();
+};
+
+CMatrix::CMatrix(int n1, int m1)
+{
+    n = n1;
+    m = m1;
+    // 分配n行m列的二维数组空间
+    data = new int* [n];
+    for (int i = 0; i < n; i++)
+    {
+        data[i] = new int[m];
+    }
+}
+
+CMatrix::~CMatrix()
+{
+    // 释放空间
+    for (int i = 0; i < n; i++)
+    {
+        delete[] data[i];
+    }
+    delete[] data;
+}
+
+int main()
+{
+    int t, n, m, i, j;
+    cin >> t;
+    while (t--)
+    {
+        cin >> n >> m;
+        // 定义矩阵对象matrixA
+        CMatrix matrixA(n, m);
+        for (i = 0; i < n; i++)
+        {
+            for (j = 0; j < m; j++)
+            {
+                // 输入第i行第j列的数据
+                cin >> matrixA[i][j];
+            }
+        }
+        // 输出matrixA中的数据
+        cout << "matrixA:" << endl;
+        for (i = 0; i < n; i++)
+        {
+            for (j = 0; j < m; j++)
+            {
+                cout << matrixA(i, j) << " ";
+            }
+            cout << endl;
+        }
+        // 定义矩阵对象matrixB
+        CMatrix matrixB;
+        matrixB = matrixA;
+        // 输出marixB中的数据
+        cout << "matrixB:" << endl;
+        for (i = 0; i < n; i++)
+        {
+            for (j = 0; j < m; j++)
+            {
+                cout << matrixB[i][j] << " ";
+            }
+            cout << endl;
+        }
+    }
+    return 0;
+}
+
+
+
+//C
+#include <bits/stdc++.h>
+using namespace std;
+
+class CPoint
+{
+	int x, y;
+public:
+	CPoint() {}
+	CPoint(int x, int y) : x(x), y(y) {}
+	int getX() {return x;}
+	int getY() {return y;}
+	bool operator == (const CPoint &cp)
+	{
+		return x == cp.x && y == cp.y;
+	}
+};
+class CRectangle
+{
+private:
+	CPoint leftPoint, rightPoint;
+public:
+	CRectangle () {}
+	CRectangle(int x1, int y1, int x2, int y2) : leftPoint(x1, y1), rightPoint(x2, y2) {}
+	bool operator > (CPoint & c)
+	{
+		return c.getY() >= rightPoint.getY() && c.getY() <= leftPoint.getY() && c.getX() >= leftPoint.getX() && c.getX() <= rightPoint.getX();
+	}
+	bool operator > (CRectangle &c)
+	{
+		return *this > c.leftPoint && *this > c.rightPoint;
+	}
+	bool operator == (CRectangle &c)
+	{
+		return leftPoint == c.leftPoint && rightPoint == c.rightPoint;
+	}
+	bool operator * (CRectangle &c)
+	{
+		return !(c.rightPoint.getY() > leftPoint.getY() || c.leftPoint.getY() < rightPoint.getY() || c.leftPoint.getX() > rightPoint.getX() || c.rightPoint.getX() < leftPoint.getX());
+	}
+	operator int()
+	{
+		return (leftPoint.getY() - rightPoint.getY()) * (rightPoint.getX() - leftPoint.getX());
+	}
+	friend ostream& operator << (ostream& os, CRectangle &d)
+	{
+		os << d.leftPoint.getX() << " " << d.leftPoint.getY() << " " << d.rightPoint.getX() << " " << d.rightPoint.getY();
+		return os;
+	}
+};
+int main()
+{
+    int t, x1, x2, y1, y2;
+    cin >> t;
+    while (t--)
+    {
+        // 矩形1的左上角、右下角
+        cin >> x1 >> y1 >> x2 >> y2;
+        CRectangle rect1(x1, y1, x2, y2);
+        // 矩形2的左上角、右下角
+        cin >> x1 >> y1 >> x2 >> y2;
+        CRectangle rect2(x1, y1, x2, y2);
+        // 输出矩形1的坐标及面积
+        cout << "矩形1:" << rect1 << " " << (int)rect1 << endl;
+        // 输出矩形2的坐标及面积
+        cout << "矩形2:" << rect2 << " " << (int)rect2 << endl;
+        if (rect1 == rect2)
+        {
+            cout << "矩形1和矩形2相等" << endl;
+        }
+        else if (rect2 > rect1)
+        {
+            cout << "矩形2包含矩形1" << endl;
+        }
+        else if (rect1 > rect2)
+        {
+            cout << "矩形1包含矩形2" << endl;
+        }
+        else if (rect1 * rect2)
+        {
+            cout << "矩形1和矩形2相交" << endl;
+        }
+        else
+        {
+            cout << "矩形1和矩形2不相交" << endl;
+        }
+        cout << endl;
+    }
+    return 0;
+}
+
+
+
+//D
+#include <bits/stdc++.h>
+using namespace std;
+class CMoney
+{
+	int yuan, fen, jiao;
+public:
+	CMoney(int yuan, int jiao, int fen) : yuan(yuan), fen(fen), jiao(jiao) {}
+	friend CMoney operator + (CMoney &c1, CMoney &c2)
+	{
+		int y, j, f;
+		y = c1.yuan + c2.yuan;
+		f = c1.fen + c2.fen;
+		j = c1.jiao + c2.jiao;
+		if (f > 9) {f %= 10; j++;}
+		if (j > 9) {j %= 10; y++;}
+		return CMoney(y, j, f);
+	}
+	friend CMoney operator - (CMoney &c1, CMoney &c2)
+	{
+		int y, j, f;
+		if (c1.fen < c2.fen) {c1.jiao--; c1.fen += 10;}
+		f = c1.fen - c2.fen;
+		if (c1.jiao < c2.jiao) {c1.yuan--; c1.jiao += 10;}
+		j = c1.jiao - c2.jiao;
+		y = c1.yuan - c2.yuan;
+		return CMoney(y, j, f);
+	}
+	void print()
+	{
+		cout << yuan << "元" << jiao << "角" << fen << "分" << endl;
+	}
+};
+int main()
+{
+	int t;
+	int yuan, jiao, fen;
+	string s;
+	for (cin >> t; t--; )
+	{
+		cin >> yuan >> jiao >> fen;
+		CMoney cm(yuan, jiao, fen);
+		int y, j, f;
+		while (cin >> s && s != "stop")
+		{
+			if (s == "add")
+			{
+				cin >> y >> j >> f;
+				CMoney ret(y, j, f);
+				cm = cm + ret;
+			}
+			else 
+			{
+				cin >> y >> j >> f;
+				CMoney ret(y, j, f);
+				cm = cm - ret;
+			}
+		}
+		cm.print();
+	}
+	return 0;
+}
+
+
+
+
+//E
+#include <bits/stdc++.h>
+using namespace std;
+class CXGraph
+{
+	int w;
+public:
+
+	CXGraph(int w) : w(w) {}
+	CXGraph& operator++()
+	{
+		if (w < 21) w += 2;
+		return *this;
+	}
+	CXGraph& operator--()
+	{
+		if (w > 1) w -= 2;
+		return *this;
+	}
+	CXGraph operator++(int)
+	{
+		CXGraph temp(w);
+		if (w < 21) this->w += 2;
+		return temp;
+	}
+	CXGraph operator--(int)
+	{
+		CXGraph temp(w);
+		if (w > 1) this->w -= 2;
+		return temp;
+	}
+	friend ostream& operator << (ostream& os, const CXGraph &c)
+	{
+		for (int i = 0; i < c.w; i++)
+		{
+			int cnt = c.w / 2 - abs(i - c.w / 2);
+			for (int i = 0; i < cnt; i++) os << " ";
+			for (int i = 0; i < (c.w - cnt - cnt); i++) os << "X";
+			os << endl;
+		}
+		return os;
+	}
+};
+int main()
+{
+    int t, n;
+    string command;
+    cin >> n;
+    CXGraph xGraph(n);
+    cin >> t;
+    while (t--)
+    {
+        cin >> command;
+        if (command == "show++")
+        {
+            cout << xGraph++ << endl;
+        }
+        else if(command == "++show")
+        {
+            cout << ++xGraph << endl;
+        }
+        else if (command == "show--")
+        {
+            cout << xGraph-- << endl;
+        }
+        else if (command == "--show")
+        {
+            cout << --xGraph << endl;
+        }
+        else if (command == "show")
+        {
+            cout << xGraph << endl;
+        }
+    }
+    return 0;
+}
+
+```
+
+22.6.9
+
+代码实现
+
+```C++
+//A
+#include <bits/stdc++.h>
+using namespace std;
+class Fraction
+{
+private:
+    int fz, fm;
+    int commonDivisor(int c1, int c2); // 计算最大公约数
+	void contracted() {if (fm < 0) {fz = -fz; fm = -fm;}}
+public:
+    Fraction(int = 0, int = 1);
+    Fraction(Fraction& f)
+	{
+		this->fz = f.fz;
+		this->fm = f.fm;
+	}
+    Fraction operator+(Fraction f)
+	{
+		Fraction temp = *this;
+		temp.fz = fz * f.fm + fm * f.fz;
+		temp.fm = fm * f.fm;
+		temp.contracted();
+		return temp;
+	}
+    Fraction operator-(Fraction f)
+	{
+		Fraction temp = *this;
+		temp.fz = fz * f.fm - fm * f.fz;
+		temp.fm = fm * f.fm;
+		temp.contracted();
+		return temp;
+	}
+    Fraction operator*(Fraction f)
+	{
+		Fraction temp = *this;
+		temp.fz *= f.fz;
+		temp.fm *= f.fm;
+		temp.contracted();
+		return temp;
+	}
+    Fraction operator/(Fraction f)
+	{
+		Fraction temp = *this;
+		temp.fz *= f.fm;
+		temp.fm *= f.fz;
+		temp.contracted();
+		return temp;		
+	}
+    void Set(int = 0, int = 1);
+	void disp() {cout << "fraction=" << fz << "/" << fm << endl;}
+};
+Fraction::Fraction(int c1, int c2) : fz(c1), fm(c2) {}
+int main()
+{
+	int a, b, c, d;
+	cin >> a >> b >> c >> d;
+	Fraction f1(a, b), f2(c, d);
+	Fraction f3;
+	f3 = f1 + f2;
+	f3.disp();
+	f3 = f1 - f2; f3.disp();
+	f3 = f1 * f2; f3.disp();
+	f3 = f1 / f2; f3.disp();
+	return 0;
+}
+
+
+//B
+#include <bits/stdc++.h>
+using namespace std;
+class Complex
+{
+private:
+    double real, image;
+public:
+    Complex(double x = 0, double y = 0);
+    friend Complex operator+(Complex& c1, Complex& c2)
+	{
+		Complex t = c1;
+		t.real = c1.real + c2.real;
+		t.image = c1.image + c2.image;
+		return t;
+	}
+    friend Complex operator-(Complex& c1, Complex& c2)
+	{
+		Complex t = c1;
+		t.real = c1.real - c2.real;
+		t.image = c1.image - c2.image;
+		return t;		
+	}
+    friend Complex operator*(Complex& c1, Complex& c2)
+	{
+		Complex t = c1;
+		t.real = c1.real * c2.real - c1.image * c2.image;
+		t.image = c1.image * c2.real + c2.image * c1.real;
+		return t;
+	}
+    void show() {cout << "Real=" << real << " Image=" << image << endl;}
+};
+Complex::Complex(double r, double i) : real(r), image(i) {}
+int main()
+{
+	double real, image;
+	cin >> real >> image; Complex c1(real, image);
+	cin >> real >> image; Complex c2(real, image);
+	Complex c3;
+	c3 = c1 + c2; c3.show();
+	c3 = c1 - c2; c3.show();
+	c3 = c1 * c2; c3.show();
+	return 0;
+}
+
+
+
+//C
+#include <bits/stdc++.h>
+using namespace std;
+class Point
+{
+	int x, y, z;
+public:
+	Point(int x = 0, int y = 0, int z = 0) : x(x), y(y), z(z) {}
+	friend Point operator++(Point &a) {a.x++; a.y++; a.z++; return a;}
+	friend Point operator++(Point &a, int)
+	{
+		Point t = a;
+		a.x++; a.y++; a.z++;
+		return t;
+	}
+	friend Point operator--(Point &a) {a.x--; a.y--; a.z--; return a;}
+	friend Point operator--(Point &a, int)
+	{
+		Point t = a;
+		a.x--; a.y--; a.z--;
+		return t;
+	}
+	void show() {cout << "x=" << x << " y=" << y << " z=" << z << endl;}
+};
+int main()
+{
+	int x, y, z; cin >> x >> y >> z;
+	Point p1(x, y, z), p2;
+	p2 = p1++; p1.show(); p2.show(); p1--;
+	p2 = ++p1; p1.show(); p2.show(); p1--;
+	p2 = p1--; p1.show(); p2.show(); p1++; 
+	p2 = --p1; p1.show(); p2.show(); p1++;
+	return 0;
+}
+
+
+
+//D
+#include <bits/stdc++.h>
+using namespace std;
+
+// 定义矩阵类
+class CMatrix
+{
+private:
+    int n, m; // n-行，m-列
+    int** data; // 存储矩阵数据
+public:
+    CMatrix()
+	{
+		n = m = 0;
+		data = NULL;
+	}
+    CMatrix(int n1, int m1);
+	CMatrix &operator = (const CMatrix &a)
+	{
+		if (data != NULL)
+		{
+			for (int i = 0; i < n; i++)
+				delete []data[i];
+			delete []data;
+		}	
+		n = a.n; m = a.m;
+		data = new int*[n];
+		for (int i = 0; i < n; i++)
+			data[i] = new int[m];
+		for (int i = 0; i < n; i++)
+			for (int j = 0; j < m; j++)
+				data[i][j] = a.data[i][j];
+		return *this;
+	}
+	friend CMatrix operator*(CMatrix &a, CMatrix &b)
+	{
+		int n = a.n;
+		CMatrix t(n, n);
+		for (int i = 0; i < n; i++)
+		{
+			for (int j = 0; j < n; j++)
+			{
+				int sum = 0;
+				for (int k = 0; k < n; k++)
+				sum += a[i][k] * b[k][j];
+				t[i][j] = sum;
+			}
+		}
+		return t;
+	}
+	int *const operator[] (const int k)
+	{
+		return data[k];
+	}
+	int operator() (int i, int j)
+	{
+		return data[i][j];
+	}
+	friend ostream& operator<<(ostream &output, CMatrix c)
+	{
+		for (int i = 0; i < c.n; i++)
+		{
+			for (int j = 0; j < c.n; j++) cout << c[i][j] << " \n"[j == c.n - 1];
+		}
+		return output;
+	}
+    // ~CMatrix();
+};
+
+CMatrix::CMatrix(int n1, int m1)
+{
+    n = n1;
+    m = m1;
+    // 分配n行m列的二维数组空间
+    data = new int* [n];
+    for (int i = 0; i < n; i++)
+        data[i] = new int[m];
+	for (int i = 0; i < n; i++)
+		for (int j = 0; j < n; j++)
+			data[i][j] = (i == j);
+}
+
+// CMatrix::~CMatrix()
+// {
+//     // 释放空间
+//     for (int i = 0; i < n; i++)
+//     {
+//         delete[] data[i];
+//     }
+//     delete[] data;
+// }
+
+int main()
+{
+    int t, n;
+    cin >> t >> n;
+	CMatrix e(n, n);
+    while (t--)
+    {
+        CMatrix matrixA(n, n);
+        for (int i = 0; i < n; i++)
+        {
+            for (int j = 0; j < n; j++)
+            {
+                cin >> matrixA[i][j];
+            }
+        }
+		e = e * matrixA;
+    }
+	cout << e;
+    return 0;
+}
+
+
+
+//E
+#include <bits/stdc++.h>
+using namespace std;
+int check(int y)
+{
+	if (y % 4 == 0 && y % 100 || y % 400) return true;
+	return false;
+}
+int mon[12] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
+class Student
+{
+	int id;
+	string name;
+	int year, month, day;
+public:
+	Student() {}
+	Student(string name_, int y, int m, int d, int i) : name(name_), year(y), month(m), day(d), id(i) {}
+	int cal()
+	{
+		int sum = 0;
+		for (int i = 1; i < year; i++) sum += check(year) + 365;
+		for (int i = 0; i < month; i++) sum += mon[i];
+		if (month > 2 && check(year)) sum++;
+		sum += day;
+		return sum;
+	}
+	friend int operator-(Student &s1, Student &s2)
+	{
+		return s1.cal() - s2.cal();
+	}
+	bool operator<(const Student s)
+	{
+		if (year != s.year) return year < s.year;
+		else if (month != s.month) return month < s.month;
+		else return day < s.day;
+	}
+	static void print(Student s1, Student s2)
+	{
+		if (s1.id > s2.id) swap(s1.name, s2.name);
+		cout << s1.name << "和" << s2.name << "年龄相差最大，为" << (s2 - s1 - 1) << "天。" << endl;
+	}
+};
+int main()
+{
+	string name; int year, month, day;
+	int n; cin >> n;
+	Student *p;
+	p = (Student*) operator new(n * sizeof(Student));
+	for (int i = 0; i < n; i++)
+	{
+		cin >> name >> year >> month >> day;
+		new(&p[i]) Student(name, year, month, day, i);
+	}
+	sort(p, p + n);
+	Student::print(p[0], p[n - 1]);
+	return 0;
+}
+```
+
+23.6.16
+
+**类模板和函数模板**
+
+```
+template< > 
+```
+
+代码实现
+
+```C++
+//A
+#include <iostream>
+using namespace std;
+template<class T>
+void findout(int n)
+{
+	T* a = new T[n];
+	for (int i = 0; i < n; i++) cin >> a[i];
+	T key;  cin >> key;
+	for (int i = 0; i < n; i++)
+	{
+		if (a[i] == key)
+		{
+			cout << i + 1 << endl;
+			break;
+		}
+		if (i == n - 1) cout << "0" << endl;
+	}
+}
+int main()
+{
+	int t, n; 
+	char ch;
+	for (cin >> t; t--; )
+	{
+		cin >> ch >> n;
+		if (ch == 'I') findout<int>(n);
+		else if (ch == 'D') findout<double>(n);
+		else if (ch == 'C') findout<char>(n);
+		else if (ch == 'S') findout<string>(n);
+	}
+	return 0;
+}
+
+
+//B
+#include <iostream>
+#include <map>
+#include <algorithm>
+using namespace std;
+template<class T>
+void Judge(int n)
+{
+	T* a = new T[n];
+	map<T, int> ma;
+	T ret;
+	for (int i = 0; i < n; i++)
+	{
+		cin >> ret;
+		ma[ret]++;
+	}
+	int maxn = 0;
+	for (auto v : ma)
+	{
+		if (v.second > maxn)
+		{
+			maxn = v.second;
+			ret = v.first;
+		}
+	}
+	cout << ret << " " << ma[ret] << endl;
+}
+int main()
+{
+	int t, n;
+	char ch;
+	for (cin >> t; t--; )
+	{
+		cin >> ch >> n;
+		if (ch == 'I') Judge<int>(n);
+		else if (ch == 'C') Judge<char>(n);
+		else if (ch == 'S') Judge<string>(n);
+	}
+	return 0;
+}
+
+
+//C
+#include <iostream>
+#include <map>
+#include <algorithm>
+using namespace std;
+template<class T>
+void check()
+{
+	T* a = new T[6];
+	for (int i = 0; i < 6; i++) cin >> a[i];
+	for (int i = 0; i < 6; i++)
+	{
+		if (a[i] < a[i - 1])
+		{
+			cout << "Invalid" << endl;
+			break;
+		}
+		if (i == 5) cout << "Valid" << endl;
+	}
+	delete[]a;
+}
+int main()
+{
+
+	char ch;
+	while (cin >> ch)
+	{
+		if (ch == 'i') check<int>();
+		else if (ch == 'f') check<double>();
+		else if (ch == 'c') check<char>();
+	}
+	return 0;
+}
+
+
+
+//D
+#include <bits/stdc++.h>
+using namespace std;
+template<typename T>
+class CMatrix
+{
+private:
+    int n, m;
+    T** data; 
+public:
+    CMatrix()
+	{
+		n = m = 0;
+		data = NULL;
+	}
+    CMatrix(int n1, int m1)
+	{
+    	n = n1;
+    	m = m1;
+		data = new T* [n];
+		for (int i = 0; i < n; i++) data[i] = new T[m];
+		for (int i = 0; i < n; i++)
+			for (int j = 0; j < m; j++)
+				cin >> data[i][j];
+	}
+	void transpose()
+	{
+		int tn = m, tm = n;
+		T** tdata;
+		tdata = new T*[tn];
+		for (int i = 0; i < tn; i++) tdata[i] = new T[tm];
+		for (int i = 0; i < tn; i++)
+			for (int j = 0; j < tm; j++)
+				tdata[i][j] = data[j][i];
+		data = tdata;
+		n = tn; m = tm;
+	}
+	void print()
+	{
+		for (int i = 0; i < n; i++)
+			for (int j = 0; j < m; j++)
+				cout << data[i][j] << " \n"[j == m - 1];
+	}
+    ~CMatrix()
+	{
+		for (int i = 0; i < n; i++)
+		{
+			delete[] data[i];
+		}
+		delete[] data;
+	}
+};
+int main()
+{
+    int t, n, m;
+	char ch;
+	for (cin >> t; t--; )
+	{
+		cin >> ch >> n >> m;
+		if (ch == 'I') {CMatrix<int> ma(n, m); ma.transpose(); ma.print();}
+		else if (ch == 'C') {CMatrix<char> ma(n, m); ma.transpose(); ma.print();}
+		else if (ch == 'D') {CMatrix<double> ma(n, m); ma.transpose(); ma.print();}
+	}
+    return 0;
+}
+
+//E
+#include <bits/stdc++.h>
+using namespace std;
+template<typename T>
+class List
+{
+private:
+	T arr[100];
+	int n;
+public:
+	List(int _n) : n(_n) 
+	{
+		for (int i = 0; i < n; i++) cin >> arr[i];
+		for (int i = n; i < 100; i++) arr[i] = -1;
+	}
+	void Insert()
+	{
+		int pos; T key; cin >> pos >> key;
+		n++;
+		for (int i = n - 1; i > pos; i--) arr[i] = arr[i - 1];
+		arr[pos] = key;
+	}
+	void Delete()
+	{
+		int pos; cin >> pos;
+		n--;
+		for (int i = pos; i < n; i++) arr[i] = arr[i + 1];
+	}
+	void Print()
+	{
+		for (int i = 0; i < n; i++) cout << arr[i] << " \n"[i == n - 1]; 
+	}
+};
+int main()
+{
+	int n;
+	cin >> n;
+	List<int> li(n);
+	li.Insert(); li.Delete(); li.Print();
+	cin >> n;
+	List<double> ld(n);
+	ld.Insert(); ld.Delete(); ld.Print();
+	return 0;
+	
+}
+```
+
+22.6.23
+
+代码实现
+
+```C++
+//A
+#include <bits/stdc++.h>
+using namespace std;
+class Audio
+{
+private:
+	int type;
+	string name;
+	int price;
+	bool status;
+public:
+	Audio(int t, string na, int p, bool s) : type(t), name(na), price(p), status(s) {}
+	void query(int op)
+	{
+		if (op == 0) show();
+		else
+		{
+			show();
+			if (status == 0) cout << "未产生租金" << endl;
+			else cout << "当前租金为" << price * op << endl; 
+		}
+	}
+	void show()
+	{
+		string s[5] = {" ", "黑胶片", "CD", "VCD", "DVD"};
+		cout << s[type] << "[" << name << "]";
+		if (status == 0) cout << "未出租" << endl;
+		else cout << "已出租" << endl;
+	}
+};
+int main()
+{
+	int t, op;
+	int type, price;
+	string name;
+	bool status;
+	for (cin >> t; t--; )
+	{
+		cin >> type >> name >> price >> status >> op;
+		Audio au(type, name, price, status);
+		au.query(op);
+	}
+	return 0;
+}
+
+
+//B
+#include <bits/stdc++.h>
+using namespace std;
+class Data
+{
+protected:
+	int year, month, day;
+public:
+	Data(int y, int m, int d) : year(y), month(m), day(d) {}
+};
+class Time
+{
+protected:
+	int hour, minute, second;
+public:
+	Time(int h, int m, int s) : hour(h), minute(m), second(s) {}
+};
+class Work : public Data, Time
+{
+	int id;
+public:
+	Work(int i, int y, int m, int d, int h, int mi, int s) : id(i), Data(y, m, d), Time(h, mi, s) {}
+	bool operator < (const Work w) const
+	{
+		if (year != w.year) return year < w.year;
+		else if (month != w.month) return month < w.month;
+		else if (day != w.day) return day < w.day;
+		else if (hour != w.hour) return hour < w.hour;
+		else if (minute != w.minute) return minute < w.minute;
+		else if (second != w.second) return second < w.second;
+		return id < w.id;
+	}
+	void show()
+	{
+		printf("No.%d: %d/%.2d/%.2d %.2d:%.2d:%.2d\n", id, year, month, day, hour, minute, second);
+	}
+};
+int main()
+{
+	int id, year, month, day, hour, minute, second;
+	vector<Work> v;
+	while (cin >> id && id)
+	{
+		cin >> year >> month >> day >> hour >> minute >> second;
+		Work w(id, year, month, day, hour, minute, second);
+		v.push_back(w);
+	}
+	sort(v.begin(), v.end());
+	cout << "The urgent Work is ";
+	v[0].show();
+}
+
+
+//C
+#include <bits/stdc++.h>
+using namespace std;
+class CDate
+{
+	int year, month, day;
+public:
+	CDate() {}
+	CDate(int y, int m, int d) : year(y), month(m), day(d) {}
+	bool operator < (const CDate c) const
+	{
+		if (year != c.year) return year < c.year;
+		else if (month != c.month) return month < c.month;
+		else if (day != c.day) return day < c.day;
+		return true;
+	}
+	bool check(int x)
+	{
+		if (x % 4 == 0 && x % 100 != 0 || x % 400 == 0) return true;
+		return false;
+	}
+	int cal()
+	{
+		int mon[13] = {0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
+		int sum = 0;
+		for (int i = 1; i < year; i++) sum += 365 + check(i);
+		for (int i = 1; i < month; i++) sum += mon[i];
+		sum += day;
+		if (check(year) && month > 2) sum++;
+		return sum;
+	}
+	int operator - (CDate c) {return this->cal() - c.cal();}
+};
+class Pet
+{
+protected:
+	string name;//姓名
+	float length;//身长
+	float weight;//体重
+	CDate current;//开始记录时间
+public:
+	Pet(string na,  float l, float w, CDate c) : name(na), length(l), weight(w), current(c) {}
+	virtual void display(CDate day)=0;//输出目标日期时宠物的身长和体重
+};
+class Cat : public Pet
+{
+	float unit[2] = {0.1, 0.2};
+public:
+	Cat(string na, float l, float w, CDate c) : Pet(na, l, w, c) {}
+	virtual void display(CDate day)
+	{
+		if (day < current) cout << "error" << endl;
+		else
+		{
+			int days = day - current;
+			cout << name << " after " << days << " day: ";
+			printf("length=%.2f,weight=%.2f\n", days * unit[0] + length, days * unit[1] + weight);
+		}
+	}
+};
+class Dog : public Pet
+{
+	float unit[2] = {0.2, 0.1};
+public:
+	Dog(string na, float l, float w, CDate c) : Pet(na, l, w, c) {}
+	virtual void display(CDate day)
+	{
+		if (day < current) cout << "error" << endl;
+		else
+		{
+			int days = day - current;
+			cout << name << " after " << days << " day: ";
+			printf("length=%.2f,weight=%.2f\n", days * unit[0] + length, days * unit[1] + weight);
+		}
+	}
+};
+int main()
+{
+	int t, type, year, month, day;
+	string name;
+	float length, weight;
+	cin >> t >> year >> month >> day;
+	CDate bgt(year, month, day);
+	Pet *pt;
+	while (t--)
+	{
+		cin >> type >> name >> length >> weight >> year >> month >> day;
+		CDate now(year, month, day);
+		if (type == 1)
+		{
+			Cat cat(name, length, weight, bgt);
+			pt = &cat;
+			(*pt).display(now);
+		}
+		else
+		{
+			Dog dog(name, length, weight, bgt);
+			pt = &dog;
+			(*pt).display(now);
+		}
+	}
+	return 0;
+}
+
+
+
+//D
+#include <bits/stdc++.h>
+using namespace std;
+class CSet
+{
+	int n;
+	vector<int> ve;
+public:
+	CSet(int _n) : n(_n)
+	{
+		for (int i = 0; i < n; i++) 
+		{
+			int x; cin >> x;
+			ve.push_back(x);
+		}
+	}
+	CSet operator + (CSet c)
+	{
+		CSet ret = *this;
+		map<int, bool> ma;
+		for (auto v : this->ve) ma[v] = 1;
+		for (auto v : c.ve)
+		{
+			if (ma.find(v) == ma.end())
+			{
+				ma[v] = 1;
+				ret.ve.push_back(v);
+			} 
+		}
+		ret.n = ret.ve.size();
+		return ret;
+	}
+	CSet operator - (CSet c)
+	{
+		CSet tmp = *this, inte = (*this)*c;
+		tmp.ve.clear();
+		map<int, bool> ma;
+		for (auto v : inte.ve) ma[v] = 1;
+		for (auto v : this->ve)
+			if (ma.find(v) == ma.end())
+				tmp.ve.push_back(v);
+		return tmp;
+	}
+	CSet operator * (CSet c)
+	{
+		CSet ret = *this;
+		map<int, bool> ma;
+		for (auto v : c.ve) ma[v] = 1;
+		ret.ve.clear();
+		for (auto v : this->ve)
+			if (ma.find(v) != ma.end())
+				ret.ve.push_back(v);
+		ret.n = ret.ve.size();
+		return ret;
+	}
+	void print()
+	{
+		for (vector<int>::iterator v = ve.begin(); v != ve.end(); v++)
+			cout << *v << " \n"[v + 1 == ve.end()];
+	}
+};
+int main()
+{
+	int t;
+	int n;
+	for (cin >> t; t--; )
+	{
+		cin >> n; CSet c1(n);
+		cin >> n; CSet c2(n);
+		cout << "A:"; c1.print();
+		cout << "B:"; c2.print();
+		cout << "A+B:"; (c1 + c2).print();
+		cout << "A*B:"; (c1 * c2).print();
+		cout << "(A-B)+(B-A):"; ((c1 - c2) + (c2 - c1)).print();
+		cout << endl;
+	}
+	return 0;
+}
+
+
+
+//E
+#include <bits/stdc++.h>
+using namespace std;
+class CBook
+{
+	string name, author, phouse;
+	double price;
+public:
+	CBook() {}
+	CBook(string n, string a, string ph, double pr) : name(n), author(a), phouse(ph), price(pr) {}
+	bool operator < (const CBook c) const
+	{
+		return price > c.price;
+	}
+	friend istream& operator>>(istream &intput, CBook &c)
+	{	
+		string inf[4];
+		for (int i = 0; i < 4; i++) getline(intput, inf[i], i == 3 ? '\n' : ',');
+		c = CBook(inf[0], inf[1], inf[3], stod(inf[2]));
+		return intput;
+	}
+	friend void find(CBook *book, int n, int &max1index,int &max2index)
+	{
+		double m1 = 0, m2 = 0;
+		for (int i = 0; i < n; i++)
+			if (book[i].price > m1) m1 = book[i].price, max1index = i;
+		for (int i = 0; i < n; i++)
+			if (book[i].price > m2 && i != max1index) m2 = book[i].price, max2index = i;
+	}
+	friend ostream& operator<<(ostream &output, CBook c)
+	{
+		output << c.name << endl << c.author << endl << c.price << endl << c.phouse << endl;
+		return output;
+	}
+};
+int main()
+{
+	int t, n;
+    cout << fixed << setprecision(2);
+	for (cin >> t; t--; )
+	{
+		cin >> n;
+		CBook *cp;
+		cp = new CBook[n];
+		int max1index, max2index;
+		for (int i = 0; i < n; i++) cin >> cp[i];
+		find(cp, n, max1index, max2index);
+		cout << cp[max1index] << endl << cp[max2index];
+	}
+	return 0;
+}
+
+```
+
+23.6.25
+
+代码
+
+```C++
+//A
+#include <bits/stdc++.h>
+using namespace std;
+// 普通会员类
+class Member 
+{  
+	// ....代码自行编写
+protected:
+	int id, num;
+	string name;
+public:
+	Member(int id, int num, string name) : id(id), num(num), name(name) {}
+	virtual void add(int d) {num += d;}
+	virtual int exchange(int d)
+	{
+		num -= (d - d % 100);
+		return d / 100;
+	}
+	virtual void print() {cout << "普通会员" << id << "--" << name << "--" << num << endl;}
+};
+
+// 贵宾会员类
+class VIP : public Member
+{  
+	// ....代码自行编写
+	int addrate, exrate;
+public: 
+	VIP(int a, int e, int i, int n, string na) : addrate(a), exrate(e), Member(i, n, na) {}
+	virtual void add(int d) {num += d * addrate;}
+	virtual int exchange(int d)
+	{
+		num -= (d - d % exrate);
+		return d / exrate;
+	}
+	virtual void print() {cout << "贵宾会员" << id << "--" << name << "--" << num << endl;}
+};
+
+int main()
+{
+	// 创建一个基类对象指针
+	Member* pm;
+	// ....其他变量自行编写
+	int id, num, addrate, exrate, mon, exval;
+	string name;
+	cin >> id >> name >> num >> mon >> exval;
+	Member mm(id, num, name);
+	pm = &mm;
+	pm -> add(mon); pm -> exchange(exval); pm -> print();
+	// 输入数据，创建普通会员对象mm
+	// 使用指针pm执行以下操作：
+	// 1、pm指向普通会员对象mm
+	// 2、输入数据，通过pm执行积分累加和积分兑换
+	// 3、通过pm调用打印方法输出
+
+	cin >> id >> name >> num >> addrate >> exrate >> mon >> exval;
+	VIP vv(addrate, exrate, id, num, name);
+	pm = &vv; 
+	pm -> add(mon); pm -> exchange(exval); pm -> print();
+	// 输入数据，创建贵宾会员对象vv
+	// 使用指针pm执行以下操作：
+	// 1、pm指向贵宾会员对象vv
+	// 2、输入数据，通过pm执行积分累加和积分兑换
+	// 3、通过pm调用打印方法输出
+
+	return 0;
+}
+
+
+
+//B
+#include <bits/stdc++.h>
+using namespace std;
+class Metal
+{
+	int hard, weight, volumn;
+public:
+	Metal(int h, int w, int v) : hard(h), weight(w), volumn(v) {}
+	Metal operator++(int)
+	{
+		Metal tmp = *this;
+		(*this).hard++;
+		(*this).weight *= 1.1;
+		(*this).volumn *= 1.1;
+		return tmp;
+	}
+	Metal operator--(int)
+	{
+		Metal tmp = *this;
+		(*this).hard--;
+		(*this).weight *= 0.9;
+		(*this).volumn *= 0.9;
+		return tmp;
+	}
+	friend Metal operator+(Metal m1, Metal m2)
+	{
+		Metal tmp = m1;
+		tmp.hard = m1.hard + m2.hard;
+		tmp.weight = m1.weight + m2.weight;
+		tmp.volumn = m1.volumn + m2.volumn;
+		return tmp;
+	}
+	friend Metal operator*(Metal m, int x)
+	{
+		Metal tmp = m;
+		tmp.volumn = m.volumn * x;
+		return tmp;
+	}
+	void print() {cout << "硬度" << hard << "--重量" << weight << "--体积" << volumn << endl;}
+};
+int main()
+{
+	int hard, weight, volumn, n;
+	cin >> hard >> weight >> volumn;
+	Metal m1(hard, weight, volumn);
+	cin >> hard >> weight >> volumn >> n;
+	Metal m2(hard, weight, volumn);
+	Metal m = m1 + m2; m.print();
+	m = m1 * n; m.print();
+	m1++; m1.print();
+	m2--; m2.print();
+	return 0;
+}
+
+
+
+//C
+#include <bits/stdc++.h>
+using namespace std;
+template<class T>
+T max(T arr[], int n)
+{
+	T maxn = -1;
+	for (int i = 0; i < n; i++)
+	{
+		if (arr[i] > maxn) maxn = arr[i];
+	}
+	return maxn;
+}
+template<class T>
+class Cryption
+{
+private:
+	T ptxt[100]; //明文
+	T ctxt[100]; //密文
+	T key; //密钥
+	int len; //长度
+public:
+	Cryption(T tk, T tt[], int n) : key(tk), len(n)
+	{
+		for (int i = 0; i < len; i++) ptxt[i] = tt[i];
+	} //参数依次对应密钥、明文、长度
+	void encrypt()
+	{
+		T maxn = max(ptxt, len);
+		for (int i = 0; i < len; i++) ctxt[i] = maxn - ptxt[i] + key;
+	}
+	void print() //打印，无需改造
+	{
+		int i;
+		for (i = 0; i < len - 1; i++)
+		{
+			cout << ctxt[i] << " ";
+		}
+		cout << ctxt[i] << endl;
+	}
+};
+
+//支持三种类型的主函数
+int main()
+{
+	int i;
+	int length; //长度
+	int ik, itxt[100];
+	double dk, dtxt[100];
+	char ck, ctxt[100];
+	//整数加密
+	cin >> ik >> length;
+	for (i = 0; i < length; i++)
+	{
+		cin >> itxt[i];
+	}
+	Cryption<int> ic(ik, itxt, length);
+	ic.encrypt();
+	ic.print();
+	//浮点数加密
+	cin >> dk >> length;
+	for (i = 0; i < length; i++)
+	{
+		cin >> dtxt[i];
+	}
+	Cryption<double> dc(dk, dtxt, length);
+	dc.encrypt();
+	dc.print();
+	//字符加密
+	cin >> ck >> length;
+	for (i = 0; i < length; i++)
+	{
+		cin >> ctxt[i];
+	}
+	Cryption<char> cc(ck, ctxt, length);
+	cc.encrypt();
+	cc.print();
+
+	return 0;
+}
+
+
+
+//D
+#include <bits/stdc++.h>
+using namespace std;
+class appliance
+{
+protected:
+	int id, power;
+public:
+	appliance(int i, int p) : id(i), power(p) {}
+	virtual void print() = 0;
+};
+class fan : virtual public appliance
+{
+protected:
+	int dir, wind;
+public:
+	fan(int i, int p, int d, int w) : appliance(i, p), dir(d), wind(w) {}
+	void condir(int x) {dir = x;}
+	void conwind(int x) {wind = x;}
+};
+class humidifier : virtual public appliance
+{
+protected:
+	double actcap, maxcap;
+public:
+	humidifier(int i, int p, double a, double m) : appliance(i, p), actcap(a), maxcap(m) {}
+	int alarm()
+	{
+		double ratio = actcap / maxcap;
+		if (ratio >= 0.5) return 1;
+		else if (ratio < 0.1) return 3;
+		else return 2;
+	}
+};
+class humidfan : public fan, public humidifier
+{
+	int gear;
+public:
+	humidfan(int i, int p, int d, int w, double a, double m) : appliance(i, p), fan(i, p, d, w), humidifier(i, p, a, m) {}
+	void adjust(int x)
+	{
+		gear = x;
+		if (x == 1) dir = 0, wind = 1;
+		else if (x == 2) dir = 1, wind = 2;
+		else if (x == 3) dir = 1, wind = 3;
+	}
+	virtual void print()
+	{
+		cout << fixed << setprecision(0);
+		cout << "加湿风扇--档位" << gear << endl;
+		cout << "编号" << id << "--功率" << power << "W" << endl;
+		cout << (dir == 1 ? "旋转吹风" : "定向吹风") << "--风力" << wind << "级" << endl;
+		cout << "实际水容量" << actcap << "升--";
+		int tmp = alarm();
+		if (tmp == 1) cout << "水量正常" << endl;
+		else if (tmp == 2) cout << "水量偏低" << endl;
+		else cout << "水量不足" << endl;  
+	}
+};
+int main()
+{
+	int t; 
+	int id, power, dir, wind, x;
+	double accap, maxcap;
+	for (cin >> t; t--; )
+	{
+		cin >> id >> power >> dir >> wind >> accap >> maxcap >> x >> x;
+		humidfan h(id, power, dir, wind, accap, maxcap);
+		h.adjust(x); h.print();
+	}
+	return 0;
+}
+
+
+
+//E
+#include <bits/stdc++.h>
+using namespace std;
+class CN; //提前声明
+class EN; //提前声明
+
+// 抽象类
+class Weight
+{
+protected:
+	char kind[20]; //计重类型
+	int gram; // 克
+public:
+	Weight(const char tk[] = "no name", int tg = 0)
+	{
+		strcpy(kind, tk);
+		gram = tg;
+	}
+	virtual void print(ostream& out) = 0; // 输出不同类型的计重信息
+};
+
+// 中国计重
+class CN : public Weight
+{
+	int jin, liang, qian;
+public:
+	CN(int j, int l, int q, int g, char ty[]) : Weight(ty, g), jin(j), liang(l), qian(q) {}
+	void Convert(int x)
+	{
+		jin = x / 500;
+		liang = x % 500 / 50;
+		qian = x % 50 / 5;
+		gram = x % 5;
+	}
+	virtual void print(ostream& out)
+	{
+		out << kind << ":" << jin << "斤" << liang << "两" << qian << "钱" << gram << "克" << endl;
+	}
+	friend ostream& operator<<(ostream &output, CN &c)
+	{
+		c.print(output);
+		return output;
+	}
+	CN& operator=(EN &en);
+};
+
+// 英国计重
+class EN : public Weight
+{
+	int pound, ounce, taran;
+public:
+	EN(int p, int o, int t, int g, char ty[]) : Weight(ty, g), pound(p), ounce(o), taran(t) {}
+	void Convert(int x)
+	{
+		pound = x / 512;
+		ounce = x % 512 / 32;
+		taran = x % 32 / 2;
+		gram = x % 2;
+	}
+	friend ostream& operator<<(ostream &output, EN &e)
+	{
+		e.print(output);
+		return output;
+	}
+	int getsum()
+	{
+		return pound * 512 + ounce * 32 + taran * 2 + gram;
+	}
+	virtual void print(ostream& out)
+	{
+		out << kind << ":" << pound << "磅" << ounce << "盎司" << taran << "打兰" << gram << "克" << endl;
+	}
+};
+
+CN& CN::operator=(EN &en)
+{
+	int sum = 0;
+	sum = en.getsum();
+	this -> Convert(sum);
+	return *this;
+}
+// 以全局函数方式重载输出运算符，代码3-5行....自行编写
+// 重载函数包含两个参数：ostream流对象、Weight类对象，参数可以是对象或对象引用
+// 重载函数必须调用参数Weight对象的print方法
+
+// 主函数
+int main()
+{
+	int tw;
+	char ch1[] = "中国计重";
+	// 创建一个中国计重类对象cn
+	// 构造参数对应斤、两、钱、克、类型，其中克和类型是对应基类属性gram和kind
+	CN cn(0, 0, 0, 0, ch1);
+	cin >> tw;
+	cn.Convert(tw); // 把输入的克数转成中国计重
+	cout << cn;
+
+	// 创建英国计重类对象en
+	// 构造参数对应磅、盎司、打兰、克、类型，其中克和类型是对应基类属性gram和kind
+	char ch2[] = "英国计重";
+	EN en(0, 0, 0, 0, ch2);
+	cin >> tw;
+	en.Convert(tw); // 把输入的克数转成英国计重
+	cout << en;
+	cn = en; // 把英国计重转成中国计重
+	cout << cn;
+	return 0;
+}
+```
+
 
 
 #### 校赛
@@ -7900,6 +10203,78 @@ int main()
         cout << ans << endl;
     }
     return 0;
+}
+```
+
+[C - Standings](https://atcoder.jp/contests/abc308/tasks/abc308_c)
+
+```C++
+#include <iostream>
+#include <algorithm>
+using namespace std;
+int n, a[2 << 17], b[2 << 17], idx[2 << 17];
+int main()
+{
+	ios::sync_with_stdio(false);
+	cin.tie(nullptr);
+	cin >> n;
+	for (int i = 0; i < n; i++)
+	{
+		cin >> a[i] >> b[i];
+		idx[i] = i;
+	}
+	sort(idx, idx + n, [](int l, int r)   // worth learning
+	{
+		if ((long)a[l] * (a[r] + b[r]) != (long)a[r] * (a[l] + b[l]))
+			return (long) a[l] * (a[r] + b[r]) > (long) a[r] * (a[l] + b[l]);
+		return l < r;
+	});
+	for (int i = 0; i < n; i++) cout << idx[i] + 1 << (i + 1 == n ? "\n" : " ");
+	return 0;
+}
+```
+
+[D - Snuke Maze](https://atcoder.jp/contests/abc308/tasks/abc308_d)
+
+```c++
+#include <iostream>
+#include <algorithm>
+#include <queue>
+using namespace std;
+int h, w;
+string s[500];
+bool dp[500][500][5];
+const int d[5] = {0, 1, 0, -1};
+int main()
+{
+	ios::sync_with_stdio(false);
+	cin.tie(nullptr);
+	cin >> h >> w;
+	for (int i = 0; i < h; i++) cin >> s[i];
+	dp[0][0][0] = true;
+	queue<pair<pair<int, int>, int>> Q;
+	Q.push(make_pair(make_pair(0, 0), 0));
+	bool ans = false;
+	while (!Q.empty())
+	{
+		int x = Q.front().first.first , y = Q.front().first.second;
+		int k = Q.front().second;
+		Q.pop();
+		if ("snuke"[k % 5] != s[x][y]) continue;
+		if (x == h - 1 && y == w - 1) ans = true;
+		for (int r = 0; r < 4; r++)
+		{
+			int tx = x + d[r], ty = y + d[r + 1];
+			if (tx < 0 || tx >= h || ty < 0 || ty >= w) continue;
+			int nk = (k + 1) % 5;
+			if (dp[tx][ty][nk]) continue;
+			dp[tx][ty][nk] = true;
+			Q.push(make_pair(make_pair(tx, ty), nk));
+		}
+	}
+	cout << (ans ? "Yes" : "No");
+	return 0;
+
 }
 ```
 

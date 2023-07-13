@@ -8016,6 +8016,284 @@ int main()
 }//
 ```
 
+2021 RoboCom世界机器人开发者大赛 - 本科组(初赛)
+
+[7 - 1 懂的都懂](https://pintia.cn/problem-sets/1446838676759703552/exam/problems/1446838732288094208)
+
+```c++
+#include <bits/stdc++.h>
+using namespace std;
+int main()
+{
+	ios::sync_with_stdio(false);
+	cin.tie(NULL);
+	int n, m; cin >> n >> m;
+	set<int> se;
+	vector<int> ve(n);
+	for (int i = 0; i < n; i++) cin >> ve[i];
+	for (int i = 0; i < n; i++)
+	{
+		int sum = ve[i];
+		for (int j = i + 1; j < n; j++)
+		{
+			sum += ve[j];
+			for (int k = j + 1; k < n; k++)
+			{
+				sum += ve[k];
+				for (int l = k + 1; l < n; l++)
+				{
+					sum += ve[l];
+					se.insert(sum);
+					sum -= ve[l];
+				}
+				sum -= ve[k];
+			}
+			sum -= ve[j];
+		}
+		sum -= ve[i];
+	}
+	for (int i = 0; i < m; i++)
+	{
+		int cnt = 0; cin >> cnt;
+		vector<int> val(cnt);
+		for (int j = 0; j < cnt; j++) cin >> val[j];
+		for (int j = 0; j < cnt; j++)
+		{
+			if (se.count(val[j] * 4) == 0) {cout << "No" << endl; break;}
+			if (j == cnt - 1) cout << "Yes" << endl;
+		}
+	}
+	return 0;
+}
+```
+
+[7-2 芬兰木棋](https://pintia.cn/problem-sets/1446838676759703552/exam/problems/1446838732288094209)
+
+```c++
+#include <bits/stdc++.h>
+using namespace std;
+typedef pair<int, int> PLL;
+typedef long long LL;
+int n, s;
+LL x, y;
+map<PLL, vector<pair<LL, int>>> ma;
+
+int main()
+{
+	cin >> n;
+	int sum = 0, cnt = 0;
+	for (int i = 0; i < n; i++)
+	{
+		cin >> x >> y >> s;
+		sum += s;
+		LL d = x * x + y * y;
+		LL c = abs(__gcd(x, y));
+		x /= c; y /= c;
+		ma[{x, y}].push_back({d, s});
+	}
+
+	for (auto v : ma)
+	{
+		vector<pair<LL, int>> ve = v.second;
+		sort(ve.begin(), ve.end());
+		for (int i = 0; i < ve.size(); i++)
+		{
+			if (i && ve[i - 1].second == 1 && ve[i].second == 1) continue;
+			cnt++;
+		}
+	}
+	cout << sum << ' ' << cnt << endl;
+	return 0;
+}
+```
+
+[7 - 3 打怪升级](https://pintia.cn/problem-sets/1446838676759703552/exam/problems/1446838732288094210)
+
+```c++
+#include <bits/stdc++.h>
+using namespace std;
+const int N = 1010;
+
+bool vis[N];
+int n, m, max_s[N];
+int min_s[N], max_d[N];
+int a, b, s, d, pre[N];
+int S[N][N], D[N][N];
+int dijkstra(int f)
+{
+	memset(vis, 0, sizeof vis);
+	memset(min_s, 0x3f, sizeof min_s);
+	memset(max_d, 0, sizeof max_d);
+
+	min_s[f] = 0;
+	while (true)
+	{
+		int t = -1;
+		for (int i = 1; i <= n; i++)
+			if (!vis[i] && (t == -1 || min_s[t] > min_s[i]))
+				t = i;
+
+		if (t == -1) break;
+		vis[t] = true;
+
+		for (int i = 1; i <= n; i++)
+		{
+			if (min_s[i] > min_s[t] + S[t][i])
+			{
+				pre[i] = t;
+				min_s[i] = min_s[t] + S[t][i];
+				max_d[i] = max_d[t] + D[t][i];
+			}
+			else if (min_s[i] == min_s[t] + S[t][i])
+			{
+				if (max_d[i] < max_d[i] + D[t][i])
+				{
+					pre[i] = t;
+					max_d[i] = max_d[t] + D[t][i];
+				}
+			}
+		}
+	}
+
+	int ms = 0;
+	for (int i = 1; i <= n; i++)
+		if (ms < min_s[i])
+			ms = min_s[i];
+	return ms;
+}
+
+void dfs(int x, int id)
+{
+	if (x == id) return;
+	dfs(pre[x], id);
+	printf("->%d", x);
+}
+
+int main()
+{
+	memset(S, 0x3f, sizeof S);
+	scanf("%d %d", &n, &m);
+	while (m--)
+	{
+		scanf("%d %d %d %d", &a, &b, &s, &d);
+		S[a][b] = S[b][a] = min(S[a][b], s);
+		D[a][b] = D[b][a] = max(D[a][b], d);
+	}
+	for (int i = 1; i <= n; i++)
+		max_s[i] = dijkstra(i);
+
+	int id = 1;
+	for (int i = 1; i <= n; i++)
+		if (max_s[id] > max_s[i])
+			id = i;
+	
+	printf("%d\n", id);
+	dijkstra(id);
+
+	int k, x;
+	scanf("%d", &k);
+	while (k--)
+	{
+		scanf("%d", &x);
+		printf("%d", id);
+		dfs(x, id);
+		printf("\n");
+		printf("%d %d\n", min_s[x], max_d[x]);
+	}
+	return 0;
+}
+```
+
+[7-4 疫情防控](https://pintia.cn/problem-sets/1446838676759703552/exam/problems/1446838732288094211)
+
+```c++
+#include <bits/stdc++.h>
+using namespace std;
+
+const int N = 5e4 + 10;
+typedef pair<int, int> PII;
+
+int n, m, d;
+int c, q, a, b, x, y;
+int f[N];
+bool st[N];
+vector<vector<PII>> plls;
+vector<int> G[N], ps, res;
+
+void init()
+{
+	for (int i = 0; i < N; i++)
+		f[i] = i;
+}
+
+int find(int x)
+{
+	return f[x] = f[x] == x ? x : find(f[x]);
+}
+
+int main()
+{
+	init();
+	scanf("%d %d %d", &n, &m, &d);
+	for (int i = 0; i < m; i++)
+	{
+		scanf("%d %d", &x, &y);
+		G[x].push_back(y);
+		G[y].push_back(x);
+	}
+	while (d--)
+	{
+		scanf("%d %d", &c, &q);
+		st[c] = true;
+		ps.push_back(c);
+
+		vector<PII> pll;
+		while (q--)
+		{
+			scanf("%d %d", &a, &b);
+			pll.push_back({a, b});
+		}
+		plls.push_back(pll);
+	}
+	for (int i = 1; i <= n; i++)
+	{
+		if (st[i]) continue;
+		for (int j = 0; j < G[i].size(); j++)
+		{
+			int x = G[i][j];
+			if (st[x]) continue;
+			f[find(i)] = find(x);
+		}
+	}
+	for (int i = plls.size() - 1; i >= 0; i--)
+	{
+		int cnt = 0;
+		vector<PII> pll = plls[i];
+		for (PII p : pll)
+			if (find(p.first) != find(p.second))
+				cnt++;
+		
+		res.push_back(cnt);
+
+		int u = ps[i];
+		for (int x : G[u])
+		{
+			if (st[x]) continue;
+			f[find(x)] = find(u);
+		}
+		st[u] = false;
+	}
+
+
+	reverse(res.begin(), res.end());
+	for (int x : res)
+		printf("%d\n", x);
+	return 0;
+}
+```
+
+
+
 #### luogu
 
 P7441「EZEC-7」Erinnerung
@@ -10278,6 +10556,75 @@ int main()
 }
 ```
 
+[E - MEX](https://atcoder.jp/contests/abc308/tasks/abc308_e)
+
+```c++
+#include <iostream>
+#include <cassert>
+#include <vector>
+using namespace std;
+const int maxn = 2e5 + 10;
+int n;
+int num[200010];
+string str;
+int cal(int a, int b, int c)
+{
+	for (int i = 0; i <= 3; i++)
+		if (i != a && i != b && i != c)
+			return i;
+}
+int main()
+{
+	cin >> n;
+	for (int i = 1; i <= n; i++) cin >> num[i];
+	cin >> str; str = ' ' + str;
+	vector<vector<int>> v1(maxn, vector<int>(3)), v2(maxn, vector<int>(3));
+	for (int i = 1; i <= n; i++)
+	{
+		v1[i] = v1[i - 1];
+		if (str[i] == 'M') v1[i][num[i]]++;
+	}
+	for (int i = n; i >= 1; i--)
+	{
+		v2[i] = v2[i + 1];
+		if (str[i] == 'X') v2[i][num[i]]++;
+	}
+	long long ans = 0;
+	for (int i = 1; i <= n; i++)
+	{
+		if (str[i] != 'E') continue;
+		for (int j = 0; j <= 2; j++)
+			for (int k = 0; k <= 2; k++)
+				ans += 1LL * v1[i][j] * v2[i][k] * cal(num[i], j, k);
+	}
+	cout << ans << endl;
+	return 0;
+}
+```
+
+[A - Divide String](https://atcoder.jp/contests/arc163/tasks/arc163_a)
+
+```c++
+#include <bits/stdc++.h>
+using namespace std;
+int main()
+{
+	int t;
+	for (cin >> t; t--; )
+	{
+		auto ac = []()
+		{
+			string s; cin >> s;
+			for(int i = 1; i < s.size(); ++i)
+				if(s.substr(0, i) < s.substr(i)) {cout << "Yes\n"; return;}	
+			cout << "No\n";
+		};
+		ac();
+	}
+	return 0;
+}
+```
+
 
 
 #### Codeforces
@@ -10390,6 +10737,98 @@ int main()
         Solve(n);
     }
     return 0;
+}
+```
+
+[C. Rudolf and the Another Competition](https://codeforces.com/contest/1846/problem/C)
+
+```c++
+#include <bits/stdc++.h>
+using namespace std;
+int main()
+{
+	ios::sync_with_stdio(false);
+	cin.tie(NULL);
+	int t;
+	for (cin >> t; t--; )
+	{
+		vector<pair<int, long long>> vec;
+		int n, m, h;
+		cin >> n >> m >> h;
+		pair<int, long long> key;
+		for (int i = 0; i < n; i++)
+		{
+			vector<int> a(m);
+			for (int j = 0; j < m; j++) cin >> a[j];
+			sort(a.begin(), a.end());
+			long long sum = 0, tmp = 0; int cnt = 0;
+			for (int j = 0; j < m; j++)
+			{
+				if (tmp + a[j] > h) break;
+				cnt++;
+				tmp += a[j];
+				sum += tmp;
+			}
+			pair<int, long long> p = {-cnt, sum};
+			vec.push_back(p);
+			if (i == 0) key = p;
+		}
+		sort(vec.begin(), vec.end());
+		for (int i = 0; i < vec.size(); i++)
+			if (vec[i] == key)
+			{
+				cout << i + 1 << endl;
+				break;
+			}
+	}
+	return 0;
+}
+```
+
+[E2. Rudolf and Snowflakes (hard version)](https://codeforces.com/contest/1846/problem/E2)
+
+```c++
+#include <bits/stdc++.h>
+using namespace std;
+int main()
+{
+	ios::sync_with_stdio(false);
+	cin.tie(NULL);
+
+	set<long long> se;
+	for (long long k = 2; k <= 1e6; k++)
+	{
+		long long val = 1 + k + k * k + k * k * k;
+		long long pw = k * k * k;
+		se.insert(val);
+		while (val < 1e18)
+		{
+			if (pw <= 1e18 / k)
+			{
+				pw *= k;
+				val += pw;
+				se.insert(val);
+			}
+			else break;
+		}
+	}
+	int t;
+	for (cin >> t; t--; )
+	{
+		long long n; cin >> n;
+		bool f = false;
+		long long l = 0, r = 1e9;
+		while (l < r)
+		{
+			long long mid = l + r >> 1;
+			if (1 + mid + mid * mid >= n) r = mid;
+			else l = mid + 1;
+		}
+		if (l >= 2 && 1 + l + l * l == n) f = true;
+		if (!f && se.count(n)) f = true;
+		cout << (f ? "YES" : "NO") << endl;
+	}
+	return 0;
 }
 ```
 

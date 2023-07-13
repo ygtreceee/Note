@@ -10584,15 +10584,186 @@ int main()
 
 ###### 树的重心
 
+**定义**
 
+树的重心也称为树的质心，它是无根树上的一个应用，一棵无根树是一个不含回路的无向图。树的重心 $u$ 是这样一个节点：以树上任意节点为根计算它的子树的节点数，如果节点 $u$ 的最大子树的节点数最少，那么 $u$ 就是树的重心。换句话说，删除节点 $u$ 后得到两棵树或者更多棵互不连通的子树，其中最大子树的节点数最少。$u$ 是树上最平衡的点。
 
-```
+**例题**
 
+给定一棵 `n` 个节点的树, 求该树的重心. 
+
+**代码实现**
+
+```c++
+#include <bits/stdc++.h>
+using namespace std;
+const int N = 5e4 + 10;        //最大节点数
+int n, cnt, maxn, bc;
+struct Edge
+{
+    int to, next;
+    Edge() {};
+    Edge(int _to, int _next) {to = _to; next = _next;}
+}e[N << 1];                    //无向边，开两倍
+int head[N];
+int f[N];                      //f[u]是以u为根的子树节点数量
+void add_edge(int u, int v)
+{
+    e[++cnt] = Edge(v, head[u]);
+    head[u] = cnt;
+}
+void dfs(int u, int fa)
+{
+    int tmp = 0;
+    f[u] = 1;                   //递归到最底层时，节点数加1
+    for (int i = head[u]; i; i = e[i].next)   //遍历u的子节点
+    {
+        int v = e[i].to;         
+        if (v == fa) continue;   //不递归父亲
+        dfs(v, u);               //递归子节点，计算v这个子树节点数量
+        tmp = max(tmp, f[v]);    //计算以u为根的节点数量
+        f[u] += f[v];            //记录u的最大子树的节点数量
+    }
+    tmp = max(tmp, n - f[u]);    //tmp = u的最大连通块的节点数
+    if (tmp < maxn) bc = u, maxn = tmp;  //维护重心
+}
+int main()
+{
+    maxn = 0x3f3f3f3f;
+    cin >> n;
+    for (int i = 1; i < n; i++)
+    {
+        int u, v; cin >> u >> v;
+        add_edge(u, v);
+        add_edge(v, u);
+    }
+    dfs(1, 0);
+    cout << bc << endl;
+    return 0;
+}
 ```
 
 
 
 ###### 树的直径
+
+**定义**
+
+**树上任意两节点之间最长的简单路径即为树的「直径」**
+
+显然，一棵树可以有多条直径，他们的长度相等。可以用两次 `DFS` 或者树形 `DP` 的方法在 $O(n)$ 时间求出树的直径。
+
+**例题**
+
+给定一棵 $n$ 个节点的树，求其直径的长度。$1 \leq n\leq 10^4$
+
+**做法**
+
+**1. 两次DFS**
+
+首先从任意节点 $y$ 开始进行第一次 `DFS`，到达距离其最远的节点，记为 $z$，然后再从 $z$ 开始做第二次 `DFS`，到达距离 $z$ 最远的节点，记为$z^{'}$，则 $\delta(z,z^{'})$ 即为树的直径。
+
+显然，如果第一次 `DFS` 到达的节点 $z$ 是直径的一端，那么第二次 DFS 到达的节点 $z^{'}$ 一定是直径的一端。我们只需证明在任意情况下 $z$  必为直径的一端。
+
+**定理**：在一棵树上，从任意节点 $y$ 开始进行一次 `DFS`，到达的距离其最远的节点 $z$ 必为直径的一端。
+
+注意：上述结论建立在所有路径均不为负的前提下。**如果树上存在负权边，则上述结论不成立**。故若存在负权边，则无法使用两次 DFS 的方式求解直径。
+
+实现代码如下
+
+```c++
+const int N = 10010;
+
+int n, c, d[N];
+vector<int> E[N];
+
+void dfs(int u, int fa)
+{
+    for (int v : E[u])
+    {
+        if (v == fa) continue;
+        d[v] = d[u] + 1;
+        if (d[v] > d[c]) c = v;
+        dfs(v, u);
+    }
+}
+int main()
+{
+    cin >> n;
+    for (int i = 1; i < n; i++)
+    {
+        int u, v; cin >> u >> v;
+        E[u].push_back(v);
+        E[v].push_back(u);
+    }
+    dfs(1, 0);
+    d[c] = 0;
+    dfs(c, 0);
+    cout << d[c] << endl;
+    return 0;
+}
+```
+
+如果需要求出一条直径上所有的节点，则可以在第二次 DFS 的过程中，记录每个点的前序节点，即可从直径的一端一路向前，遍历直径上所有的节点。
+
+**2. 树形DP**
+
+**过程**
+
+我们记录当 $1$ 为树的根时，每个节点作为子树的根向下，所能延伸的最长路径长度与 $d_1$ 次长路径（**与最长路径无公共边**）长度$d_2$，那么直径就是对于每一个点，该点能 $d_1+d_2$ 取到的值中的最大值。
+
+树形 DP 可以在**存在负权边**的情况下求解出树的直径。
+
+ 代码实现
+
+```c++
+const int N = 10010;
+
+int n, d = 0;
+int d1[N], d2[N];
+vector<int> E[N];
+
+void dfs(int u, int fa)
+{
+    d1[u] = d2[u] = 0;
+    for (int v : E[u])
+    {
+        if (v == fa) continue;
+        dfs(v, u);
+        int t = d1[v] + 1;
+        if (t > d1[u])
+            d2[u] = d1[u], d1[u] = t;
+        else if (t > d2[u])
+            d2[u] = t;
+    }
+    d = max(d, d1[u] + d2[u]);
+}
+int main()
+{
+    cin >> n;
+    for (int i = 1; i < n; i++)
+    {
+        int u, v; cin >> u >> v;
+        E[u].push_back(v);
+        E[v].push_back(u);
+    }
+    dfs(1, 0);
+    cout << d << endl;
+    return 0;
+}
+```
+
+如果需要求出一条直径上所有的节点，则可以在 DP 的过程中，记录下每个节点能向下延伸的最长路径与次长路径（定义同上）所对应的子节点，在求 $d$ 的同时记下对应的节点 $u$，使得 $d = d_1[u] + d_2[u]$，即可分别沿着从 $u$开始的最长路径的次长路径对应的子节点一路向某个方向（对于无根树，虽然这里指定了 $1$ 为树的根，但仍需记录每点跳转的方向；对于有根树，一路向上跳即可），遍历直径上所有的节点。
+
+**性质**
+若树上所有边边权均为正，则树的所有直径中点重合
+证明：使用反证法。设两条中点不重合的直径分别为 $\delta(s,t) 与 \delta(s',t')$，中点分别为 $x$ 与 $x'$。显然，$\delta(s,x) = \delta(x,t) = \delta(s',x') = \delta(x',t')$。
+
+![无负权边的树所有直径的中点重合](https://oi-wiki.org/graph/images/tree-diameter4.svg)
+
+有 $\delta(s,t') = \delta(s,x) + \delta(x,x') + \delta(x',t') > \delta(s,x) + \delta(x,t) = \delta(s,t)$，与 $\delta(s,t)$ 为树上任意两节点之间最长的简单路径矛盾，故性质得证。
+
+**题目**
 
 [P5536 【XR-3】核心城市 - 洛谷](https://www.luogu.com.cn/problem/solution/P5536)
 
@@ -10796,7 +10967,313 @@ int main()
 
 #### LCA
 
+求LCA (最近公共祖先) 是一个基本的树上问题.
 
+1. 定义
+
+**公共祖先**: 在一棵有根树上, 若节点 F 是节点 x 的祖先, 也是节点 y 的祖先, 那么 F 称为 x 和 y 的公共祖先
+
+**最近公共祖先 (LCA)** : 在 x 和 y 的所有公共祖先中, 深度最大的称为最近公共祖先, 记为  c = LCA (x, y)
+
+性质
+
+1.  $\text{LCA}(\{u\})=u$ 
+2.  u 是 v 的祖先，当且仅当 $ \text{LCA}(u,v)=u$ ；
+3. 如果 u 不为 v 的祖先并且 v 不为 u 的祖先，那么 u, v 分别处于 $\text{LCA}(u,v) $ 的两棵不同子树中；
+4. 前序遍历中，$\text{LCA}(S)$ 出现在所有 S 中元素之前，后序遍历中 $\text{LCA}(S)$  则出现在所有 S 中元素之后；
+5. 两点集并的最近公共祖先为两点集分别的最近公共祖先的最近公共祖先，即 $\text{LCA}(A\cup B)=\text{LCA}(\text{LCA}(A), \text{LCA}(B))$ ；
+6. 两点的最近公共祖先必定处在树上两点间的最短路上；
+7. $d(u,v)=h(u)+h(v)-2h(\text{LCA}(u,v))$ ，其中 d 是树上两点间的距离，h 代表某点到树根的距离。
+
+2. 求法
+
+**朴素算法**
+
+过程
+可以每次找深度比较大的那个点，让它向上跳。显然在树上，这两个点最后一定会相遇，相遇的位置就是想要求的 LCA。 或者先向上调整深度较大的点，令他们深度相同，然后再共同向上跳转，最后也一定会相遇。
+
+性质
+朴素算法预处理时需要 `dfs` 整棵树，时间复杂度为 $O(n)$，单次查询时间复杂度为 $O(n)$ 。但由于随机树高为 $O(\log n)$，所以朴素算法在随机树上的单次查询时间复杂度为 $O(\log n)$ 
+
+倍增法
+
+**过程**
+
+倍增算法是最经典的 LCA 求法，他是朴素算法的改进算法。通过预处理 $\text{fa}_{x,i} $ 数组，游标可以快速移动，大幅减少了游标跳转次数。$\text{fa}_{x,i} $ 表示点 $x$ 的第 $2^i$ 个祖先。$\text{fa}_{x,i}$ 数组可以通过 `dfs` 预处理出来; 特别要注意预处理和求 `lca` 时倍增大小细节的控制. 
+
+现在我们看看如何优化这些跳转： 在调整游标的第一阶段中，我们要将 `u,v` 两点跳转到同一深度。我们可以计算出 `u,v` 两点的深度之差，设其为 y。通过将 y 进行二进制拆分，我们将 y 次游标跳转优化为「y 的二进制表示所含 1 的个数」次游标跳转。 在第二阶段中，我们从最大的 `i` 开始循环尝试，一直尝试到 0（包括 0），如果 $\text{fa}_{u,i}\not=\text{fa}_{v,i}$，则 $u\gets\text{fa}_{u,i},v\gets\text{fa}_{v,i}$，那么最后的 LCA 为 $\text{fa}_{u,0}$。
+
+**实现**
+
+```c++
+#include <bits/stdc++.h>
+using namespace std;
+const int N = 500005;
+struct Edge{int to, next;}edge[2 * N];   //链式前向星
+int head[2 * N], cnt;
+void init()
+{
+    for (int i = 0; i < 2 * N; i++) {edge[i].next = -1; head[i] = -1;}
+    cnt = 0;
+}
+void addedge(int u, int v)
+{
+    edge[cnt].to = v;
+    edge[cnt].next = head[u];
+    head[u] = cnt++;
+}
+
+int fa[N][20], deep[N];  //fa:节点第2^i个祖先, deep:节点深度
+void dfs(int x, int father)  //求x的深度deep[x]和fa[x][],father是x的父节点
+{
+    deep[x] = deep[father] + 1;  //深度:比父节点深度多1
+    fa[x][0] = father;     //记录父节点
+    for (int i = 1; (1 << i) <= deep[x]; i++)  //求fa[][]数组,最多到根节点
+        fa[x][i] = fa[fa[x][i - 1]][i - 1];
+    for (int i = head[x]; ~i; i = edge[i].next)  //遍历所有子节点
+        if (edge[i].to != father)
+            dfs(edge[i].to, x);
+}
+int LCA(int x, int y)
+{
+    if (deep[x] < deep[y]) swap(x, y);  //让x位于更底层,即x的深度值更大
+    //(1)把x和y提到相同的深度
+    for (int i = 19; i >= 0; i--)   //x最多跳19次: 2 ^ 19 > 500005
+        if (deep[x] - (1 << i) >= deep[y])  //如果x跳过头了,就换一个小的i重跳
+            x = fa[x][i];         //如果x还没跳到y层,就更新x继续跳
+    if (x == y) return x;   //y就是x的祖先
+    //(2)x和y同步往上跳,找到LCA
+    for (int i = 19; i >= 0; i--)  //如果祖先相等,说明跳过头了,换一个小的i重跳
+        if (fa[x][i] != fa[y][i])  //如果祖先不相等,就更新x和y继续跳
+        {
+            x = fa[x][i]; y = fa[y][i];
+        }
+    return fa[x][0];  //最后x位于LCA的下一层,父节点fa[x][0]就是LCA
+}
+int main()
+{
+    init();   //初始化链式前向星
+    int n, m, root; scanf("%d%d%d", &n, &m, &root);
+    for (int i = 1; i < n; i++)  //读树
+    {
+        int u, v; scanf("%d%d", &u, &v);
+        addedge(u, v); addedge(v, u);
+    }
+    dfs(root, 0);   //计算每个节点的深度并预处理fa[][]数组
+    while (m--)
+    {
+        int a, b; scanf("%d%d", &a, &b);
+        printf("%d\n", LCA(a, b));
+    }
+    return 0;
+}
+```
+
+**性质**
+
+倍增算法的预处理时间复杂度为 $O(n \log n)$, 单次查询时间复杂度为 $O(\log n)$, 倍增法的本质就是利用**二进制拆分的性质**, 对所有我们需要走的路程都进行二进制拆分, 实现 $O(logn)$ 优化
+
+Tarjan算法
+
+**过程**
+
+Tarjan 算法 是一种 离线算法，需要使用 并查集 记录某个结点的祖先结点。做法如下：
+
+1. 首先接受输入边（邻接链表）、查询边（存储在另一个邻接链表内）。查询边其实是虚拟加上去的边，为了方便，每次输入查询边的时候，将这个边及其反向边都加入到 queryEdge 数组里。
+2. 然后对其进行一次 DFS 遍历，同时使用 visited 数组进行记录某个结点是否被访问过、parent 记录当前结点的父亲结点。
+3. 其中涉及到了 回溯思想，我们每次遍历到某个结点的时候，认为这个结点的根结点就是它本身。让以这个结点为根节点的 DFS 全部遍历完毕了以后，再将 这个结点的根节点 设置为 这个结点的父一级结点。
+4. 回溯的时候，如果以该节点为起点，queryEdge 查询边的另一个结点也恰好访问过了，则直接更新查询边的 LCA 结果。
+5. 最后输出结果。
+
+**性质**
+
+Tarjan 算法需要初始化并查集，所以预处理的时间复杂度为 $O(n)$。
+
+朴素的 Tarjan 算法处理所有 m 次询问的时间复杂度为 $O(m \alpha(m+n, n) + n)$，但是 Tarjan 算法的常数比倍增算法大。存在 $O(m + n) $ 的实现。
+
+ **实现**
+
+```c++
+#include <bits/stdc++.h>
+using namespace std;
+const int N = 500005;
+int fa[N], head[N], cnt, head_query[N], cnt_query, ans[N];
+bool vis[N];
+struct Edge{int to, next, num;}edge[2 * N], query[2 * N];  //链式前向星
+void init()  //初始化
+{
+    for (int i = 0; i < 2 * N; i++)
+    {
+        edge[i].next = -1; head[i] = -1;
+        query[i].next = -1; head_query[i] = -1;
+    }
+    cnt = 0; cnt_query = 0;
+}
+void addedge(int u, int v) //加边
+{
+    edge[cnt].to = v;
+    edge[cnt].next = head[u];
+    head[u] = cnt++;
+}
+void add_query(int x, int y, int num) //加查询, num为第几个查询
+{
+    query[cnt_query].to = y;
+    query[cnt_query].num = num;
+    query[cnt_query].next = head_query[x];
+    head_query[x] = cnt_query++;
+}
+int find_set(int x)  //并查集查询及路径压缩
+{
+    if (fa[x] != x) fa[x] = find_set(fa[x]);
+    return fa[x];
+}
+void tarjan(int x)   //tarjan()函数是一个DFS
+{
+    vis[x] = true;
+    for (int i = head[x]; ~i; i = edge[i].next)   //遍历子节点
+    {
+        int y = edge[i].to;
+        if (!vis[y])
+        {
+            tarjan(y);
+            fa[y] = x;   //合并并查集; 把子节点y合并到父节点x上
+        }
+    }
+    for (int i = head_query[x]; ~i; i = query[i].next)  //查询所有与x有查询关系的y
+    {
+        int y = query[i].to;
+        if (vis[y]) ans[query[i].num] = find_set(y);  //如果to被访问过, LCA就是find(y)
+    }
+}
+int main()
+{
+    init();
+    memset(vis, 0, sizeof vis);
+    int n, m, root; scanf("%d%d%d", &n, &m, &root);
+    for (int i = 1; i < n; i++)
+    {
+        fa[i] = i;   //并查集初始化
+        int u, v; scanf("%d%d", &u, &v);
+        addedge(u, v); addedge(v, u);   //存边
+    }
+    fa[n] = n;
+    for (int i = 1; i <= m; i++)
+    {
+        int a, b; scanf("%d%d", &a, &b);
+        add_query(a, b, i); add_query(b, a, i);   //读m个询问并存储
+    }
+    tarjan(root); 
+    for (int i = 1; i <= m; i++) printf("%d\n", ans[i]);
+    return 0;
+}
+```
+
+3. 应用
+
+树上两点之间的最短距离
+
+LCA 最基本的应用就是求树上两点之间的最短距离, 它等于两点深度之和减去两倍的 LCA 深度
+
+树上差分
+
+**差分**是一种思想，对于一个有 $n$ 个元素的数组 $a$ ，其差分数组 $diff$ 的每个元素 $diff[i]=a[i]-a[i-1]$. 差分思想将数组相邻的元素的差值保存起来, 使得我们在做区间加减操作时可以只对**区间端点**操作, 从而用 $O(1)$ 的时间复杂度实现区间加减操作, 树上差分本质上就是在树上做差分
+
+1. **树上点差分**
+
+对于树上任意两个节点 $u,v$，有且只有一条简单路径。若一棵树初始时所有节点有个权值 $w_i$，每次给定两个节点 $u,v$，如何用差分给这两个节点的简单路径上的所有点权进行“区间”加减操作呢？
+
+有一个比较显然的思路是，将$u,v$分为两条链，切分点是 $LCA(u,v)$，再对这两条链进行操作，这样的好处是两条链都是有父子关系节点，比原来的一条链更好用 `dfs` 和递归处理。
+
+以下图为例，若我们想对 $2,3$ 两个节点的简单路径上的节点的权值进行统一加减操作，我们可以先找到 $LCA(2,3)=4$，则有两条链：$4\rightarrow 3,4\rightarrow 2$，再在这两条链上进行差分操作，这就是树上点差分的思想。
+
+<img src="https://user-images.githubusercontent.com/71833437/195993904-542c63d6-b2e4-4d28-a5b7-af144423586e.png" alt="tree_teach4" style="zoom:33%;" />
+
+而对于 $u,v$ 形成的路径，我们将 $diff[u]+=x,diff[v]+=x,diff[lca(u,v)]-=x,diff[fa[lca(u,v)][0]]-=x$ ，便可实现树上点权“区间”加减操作，最后再 `dfs` 求得差分的前缀和数组即可。
+
+2. **树上边差分**
+
+若一棵树初始时所有边有权值 $w_i$，每次给定两个节点 $u,v$ ，如何用差分给这两个节点的简单路径上的所有边权进行“区间”加减操作呢？
+
+同样我们可以将 $u,v$ 分为两条链，切分点是 $LCA(u,v)$，再对这两条链进行操作，但具体细节与点差分略有不同。
+
+而对于 $u,v$ 形成的路径，我们将 $diff[u]+=x,diff[v]+=x,diff[lca(u,v)]-=2x$，便可实现树上边权“区间”加减操作，最后同样 `dfs` 统计即可。
+
+**代码**
+
+```c++
+#include <bits/stdc++.h>
+using namespace std;
+const int N = 50010;
+struct Edge{int to, next;}edge[2 * N];
+int head[2 * N], D[N], deep[N], fa[N][20], ans, cnt;
+void init()
+{
+    for (int i = 0; i < 2 * N; i++) {edge[i].next = -1; head[i] = -1;}
+    cnt = 0;
+}
+void addedge(int u, int v)
+{
+    edge[cnt].to = v;
+    edge[cnt].next = head[u];
+    head[u] = cnt++;
+}
+void dfs1(int x, int father)
+{
+    deep[x] = deep[father] + 1;
+    fa[x][0] = father;
+    for (int i = 1; (1 << i) <= deep[x]; i++)
+        fa[x][i] = fa[fa[x][i - 1]][i - 1];
+    for (int i = head[x]; ~i; i = edge[i].next)
+        if (edge[i].to != father)
+            dfs1(edge[i].to, x);
+}
+int LCA(int x, int y)
+{
+    if (deep[x] < deep[y]) swap(x, y);
+    for (int i = 19; i >= 0; i--)
+        if (deep[x] - (1 << i) >= deep[y])
+            x = fa[x][i];
+    if (x == y) return x;
+    for (int i = 19; i >= 0; i--)
+        if (fa[x][i] != fa[y][i])
+        {
+            x = fa[x][i];
+            y = fa[y][i];
+        }
+    return fa[x][0];
+}
+void dfs2(int u, int fath)
+{
+    for (int i = head[u]; ~i; i = edge[i].next)
+    {
+        int e = edge[i].to;
+        if (e == fath) continue;
+        dfs2(e, u);
+        D[u] += D[e];
+    }
+    ans = max(ans, D[u]);
+}
+int main()
+{
+    init();
+    int n, m; scanf("%d%d", &n, &m);
+    for (int i = 1; i < n; i++)
+    {
+        int u, v; scanf("%d%d", &u, &v);
+        addedge(u, v); addedge(v, u);
+    }
+    dfs1(1, 0);   //计算每个节点的深度并预处理fa[][]数组
+    for (int i = 1; i <= m; i++)
+    {
+        int a, b; scanf("%d%d", &a, &b);
+        int lca = LCA(a, b);
+        D[a]++; D[b]++; D[lca]--; D[fa[lca][0]]--;  //树上差分
+    }
+    dfs2(1, 0);   //用差分数组求每个节点的权值
+    printf("%d", ans);
+    return 0;
+}
+```
 
 ## 动态规划
 

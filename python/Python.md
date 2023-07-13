@@ -2413,6 +2413,29 @@ def name():
 
 `return` 
 
+`->` 出现在函数定义的`()` 之后, 表示返回值的类型
+
+`:` 表示输入参数的类型建议符
+
+```python
+class CQueue:
+    def _init__(self):
+        self.A,self.B=[],[]
+//value:int表示建议的value类型为int型，->None表示函数返回
+值为空，->int表示函数返回值为int型。
+    def appendTail(self,value:int)->None:
+        self.A.append(value)
+
+    def deleteHead(self)->int:
+        if self.B:
+            return self.B.pop()
+        if not self.A:
+            return -1
+        while self.A:
+            self.B.append(self.A.pop())
+        return self.B.pop()
+```
+
 注意: 
 
 1. `return` 后续代码不会被执行
@@ -5298,12 +5321,1644 @@ Python中的垃圾回收器采用了引用计数（Reference Counting）和标�
 9. 资源的累加
 
    1. 概念: 在一个类的基础上, 增加一些额外的资源
+   
    2. 子类相比于父类, 多一些自己特有的资源
+   
    3. 在被覆盖的方法基础之上, 新增内容
+   
+      1. 方案一
+   
+      2. 方案二: 在低优先级类的方法中, 通过`super`来调用高优先级类的方法
+   
+         `super` 
+   
+         **概念**
+   
+         Python中的`super()`函数是一个特殊的函数，它用于调用父类的方法。它的作用是在子类中调用父类的方法，从而实现代码复用和继承。`super()`函数主要用于多重继承的情况下，以便在父类之间进行正确的调用。它起着代理的作用, 沿着 `MRO`链条, 找到下一级节点, 去调用对应的方法
+   
+         **语法原理**
+   
+         `super([type[, object-or-type]])`
+   
+         `super()`函数接受两个可选参数：`type`和`object-or-type`。`type`通常是当前类的类型，而`object-or-type`则是当前类的实例或者是该类。如果省略这两个参数，则默认使用当前方法所在的类和实例。
+   
+         当调用`super()`函数时，它会返回一个代理对象（proxy object），该对象用于调用父类的方法。这个代理对象的工作原理是基于方法解析顺序（MRO，Method Resolution Order）的算法，MRO算法决定了在多继承情况下，Python解释器查找方法的顺序。MRO算法基于C3算法，它利用拓扑排序的方法来解决方法调用的冲突问题，确保每个类的方法都能被正确地调用，而且每个方法只会被调用一次。
+   
+         当使用`super()`函数调用父类的方法时，Python解释器会自动根据MRO算法确定应该调用哪个父类的方法，然后将方法的参数传递给它。这样，就可以实现代码复用和继承。另外需要注意的是，`super()`函数只能用于新式类（即继承了`object`的类），对于旧式类则不支持。
+   
+         总之，`super()`函数的语法原理是基于MRO算法的多重继承调用机制，它可以帮助我们在多重继承的情况下，正确地调用父类的方法。
+   
+         其中`super`是沿着参数2的`MRO`链条, 找参数1的下一个节点, 并且使用参数2进行调用来应对类方法, 静态方法, 以及实例方法的传参问题. 
+   
+         **常用语法格式**
+   
+         在Python中，`super()`函数的常用语法格式有两种：
+   
+         1. 无参数形式：
+   
+         ```python
+         class ChildClass(ParentClass):
+             def some_method(self, arg1, arg2, ...):
+                 super().some_method(arg1, arg2, ...)
+         ```
+   
+         在这种形式下，`super()`函数会自动推断出当前类和实例，并调用当前类的父类中名为`some_method()`的方法。这种形式在Python 3及以上版本中是常用的形式。
+   
+         2. 带参数形式：
+   
+         ```python
+         class ChildClass(ParentClass):
+             def some_method(self, arg1, arg2, ...):
+                 super(ChildClass, self).some_method(arg1, arg2, ...)
+         ```
+   
+         在这种形式下，`super()`函数需要传入当前类和实例作为参数。这种形式在Python 2及以下版本中比较常用。
+   
+         在使用`super()`函数时，需要注意以下几点：
+   
+         1. `super()`函数只能用于新式类（即继承了`object`的类），对于旧式类则不支持。
+   
+         2. `super()`函数只能用于调用父类的方法，不能用于调用父类的属性。
+   
+         3. `super()`函数只能用于单继承和多重继承的情况下，不能用于多继承的情况下。
+   
+         总之，`super()`函数的常用语法格式是无参数形式和带参数形式，可以根据具体的情况选择适合的形式来使用。
+   
+         **注意**
+   
+         带参数时可以将`super()`参数中的类名直接写为`self.__calss__`, 这样可以更加灵活, 但是会出现死循环问题, 所以不要这么写	
 
 ###### 多态
 
+在Python中，多态是一种面向对象编程的特性，它允许不同的对象对同一个方法做出不同的响应。在Python中，多态可以通过方法重写和方法重载来实现。
+
+方法重写是指在子类中重新定义父类中已存在的方法。当子类对象调用这个方法时，它将调用子类中的方法而不是父类中的方法。这样就可以根据不同的子类对象实现不同的方法响应。
+
+例如，假设我们有一个动物类和一个狗类，狗类继承自动物类，并且重写了动物类中的`make_sound`方法：
+
+```python
+class Animal:
+    def make_sound(self):
+        pass
+
+class Dog(Animal):
+    def make_sound(self):
+        print("汪汪汪！")
+```
+
+在这里，`Dog`类重写了`Animal`类中的`make_sound`方法，并实现了狗叫的功能。当我们创建一个`Dog`对象并调用`make_sound`方法时，它将输出“汪汪汪！”：
+
+```python
+dog = Dog()
+dog.make_sound()  # 输出：汪汪汪！
+```
+
+方法重载是指在同一个类中定义多个方法，它们具有相同的名称但不同的参数类型和/或数量。在调用这个方法时，会根据传入的参数类型和/或数量来决定具体调用哪个方法。方法重载在Python中并不是一个必需的特性，因为Python是一种动态类型语言，它不需要在编译时确定变量的数据类型。
+
+举个例子，我们可以在一个类中定义多个add方法，每个方法都有不同的参数类型和数量：
+
+```python
+class Math:
+    def add(self, x, y):
+        return x + y
+    
+    def add(self, x, y, z):
+        return x + y + z
+```
+
+当我们创建一个Math对象并调用add方法时，Python会根据传入的参数类型和数量来决定具体调用哪个add方法：
+
+```python
+math = Math()
+print(math.add(1, 2))  # 输出：3
+print(math.add(1, 2, 3))  # 输出：6
+```
+
+需要注意的是，在Python中，方法重载并不是一个严格的规则，因为Python是一种动态类型语言，它不需要在编译时确定变量的数据类型。因此，我们可以使用`*args`和`**kwargs`参数来实现灵活的方法定义，例如：
+
+```python
+class Math:
+    def add(self, *args):
+        return sum(args)
+```
+
+在这里，我们使用了*args参数来接收任意数量的参数，并使用内置函数sum来计算它们的和。这样，我们就可以在调用add方法时传入任意数量的参数，而不需要在类中定义多个方法。
+
+###### 补充
+
+在Python中，抽象类和抽象方法是一种用于面向对象编程的概念，它们可以用来描述一种通用的行为或结构，并且要求子类实现这些行为或结构。抽象类和抽象方法通常用于设计和实现框架或API，以便其他人可以在其基础上构建自己的应用程序。
+
+抽象类是不能被实例化的类，它只能被用作其他类的基类。抽象类通常包含一些抽象方法，这些方法只有方法声明，没有具体实现。抽象方法必须在子类中实现，否则子类也必须被声明为抽象类。
+
+在Python中，我们可以使用abc模块来创建抽象类和抽象方法。下面是一个简单的例子：
+
+```python
+from abc import ABC, abstractmethod
+
+class Animal(ABC):
+    @abstractmethod
+    def make_sound(self):
+        pass
+
+class Dog(Animal):
+    def make_sound(self):
+        print("汪汪汪！")
+
+class Cat(Animal):
+    def make_sound(self):
+        print("喵喵喵！")
+```
+
+在这里，`Animal`类是一个抽象类，它包含一个名为`make_sound`的抽象方法。因为`make_sound`是一个抽象方法，所以它没有具体实现。`Dog`和`Cat`类是`Animal`类的子类，并且都实现了`make_sound`方法。因此，它们都可以被实例化并使用。
+
+**要特别注意的是, 如果定义了抽象方法, 在抽象类的子类中一定要对抽象方法进行具体实现, 否则会报错. **
+
+如果我们尝试实例化`Animal`类，Python将抛出`TypeError`异常，因为抽象类不能被实例化：
+
+```python
+animal = Animal()  # 抛出TypeError异常
+```
+
+需要注意的是，在Python中，我们也可以定义一个没有任何抽象方法的抽象类，例如：
+
+```python
+class Shape(ABC):
+    pass
+```
+
+在这里，`Shape`类是一个抽象类，它没有任何抽象方法。这种情况下，我们通常使用抽象类来表示一个通用的概念，例如形状，而不需要实现任何具体的行为。
+
+总之，抽象类和抽象方法是一种用于面向对象编程的概念，它们可以用来描述一种通用的行为或结构，并且要求子类实现这些行为或结构。在Python中，我们可以使用abc模块来创建抽象类和抽象方法，并且抽象类不能被实例化，而抽象方法必须在子类中实现。
+
+
+
+#### 设计原则
+
+在Python中，面向对象编程是一种重要的编程范式，它可以帮助我们更好地组织和管理代码。为了编写高质量的面向对象代码，我们需要遵循一些面向对象的设计原则。下面是一些常见的面向对象设计原则：
+
+1. 单一职责原则（SRP）：一个类应该只有一个单一的功能，即只有一个职责。这样可以使类的设计更加简单、清晰，并且易于维护。
+
+2. 开放-封闭原则（OCP）：一个类应该对扩展开放，对修改封闭。这意味着添加新功能应该通过添加新的代码来实现，而不是修改原有代码。
+
+3. 里氏替换原则（LSP）：子类应该能够替换掉父类并且不会产生任何错误或异常。这意味着子类应该与其父类遵循相同的接口和行为。
+
+4. 接口隔离原则（ISP）：一个类不应该强迫其客户端依赖于不需要使用的接口。这意味着我们应该将接口拆分成更小的、更具体的接口，以便客户端只需要依赖于它们所需要的接口。
+
+5. 依赖倒置原则（DIP）：高层模块不应该依赖于低层模块，它们应该依赖于抽象。这意味着我们应该将高层模块和低层模块都依赖于抽象接口，而不是直接依赖于具体的实现。
+
+6. 迪米特法则（LoD）：一个模块不应该了解它所不需要知道的信息。这意味着我们应该尽可能地减少模块之间的耦合度，以便更容易地进行维护和修改。
+
+遵循这些面向对象设计原则可以帮助我们设计出更加灵活、可扩展、易于维护的面向对象程序。它们可以使我们的代码更加清晰，易于理解，并且更容易满足需求变更。
 
 
 
 
+
+
+
+## 异常处理
+
+#### 错误和异常的概念
+
+在Python中，异常和错误是指在程序运行时遇到的问题，这些问题可能会导致程序无法正常执行或产生不正确的结果。异常和错误是Python中的两个不同的概念，它们的含义如下：
+
+1. 异常（Exception）：指程序在运行时遇到的非致命问题，例如输入错误的数据、文件不存在等。当程序遇到异常时，可以捕获和处理异常，以便程序能够继续执行。出现此类错误时，语法和逻辑通常是正确的。Python中的异常通常是由raise语句抛出的，可以使用try...except语句来捕获和处理异常。
+
+2. 错误（Error）：指程序在运行时遇到的致命问题，例如内存不足、语法错误等。当程序遇到错误时，通常无法继续执行，需要修复程序代码或者更换计算机硬件等。Python中的错误通常是由Python解释器抛出的，例如SyntaxError、NameError等。但是如果是出现逻辑错误，解释器则无法帮我们检测出来。
+
+#### 常见的系统异常
+
+在Python中，有许多内置的异常类型，这些异常类型可以帮助我们识别和处理程序运行时遇到的问题。下面是一些常见的系统异常以及它们的说明：
+
+1. NameError：当Python在局部或全局命名空间中找不到变量或函数时抛出。这通常是因为变量或函数未被定义或未正确导入。
+
+2. TypeError：当Python无法将对象与正确类型进行匹配时抛出。这通常是因为使用了错误的参数类型或对象类型。
+
+3. ValueError：当Python接收到正确类型的对象，但是这些对象的值不符合预期时抛出。这通常是因为使用了错误的参数值或对象值。
+
+4. IndexError：当Python尝试访问列表、元组或其他序列类型中不存在的索引时抛出。这通常是因为使用了错误的索引值。
+
+5. KeyError：当Python尝试访问字典中不存在的键时抛出。这通常是因为使用了错误的键值。
+
+6. AttributeError：当Python尝试访问对象中不存在的属性时抛出。这通常是因为对象类型没有该属性或者属性名称被错误拼写。
+
+7. ZeroDivisionError：当Python尝试将一个数除以0时抛出。这通常是因为代码逻辑错误或者输入数据错误导致的。
+
+8. IOError：当Python无法读取文件或者文件不存在时抛出。这通常是因为文件路径错误或者文件权限问题导致的。
+
+9. StopIteration：迭代器异常是指在使用迭代器遍历集合时可能会出现的异常情况。在Python中，迭代器通常是通过调用内置函数iter()来创建的。当迭代器调用next()方法时，如果已经到达了集合的末尾，就会抛出一个StopIteration异常，表示迭代已经结束。
+
+这些是Python中常见的一些系统异常，当程序出现这些异常时，通常需要对其进行适当的处理，以便程序能够继续执行或者输出有用的错误信息。需要注意的是，这些异常只是Python中的一部分异常类型，还有许多其他的异常类型，需要根据具体情况进行处理。
+
+**系统异常类继承树**
+
+在Python中，内置的异常类都是继承自基类Exception的。Exception是所有异常类的基类，它本身又继承自BaseException类。所有的异常类都可以通过继承自这些基类来定义自己的异常。
+
+下面是Python内置异常类的继承树：
+
+```python
+BaseException
+├── SystemExit
+├── KeyboardInterrupt
+├── GeneratorExit
+├── Exception
+│   ├── StopIteration
+│   ├── ArithmeticError
+│   │   ├── FloatingPointError
+│   │   ├── OverflowError
+│   │   └── ZeroDivisionError
+│   ├── AssertionError
+│   ├── AttributeError
+│   ├── BufferError
+│   ├── EOFError
+│   ├── ImportError
+│   ├── LookupError
+│   │   ├── IndexError
+│   │   └── KeyError
+│   ├── MemoryError
+│   ├── NameError
+│   │   └── UnboundLocalError
+│   ├── OSError
+│   │   ├── BlockingIOError
+│   │   ├── ChildProcessError
+│   │   ├── ConnectionError
+│   │   ├── FileExistsError
+│   │   ├── FileNotFoundError
+│   │   ├── InterruptedError
+│   │   ├── IsADirectoryError
+│   │   ├── NotADirectoryError
+│   │   ├── PermissionError
+│   │   ├── ProcessLookupError
+│   │   ├── TimeoutError
+│   │   └── UnsupportedOperation
+│   ├── ReferenceError
+│   ├── RuntimeError
+│   │   ├── NotImplementedError
+│   │   └── RecursionError
+│   ├── SyntaxError
+│   ├── IndentationError
+│   │   ├── TabError
+│   │   └── UnindentError
+│   ├── SystemError
+│   ├── TypeError
+│   ├── ValueError
+│   │   ├── UnicodeError
+│   │   │   ├── UnicodeDecodeError
+│   │   │   └── UnicodeEncodeError
+│   │   └── ValueError
+│   ├── Warning
+│   │   ├── DeprecationWarning
+│   │   ├── PendingDeprecationWarning
+│   │   ├── RuntimeWarning
+│   │   ├── SyntaxWarning
+│   │   ├── UserWarning
+│   │   └── Warning
+│   └── KeyboardInterrupt
+```
+
+在这个继承树中，所有的异常类都直接或间接继承自BaseException。SystemExit、KeyboardInterrupt和GeneratorExit是三个特殊的异常类，分别用于表示程序退出、用户中断和生成器退出。Exception是所有常规异常类的基类，它包含了大部分常规的异常类型，例如StopIteration、ArithmeticError、AssertionError、AttributeError、LookupError、OSError、TypeError、ValueError等等。Warning是所有警告异常的基类，它包含了各种警告类型，例如DeprecationWarning、RuntimeWarning、SyntaxWarning等等。
+
+通过理解这个继承树，我们可以更好地了解Python中各种异常类型之间的关系，并且可以更好地使用它们来处理程序运行时可能遇到的各种问题。
+
+
+
+#### 捕获和处理异常
+
+1. `try...except`
+
+在Python中，try...except语句是一种用于捕获和处理异常的语句，它的基本语法格式如下：
+
+```python
+try:
+    # 可能会抛出异常的代码块
+except [异常类型1 [as 异常实例1]]:
+    # 异常类型1 的处理代码
+except [异常类型2 [as 异常实例2]]:
+    # 异常类型2 的处理代码
+...
+except [Exception [as 异常实例]]:
+    # 通用异常处理代码
+else:      # 可省略
+    # 没有异常时执行的代码
+finally:   # 可省略
+    # 最终要执行的代码
+```
+
+在这个语法格式中，try语句包含了可能会抛出异常的代码块。这里不管会抛出多少个异常，只会从上往下检测，检测到一个后，就立即匹配下去，不会多次检测。
+
+except语句包含了处理异常的代码块。except语句可以指定一个或多个异常类型，也可以使用通用的Exception类型来捕获所有可能的异常。当程序执行到try语句时，会尝试执行其中的代码块。如果代码块执行过程中出现了异常，就会跳转到对应的except语句，并执行其中的代码块。在except语句中，可以使用as关键字来指定一个异常实例，这个异常实例可以用于获取异常的详细信息。
+
+如果没有出现异常，则会跳过所有的except语句，并执行else语句中的代码块。
+
+在finally语句中，可以指定最终要执行的代码块，无论是否出现异常，这些代码都会被执行。
+
+下面是一个简单的try...except语句的例子，用于处理除数为零的情况：
+
+```python
+try:
+    x = 10 / 0
+except ZeroDivisionError as e:   # as后面的名称可以自己定义
+    print("除数为零：", e)
+else:
+    print("结果是：", x)
+finally:
+    print("程序执行结束")
+    
+    
+# output
+除数为零： division by zero
+程序执行结束
+```
+
+在这个例子中，try语句尝试计算10除以0的结果，这会引发一个ZeroDivisionError异常。由于我们在except语句中指定了ZeroDivisionError类型，并将异常实例命名为e，因此程序会跳转到except语句，输出异常信息。最后，程序会执行finally语句，输出“程序执行结束”。
+
+**注意**
+
+1. 通过使用try...except语句，我们可以捕获和处理程序执行过程中可能出现的异常，以确保程序能够正常执行，或者提供有用的错误信息。需要注意的是，在处理异常时，需要根据具体情况选择合适的异常类型和处理方式，以便尽可能地准确地解决问题。
+
+2. try语句没有捕获到异常，先执行try代码段后，再执行else，最后执行finally
+
+3. 如果try捕获到异常，首先执行except处理错误，然后执行finally
+
+4. 如果异常名称不确定，而又想捕获，可以直接写Exception
+
+5. 如果代码段出现多个错误，只会对第一个错误进行处理，无论下面except有无对应的错误类型，如果没有，直接抛出异常，如果有则捕获异常
+
+6. 如果针对于多个不同的异常有相同的处理方式，那么可以将多个异常合并。
+
+   ```python
+   # 将多种类型包装成元组
+   except (ZeroDivisionError, NameError) : 
+   ```
+
+
+2. `with`
+
+在 Python 中，`with` 语句提供了一种方便的方式来管理资源，例如打开和关闭文件、建立和断开数据库连接等等。它可以在代码块开始时自动获取资源，然后在代码块结束时自动释放资源，从而确保资源被正确地释放并且不会遗漏。
+
+使用 `with` 语句可以避免手动管理资源时出现的一些常见问题，例如遗漏释放资源、资源泄漏、异常处理等等。这样可以使代码更加简洁、易读和可维护。
+
+一个简单的 `with` 语句的示例是打开一个文件并读取其中的内容：
+
+```python
+with open('example.txt', 'r') as f:
+    contents = f.read()
+    print(contents)
+```
+
+在这个示例中，`with` 语句打开名为 `example.txt` 的文件，并将其赋值给变量 `f`。在代码块中，我们读取文件内容并打印它。当代码块结束时，`with` 语句会自动关闭文件，即使在代码块中出现异常也会如此。这可以确保文件被正确地关闭，从而避免资源泄漏问题。
+
+3. 自定义上下文管理器
+
+在 Python 中，我们可以通过实现上下文管理器来自定义 `with` 语句的行为。上下文管理器是一个对象，它可以定义在 `with` 语句中需要执行的一些操作，例如资源的获取和释放。一个对象要成为上下文管理器，它必须实现 `__enter__()` 和 `__exit__()` 方法。
+
+`__enter__()` 方法在进入 `with` 代码块时被调用，并返回一个对象，这个对象将被赋值给 `as` 关键字后面的变量。`__exit__()` 方法在 `with` 代码块结束时被调用，无论代码块是否抛出异常，都会执行该方法。`__exit__()` 方法可以用来释放资源或者处理异常。
+
+下面是一个简单的自定义上下文管理器的示例，它用于计时一个代码块的执行时间：
+
+```python
+import time
+
+class Timer:
+    def __enter__(self):
+        self.start_time = time.time()
+        return self
+    
+    def __exit__(self, exc_type, exc_value, traceback):
+        self.end_time = time.time()
+        print('Elapsed time: {:.6f}s'.format(self.end_time - self.start_time))
+
+# 使用 Timer 上下文管理器计时代码块的执行时间
+with Timer():
+    time.sleep(1)  # 模拟执行时间
+```
+
+在这个示例中，`Timer` 类实现了 `__enter__()` 和 `__exit__()` 方法。在 `__enter__()` 方法中，我们记录了当前时间。在 `__exit__()` 方法中，我们再次记录当前时间，计算出代码块的执行时间，并打印出来。
+
+在 `with Timer():` 语句中，我们创建了一个 `Timer` 对象，并使用 `with` 语句将其作为上下文管理器。当代码块执行完毕后，`__exit__()` 方法会被自动调用，输出代码块的执行时间。
+
+在 Python 中，上下文管理器可以通过 `__exit__()` 方法来**处理异常**。当代码块中出现异常时，Python 解释器会将异常类型、异常值和 traceback 对象传递给 `__exit__()` 方法。我们可以在 `__exit__()` 方法中检查异常类型，并相应地处理异常。
+
+下面是一个处理异常的上下文管理器的示例，它用于打开和关闭文件：
+
+```python
+class FileManager:
+    def __init__(self, filename, mode):
+        self.filename = filename
+        self.mode = mode
+        self.file = None
+        
+    def __enter__(self):
+        try:
+            self.file = open(self.filename, self.mode)
+        except:
+            print('Failed to open file')
+            return None
+        return self.file
+    
+    def __exit__(self, exc_type, exc_value, traceback):
+        if self.file:
+            self.file.close()
+            
+        if exc_type is not None:
+            print('Exception occurred: {}: {}'.format(exc_type.__name__, exc_value))
+            return True
+```
+
+在这个示例中，`FileManager` 类实现了 `__enter__()` 和 `__exit__()` 方法。在 `__enter__()` 方法中，我们尝试打开一个文件，并将文件对象存储在实例变量 `self.file` 中。如果打开文件失败，我们输出错误信息并返回 `None`。在 `__enter__()` 方法中，我们返回文件对象，这样就可以在代码块中使用文件对象了。
+
+在 `__exit__()` 方法中，我们首先判断文件是否打开，如果打开则关闭文件。然后我们检查异常类型是否为 `None`。如果不是 `None`，说明在代码块中出现了异常，我们输出异常信息并返回 `True`，这样就可以将异常交给上层调用者处理。
+
+使用上面的上下文管理器，我们可以像这样打开文件并读取其中的内容：
+
+```python
+with FileManager('example.txt', 'r') as f:
+    if f is None:
+        print('Failed to open file')
+    else:
+        contents = f.read()
+        print(contents)
+```
+
+在这个示例中，`with` 语句会使用 `FileManager` 上下文管理器打开 `example.txt` 文件。如果文件打开失败，`__enter__()` 方法返回 `None`，我们输出错误信息。如果文件打开成功，我们读取文件内容并打印出来。当代码块执行完毕后，`__exit__()` 方法会被自动调用，如果出现异常，异常信息会被输出。
+
+4. `contextlib`模块
+
+   1. `@contextlib.contextmanager`
+
+      `contextlib.contextmanager` 是 Python 标准库中 `contextlib` 模块提供的一个装饰器函数，它可以帮助我们更方便地定义上下文管理器。
+
+      使用 `contextlib.contextmanager` 装饰器，我们可以将一个生成器函数转换成一个上下文管理器。生成器函数中的 `yield` 语句用来将控制权交给 `with` 语句，而 `yield` 语句之前的代码通常用来获取资源，而 `yield` 语句之后的代码通常用来释放资源。在 `yield` 语句之前的代码中，我们可以将资源传递给 `with` 语句中的代码块。
+
+      下面是一个使用 `contextlib.contextmanager` 装饰器定义上下文管理器的示例，它用于计时一个代码块的执行时间：
+
+      ```python
+      import time
+      from contextlib import contextmanager
+      
+      @contextmanager
+      def Timer():
+          start_time = time.time()
+          yield
+          end_time = time.time()
+          print('Elapsed time: {:.6f}s'.format(end_time - start_time))
+      
+      # 使用 Timer 上下文管理器计时代码块的执行时间
+      with Timer():
+          time.sleep(1)  # 模拟执行时间
+      ```
+
+      在这个示例中，我们使用 `@contextmanager` 装饰器将 `Timer()` 函数转换成了一个上下文管理器。在 `Timer()` 函数中，我们记录了当前时间，并使用 `yield` 语句将控制权交给 `with` 语句中的代码块。在 `with` 代码块执行完毕后，`yield` 语句之后的代码会被执行，我们再次记录当前时间，并输出代码块的执行时间。
+
+      使用 `contextlib.contextmanager` 装饰器定义上下文管理器的好处是，我们可以使用生成器函数来定义上下文管理器，这样可以使代码更加简洁和易读。同时，`contextlib.contextmanager` 装饰器还处理了一些错误处理和异常处理的细节，使得我们不必自己编写一些繁琐的代码。
+
+      下面是一个使用该装饰器实现一个异常处理的上下文管理器的例子
+
+      ```python
+      from contextlib import contextmanager
+      
+      @contextmanager
+      def ze():
+          try:
+              yield
+          except ZeroDivisionError as e:
+              print("error", e)
+      
+      
+      x = 1
+      y = 0
+      with ze():
+          x / y
+      
+      a = 1
+      b = 0
+      with ze():
+          a / b
+          
+      # output
+      error division by zero
+      error division by zero
+      ```
+
+   2. `context.closing` 
+
+      `contextlib.closing` 是 Python 标准库中 `contextlib` 模块提供的一个上下文管理器，它用于自动关闭实现了 `close()` 方法的对象。
+
+      通常情况下，我们需要手动调用对象的 `close()` 方法来释放资源，例如关闭文件、关闭数据库连接等等。但是，如果我们在使用对象时忘记了调用 `close()` 方法，就可能会出现资源泄漏的问题。为了避免这种问题，我们可以使用 `contextlib.closing` 上下文管理器。
+
+      `contextlib.closing` 接受一个对象作为参数，并返回一个上下文管理器，这个上下文管理器会自动在代码块结束时调用对象的 `close()` 方法。这样可以确保对象被正确地关闭，从而避免资源泄漏的问题。
+
+      下面是一个使用 `contextlib.closing` 上下文管理器的示例，它用于自动关闭一个文件：
+
+      ```python
+      from contextlib import closing
+      
+      with closing(open('example.txt', 'r')) as f:
+          contents = f.read()
+          print(contents)
+      ```
+
+      在这个示例中，我们使用 `open()` 函数打开 `example.txt` 文件，并将文件对象作为参数传递给 `contextlib.closing` 函数。`contextlib.closing` 函数返回一个上下文管理器，我们使用 `with` 语句将其作为上下文管理器。在代码块中，我们读取文件内容并打印出来。当代码块执行完毕后，`contextlib.closing` 上下文管理器会自动调用文件对象的 `close()` 方法，从而确保文件被正确地关闭，避免资源泄漏的问题。
+
+      使用 `contextlib.closing` 上下文管理器的好处是，我们不必手动调用对象的 `close()` 方法，从而避免忘记关闭对象的情况。同时，`contextlib.closing` 上下文管理器还处理了一些错误处理和异常处理的细节，使得我们不必自己编写一些繁琐的代码。
+
+   3. `context.nexted` 
+
+      `contextlib.nested` 是 Python 标准库中 `contextlib` 模块提供的一个上下文管理器，它可以让我们同时使用多个上下文管理器。
+
+      `contextlib.nested` 接受多个上下文管理器作为参数，并返回一个上下文管理器，这个上下文管理器可以同时管理多个上下文管理器。在代码块中，我们可以使用多个上下文管理器，它们的作用会被合并起来。
+
+      但是需要注意的是，`contextlib.nested` 函数在 Python 2 中被引入，但在 Python 3 中已经被弃用。在 Python 3 中，我们可以使用 `with` 语句嵌套的方式来达到类似的效果。
+
+      下面是一个使用 `contextlib.nested` 上下文管理器的示例，它用于同时打开多个文件：
+
+      ```python
+      from contextlib import nested
+      
+      with nested(open('file1.txt', 'r'), open('file2.txt', 'r')) as (f1, f2):
+          contents1 = f1.read()
+          contents2 = f2.read()
+          print(contents1)
+          print(contents2)
+      ```
+
+      在这个示例中，我们使用 `contextlib.nested` 函数同时打开了 `file1.txt` 和 `file2.txt` 两个文件，并将它们的文件对象作为参数传递给 `contextlib.nested` 函数。`contextlib.nested` 函数返回一个上下文管理器，我们使用 `with` 语句将其作为上下文管理器。在代码块中，我们分别读取两个文件的内容，并打印出来。
+
+      在 Python 3 中，我们可以使用 `with` 语句嵌套的方式来达到类似的效果。例如，上面的示例可以改写为：
+
+      ```python
+      with open('file1.txt', 'r') as f1, open('file2.txt', 'r') as f2:
+          contents1 = f1.read()
+          contents2 = f2.read()
+          print(contents1)
+          print(contents2)
+      ```
+
+      在这个示例中，我们使用 `with` 语句嵌套的方式同时打开了 `file1.txt` 和 `file2.txt` 两个文件，并将它们的文件对象赋值给变量 `f1` 和 `f2`。在代码块中，我们分别读取两个文件的内容，并打印出来。当代码块执行完毕后，两个文件对象会被自动关闭。
+
+#### 手动抛出异常
+
+在Python中，手动抛出异常通常需要使用`raise`语句。`raise`语句用于引发一个异常，并将控制权传递给异常处理程序。
+
+以下是一个Python代码示例，演示如何手动抛出异常：
+
+```python
+def divide(x, y):
+    if y == 0:
+        raise ZeroDivisionError("除数不能为零") # 抛出一个ZeroDivisionError异常
+    return x / y
+
+try:
+    result = divide(10, 0)
+    print(result)
+except ZeroDivisionError as e:
+    print("出现异常：", e)
+```
+
+在这个示例中，我们定义了一个`divide`函数，该函数接受两个参数并返回它们的商。如果第二个参数为0，函数将抛出一个`ZeroDivisionError`异常。在`try`块中，我们调用`divide`函数并尝试计算10除以0，这将引发一个异常。然后我们使用`except`块来捕获该异常并打印错误消息。
+
+请注意，当您手动抛出异常时，您可以选择任何异常类。在Python中，有许多内置的异常类可供使用，例如`ValueError`、`TypeError`、`IndexError`等。您还可以定义自己的异常类，以便更好地管理您的应用程序中的异常。
+
+#### 自定义异常
+
+在Python中，您可以通过创建一个新的异常类来定义自己的异常。通常情况下，您可以从Python内置的`Exception`类派生您的异常类，并添加您自己的属性和方法。
+
+以下是一个Python代码示例，演示如何定义一个自定义异常类：
+
+```python
+class MyCustomException(Exception):
+    def __init__(self, message, code):
+        super().__init__(message)
+        self.code = code
+
+    def __str__(self):
+        return f"{self.code}: {self.args[0]}"
+
+try:
+    raise MyCustomException("自定义异常", 500)
+except MyCustomException as e:
+    print(e)
+```
+
+在这个示例中，我们定义了一个名为`MyCustomException`的自定义异常类。该类从`Exception`类派生，并添加了一个名为`code`的属性和一个名为`__str__()`的方法，用于返回异常的字符串表示形式。在`__init__()`方法中，我们初始化了`message`和`code`属性，并调用了`super()`方法以便调用父类的构造函数。
+
+然后，我们使用`raise`语句抛出一个新的`MyCustomException`异常。在`except`块中，我们捕获该异常并打印它的字符串表示形式。
+
+当您在自己的应用程序中定义自定义异常时，请确保给它们一个有意义的名称，并使用它们来表示特定类型的异常情况。这样做可以使您的代码更加清晰和易于理解。
+
+
+
+
+
+## 包和模块
+
+#### 概念
+
+1. **模块**：模块是一个Python文件，其中包含了一组相关的函数、类、变量和常量。通常情况下，每个模块都会定义一组相关的功能，以便在其他Python程序中重复使用
+
+2. **包**：包是一个包含多个模块或者多个子包的有层次的文件目录结构。通常情况下，包中的每个模块都会定义一组相关的功能，以便在其他Python程序中重复使用，且该目录下一定包含`__init__.py`文件。
+
+3. **库**：在计算机编程中，库是一组可重用代码的集合，该集合被打包在一起以便在多个程序或系统中共享和重复使用。库通常包含函数、类、变量和常量等元素，旨在提供特定领域的特定功能。
+
+   与包和模块不同，库通常是独立的软件包，可以独立于主要应用程序之外进行开发和维护。库通常由第三方开发人员或团队创建，以便向其他开发人员提供可重用的功能，从而减少代码冗余和提高开发效率。
+
+   在Python中，有许多流行的库可以帮助您执行各种任务，例如数据分析、Web开发、机器学习、图像处理等。一些常见的Python库包括：
+
+   - NumPy：用于数值计算和科学计算的库
+   - Pandas：用于数据分析和数据处理的库
+   - Flask：用于Web开发的轻量级框架
+   - Django：用于Web开发的全功能框架
+   - TensorFlow：用于机器学习的库
+   - Matplotlib：用于数据可视化的库
+
+4. **框架**：在计算机编程中，框架是一种为特定领域的应用程序提供基础结构和功能的软件架构。框架提供了一个通用的结构，使开发人员可以编写自己的应用程序，而无需从头开始构建所有必需的功能。
+
+   框架通常包含许多预定义的类、函数、接口和协议，这些元素可以帮助开发人员快速构建应用程序，并实现通用的编程模式和最佳实践。框架通常也提供了一些标准化的方式来组织和管理代码，以便使代码更易于维护和扩展。
+
+   在Web开发中，框架通常用于构建Web应用程序。Web框架提供了一组用于处理HTTP请求和响应的类和函数，以及用于处理数据库、模板渲染、表单验证等常见任务的工具。一些常见的Python Web框架包括：
+
+   - Flask：一个轻量级的Web框架，适用于小型应用程序和API
+   - Django：一个全功能的Web框架，适用于大型Web应用程序和内容管理系统
+   - Pyramid：一个灵活的Web框架，适用于各种规模的应用程序和API
+
+#### 作用
+
+- 组织代码：模块可以将相关的代码组织在一起，使代码更易于维护和理解。
+- 提供可重用的功能：模块可以在不同的应用程序之间共享和重用，从而减少代码冗余。
+- 支持命名空间：模块中的函数、类、变量和常量可以使用模块名作为前缀，以便在大型项目中避免名称冲突。
+
+#### 分类
+
+1. 标准包/模块：标准库包是Python语言本身提供的包，无需额外安装即可使用。这些包包括`os`、`sys`、`re`、`math`等，它们提供了许多常用的功能。
+2. 第三方包/模块：第三方包是由第三方开发人员或团队开发的包，提供了各种不同的功能。这些包需要通过`pip`或其他包管理器进行安装，例如`numpy`、`requests`、`pandas`等。
+3. 自定义包/模块
+
+
+
+#### 一般操作
+
+###### 创建
+
+1. 创建模块: 直接创建一个`.py`文件, 并在其中定义一些函数、类、变量等元素即可
+2. 创建包: 创建一个文件夹, 文件夹内务必创建一个`__init__.py`文件(其实python3.3版本之后不必创建, 但是为了代码兼容, 以及做一些其他包处理操作, 目前还是建议创建)
+3. 创建多层级包: 在包里面创建另一个包即可, 可以无限极嵌套
+
+
+
+###### 查看
+
+`dir()` 
+
+要查看模块的信息，您可以使用`help()`函数或`dir()`函数。例如，要查看名为`mymodule`的模块的信息，您可以执行以下操作：
+
+```python
+import mymodule
+
+# 使用help()函数查看模块信息
+help(mymodule)
+
+# 使用dir()函数查看模块中的元素
+print(dir(mymodule))
+```
+
+`__file__`
+
+`__file__`是一个内置变量，在Python程序中可以用来获取当前模块的文件路径。具体来说，`__file__`变量包含了当前模块的绝对路径或相对路径。
+
+当您在Python程序中使用`__file__`变量时，它将返回包含当前模块代码的文件的绝对路径或相对路径。例如，假设您有一个名为`mymodule.py`的模块，并且该模块的绝对路径为`/path/to/mymodule.py`，则以下代码将打印`/path/to/mymodule.py`：
+
+```python
+import os
+
+print(os.path.abspath(__file__))
+```
+
+在这个例子中，`os.path.abspath()`函数用于将相对路径转换为绝对路径，并打印出当前模块文件的绝对路径。
+
+`__file__`变量的主要作用是允许您在运行时获取当前模块的路径，以便您可以使用该路径来执行各种文件操作，例如读取文件内容、写入文件等。在一些特定的场景下，它也可以用于调试代码或构建动态的文件路径。
+
+总之，`__file__`变量是一个非常有用的内置变量，可以帮助您获取当前模块文件的路径，或者查看包/模块的基本信息, 需要的是注意的是, 查看包时得到的是 `__init__.py` 路径
+
+
+
+###### 导入
+
+**方式**
+
+1. `import M`: 使用`import`语句可以导入一个模块, 如果是某个包里面的模块, 则可以通过点语法来定位, 需要注意的是每次调用包时, 都会先执行包里面的`__init__.py` 文件
+
+2. `import M1, M2` : 导入多个模块, 可以用逗号隔开
+
+3. `import M as ...` : 使用import...as语句可以给导入的模块或函数起一个别名, 可以简化资源访问前缀, 增加程序的扩展性
+
+4. `from ... import ...[as ...]`: 从一个模块中导入**指定**的函数、类或变量; 需要明确的是只能从大的地方找小的东西: 包 > 模块 > 模块资源, 而且注意面向关系, 即包只能看到模块, 模块只能看到模块资源
+
+   ```python
+   # 只能从包到模块, 模块到模块资源
+   from p1 import Tool1 as t1, Tool2 as t2      # 多模块
+   from p1 import Tool1, Tool2
+   from p1.sub_p import sub_tool                # 多层级
+   ```
+
+5. `from ... import * [as ...]` : 导入一个模块或者包中的**所有非下划线开头**的公共函数、类和变量, 在使用时我们需要小心, 因为我们无法预知会导入哪些内容到当前位置, 容易产生变量名冲突
+
+   ```python
+   # 也可以通过在模块中重写__all__列表, 来选择我们所认为的需要从模块中导入的资源, 或者从包中需要导入的模块; 注意列表中每个元素都是字符串, 即引号包含变量名称或者文件名称
+   __all__ = ["num1", ... ]
+   ```
+
+**注意**
+
+1. 使用时需要指明资源的模块名称
+
+2. 如果导入的是一个包, 默认不会导入任何模块, 所以我们要在`__init__` 文件中再次导入需要的模块, 即把导入模块的代码写入`__init__` 文件; 以`from ... import ...` 的形式导入
+
+3. 导入模块: 首先在`sys.modules`中查找是否已经导入, 如果是第一次导入, 首先是在自己当下的命名空间中, 执行所有代码; 接着创建一个模块对象, 并将模块内所有顶级变量以属性的形式绑定到模块对象上(可通过`__dict__` 查看); 最后在`import` 的位置, 引入`import` 后面的变量名称到当前命名空间. 如果先前已经导入过, 那就属于第二次导入, 当第二次导入时, 直接进行上述最后一个步骤, 即从已经加载过的模块中去找, 也就是说, 多次导入模块时, 模块并不会多次执行
+
+4. 上述几种导入方式不存在哪一种更节省内存, 区别在于要导入的内容而已. 
+
+5. 当出现重名时, 从哪个位置找到需要导入的模块? 第一次导入时, 按照模块检索路径顺序寻找
+
+   1. 第一级是内置模块
+   2. 第二级是`sys.path`, 其构成是
+      - 当前目录
+      - 环境变量PYTHONPATH指定的路径列表
+      - 特定路径下的`.pth`文件中的文件路径列表
+      - 在python安装路径的lib库中搜索, 追加路径的方式
+
+6. 追加路径方式
+
+   1. 直接修改`sys.path`, 但注意修改后仅使用于该文件
+
+      ```python
+      import sys
+      sys.path.append(r"C:\Users\ygtrece\Desktop")
+      ```
+
+   2. 修改环境变量
+
+      可以添加在用户变量, 适用于当前该用户, 也可以添加在系统变量, 适用于该系统, 根据自己的需求即可; 添加的变量名为`PYTHONPATH`, 变量值为所需要添加的模块路径. 但是该方式只在shell中有效, 因为pycharm对系统环境变量支持不是很好, 所以有时候需要在settings的Interpreter Paths中手动添加. 
+
+   3. 添加`.pth`文件
+
+      `getsitepackage` 
+
+      ```python
+      import site
+      print(site.getsitepackage())
+      ```
+
+      `getsitepackages()` 函数是 Python 中的一个函数，通常用于获取安装 Python 包的系统级目录。该函数返回一个由系统级 Python 包目录的路径组成的列表。
+
+      具体而言，`getsitepackages()` 函数可以用于查找系统中所有已安装的 Python 包的目录。这些目录通常存储在一个名为 `site-packages` 的文件夹中，并且可以包含多个版本的 Python 包。在使用 `getsitepackages()` 函数时，它将会返回一个列表，其中包含了所有这些包的目录路径
+
+      这个函数的返回值可以用于许多不同的目的，例如：
+
+      - 查找并导入已安装的 Python 包
+      - 为特定的 Python 脚本或应用程序创建虚拟环境
+      - 将 Python 包安装到系统级目录中，以便其他用户可以轻松地使用它们
+      - 可以在目录中加入写有我们需要导入的模块的路径的`.pth`文件，起到追加路径的作用
+
+      需要注意的是，`getsitepackages()` 函数返回的路径可能因操作系统和 Python 版本而异。
+
+7. 查看已加载模块
+
+   `sys.modules` 是 Python 的一个内置模块，它是一个字典，用于存储 Python 中已经导入的模块。字典的键是模块名，值是模块对象。
+
+   当你导入一个模块时，Python 会将模块对象存储在 `sys.modules` 字典中。下次导入相同的模块时，Python 会从 `sys.modules` 字典中返回已经存在的模块对象，而不是重新加载模块。
+
+   `sys.modules` 可以用于检查哪些模块已经加载，以及获取已经加载的模块对象。例如，可以使用以下代码获取 `math` 模块的对象:
+
+   ```python
+   import sys
+   
+   math_module = sys.modules['math']
+   ```
+
+   `sys.modules` 还可以用于删除已经加载的模块，以及强制重新加载模块。例如，可以使用以下代码删除 `math` 模块的对象:
+
+   ```python
+   import sys
+   
+   if 'math' in sys.modules:
+       del sys.modules['math']
+   ```
+
+   这样，下次导入 `math` 模块时，Python 会重新加载它。
+
+   需要注意的是，尽管 `sys.modules` 可以用于删除和重新加载模块，但是这样做可能会导致未定义的行为和意外的结果。因此，在实际使用中，应该谨慎操作 `sys.modules`
+
+**导入模块的常见情景**
+
+1. 局部导入
+
+   在局部范围内导入模块, 在其他范围无法使用, 所以如果想要全局范围都能使用, 在文件顶部导入相关模块
+
+   ```python
+   def cal():
+   	import math
+   	print(math.acos)
+   
+   cal()   # <built-in function acos>
+   ```
+
+2. 覆盖导入
+
+   自定义模块和非内置标准模块重名, 根据前者存储位置, 有可能前者会覆盖后者; 所以自定义模块命名不要与后者重名;
+
+   自定义模块和内置模块重名, 内置肯定覆盖自定义, 如果我们又特别需要使用自定义模块, 则需要使用`from ... import ... `指明绝对路径进行导入
+
+3. 循环导入
+
+   当两个或多个模块相互导入时，可能会出现循环依赖的问题。
+
+   ```python
+   # module_a.py
+   import module_b
+   
+   def func_a():
+       pass
+   
+   # module_b.py
+   import module_a
+   
+   def func_b():
+       pass
+   ```
+
+   在这个例子中，`module_a` 和 `module_b` 相互导入了对方，这可能会导致循环依赖的问题。为了避免这种情况，应该尽量避免相互导入，或者重构代码以消除循环依赖。
+
+4. 可选导入
+
+   可选导入：有时候，某些模块可能不存在，或者只在某些条件下才需要使用。在这种情况下，可以使用可选导入，以避免在模块不存在或者不需要使用时出现错误。例如：
+
+   ```python
+   try:
+       import pandas as pd
+   except ImportError:
+       pd = None
+   ```
+
+   在这个例子中，我们尝试导入 `pandas` 模块，如果导入失败，则将变量 `pd` 设置为 `None`。这样，在后续代码中使用 `pd` 时，需要先检查 `pd` 是否为 `None`。
+
+5. 包内导入
+
+   绝对导入和相对导入
+
+   理论: Python绝对导入和相对导入, 这两个概念是相对于包内导入而言的, 包内导入即包内模块导入包内部的模块
+
+   概念: 
+
+   1. 绝对导入
+
+      参照`sys.path`路径进行检索; 例如指明包名或者模块名`import a` , `from a import b` ; 注意以上结论基于python3.x之后
+
+   2. 相对导入
+
+      使用`.`来指明相对路径, `.`是根据模块名称所获取的当前目录, `..`是根据模块名称所获取的上层目录; 例如`from . import a` , `from .. import a`; 
+
+
+
+
+
+###### 三方包/模块的安装与升级
+
+1. 概念: 三方包和模块是由第三方开发者编写的、可供其他 Python 程序使用的代码库。这些代码库通常提供了一些有用的函数、类和工具，可以帮助程序员更快、更方便地开发 Python 程序
+
+2. 包管理项目
+
+   目前有许多包管理工具, 但是官方支持的且认可度高的就两个: `distutils`, 它是官方标准库, 从python2到python3.6全部内置支持; `setuptools`, 是三方库, 在部分python子社区已经成为标准
+
+   1. `distutils` : 是标准库的一部分, 能处理简单的包的安装, 通过`setup.py`进行安装
+   2. `setuptools` : 现行的包安装标准, 自带一个`easy_install`安装脚本; 且引入了`.egg`格式; 是目前的主要选择
+   3. [更多包管理项目](https://packaging.python.org/key_projects)
+
+3. 常见已发布三方包和模块的形式: 
+
+   1. 源码
+
+      - 单文件模块
+      - 多文件模块(由包管理工具发布的项目), 基于`distutils` 工具发布的项目特点, 包含`setup.py` 文件, `setuptools`也是基于`distutils`
+
+   2. `.egg`
+
+      `setuptools` 引入的一种格式, `setuptools`可以识别它, 安装它
+
+   3. `.whl`
+
+      本质是`.zip`格式, 是为了替代`.egg` 
+
+4. 安装方式
+
+   1. 本地安装
+
+      - 对于单文件模块: 直接拷贝到相关文件夹就可以; 存放位置: `sys.path`中所包含的路径都可以, 一般存放在`Lib/site-package`文件夹中 
+
+      - 对于带`setup.py`文件: 通过`setup.py`脚本即可安装
+
+        步骤1: 打开命令行工具`cmd` 
+
+        步骤2: 切换到`setup.py`文件所在目录
+
+        步骤3: 执行命令`python3 setup.py install` (python3.x版本)
+
+        注意: 如果项目是使用`distutils`打包的, 上述命令可以直接使用; 如果是用`setuptools`打包的, 有可能上述命令会报错
+
+      - `.egg`文件: 使用setuptools的自带的安装脚本easy_install进行安装
+
+        使用`setuptools`自带的安装脚本`easy_install`进行安装, 要求先安装`setuptools` 
+
+        语法: `easy_install xxx.egg` 
+
+      - `.whl`文件: 使用`pip`进行安装
+
+        1. 使用`easy_install`安装
+
+           语法: `easy_install xxx.whl` 
+
+        2. 使用`pip` (推荐)
+
+           安装`pip`
+
+           1. 通过`easy_install`远程或者本地安装
+           2. 远程: `easy_install pip` , 自动下载, 自动安装
+           3. 本地: `easy_install xxx.egg` 或者 `easy_install xxx.whl`或者 `easy_install xxx.tar.gz` 
+
+           使用语法
+
+           `pip install xxx.whl` 
+
+   2. 远程安装
+
+      概念: 自动地从远程地址检索 -> 下载 ->安装某个模块
+
+      安装方式
+
+      - `easy_install`: 语法: `easy_install xxx` (后面可以直接写包的名称, 但需要先安装`setuptools`)
+      - `pip` : 语法: `pip install xxx` (同样可以直接写包的名称, 且需要先安装`pip` )
+      - `pycharm` 
+
+      注意: 安装包是从`https://pypi.python.org/` 下载的, 一般安装在本地的`Lib/site_packages` 文件中
+
+   3. 安装源
+
+      - [Python官方](https://pypi.python.org/simple)
+      - [豆瓣](https://pypi.douban.com/simple/)
+      - 阿里
+      - 中国科技大学
+
+
+
+
+
+###### 模块的其他操作
+
+1. `easy_install` 
+
+   [详细介绍地址](https://peak.telecommunity.com/DevCenter/EasyInstall)
+
+   其他常用操作
+
+   - 多个python版本的切换安装
+
+     如果一台电脑上既装了python2.x也安装了python3.x, 两个版本环境都装了setuptools, 都可以使用easy_install, 我们可以通过easy_install安装到指定版本的环境中, 语法是`easy_install-N.N` , `N.N`用于指明安装在哪个版本的环境中, 例如 `easy_install-3.6 requests` 
+
+   - 安装指定版本包
+
+     如果一个包有多个版本, 而有的项目使用的是某个特定版本, 则应该使用`easy_install "库名 限定符 版本[,限定符 版本]"` , 中括号部分代表可选, 库名是包的名称, 限定符有`< > <= >= ==` ; 例如`easy_install "requests >= 2.14.1"` 表示安装大于或等于2.14.1版本的最新包, `easy_install "requests > 1.0, <2.0"` 表示安装大于1.0并且小于2.0的包, `easy_install "requests == 2.14.1"` 安装该版本的包, 如果已安装则切换至该版本. 
+
+   - 升级三方包
+
+     有些包的作者, 修复了之前的某个bug, 本地需要更新到最新版本. 应该使用`easy_install --upgrade (-U) 库名` , 例如 `easy_install --upgrade requests` 
+
+   - 卸载三方包
+
+     有些已经安装的包, 因某些原因想要删除
+
+     解决方法
+
+     1. 手动卸载: 删除在`easy_install` 中的包记录, 并删除对应的包文件
+     2. `easy_install -m 包名` : 效果是删除在`easy_install.pth`文件中对应的包记录, 需要注意的是, 并没有真正把`.egg`包文件删除, 不删除的原因是为了方便多版本切换, 但我们也可以手动删除包文件, 与此同时, 依赖包也不会被删除, 这是因为依赖包有可能被其他第三方包依赖
+
+     补充
+
+     1.  `easy_install.path`作用是记录着当前通过`easy_install`已经安装的模块, 多个版本的模块只记录最后一次安装的, 用于导入模块时的路径检索
+
+     2. `-m`的真正作用: 便于支持多版本, 可在运行时进行切换, 如果不直接指明包的某个版本, 使得用户无法直接导入, 因为它删除了在`easy_install.pth`文件中对应包的记录 , 用户如果想使用某个版本, 需要使用如下代码, 例如
+
+        ```python
+        import pkg_resources
+        pkg_resources.require("requests==2.18.4")
+        import requests
+        ```
+
+   - 切换三方安装源
+
+     有可能python官方库的托管平台服务器在国外导致安装速度慢甚至失败, 可以修改`easy_install.py`文件中的安装源路径
+
+     
+
+2. `pip` 
+
+   [详细介绍地址](https://pip.pypa.io/en/stable/)
+
+   其他常用操作
+
+   - 切换安装源
+
+     1. 一次性修改
+
+        `pip install --index-url https://pypi.douban.com/simple/ requests` 指定检索, 仅仅只到某一个地址检索指定包
+
+        `pip install --extra-url https://pypi.douban.com/simple/ requests` 扩展检索, 到官方的pypi地址检索, 检索失败后才到扩展的地址检索
+
+     2. 永久性修改
+
+        在c://users/username/ 中创建pip文件夹, 在`pip`文件夹中创建`pip.ini` 文件
+
+        ```
+        [global]
+        index-url = http://pypi.douban.com/simple/
+        [install]
+        trusted-host=pypi.douban.com
+        ```
+
+     3. 安装源
+
+   - 安装在不同的python版本环境中
+
+     1. python2版本: `python -m pip install requests` 或者 `py -2 -m pip install requests` 
+
+        python3版本: `python3 -m pip install requests` 或者 `py -3 -m pip install requests` 
+
+     2. python的安装包实际上在系统中安装了一个启动器 `py.exe` , 启动器可以调用不同版本的python去执行某些脚本 `py -2` 和 `py -3` 
+
+   - 查看包
+
+     1. 所有已经安装的包 : `pip list`
+     2. 不被依赖的包 : `pip list --not-required` 
+     3. 所有过期的包: `pip list --outdated` , 如果出现警告, 可以使用 `pip list --outdated --trusted-host url` , `url` 是具体网址
+     4. 查看某个包的具体信息: `pip show xxx` 
+
+   - 搜索包
+
+     `pip search xxx` : 例如 `pip search peppercorn` 
+
+     `pip search -i url xxx`, 其中 `url` 表示检索地址, 可以手动选择检索地址
+
+   - 安装特定版本
+
+     `pip install "requests == 2.18"` 
+
+     `pip install "requests >= 2.0"`
+
+     `pip install "requests > 2.0, < 3.0"` 
+
+   - 升级包
+
+     `pip install --upgrade xxx` 
+
+     注意: `pip install xxx` 检索到包存在时就不会安装了, 所以没有更新功能, 只有包不存在时才会安装到最新版本. 
+
+   - 卸载包
+
+     `pip uninstall xxx` 
+
+     注意: 如果是通过`easy_install` 安装的, 那会自动删除`easy_install.pth`文件中对应包路径, 并且自动删除对应`.egg`包的原文件; 如果是通过`pip install` 安装的, 会直接删除对应包文件
+
+   - 生成冻结需求文本
+
+     可以将当前安装的三方包记录, 存储到指定的文件当中, 以后就可以根据这个需求文本去安装三方包
+
+     `pip freeze`  生成除了`pip` 和 `setuptools` 之外的包信息
+
+     `pip freeze > ./requirements.txt`  将包信息写入`requirements.txt` 文件
+
+   - 根据冻结需求文本安装
+
+     `pip install -r requirement.txt` 
+
+     
+
+3. 三方模块的版本规则
+
+   版本由三部分组成 `n1.n2.n3 `
+
+   - n3 : 当版本的bug修复之后, n3 + 1
+   - n2 : 新增了一个小功能, n2 + 1
+   - n1 : 修改了之前的功能, 或者添加了一个新功能(修改了之前俺的api), n1 + 1
+
+   例如
+
+   1. 发布了一个库 1.0.0
+   2. 修复了一个bug 1.0.1
+   3. 在库中新增了一个小功能 1.1.0
+   4. 发布一个超大功能, api修改, 发布 2.0.0
+
+
+
+#### 高级操作
+
+**包和模块的发布**
+
+0. 文档地址
+
+     https://python-packaging.readthedocs.io/en/latest/minimal.html
+
+1. 账号操作
+
+   注册账号: https://pypi.python.org/pypi
+
+   邮箱验证: http://pypi.org/manage/account/
+
+2. 环境准备
+
+   1. setuptools 安装
+
+      https://pypi.python.org 搜索setuptools下载源码文件, 解压后打开命令行工具, 切换当前目录为`setup.py`所在目录(`cc xxx`), 在命令行中执行命令`python setup.py install` 或者 `python3 setup.py install` 
+
+   2. pip 安装
+
+      setuptools 安装完毕后会有一个安装脚本, 在命令行中执行`easy_install pip` 或者 `easy_install-3.6 pip` 
+
+   3. wheel 安装
+
+      在命令行中执行 `pip install wheel` 或者 `python3 -m pip install wheel` 
+
+   4. twine 安装
+
+      `pip install twine` 或者 `python3 -m pip install twine` 
+
+   注意安装的python版本环境问题
+
+3. 发布前准备
+
+   1. 创建一个包项目
+
+      项目结构
+
+      ```
+      项目名称
+      	包名称             # 真正的包和模块
+      		__init__.py
+      		模块
+      	模块
+      	setup.py          # 非常重要, 必不可少
+      	README.rst        # 可选补充
+      	LICENSE.txt
+      	MANIFEST.in
+      ```
+
+      命名建议
+
+      - 全部小写
+      - 多个单词以中划线`-`作为分割, 不要使用`_` , 因为pip安装对`_`支持不是很好
+      - 不能和Pypi上已有的包名重复
+
+      `setup.py` 
+
+      - 作用: 项目信息的配置文件, 这个里面最重要的就是执行一个setup函数, 通过这个函数来指明信息
+
+      - 示例
+
+        ```python
+        # 写法1
+        from distutils.core import setup
+        setup(形参1=实参1, 形参2=实参2)
+        
+        # 写法2(建议)
+        from setuptools import setup
+        setup(形参1=实参1, 形参2=实参2)
+        ```
+
+      - `setup`函数
+
+        在 Python 包和模块中，可以使用 `setup.py` 文件来定义和配置项目的元数据信息，如名称、版本、作者、依赖项等，并且可以使用 `setuptools` 模块中提供的 `setup()` 函数来构建、打包和发布项目。
+
+        下面是 `setup()` 函数中常用的一些参数及其作用：
+
+        - `name`: 项目的名称，通常是一个字符串。
+        - `version`: 项目的版本号，通常是一个字符串。
+        - `description`: 项目的简要描述，通常是一个字符串。
+        - `long_description`: 项目的详细描述，通常是一个包含多行文本的字符串，可以从 README 文件中读取。
+        - `url`: 项目的主页或源代码仓库地址，通常是一个字符串。
+        - `author`: 项目的作者姓名，通常是一个字符串。
+        - `author_email`: 项目作者的电子邮件地址，通常是一个字符串。
+        - `license`: 项目的许可证类型，通常是一个字符串。
+        - `classifiers`: 项目的分类标签，通常是一个列表或元组，可以从 PyPI 的分类列表中选择。
+        - `packages`: 项目的包含的 Python 包，通常是一个列表或元组。
+        - `install_requires`: 项目的依赖项列表，通常是一个列表或元组。
+        - `entry_points`: 项目的命令行入口点，通常是一个字典。
+
+        除了上述参数之外，还有一些其他的参数可以用于 `setup()` 函数，如 `keywords`、`zip_safe`、`include_package_data`、`package_data` 等，这些参数的作用和用法可以参考官方文档。
+
+        总之，`setup()` 函数是用于定义和配置 Python 项目元数据信息的重要函数，掌握其常用参数和用法对于开发和发布 Python 项目是非常有帮助的。
+
+      - 具体的`setup.py`脚本文档 
+
+        https://docs.python.org/2/distuils/setupscript.html
+
+        https://packaging.python.org/tutorials/distributing-packages/
+        
+        
+
+   2. `README.rst`文件
+
+      Python包和模块中的README.rst文件是一个文本文件，通常位于包或模块的根目录下，用于描述该包或模块的功能、使用方法、注意事项等信息。该文件以reStructuredText格式编写，是Python社区广泛使用的一种文档格式。
+
+      作用: 可以使用特定的字符, 来描述文本的格式, Pypi平台能够自动识别`long_description`字段中所写的这种格式的字符串; 同时提供给使用者和开发者一个简洁而又清晰的文档，方便他们了解该包或模块的用途和使用方法。同时，该文件也可以提供一些代码示例、注意事项、参考链接等信息，帮助使用者更好地使用该包或模块。
+
+      以下是README.rst文件的一些基本语法：
+
+      1. 标题：使用“=”，“-”等符号来表示一级、二级标题等。
+
+      ```
+      My Package
+      ==========
+      
+      Subheading
+      ----------
+      ```
+
+      2. 列表：使用“*”符号表示无序列表，使用“#.”表示有序列表。
+
+      ```
+      * Item 1
+      * Item 2
+      * Item 3
+      ```
+
+      3. 代码块：使用“::”表示代码块开始，使用缩进表示代码块中的内容。
+
+      ```
+      :: 
+      
+          def hello():
+              print("Hello, World!")
+      ```
+
+      4. 强调：使用“*”或“**”表示强调。
+
+      ```
+      This is *italic* and this is **bold**
+      ```
+
+      5. 链接：使用“`链接文本 <链接地址>`_”表示链接。
+
+      ```
+      For more information, please see `the official documentation <https://docs.python.org/3/>`_.
+      ```
+
+      除了上述语法外，还可以使用其他reStructuredText语法来编写README.rst文件。具体语法文档说明https://zh-sphinx-doc.readthedocs.io/en/latest/contents.html
+
+      在编写README.rst文件时，需要注意以下事项：
+
+      1. 文件名必须为README.rst，大小写敏感；
+      2. 文件内容必须使用reStructuredText格式编写；
+      3. 尽量使用简洁明了的语言描述包或模块的功能和用途；
+      4. 包或模块的使用方法应该尽可能详细，包括代码示例；
+      5. 可以提供一些注意事项、参考链接等信息，方便使用者更好地使用该包或模块。
+
+      语法检测: 
+
+      1. 有时候会发现写的`rst`文件在pypi平台无法正常显示, 原因是pypi上对于rst的解析器问题, 并不是sphinx, 导致部分语法有一些差异
+      2. 解决方案: 先从本地对`long_description`进行验证, 验证通过后再进行上传
+      3. 步骤: 安装库 `pip install readme_renderer` , 执行命令 `python3 setup.py check -r -s` 
+
+      
+
+   3. `LICENSE.txt` 文件
+
+      `LICENSE.txt`文件是一个文本文件，通常位于Python包或模块的根目录下，用于描述该包或模块的许可证信息。该文件包含许可证的文本内容，以及授权方式等信息，是开源软件项目必备的一部分。
+
+      `LICENSE.txt`文件的作用是告知使用者该包或模块的许可证类型以及使用该包或模块的许可条件。在开源软件项目中，开发者通常会选择一种开源许可证，比如MIT许可证、BSD许可证、GPL许可证等，让使用者可以在符合许可证条件的前提下使用、修改和分发该软件。
+
+      使用者在使用该包或模块时，应该仔细阅读`LICENSE.txt`文件中的许可证条款，并遵守许可证中规定的条件。如果使用者不同意许可证中的条件，则不能使用该软件。
+
+      `LICENSE.txt`文件的编写要求和格式没有统一的标准，但通常应该包含以下信息：
+
+      1. 许可证类型：应该明确指出所采用的许可证类型，比如MIT、BSD、GPL等；
+      2. 许可证文本：应该将许可证的全文复制到`LICENSE.txt`文件中；
+      3. 许可证授权方式：应该说明使用者可以如何使用该软件，比如可以免费使用、修改和分发该软件等；
+      4. 许可证限制：应该说明使用者不允许做的事情，比如不允许删除版权声明、不允许将该软件用于商业用途等；
+      5. 作者信息：应该明确指出该软件的作者或开发者；
+      6. 其他信息：可以包括其他与许可证相关的信息，比如版本号、发布日期等。
+
+      总之，`LICENSE.txt`文件是一个非常重要的文件，它告知用户使用该软件的条件和限制，为使用者和开发者之间建立了一种法律关系，保护了软件的知识产权。
+
+      文件内容获取地址 https://choosealicense.com/
+
+      
+
+   4. `MANIFEST.in` 文件
+
+      `MANIFEST.txt`文件是一个文本文件，通常位于Python包或模块的根目录下，用于描述该包或模块的文件清单。该文件列出了应该包含在发布版本中的所有文件，以及它们在包或模块中的相对路径。
+
+      `MANIFEST.txt`文件的作用是帮助开发者在发布软件时，确保包或模块中的所有文件都被包括在发布版本中。在Python中，发布软件通常使用`distutils`或`setuptools`等工具来打包发布版本，这些工具可以使用`MANIFEST.txt`文件来确定应该包含哪些文件。
+
+      例如
+
+      ```python
+      include README.rst
+      include LICENSE.txt
+      ```
+
+      `MANIFEST.txt`文件的编写要求和格式没有统一的标准，但通常应该包含以下信息：
+
+      1. 包含的文件列表：应该列出应该包括在发布版本中的所有文件，以及它们在包或模块中的相对路径；
+      2. 排除的文件列表：可以列出应该排除在发布版本中的文件，比如测试文件、示例文件等；
+      3. 包含的文件类型：可以指定应该包括哪些类型的文件，比如Python源代码文件、配置文件、文档等；
+      4. 其他信息：可以包括其他与发布版本相关的信息，比如版本号、发布日期等。
+
+      总之，`MANIFEST.txt`文件是一个帮助开发者管理包或模块文件的工具，它可以确保所有必要的文件都包含在发布版本中，并排除一些不必要的文件。使用`MANIFEST.txt`文件可以使发布软件的过程更加自动化、可靠和高效。
+
+      具体官方文档
+
+      1. https://docs.python.org/3/distuils/sourcedist.html#specifying-the-files-to-distribute
+      2. 包含 `include *.txt`
+      3. 递归包含 `recursive-include example *.txt *.py`
+      4. 修剪 `prune examples/sample/build` 
+
+      
+
+   5. 编译生成发布包
+
+      在命令行工具中执行
+
+      1. 进入`setup.py`同级目录: `cd xxx` 
+
+      2. 执行
+
+         ```python
+         python3 setup.py sdist
+         python3 setup.py bdist
+         python3 setup.py bdist_egg
+         python3 setup.py bdsit_wheel
+         python3 setup.py bdist_wininst
+         ...
+         ```
+
+      3. 更多命令以及命令的具体作用可通过 `python3 setup.py --help-commands` 查看 
+
+         
+
+   6. 安装方式
+
+      以上生成的发布包已经可以本地安装
+
+      - 带 `setup.py`源码压缩包
+
+        1. 方式1: 解压, 进入同级目录, 执行 `python3 setup.py install` 
+        2. 方式2: `pip install xxx`
+        3. 方式3: `easy_install xxx` 
+
+      - 二进制发行包
+
+      - windows下的安装文件
+
+      - `.egg`文件
+
+        `easy_install xxx.egg` 
+
+      - `.whl`格式
+
+        `easy_install xxx.whl` 
+
+        `pip install xxx.whl` 
+
+   
+
+4. 发布过程
+
+5. 发布后使用
+
+
+
+#### 补充
+
+1. 区分模块的测试和发布状态
+
+   借助`__name__`来区分py文件被执行的模式
+
+   - 直接执行: 值为`__main__`
+   - 被当作模块执行: 值为模块名称
+
+   示例
+
+   ```python
+   if __name__ == '__name__':
+   	pass
+   ```
+
+2. 使用Pycharm安装包和模块
+
+   在编译器中直接安装包和模块会比较方便
+
+   
+
+   
+
+   
+
+## 虚拟环境
+
+#### 概念
+
+Python中的虚拟环境是一种工具，可以为不同的Python项目创建独立的开发环境。虚拟环境允许您在同一计算机上同时运行不同版本的Python，以及不同的Python库和依赖项。这样，您可以在不影响其他项目的情况下，针对特定项目使用特定的Python版本和库。
+
+虚拟环境的好处在于，它们可以帮助您避免因为不同项目之间的Python版本和依赖项冲突而导致的问题。它们还可以使得项目的部署和分享变得更加容易。
+
+#### 安装
+
+Python中有几个虚拟环境管理工具，其中最常用的是venv和virtualenv。venv是Python 3.3及以上版本自带的虚拟环境管理工具，而virtualenv是一个第三方库，可以在Python 2和Python 3中使用。
+
+1. `venv`
+
+使用venv创建一个新的虚拟环境的步骤如下：
+
+1. 打开终端或命令行窗口。
+2. 创建一个名为myenv的新虚拟环境：`python -m venv myenv`
+3. 激活虚拟环境：`source myenv/bin/activate`（在Windows系统上，激活命令是`myenv\Scripts\activate`）
+4. 在虚拟环境中安装所需的Python库和依赖项。
+5. 在虚拟环境中完成项目开发后，使用`deactivate`命令退出虚拟环境。
+
+
+
+2. `virtualenv`
+
+使用virtualenv创建虚拟环境的步骤与上述类似，只是第二步需要使用virtualenv命令来创建虚拟环境。
+
+安装命令: `pip install virtualenv` 
+
+文档说明: https://virtualenv.pypa.io/en/latest/userguide
+
+使用步骤
+
+1. 创建一个局部的隔离的虚拟环境
+
+   语法; `virtualenv xxx` , `xxx`是虚拟环境名称, 例如 `virtualenv ENV` 
+
+   可选参数
+
+   - `-p` 指明python版本创建, 后面加上python某一版本的解释器, 到时候就使用此版本的python解释器, 默认是安装virtualenv包的
+
+     时候所在的python版本, 例如 `virtualenv - C:\Python\36\python3.exe ENV` 
+
+   - `__system-site-packages` : 继承系统的三方库, 到时候检索库的时候也会到系统的三方库中找, 如果不加此项到时候只会在当前的虚拟环境中找, 例如 `virtualenv --system-site-packages ENV` 
+
+2. 激活虚拟环境
+
+   语法: 进入到虚拟环境目录/scripts文件夹中, 然后使用命令`activate`
+
+3. 在激活状态下开发
+
+4. 退出虚拟环境
+
+   语法: 进入到虚拟环境目录/scripts文件夹中, 然后使用命令`deactivate.bat` 
+
+5. 删除虚拟环境
+
+   直接删除整个文件夹目录即可
+
+补充: 以后把项目交给别人的时候, 如何能保证项目在别人的电脑跑得起来
+
+解决方案
+
+1. 连同虚拟环境和项目一起拷贝给别人
+2. 在虚拟环境中冻结依赖需求文本, 把项目和依赖需求文本给别人, 别人自己在本地创建一个新的虚拟环境, 并根据依赖需求文本安装环境
+
+
+
+3. 也可以使用Pycharm使用虚拟环境
+
+
+
+#### 进阶
+
+1. 集中式虚拟环境管理
+
+   库名称: `virtualenvwrapper-win`, 基于`virtualenv`, 开发的一个工具包
+
+   功能作用: 可以将之前分散在各个路径下的虚拟环境集中到统一的路径下进行管理, 方便各个虚拟环境之间的切换, 更加方便的去使用`virtualenv` 
+
+   文档说明: https://pypi.python.org/pypi/virtrualenvwrapper-win
+
+   使用说明:
+
+   - 创建虚拟环境
+
+     语法; `mkvirtualenv xxx` , `xxx`是虚拟环境名称  
+
+     作用效果: 会创建在特定的文件夹中, windows下默认在用户目录的Envs文件夹中, 同时激活新建的虚拟环境
+
+   - 查看所有虚拟环境
+
+     语法: `lsvitualenv` 或者`workon` 
+
+     作用效果: 列出当下创建的所有虚拟环境
+
+   - 切换激活虚拟环境
+
+     语法: `workon xxx`
+
+     作用效果: 激活指定的虚拟环境
+
+   - 关闭虚拟环境
+
+      语法: `deactivate` 
+
+     作用效果: 关闭当下所在的虚拟环境
+
+   - 删除虚拟环境
+
+     语法: `rmvirtualenv xxx` 
+
+     作用效果: 删除指定虚拟环境以及对应的文件夹, 退出对应虚拟环境的激活状态
+
+2. 更加基于项目的虚拟环境管理
+
+   库名: `pipenv`
+
+   功能作用: `pip + virtualenv`  更加基于项目, 使得我们更加关注于项目的管理, 工具内部封装了以上两个功能
+
+   优势: 不需要再分别使用`pip`和`virtualenv`, 直接使用`Pipenv`即可, 会自动地帮你创建虚拟环境, 以及安装三方库, 会自动地记录你的项目依赖的所有三方库; 使用`Pipfile` 和 `Pipfile.lock`取代了`requirements.txt`
+
+   文档说明: https://docs.pipenv.org
+
+   在命令行中输出`pipenv` 或者 `pipenv --help`能帮助我们了解具体的命令使用说明
+
+   使用说明: 
+
+   - 创建虚拟环境
+
+     语法: `pipenv --two` (python2) 或者`pipenv --three` (python3)
+
+     查看相关信息
+
+     - `pipenv --where` :  查看项目位置
+     - `pipenv --venv` : 查看虚拟环境位置
+     - `pipenv --py` : 查看解释器信息
+
+   - 激活虚拟环境
+
+     语法: `pipenv shell` 
+
+     作用效果: 激活虚拟环境之后不会像之前那样在命令行前出现括号和虚拟环境名称, 但是在命令行窗口处会有 `pipenv shell` 的标识
+
+     ![image-20230713150856934](C:\Users\ygtrece\AppData\Roaming\Typora\typora-user-images\image-20230713150856934.png)
+
+   - 虚拟环境下开发
+
+     - 执行代码 `python3 xxx.py` 会使用虚拟环境
+
+     - 安装包
+
+       命令: `pipenv install xxx` 
+
+       作用效果:
+
+       1. 检测当前项目对应的虚拟环境是否存在, 不存在则创建
+       2. 在虚拟环境中安装指定的三方库, 如果没有指定则不安装
+       3. 在项目目录下通过`pipfile` 和 `pipfile.lock` 记录当下已经安装的
+
+       注意: 不要使用`pip install` , 虽然在虚拟环境中安装对应的包, 但是不会更新`pipfile` 和 `pipfile.lock` 
+
+     - 查看包的依赖结构
+
+       `pipenv graph` 
+
+     - 卸载包
+
+       `pipenv uninstall xxx`
+
+   - 退出虚拟环境
+
+     `exit` 或者直接关闭 `shell`窗口
+
+   - 删除虚拟环境
+
+     先`cd xxx` 进入对应的虚拟环境目录, 然后使用命令`pipenv --rm`
+
+   补充: 以后上传项目给他人时直接传项目的源码以及 `pipfile` 和 `pipfile.lock` 文件即可. 
+
+   
+
+   
+
+   
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+​	

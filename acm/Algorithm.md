@@ -6253,7 +6253,59 @@ int main()
         Solve();
     return 0;
 }
+
+//or
+#include <bits/stdc++.h>
+using namespace std;
+int n, ans;
+int dp[1010];
+struct rec
+{
+    int x, y;
+    rec() {}
+    rec(int x_, int y_) : x(x_), y(y_) {}
+    bool operator < (const rec &r) const
+    {
+        if (x != r.x) return x < r.x;
+        else return y < r.y;
+    }
+}r[1010];
+int dfs(int x)
+{
+    if (dp[x]) return dp[x];
+    dp[x] = 1;
+    int tmp = 0;
+    for (int i = x + 1; i <= n; i++)
+    {
+        if (r[x].x < r[i].x && r[x].y < r[i].y)
+            tmp = max(tmp, dfs(i));
+    }
+    return dp[x] += tmp;
+}
+int main()
+{
+    int t; 
+    for (cin >> t; t--; )
+    {
+        ans = 0;
+        cin >> n;
+        for (int i = 1; i <= n; i++) dp[i] = 0;
+        for (int i = 1; i <= n; i++)
+        {
+            int x, y; cin >> x >> y;
+            if (x > y) swap(x, y);
+            r[i] = rec(x, y);
+        }
+        sort(r + 1, r + n + 1);
+        for (int i = 1; i <= n; i++)
+            ans = max(ans, dfs(i));
+        cout << ans << endl;
+    }
+    return 0;
+}
 ```
+
+
 
 [P3183 HAOI2016 食物链 - 洛谷](https://www.luogu.com.cn/problem/P3183)
 
@@ -11034,7 +11086,7 @@ void dfs(int x, int father)  //求x的深度deep[x]和fa[x][],father是x的父�
         if (edge[i].to != father)
             dfs(edge[i].to, x);
 }
-int LCA(int x, int y)
+int LCA(int x, int y)	
 {
     if (deep[x] < deep[y]) swap(x, y);  //让x位于更底层,即x的深度值更大
     //(1)把x和y提到相同的深度
@@ -11475,7 +11527,7 @@ int main()
         for (int j = C; j >= new_c[i]; j--)
             dp[j] = max(dp[j], dp[j - new_c[i]] + new_w[i]);
     cout << dp[C] << endl;
-    return 0;
+    return 0;	
 }
 
 //单调队列优化
@@ -16288,7 +16340,7 @@ int main()
     kmp(str, pattern);
     for (auto v : ans) cout << v << endl;
     for (int i = 1; i <= strlen(pattern); i++) printf(" %d" + !(i - 1), Next[i]);
-    return 0;
+    return 0;	
 }
 ```
 
@@ -16816,7 +16868,7 @@ e[0].to = 2, e[1].to = 1, e[2].to = 2, e[3].to = 3, e[4].to = 3, e[5].to = 4, e[
 e[0].nex = -1, e[1].nex = -1, e[2].nex = -1, e[3].nex = -1, e[4].nex = 1, e[5].nex = 0, e[6].nex = 4, e[7].nex = -1, e[8].nex = 6, e[9].nex = 7, e[10].nex = 2,
 5 4 3 1
 
-    
+
 链式前向星代码简化
 #include <bits/stdc++.h>
 using namespace std;
@@ -17688,7 +17740,7 @@ void dijkstra()
             if (done[y.to]) continue;    //丢弃已经找到最短路径的邻居节点
             if (dis[y.to] > y.w + u.n_dis)       //既能用于加入新节点，也可以更新已加入队列的节点的距离
             {
-                dis[y.to] = y.w + u.n_dis;
+                dis[y.to] = y.w + u.n_dis;		
                 Q.push(node(y.to, dis[y.to]));   //扩展新邻居放入优先队列
                 pre[y.to] = u.id;            //记录路径
             } 
@@ -17905,7 +17957,7 @@ luogu P2868 Sightseeing cows
 
 最优比率环？？？
 
-```
+```C++
 const int N = 1e4 +5, M = 5e4 + 5;
 const int INF = 0x3f3f3f3f;
 double dis[N];

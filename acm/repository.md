@@ -10834,6 +10834,8 @@ int main()
 
 
 
+
+
 ####  lanqiao
 
 [P8748 蓝桥杯 2021 省 B 时间显示 - 洛谷](https://www.luogu.com.cn/problem/P8748)
@@ -11530,3 +11532,72 @@ for i in range(30):
 ```
 
 ​	
+
+#### 练习
+
+[**Mountain Walking**](http://poj.org/problem?id=2110)
+
+```c++
+#include <iostream>
+#include <algorithm>
+#include <cstring>
+using namespace std;
+int n; 
+int p[105][105];
+int step[5] = {0, 1, 0, -1, 0};
+bool vis[105][105];
+int ll, rl;
+bool check(int x, int y)
+{
+    if (x == n && y == n) return true;
+    for (int k = 1; k <= 4; k++)
+    {
+        int xx = x + step[k], yy = y + step[k - 1];
+        if (xx >= 1 && xx <= n && yy >= 1 && yy <= n && p[xx][yy] <= rl && p[xx][yy] >= ll && vis[xx][yy] == 0)
+        {
+            vis[xx][yy] = 1;
+            if(check(xx, yy))
+            {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+int main()
+{
+    ios::sync_with_stdio(false);
+    cin.tie(0);
+    cin >> n;
+    for (int i = 1; i <= n; i++)
+        for (int j = 1; j <= n; j++)
+            cin >> p[i][j];
+    int l = abs(p[n][n] - p[1][1]), r = 110;
+    int minn = min(p[n][n], p[1][1]), maxn = max(p[n][n], p[1][1]);
+    while (l < r)
+    {
+        int mid = l + r >> 1;
+        if (mid < maxn - minn)
+        {
+            l = mid + 1;
+            continue;
+        }
+        int ret = (maxn - mid >= 0) ? (maxn - mid) : 0;
+        for (int k = ret; k <= minn; k++)
+        {
+            memset(vis, 0, sizeof vis);
+            vis[1][1] = 1;
+            ll = k, rl = k + mid;
+            if (check(1, 1))
+            {
+                r = mid;
+                break;
+            }
+            if (k == minn) l = mid + 1;
+        }
+    }
+    cout << l << endl;
+    return 0;
+}
+```
+

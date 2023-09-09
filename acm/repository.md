@@ -10832,7 +10832,169 @@ int main()
 }
 ```
 
+[E. Data Structures Fan](https://codeforces.com/contest/1872/problem/E)
 
+本题需要掌握异或的知识点, 异或可以通过前缀处理的方法实现快速得到区间异或值, 类似于前缀和与前缀差, 原理就是两个相同的数异或得到0, 即一个数被异或两次就等价于没有异或. 然后就是动态存储的问题了, 在本题中也不需要真的去改变`string` 中的`0`和`1`, 而是直接存储`0`的位置的数的异或值即可, 然后动态维护这个值, 一旦有某个区间发生改变, 就异或上这个区间的异或值即可, 由于相同为0, 不同为1的原则, 这个值所代表的意义永远不会改变. 
+
+```c++
+#include <bits/stdc++.h>
+using namespace std;
+int main()
+{
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+    int t;
+    for (cin >> t; t--; )
+    {
+        int n; cin >> n;
+        vector<int> ve(n);
+        for (int i = 0; i < n; i++) cin >> ve[i];
+        vector<int> S(n + 1);
+        for (int i = 0; i < n; i++) S[i + 1] = S[i] ^ ve[i];
+        string s; cin >> s;
+        long long x = 0;
+        for (int i = 0; i < n; i++)
+            if (s[i] == '0')
+                x ^= ve[i];
+        int q, op;
+        for (cin >> q; q--; )
+        {
+            cin >> op;
+            if (op == 1)
+            {
+                int l, r; cin >> l >> r;
+                l--;
+                x ^= S[l] ^ S[r];
+            }
+            else
+            {
+                int r; cin >> r;
+                if (r == 0) cout << x << ' ';
+                else cout << (x ^ S[n]) << ' ';
+            }
+        }
+        cout << endl;
+    }
+    return 0;
+}
+```
+
+[F. Selling a Menagerie](https://codeforces.com/contest/1872/problem/F)
+
+关键是把题中所表达的关系转化为有向图, 就会比较好理解. 存储每个点的出度, 先解决链式关系, 留下成环的关系后, 再来解决环即可. 处理环的过程中, 由于必然会有一个点以原本的价值卖出, 所以找到那个最小的点, 其他按照链式关系卖出即可. 
+
+```c++
+#include <bits/stdc++.h>
+using namespace std;
+int main()
+{
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+    int t;
+    for (cin >> t; t--; )
+    {
+        int n; cin >> n;
+        vector<int> a(n);
+        for (int i = 0; i < n; i++) cin >> a[i], a[i]--;
+        vector<int> c(n);
+        for (int i = 0; i < n; i++) cin >> c[i];
+        vector<int> ind(n, 0);
+        for (int i = 0; i < n; i++) ind[a[i]]++;
+        queue<int> Q;
+        for (int i = 0; i < n; i++)
+            if (ind[i] == 0) 
+                Q.push(i);
+        vector<int> p;
+        while (!Q.empty())
+        {
+            int v = Q.front();
+            Q.pop();
+            p.push_back(v);
+            ind[a[v]]--;
+            if (ind[a[v]] == 0) Q.push(a[v]);
+        }
+        vector<bool> vis(n, false);
+        for (int i = 0; i < n; i++)
+        {
+            if (ind[i] == 1 && vis[i] == 0)
+            {
+                vector<int> P;
+                for (int k = i; !vis[k]; k = a[k])
+                {
+                    vis[k] = true;
+                    P.push_back(k);
+                }
+                int cnt = P.size();
+                int x = 0;
+                for (int k = 1; k < cnt; k++)
+                    if (c[P[k]] < c[P[x]]) x = k;
+                for (int k = 1; k <= cnt; k++)
+                    p.push_back(P[(x + k) % cnt]);
+            }
+        }
+        for (int i = 0; i < n; i++)
+            cout << p[i] + 1 << (i == n - 1 ? "\n" : " ");
+    }
+    return 0;
+}
+```
+
+[G. Replace With Product](https://codeforces.com/contest/1872/problem/G)
+
+```c++
+#include <bits/stdc++.h>
+using namespace std;
+#define LL long long
+void solve()
+{
+    int n; cin >> n;
+    vector<int> a(n);
+    for (int i = 0; i < n; i++) cin >> a[i];
+    LL tot = 1;
+    for (int i = 0; i < n; i++)
+    {
+        if (INT64_MAX / a[i] <= tot)
+            tot = INT64_MAX;
+        else tot *= a[i];
+    }
+    if (tot == INT64_MAX) 
+    {
+        int l = 0, r = n - 1;
+        while (a[l] == 1) l++;
+        while (a[r] == 1) r--;
+        cout << l + 1 << ' ' << r + 1 << endl;
+    }
+    else
+    {
+        array<LL, 3> best = {0, 0, 0};
+        vector<LL> sum(n + 1), mul(n + 1);
+        sum[0] = 0, mul[0] = 1;
+        vector<int> pos;
+        for (int i = 0; i < n; i++)
+        {
+            sum[i + 1] = sum[i] + a[i];
+            mul[i + 1] = mul[i] * a[i];
+            if (a[i] > 1) pos.push_back(i);
+        }
+        for (int l : pos)
+            for (int r : pos)
+                if (l < r)
+                    best = max(best, {mul[r + 1] / mul[l] - sum[r + 1] + sum[l], l, r});
+        cout << best[1] + 1 << ' ' << best[2] + 1 << endl;
+    }
+}
+int main()
+{
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+    int t;
+    for (cin >> t; t--; )
+    {
+        solve();
+    }
+    return 0;
+}
+```
 
 
 
